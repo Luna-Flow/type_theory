@@ -1,0 +1,9 @@
+import {
+}
+
+import {
+  "Luna-Flow/type_theory/core",
+  "Luna-Flow/type_theory/rewrite",
+  "Luna-Flow/type_theory/substitution",
+  "Luna-Flow/type_theory/syntax",
+} for "wbtest"

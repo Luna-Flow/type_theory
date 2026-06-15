@@ -1,0 +1,81 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Luna-Flow/type_theory/rewrite"
+
+import {
+  "Luna-Flow/type_theory/syntax",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn[T] bottom_up_once(@syntax.Term[T], RuleName, (@syntax.Term[T]) -> @syntax.Term[T]?) -> StepResult[T]
+
+pub fn[N : @syntax.BindingSyntax] generic_normalize(N, RuleName, (N) -> N?, Int) -> GenericNormalizationResult[N]
+
+pub fn[N : @syntax.BindingSyntax] generic_top_down_once(N, RuleName, (N) -> N?) -> GenericStepResult[N]
+
+pub fn[T] normalize(@syntax.Term[T], (@syntax.Term[T]) -> StepResult[T], Int) -> NormalizationResult[T]
+
+pub fn[T] top_down_once(@syntax.Term[T], RuleName, (@syntax.Term[T]) -> @syntax.Term[T]?) -> StepResult[T]
+
+pub fn[T] trace(@syntax.Term[T], (@syntax.Term[T]) -> StepResult[T], Int) -> ReductionTrace[T]
+
+// Errors
+
+// Types and methods
+pub(all) enum GenericNormalizationResult[N] {
+  NormalForm(term~ : N, steps~ : Int)
+  StepLimitReached(term~ : N, steps~ : Int)
+} derive(Eq, @debug.Debug)
+
+pub(all) enum GenericStepResult[N] {
+  NoStep
+  Reduced(before~ : N, after~ : N, rule~ : RuleName, path~ : ReductionPath)
+} derive(Eq, @debug.Debug)
+
+pub(all) enum NormalizationResult[T] {
+  NormalForm(term~ : @syntax.Term[T], steps~ : Int)
+  StepLimitReached(term~ : @syntax.Term[T], steps~ : Int)
+} derive(Eq, @debug.Debug)
+
+pub(all) enum ReductionFrame {
+  BinderBody
+  ApplyHead
+  ApplyArgument(Int)
+} derive(Eq, @debug.Debug)
+
+pub struct ReductionPath {
+  frames : Array[ReductionFrame]
+} derive(Eq, @debug.Debug)
+pub fn ReductionPath::prepend(Self, ReductionFrame) -> Self
+pub fn ReductionPath::root() -> Self
+pub fn ReductionPath::to_array(Self) -> Array[ReductionFrame]
+
+pub struct ReductionTrace[T] {
+  initial : @syntax.Term[T]
+  steps : Array[StepResult[T]]
+  result : NormalizationResult[T]
+} derive(Eq, @debug.Debug)
+pub fn[T] ReductionTrace::initial(Self[T]) -> @syntax.Term[T]
+pub fn[T] ReductionTrace::result(Self[T]) -> NormalizationResult[T]
+pub fn[T] ReductionTrace::steps(Self[T]) -> Array[StepResult[T]]
+
+pub struct RuleName {
+  value : String
+} derive(Compare, Eq, Hash, @debug.Debug)
+pub fn RuleName::new(String) -> Result[Self, RuleNameError]
+pub fn RuleName::unsafe_new(String) -> Self
+pub fn RuleName::value(Self) -> String
+
+pub(all) enum RuleNameError {
+  Empty
+} derive(Eq, @debug.Debug)
+
+pub(all) enum StepResult[T] {
+  NoStep
+  Reduced(before~ : @syntax.Term[T], after~ : @syntax.Term[T], rule~ : RuleName, path~ : ReductionPath)
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
+

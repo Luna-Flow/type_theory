@@ -1,0 +1,53 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Luna-Flow/type_theory/syntax"
+
+import {
+  "Luna-Flow/type_theory/core",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/immut/hashset",
+}
+
+// Values
+pub fn[T] all_names(Term[T]) -> @hashset.HashSet[@core.Name]
+
+pub fn[T : Eq] alpha_equal(Term[T], Term[T]) -> Bool
+
+pub fn[T] free_variables(Term[T]) -> @hashset.HashSet[@core.Name]
+
+pub fn[N : BindingSyntax] generic_all_names(N) -> @hashset.HashSet[@core.Name]
+
+pub fn[N : BindingSyntax] generic_alpha_rename_bound(N, @core.Name, @core.Name) -> N?
+
+pub fn[N : BindingSyntax] generic_free_variables(N) -> @hashset.HashSet[@core.Name]
+
+// Errors
+
+// Types and methods
+pub(all) enum BindingView[N] {
+  Opaque
+  Variable(@core.Name)
+  Apply(N, Array[N])
+  Bind(@core.Name, N)
+}
+
+pub(all) enum Term[T] {
+  Value(T)
+  Variable(@core.Name)
+  Apply(Term[T], Array[Term[T]])
+  Bind(@core.Name, Term[T])
+} derive(Eq, @debug.Debug)
+pub fn[T] Term::alpha_rename_bound(Self[T], @core.Name, @core.Name) -> Self[T]?
+pub fn[T, U] Term::map_values(Self[T], (T) -> U) -> Self[U]
+pub fn[T] Term::rename_free(Self[T], @core.Renaming) -> Self[T]
+pub impl[T] BindingSyntax for Term[T]
+
+// Type aliases
+
+// Traits
+pub(open) trait BindingSyntax {
+  fn project(Self) -> BindingView[Self]
+  fn variable(@core.Name) -> Self
+  fn apply(Self, Array[Self]) -> Self
+  fn bind(@core.Name, Self) -> Self
+}
+

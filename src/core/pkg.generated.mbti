@@ -1,0 +1,54 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Luna-Flow/type_theory/core"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/immut/hashset",
+}
+
+// Values
+pub fn fresh_name(Name, @hashset.HashSet[Name]) -> Name
+
+// Errors
+
+// Types and methods
+pub struct Context {
+  names : Array[Name]
+} derive(Eq, @debug.Debug)
+pub fn Context::contains(Self, Name) -> Bool
+pub fn Context::empty() -> Self
+pub fn Context::extend(Self, Name) -> Self
+pub fn Context::from_array(Array[Name]) -> Self
+pub fn Context::length(Self) -> Int
+pub fn Context::to_array(Self) -> Array[Name]
+
+pub struct Name {
+  text : String
+} derive(Compare, Eq, Hash, @debug.Debug)
+pub fn Name::new(String) -> Self
+pub fn Name::text(Self) -> String
+
+pub struct Renaming {
+  entries : Array[(Name, Name)]
+} derive(Eq, @debug.Debug)
+pub fn Renaming::apply(Self, Name) -> Name
+pub fn Renaming::empty() -> Self
+pub fn Renaming::set(Self, Name, Name) -> Self
+pub fn Renaming::singleton(Name, Name) -> Self
+pub fn Renaming::support(Self) -> @hashset.HashSet[Name]
+pub fn Renaming::targets(Self) -> @hashset.HashSet[Name]
+pub fn Renaming::then(Self, Self) -> Self
+pub fn Renaming::without(Self, Name) -> Self
+
+pub struct Telescope[T] {
+  entries : Array[(Name, T)]
+}
+pub fn[T] Telescope::empty() -> Self[T]
+pub fn[T] Telescope::extend(Self[T], Name, T) -> Self[T]
+pub fn[T] Telescope::length(Self[T]) -> Int
+pub fn[T] Telescope::to_array(Self[T]) -> Array[(Name, T)]
+
+// Type aliases
+
+// Traits
+

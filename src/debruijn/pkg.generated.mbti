@@ -1,0 +1,60 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Luna-Flow/type_theory/debruijn"
+
+import {
+  "Luna-Flow/type_theory/core",
+  "Luna-Flow/type_theory/rewrite",
+  "Luna-Flow/type_theory/syntax",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn[T] from_named(@syntax.Term[T]) -> DbTerm[T]
+
+pub fn[T] instantiate(DbTerm[T], DbTerm[T]) -> Result[DbTerm[T], ScopeError]
+
+pub fn[T] normalize(DbTerm[T], Int) -> DbNormalizationResult[T]
+
+pub fn[T] reduce_once(DbTerm[T]) -> DbStepResult[T]
+
+pub fn[T] shift(DbTerm[T], Int, Int) -> Result[DbTerm[T], ScopeError]
+
+pub fn[T] substitute_bound(DbTerm[T], Int, DbTerm[T]) -> Result[DbTerm[T], ScopeError]
+
+pub fn[T] to_named(DbTerm[T]) -> Result[@syntax.Term[T], ScopeError]
+
+pub fn[T] validate(DbTerm[T]) -> Result[Unit, ScopeError]
+
+// Errors
+
+// Types and methods
+pub(all) enum DbNormalizationResult[T] {
+  NormalForm(term~ : DbTerm[T], steps~ : Int)
+  StepLimitReached(term~ : DbTerm[T], steps~ : Int)
+  ScopeFailure(term~ : DbTerm[T], error~ : ScopeError, steps~ : Int)
+} derive(Eq, @debug.Debug)
+
+pub(all) enum DbStepResult[T] {
+  NoStep
+  Reduced(before~ : DbTerm[T], after~ : DbTerm[T], rule~ : @rewrite.RuleName, path~ : @rewrite.ReductionPath)
+  ScopeFailure(ScopeError)
+} derive(Eq, @debug.Debug)
+
+pub(all) enum DbTerm[T] {
+  Value(T)
+  Free(@core.Name)
+  Bound(Int)
+  Apply(DbTerm[T], Array[DbTerm[T]])
+  Bind(DbTerm[T])
+} derive(Eq, @debug.Debug)
+
+pub(all) enum ScopeError {
+  UnboundIndex(index~ : Int, depth~ : Int)
+  NegativeIndex(index~ : Int)
+  NegativeShift(index~ : Int, delta~ : Int, cutoff~ : Int)
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
+

@@ -1,0 +1,51 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Luna-Flow/type_theory/nbe"
+
+import {
+  "Luna-Flow/type_theory/core",
+  "Luna-Flow/type_theory/debruijn",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn[T] eval(@debruijn.DbTerm[T], Int) -> EvaluationResult[T]
+
+pub fn[T] normalize(@debruijn.DbTerm[T], Int) -> NbeResult[T]
+
+pub fn[T] quote(Semantic[T], Int, Int) -> QuoteResult[T]
+
+pub fn[T] reflect_free(@core.Name) -> Semantic[T]
+
+pub fn[T] reflect_level(Int) -> Semantic[T]?
+
+// Errors
+
+// Types and methods
+pub(all) enum EvaluationResult[T] {
+  Evaluated(value~ : Semantic[T], consumed~ : Int)
+  FuelExhausted(consumed~ : Int)
+  ScopeFailure(error~ : @debruijn.ScopeError, consumed~ : Int)
+}
+
+pub(all) enum NbeResult[T] {
+  NormalForm(term~ : @debruijn.DbTerm[T], consumed~ : Int)
+  FuelExhausted(consumed~ : Int)
+  ScopeFailure(error~ : @debruijn.ScopeError, consumed~ : Int)
+} derive(Eq, @debug.Debug)
+
+pub(all) enum QuoteResult[T] {
+  Quoted(term~ : @debruijn.DbTerm[T], consumed~ : Int)
+  FuelExhausted(consumed~ : Int)
+  ScopeFailure(error~ : @debruijn.ScopeError, consumed~ : Int)
+}
+
+pub struct Semantic[T] {
+  inner : SemanticInner[T]
+}
+
+type SemanticInner[T]
+
+// Type aliases
+
+// Traits
+

@@ -1,0 +1,41 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Luna-Flow/type_theory/substitution"
+
+import {
+  "Luna-Flow/type_theory/core",
+  "Luna-Flow/type_theory/syntax",
+  "moonbitlang/core/immut/hashset",
+}
+
+// Values
+pub fn[T] from_renaming(Array[@core.Name], @core.Renaming) -> Substitution[T]
+
+// Errors
+
+// Types and methods
+pub struct GenericSubstitution[N] {
+  entries : Array[(@core.Name, N)]
+}
+pub fn[N : @syntax.BindingSyntax] GenericSubstitution::apply_once(Self[N], N) -> N
+pub fn[N] GenericSubstitution::empty() -> Self[N]
+pub fn[N] GenericSubstitution::get(Self[N], @core.Name) -> N?
+pub fn[N] GenericSubstitution::set(Self[N], @core.Name, N) -> Self[N]
+pub fn[N] GenericSubstitution::singleton(@core.Name, N) -> Self[N]
+pub fn[N] GenericSubstitution::without(Self[N], @core.Name) -> Self[N]
+
+pub struct Substitution[T] {
+  entries : Array[(@core.Name, @syntax.Term[T])]
+}
+pub fn[T] Substitution::apply(Self[T], @syntax.Term[T]) -> @syntax.Term[T]
+pub fn[T] Substitution::empty() -> Self[T]
+pub fn[T] Substitution::get(Self[T], @core.Name) -> @syntax.Term[T]?
+pub fn[T] Substitution::restrict(Self[T], @hashset.HashSet[@core.Name]) -> Self[T]
+pub fn[T] Substitution::set(Self[T], @core.Name, @syntax.Term[T]) -> Self[T]
+pub fn[T] Substitution::singleton(@core.Name, @syntax.Term[T]) -> Self[T]
+pub fn[T] Substitution::then(Self[T], Self[T]) -> Self[T]
+pub fn[T] Substitution::without(Self[T], @core.Name) -> Self[T]
+
+// Type aliases
+
+// Traits
+

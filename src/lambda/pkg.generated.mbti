@@ -1,0 +1,30 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Luna-Flow/type_theory/lambda"
+
+import {
+  "Luna-Flow/type_theory/core",
+  "Luna-Flow/type_theory/rewrite",
+  "Luna-Flow/type_theory/syntax",
+}
+
+// Values
+pub fn[T] abstraction(@core.Name, @syntax.Term[T]) -> @syntax.Term[T]
+
+pub fn[T] application(@syntax.Term[T], @syntax.Term[T]) -> @syntax.Term[T]
+
+pub fn[T] beta_eta_rule(@syntax.Term[T]) -> @syntax.Term[T]?
+
+pub fn[T] beta_rule(@syntax.Term[T]) -> @syntax.Term[T]?
+
+pub fn[T] eta_rule(@syntax.Term[T]) -> @syntax.Term[T]?
+
+pub fn[T] normalize(@syntax.Term[T], Int) -> @rewrite.NormalizationResult[T]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

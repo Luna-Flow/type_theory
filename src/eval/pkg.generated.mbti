@@ -1,0 +1,30 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Luna-Flow/type_theory/eval"
+
+import {
+  "Luna-Flow/type_theory/rewrite",
+  "Luna-Flow/type_theory/syntax",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn[T] evaluate(@syntax.Term[T], @rewrite.RuleName, (@syntax.Term[T]) -> @syntax.Term[T]?, Strategy, Int) -> @rewrite.NormalizationResult[T]
+
+pub fn[T] reduce_once(@syntax.Term[T], @rewrite.RuleName, (@syntax.Term[T]) -> @syntax.Term[T]?, Strategy) -> @rewrite.StepResult[T]
+
+pub fn[T] trace(@syntax.Term[T], @rewrite.RuleName, (@syntax.Term[T]) -> @syntax.Term[T]?, Strategy, Int) -> @rewrite.ReductionTrace[T]
+
+// Errors
+
+// Types and methods
+pub(all) enum Strategy {
+  NormalOrder
+  ApplicativeOrder
+  WeakHead
+  FullNormal
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
+
