@@ -11,8 +11,11 @@ substrate for Luna-Flow symbolic computation.
 - `rewrite`: structured single-step reduction, paths, traces, and bounded loops.
 - `eval`: normal-order, applicative-order, weak-head, and full traversal facades.
 - `debruijn`: De Bruijn syntax, conversion, scope checking, shifting, and beta.
-- `nbe`: lazy, fuel-bounded untyped normalization by evaluation and quote.
-- `lambda`: named beta/eta reference calculus.
+- `utlc/lambda`: untyped named beta/eta reference calculus.
+- `utlc/nbe`: lazy, fuel-bounded untyped normalization by evaluation and quote.
+- `stlc`: simply typed lambda calculus over the shared substrate, with
+  bidirectional typechecking, checked operational normalization, and typed
+  eta-long normalization by evaluation.
 
 ## Semantic Boundaries
 
@@ -25,10 +28,15 @@ Generic substitution is simultaneous and one pass. A replacement inserted for
 traversal accepts arbitrary domain rules; domain-specific evaluation,
 canonicalization, and fixed-point policies remain owned by the downstream AST.
 
-Untyped NbE is intentionally bounded because untyped lambda terms may diverge.
-It returns `NormalForm`, `FuelExhausted`, or `ScopeFailure`. The operational
+UTLC NbE is intentionally bounded because untyped lambda terms may diverge. It
+returns `NormalForm`, `FuelExhausted`, or `ScopeFailure`. The UTLC operational
 small-step reducer remains the public reference semantics and is tested for
 normal-form agreement with NbE on terminating examples.
+
+The `stlc` package adds type-directed normalization for well-typed simply typed
+lambda terms over the shared named syntax. Its typed NbE is eta-long and total
+for well-typed STLC terms modulo implementation safeguards, while the existing
+untyped NbE remains fuel-bounded by design.
 
 Public APIs report expected validation and scope failures as structured data.
 For example, `RuleName::new` returns `Result[RuleName, RuleNameError]`; use

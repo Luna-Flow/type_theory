@@ -1,0 +1,66 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Luna-Flow/type_theory/stlc"
+
+import {
+  "Luna-Flow/type_theory/core",
+  "Luna-Flow/type_theory/debruijn",
+  "Luna-Flow/type_theory/rewrite",
+  "Luna-Flow/type_theory/syntax",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn check(Signature, TypeContext, @syntax.Term[Atom], Ty) -> Result[Unit, TypeError]
+
+pub fn infer(Signature, TypeContext, @syntax.Term[Atom]) -> Result[Ty, TypeError]
+
+pub fn normalize_checked(Signature, TypeContext, @syntax.Term[Atom], Ty, Int) -> Result[@rewrite.NormalizationResult[Atom], TypeError]
+
+pub fn normalize_eta_long(Signature, TypeContext, @syntax.Term[Atom], Ty) -> Result[@syntax.Term[Atom], TypeError]
+
+// Errors
+
+// Types and methods
+pub(all) enum Atom {
+  UnitLit
+  Const(@core.Name)
+} derive(Eq, @debug.Debug)
+
+pub struct Signature {
+  entries : Array[(@core.Name, Ty)]
+} derive(Eq, @debug.Debug)
+pub fn Signature::empty() -> Self
+pub fn Signature::extend(Self, @core.Name, Ty) -> Self
+pub fn Signature::lookup(Self, @core.Name) -> Ty?
+pub fn Signature::to_array(Self) -> Array[(@core.Name, Ty)]
+
+pub(all) enum Ty {
+  Base(@core.Name)
+  Unit
+  Arrow(Ty, Ty)
+} derive(Eq, @debug.Debug)
+
+pub struct TypeContext {
+  entries : Array[(@core.Name, Ty)]
+} derive(Eq, @debug.Debug)
+pub fn TypeContext::empty() -> Self
+pub fn TypeContext::extend(Self, @core.Name, Ty) -> Self
+pub fn TypeContext::lookup(Self, @core.Name) -> Ty?
+pub fn TypeContext::to_array(Self) -> Array[(@core.Name, Ty)]
+
+pub(all) enum TypeError {
+  UnboundVariable(@core.Name)
+  UnknownConstant(@core.Name)
+  CannotInferLambda
+  ExpectedFunction(Ty)
+  TypeMismatch(expected~ : Ty, actual~ : Ty)
+  EmptyApplication
+  ScopeError(@debruijn.ScopeError)
+  NormalizationError(message~ : String)
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+pub type Term = @syntax.Term[Atom]
+
+// Traits
+

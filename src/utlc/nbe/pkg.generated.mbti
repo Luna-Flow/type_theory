@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "Luna-Flow/type_theory/nbe"
+package "Luna-Flow/type_theory/utlc/nbe"
 
 import {
   "Luna-Flow/type_theory/core",

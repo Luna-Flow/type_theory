@@ -1,6 +1,6 @@
 # Correctness Checklist
 
-Last audited: 2026-06-15
+Last audited: 2026-06-16
 
 | Area | Status | Evidence | Contract |
 | --- | --- | --- | --- |
@@ -13,13 +13,18 @@ Last audited: 2026-06-15
 | De Bruijn scope | Correct | dangling and negative index tests | invalid indices return `ScopeError` |
 | Shift and instantiation | Correct | nested binder beta tests | standard cutoff-based shifting |
 | De Bruijn small-step | Correct | path and normalization tests | leftmost-outermost beta |
-| Untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests | beta-normalization may exhaust fuel |
+| UTLC untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests | beta-normalization may exhaust fuel |
+| STLC bidirectional typechecking | Correct | typing, rejection, and shadowing tests | inference is syntax-directed and lambdas check against arrows |
+| STLC typed eta-long NbE | Correct | eta-expansion, open neutral, and beta/eta tests | well-typed STLC terms normalize by type-directed readback |
 | Custom AST integration | Contract tested | mock downstream AST | domain canonicalization remains downstream |
 
 ## Known Boundaries
 
 - `Term[T]` assumes `T` is closed with respect to shared names.
-- Untyped NbE is not total; `FuelExhausted` is expected for divergent terms.
-- Typed, eta-long NbE belongs to the future STLC package.
+- UTLC NbE is not total; `FuelExhausted` is expected for divergent terms.
 - Generic rewrite traversal currently provides pre-order single-step semantics;
   additional strategies must preserve the one-redex contract.
+- STLC operational normalization remains step-bounded because it intentionally
+  reuses the UTLC named lambda reducer as the reference semantics.
+- STLC v1 covers only simply typed lambda calculus with `Unit`, base types,
+  arrows, and typed constants from a signature.
