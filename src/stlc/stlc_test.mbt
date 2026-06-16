@@ -215,6 +215,84 @@ test "typed eta long nbe eta expands open functions" {
 }
 
 ///|
+test "typed eta long nbe eta expands functional constants" {
+  let a = base("A")
+  let b = base("B")
+  let c = @core.Name::new("c")
+  let sig = Signature::empty().extend(c, Ty::Arrow(a, b))
+  let expected = lam("x", app(con("c"), tm_var("x")))
+  match
+    normalize_eta_long(sig, TypeContext::empty(), con("c"), Ty::Arrow(a, b)) {
+    Ok(normal) => assert_true(@syntax.alpha_equal(normal, expected))
+    Err(_) => assert_false(true)
+  }
+}
+
+///|
+test "typed eta long nbe eta expands nested functional constants" {
+  let a = base("A")
+  let b = base("B")
+  let c_ty = base("C")
+  let c = @core.Name::new("c")
+  let sig = Signature::empty().extend(c, Ty::Arrow(a, Ty::Arrow(b, c_ty)))
+  let expected = lam(
+    "x",
+    lam("y", app(app(con("c"), tm_var("x")), tm_var("y"))),
+  )
+  match
+    normalize_eta_long(
+      sig,
+      TypeContext::empty(),
+      con("c"),
+      Ty::Arrow(a, Ty::Arrow(b, c_ty)),
+    ) {
+    Ok(normal) => assert_true(@syntax.alpha_equal(normal, expected))
+    Err(_) => assert_false(true)
+  }
+}
+
+///|
+test "typed eta long nbe quotes higher order neutral lambda arguments" {
+  let a = base("A")
+  let b = base("B")
+  let h = @core.Name::new("h")
+  let sig = Signature::empty().extend(h, Ty::Arrow(Ty::Arrow(a, a), b))
+  let argument = lam("x", tm_var("x"))
+  let term = app(con("h"), argument)
+  match normalize_eta_long(sig, TypeContext::empty(), term, b) {
+    Ok(normal) => assert_true(@syntax.alpha_equal(normal, term))
+    Err(_) => assert_false(true)
+  }
+}
+
+///|
+test "typed eta long nbe quotes higher order neutral open function arguments" {
+  let a = base("A")
+  let b = base("B")
+  let h = @core.Name::new("h")
+  let f = @core.Name::new("f")
+  let sig = Signature::empty().extend(h, Ty::Arrow(Ty::Arrow(a, a), b))
+  let ctx = TypeContext::empty().extend(f, Ty::Arrow(a, a))
+  let term = app(con("h"), tm_var("f"))
+  let expected = app(con("h"), lam("x", app(tm_var("f"), tm_var("x"))))
+  match normalize_eta_long(sig, ctx, term, b) {
+    Ok(normal) => assert_true(@syntax.alpha_equal(normal, expected))
+    Err(_) => assert_false(true)
+  }
+}
+
+///|
+test "typed eta long nbe applies function constants to unit" {
+  let c = @core.Name::new("c")
+  let sig = Signature::empty().extend(c, Ty::Arrow(Ty::Unit, Ty::Unit))
+  let term = app(con("c"), unit_term())
+  match normalize_eta_long(sig, TypeContext::empty(), term, Ty::Unit) {
+    Ok(normal) => assert_true(@syntax.alpha_equal(normal, term))
+    Err(_) => assert_false(true)
+  }
+}
+
+///|
 test "typed eta long nbe preserves identity and open neutral heads" {
   let a = base("A")
   let id_term = lam("x", tm_var("x"))

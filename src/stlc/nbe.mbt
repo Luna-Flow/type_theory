@@ -1,20 +1,24 @@
 ///|
 priv struct Closure {
+  sig : Signature
+  ctx : TypeContext
   environment : Array[(@core.Name, Value)]
   parameter : @core.Name
+  domain : Ty
+  codomain : Ty
   body : Term
 }
 
 ///|
 priv enum Neutral {
   NFree(@core.Name)
-  NApp(Neutral, Value)
+  NConst(@core.Name)
+  NApp(Neutral, Ty, Value)
 }
 
 ///|
 priv enum Value {
   VUnit
-  VAtom(Atom)
   VLam(Closure)
   VNeutral(Neutral)
 }
@@ -33,14 +37,18 @@ fn env_lookup(
 }
 
 ///|
-fn quote_neutral(neutral : Neutral) -> Result[Term, TypeError] {
+fn quote_neutral(
+  neutral : Neutral,
+  used : @hashset.HashSet[@core.Name],
+) -> Result[Term, TypeError] {
   match neutral {
     NFree(name) => Ok(@syntax.Variable(name))
-    NApp(function, argument) =>
-      match quote_neutral(function) {
+    NConst(name) => Ok(@syntax.Value(Atom::Const(name)))
+    NApp(function, domain, argument) =>
+      match quote_neutral(function, used) {
         Err(error) => Err(error)
         Ok(quoted_function) =>
-          match quote_untyped(argument) {
+          match reify(domain, argument, used) {
             Err(error) => Err(error)
             Ok(quoted_argument) =>
               Ok(@syntax.Apply(quoted_function, [quoted_argument]))
@@ -50,29 +58,24 @@ fn quote_neutral(neutral : Neutral) -> Result[Term, TypeError] {
 }
 
 ///|
-fn quote_untyped(value : Value) -> Result[Term, TypeError] {
-  match value {
-    VUnit => Ok(@syntax.Value(Atom::UnitLit))
-    VAtom(atom) => Ok(@syntax.Value(atom))
-    VNeutral(neutral) => quote_neutral(neutral)
-    VLam(_) =>
-      Err(
-        TypeError::NormalizationError(
-          message="cannot quote function without a type",
-        ),
-      )
-  }
-}
-
-///|
-fn apply_value(function : Value, argument : Value) -> Result[Value, TypeError] {
+fn apply_value_typed(
+  function : Value,
+  domain : Ty,
+  argument : Value,
+) -> Result[Value, TypeError] {
   match function {
     VLam(closure) => {
       let next_environment = closure.environment.copy()
       next_environment.push((closure.parameter, argument))
-      eval(closure.body, next_environment)
+      eval_typed(
+        closure.sig,
+        closure.ctx.extend(closure.parameter, closure.domain),
+        closure.body,
+        closure.codomain,
+        next_environment,
+      )
     }
-    VNeutral(neutral) => Ok(VNeutral(NApp(neutral, argument)))
+    VNeutral(neutral) => Ok(VNeutral(NApp(neutral, domain, argument)))
     _ =>
       Err(
         TypeError::NormalizationError(
@@ -83,35 +86,103 @@ fn apply_value(function : Value, argument : Value) -> Result[Value, TypeError] {
 }
 
 ///|
-fn eval(
+fn head_type_for_application(
+  sig : Signature,
+  ctx : TypeContext,
+  head : Term,
+  arguments : Array[Term],
+  expected : Ty,
+) -> Result[Ty, TypeError] {
+  if arguments.length() == 0 {
+    return Err(TypeError::EmptyApplication)
+  }
+  match head {
+    @syntax.Bind(parameter, body) =>
+      match infer(sig, ctx, arguments[0]) {
+        Err(error) => Err(error)
+        Ok(domain) => {
+          let codomain = if arguments.length() == 1 {
+            expected
+          } else {
+            match
+              head_type_for_application(
+                sig,
+                ctx.extend(parameter, domain),
+                body,
+                arguments[1:].to_owned(),
+                expected,
+              ) {
+              Err(error) => return Err(error)
+              Ok(body_type) => body_type
+            }
+          }
+          Ok(Ty::Arrow(domain, codomain))
+        }
+      }
+    _ => infer(sig, ctx, head)
+  }
+}
+
+///|
+fn eval_typed(
+  sig : Signature,
+  ctx : TypeContext,
   term : Term,
+  ty : Ty,
   environment : Array[(@core.Name, Value)],
 ) -> Result[Value, TypeError] {
   match term {
     @syntax.Value(Atom::UnitLit) => Ok(VUnit)
-    @syntax.Value(atom) => Ok(VAtom(atom))
+    @syntax.Value(Atom::Const(name)) => Ok(VNeutral(NConst(name)))
     @syntax.Variable(name) =>
       match env_lookup(environment, name) {
         Some(value) => Ok(value)
         None => Err(TypeError::UnboundVariable(name))
       }
-    @syntax.Bind(parameter, body) => Ok(VLam({ environment, parameter, body }))
+    @syntax.Bind(parameter, body) =>
+      match ty {
+        Ty::Arrow(domain, codomain) =>
+          Ok(VLam({ sig, ctx, environment, parameter, domain, codomain, body }))
+        _ =>
+          Err(
+            TypeError::NormalizationError(
+              message="lambda semantic value requires an arrow type",
+            ),
+          )
+      }
     @syntax.Apply(head, arguments) => {
       if arguments.length() == 0 {
         return Err(TypeError::EmptyApplication)
       }
-      let mut current = match eval(head, environment) {
+      let mut current_type = match
+        head_type_for_application(sig, ctx, head, arguments, ty) {
+        Ok(head_type) => head_type
+        Err(error) => return Err(error)
+      }
+      let mut current = match
+        eval_typed(sig, ctx, head, current_type, environment) {
         Ok(value) => value
         Err(error) => return Err(error)
       }
       for argument in arguments {
-        let argument_value = match eval(argument, environment) {
-          Ok(value) => value
-          Err(error) => return Err(error)
-        }
-        match apply_value(current, argument_value) {
-          Ok(next) => current = next
-          Err(error) => return Err(error)
+        match current_type {
+          Ty::Arrow(domain, codomain) => {
+            match check(sig, ctx, argument, domain) {
+              Ok(_) => ()
+              Err(error) => return Err(error)
+            }
+            let argument_value = match
+              eval_typed(sig, ctx, argument, domain, environment) {
+              Ok(value) => value
+              Err(error) => return Err(error)
+            }
+            match apply_value_typed(current, domain, argument_value) {
+              Ok(next) => current = next
+              Err(error) => return Err(error)
+            }
+            current_type = codomain
+          }
+          _ => return Err(TypeError::ExpectedFunction(current_type))
         }
       }
       Ok(current)
@@ -132,13 +203,13 @@ fn reflect(ty : Ty, neutral : Neutral) -> Value {
 fn reify_with_name(
   ty : Ty,
   value : Value,
+  used : @hashset.HashSet[@core.Name],
   fresh : @core.Name,
 ) -> Result[Term, TypeError] {
   match ty {
     Ty::Base(_) =>
       match value {
-        VAtom(atom) => Ok(@syntax.Value(atom))
-        VNeutral(neutral) => quote_neutral(neutral)
+        VNeutral(neutral) => quote_neutral(neutral, used)
         VUnit =>
           Err(
             TypeError::NormalizationError(
@@ -155,14 +226,7 @@ fn reify_with_name(
     Ty::Unit =>
       match value {
         VUnit => Ok(@syntax.Value(Atom::UnitLit))
-        VNeutral(neutral) => quote_neutral(neutral)
-        VAtom(Atom::UnitLit) => Ok(@syntax.Value(Atom::UnitLit))
-        VAtom(Atom::Const(_)) =>
-          Err(
-            TypeError::NormalizationError(
-              message="constant atom cannot inhabit unit without reduction",
-            ),
-          )
+        VNeutral(neutral) => quote_neutral(neutral, used)
         VLam(_) =>
           Err(
             TypeError::NormalizationError(
@@ -172,7 +236,7 @@ fn reify_with_name(
       }
     Ty::Arrow(domain, codomain) => {
       let argument = reflect(domain, NFree(fresh))
-      match apply_value(value, argument) {
+      match apply_value_typed(value, domain, argument) {
         Ok(body_value) =>
           match reify(codomain, body_value, @hashset.from_array([fresh])) {
             Ok(body) => Ok(@syntax.Bind(fresh, body))
@@ -205,7 +269,7 @@ fn reify_with_used(
     Ty::Arrow(domain, codomain) => {
       let fresh = @core.fresh_name(@core.Name::new("x"), used)
       let argument = reflect(domain, NFree(fresh))
-      match apply_value(value, argument) {
+      match apply_value_typed(value, domain, argument) {
         Ok(body_value) =>
           match reify_with_used(codomain, body_value, used.add(fresh)) {
             Ok(body) => Ok(@syntax.Bind(fresh, body))
@@ -214,7 +278,7 @@ fn reify_with_used(
         Err(error) => Err(error)
       }
     }
-    _ => reify_with_name(ty, value, @core.Name::new("x"))
+    _ => reify_with_name(ty, value, used, @core.Name::new("x"))
   }
 }
 
@@ -260,9 +324,8 @@ pub fn normalize_eta_long(
     Ok(_) => ()
     Err(error) => return Err(error)
   }
-  let _ = sig
   let used = @syntax.all_names(term).union(context_names(ctx))
-  match eval(term, initial_environment(ctx)) {
+  match eval_typed(sig, ctx, term, ty, initial_environment(ctx)) {
     Ok(value) => reify(ty, value, used)
     Err(error) => Err(error)
   }
