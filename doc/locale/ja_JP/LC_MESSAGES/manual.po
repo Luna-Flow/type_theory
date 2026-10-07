@@ -1,0 +1,112 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Luna-Flow documentation\n"
+"Report-Msgid-Bugs-To: https://github.com/Luna-Flow\n"
+"Language: ja_JP\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: conf.json:summary
+msgid "A formal semantic substrate for Luna-Flow symbolic computation, with binding, substitution, rewriting, evaluation strategies, and lambda/type-theoretic cores."
+msgstr "Luna-Flow の記号計算のための形式的な意味論基盤で、束縛、代入、書き換え、評価戦略、ラムダ計算・型理論のコアを提供します。"
+
+#: manual/index.md:1
+msgid "type_theory"
+msgstr "type_theory"
+
+#: manual/index.md:3
+msgid "This module provides reusable named and De Bruijn binding semantics, capture-avoiding substitution, structured single-step reduction, and bounded untyped NbE."
+msgstr "このモジュールは named/De Bruijn 束縛、捕獲回避代入、構造化一段階簡約、および fuel 付き untyped NbE を提供します。"
+
+#: manual/index.md:7
+msgid "Custom domain ASTs should implement `BindingSyntax` to use one-pass generic substitution and arbitrary custom rewrite rules. Lambda users may choose named syntax, De Bruijn small-step reduction, or bounded NbE with quote."
+msgstr "任意のドメイン固有 AST は `BindingSyntax` を実装することで、一回だけの simultaneous substitution とカスタム簡約規則を利用できます。Lambda の利用者は、named 構文、De Bruijn の small-step 簡約、quote 付きの有界 NbE から選択できます。"
+
+#: manual/index.md:11
+msgid "Packages"
+msgstr "パッケージ"
+
+#: manual/index.md:13
+msgid "Package"
+msgstr "パッケージ"
+
+#: manual/index.md:13
+msgid "Contents"
+msgstr "内容"
+
+#: manual/index.md:15
+msgid "Names, contexts, telescopes, freshness, and finite renamings."
+msgstr "名前、コンテキスト、telescope、fresh name、有限のリネーミング。"
+
+#: manual/index.md:16
+msgid "Generic named `Term[T]` plus the open `BindingSyntax` trait."
+msgstr "汎用の named `Term[T]` と、開かれた `BindingSyntax` trait。"
+
+#: manual/index.md:17
+msgid "Capture-avoiding named and downstream-AST substitution."
+msgstr "named 項と下流 AST に対する捕獲回避代入。"
+
+#: manual/index.md:18
+msgid "Structured single-step reduction, paths, traces, and bounded loops."
+msgstr "構造化一段階簡約、パス、trace、有界ループ。"
+
+#: manual/index.md:19
+msgid "Normal-order, applicative-order, weak-head, and full traversal facades."
+msgstr "正規順序、適用順序、弱頭部、完全走査のファサード。"
+
+#: manual/index.md:20
+msgid "De Bruijn syntax, conversion, scope checking, shifting, and beta."
+msgstr "De Bruijn 構文、変換、スコープ検査、シフト、beta。"
+
+#: manual/index.md:21
+msgid "Untyped named beta/eta reference calculus."
+msgstr "型なし named beta/eta 参照計算。"
+
+#: manual/index.md:22
+msgid "Lazy, fuel-bounded untyped normalization by evaluation and quote."
+msgstr "遅延評価で fuel により制限された、型なしの評価による正規化（NbE）と quote。"
+
+#: manual/index.md:23
+msgid "Simply typed lambda calculus over the shared substrate, with bidirectional typechecking, checked operational normalization, and typed eta-long normalization by evaluation."
+msgstr "共有基盤の上に構築した単純型付きラムダ計算。双方向型検査、検査付きの操作的正規化、型付き eta-long NbE を備えます。"
+
+#: manual/index.md:25
+msgid "The generated `pkg.generated.mbti` file of each package is the authoritative list of its public names and signatures."
+msgstr "各パッケージの生成された `pkg.generated.mbti` ファイルが、公開名とシグネチャの正式な一覧です。"
+
+#: manual/index.md:28
+msgid "Further reading"
+msgstr "関連資料"
+
+#: manual/index.md:30
+msgid "[Semantic design](semantics.md) explains how reduction, NbE, the two syntax representations, and failure reporting fit together."
+msgstr "[意味論の設計](semantics.md)では、簡約、NbE、二つの構文表現、失敗の報告がどのように組み合わさるかを説明します。"
+
+#: manual/index.md:32
+msgid "The [correctness checklist](../../CORRECTNESS_CHECKLIST.md) records the audited invariants and known boundaries."
+msgstr "[正しさのチェックリスト](../../CORRECTNESS_CHECKLIST.md)には、監査済みの不変条件と既知の境界を記録しています。"
+
+#: manual/semantics.md:1
+msgid "Semantic design"
+msgstr "意味論の設計"
+
+#: manual/semantics.md:3
+msgid "The operational semantics is defined by structured single-step reduction. Bounded normalizers and traces repeatedly invoke that interface."
+msgstr "一段階簡約が操作的意味論の基準です。多段階正規化と trace はこの API を繰り返し呼び出します。"
+
+#: manual/semantics.md:6
+msgid "NbE is an independent denotational implementation using lazy delayed terms, closures, neutral levels, and quote. It shares De Bruijn scope and binder primitives with the operational reducer and is checked for result agreement."
+msgstr "NbE は lazy thunk、closure、neutral level、quote による独立した表示的実装です。De Bruijn のスコープと束縛のプリミティブを操作的簡約器と共有し、結果が一致することをテストで確認します。"
+
+#: manual/semantics.md:10
+msgid "Named and De Bruijn syntax are both public. Conversion into De Bruijn removes alpha-renaming from the reduction kernel; conversion back selects deterministic fresh names."
+msgstr "named 構文と De Bruijn 構文はどちらも公開されています。De Bruijn に変換すると簡約カーネルから alpha リネーミングが不要になり、named 構文に戻すときは決定的に fresh name を選びます。"
+
+#: manual/semantics.md:14
+msgid "Any custom AST that implements `BindingSyntax` can use generic substitution and rewrite traversal. Rewrite rules, domain evaluation, canonicalization, and fixed-point policies are defined by the downstream AST and are not fixed semantics of this module."
+msgstr "`BindingSyntax` を実装した任意のカスタム AST は、汎用の代入と簡約走査を利用できます。簡約規則、ドメインの評価、canonicalization、fixed-point の方針は下流の AST が定義するもので、このモジュールの固定された意味論には含まれません。"
+
+#: manual/semantics.md:19
+msgid "Expected failures at public boundaries are represented as structured data. `RuleName::new`, for example, returns `RuleNameError::Empty` for an empty name. Aborting `unsafe_*` constructors are reserved for callers that already establish the corresponding internal invariant."
+msgstr "公開 API 境界で想定される失敗は、構造化データとして表現します。例えば `RuleName::new` は空の名前に対して `RuleNameError::Empty` を返します。実行を中断する `unsafe_*` コンストラクタは、対応する内部 invariant が呼び出し側で保証される場合にのみ使用します。"

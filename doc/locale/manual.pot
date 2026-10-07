@@ -1,0 +1,112 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Luna-Flow documentation\n"
+"Report-Msgid-Bugs-To: https://github.com/Luna-Flow\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: conf.json:summary
+msgid "A formal semantic substrate for Luna-Flow symbolic computation, with binding, substitution, rewriting, evaluation strategies, and lambda/type-theoretic cores."
+msgstr ""
+
+#: manual/index.md:1
+msgid "type_theory"
+msgstr ""
+
+#: manual/index.md:3
+msgid "This module provides reusable named and De Bruijn binding semantics, capture-avoiding substitution, structured single-step reduction, and bounded untyped NbE."
+msgstr ""
+
+#: manual/index.md:7
+msgid "Custom domain ASTs should implement `BindingSyntax` to use one-pass generic substitution and arbitrary custom rewrite rules. Lambda users may choose named syntax, De Bruijn small-step reduction, or bounded NbE with quote."
+msgstr ""
+
+#: manual/index.md:11
+msgid "Packages"
+msgstr ""
+
+#: manual/index.md:13
+msgid "Package"
+msgstr ""
+
+#: manual/index.md:13
+msgid "Contents"
+msgstr ""
+
+#: manual/index.md:15
+msgid "Names, contexts, telescopes, freshness, and finite renamings."
+msgstr ""
+
+#: manual/index.md:16
+msgid "Generic named `Term[T]` plus the open `BindingSyntax` trait."
+msgstr ""
+
+#: manual/index.md:17
+msgid "Capture-avoiding named and downstream-AST substitution."
+msgstr ""
+
+#: manual/index.md:18
+msgid "Structured single-step reduction, paths, traces, and bounded loops."
+msgstr ""
+
+#: manual/index.md:19
+msgid "Normal-order, applicative-order, weak-head, and full traversal facades."
+msgstr ""
+
+#: manual/index.md:20
+msgid "De Bruijn syntax, conversion, scope checking, shifting, and beta."
+msgstr ""
+
+#: manual/index.md:21
+msgid "Untyped named beta/eta reference calculus."
+msgstr ""
+
+#: manual/index.md:22
+msgid "Lazy, fuel-bounded untyped normalization by evaluation and quote."
+msgstr ""
+
+#: manual/index.md:23
+msgid "Simply typed lambda calculus over the shared substrate, with bidirectional typechecking, checked operational normalization, and typed eta-long normalization by evaluation."
+msgstr ""
+
+#: manual/index.md:25
+msgid "The generated `pkg.generated.mbti` file of each package is the authoritative list of its public names and signatures."
+msgstr ""
+
+#: manual/index.md:28
+msgid "Further reading"
+msgstr ""
+
+#: manual/index.md:30
+msgid "[Semantic design](semantics.md) explains how reduction, NbE, the two syntax representations, and failure reporting fit together."
+msgstr ""
+
+#: manual/index.md:32
+msgid "The [correctness checklist](../../CORRECTNESS_CHECKLIST.md) records the audited invariants and known boundaries."
+msgstr ""
+
+#: manual/semantics.md:1
+msgid "Semantic design"
+msgstr ""
+
+#: manual/semantics.md:3
+msgid "The operational semantics is defined by structured single-step reduction. Bounded normalizers and traces repeatedly invoke that interface."
+msgstr ""
+
+#: manual/semantics.md:6
+msgid "NbE is an independent denotational implementation using lazy delayed terms, closures, neutral levels, and quote. It shares De Bruijn scope and binder primitives with the operational reducer and is checked for result agreement."
+msgstr ""
+
+#: manual/semantics.md:10
+msgid "Named and De Bruijn syntax are both public. Conversion into De Bruijn removes alpha-renaming from the reduction kernel; conversion back selects deterministic fresh names."
+msgstr ""
+
+#: manual/semantics.md:14
+msgid "Any custom AST that implements `BindingSyntax` can use generic substitution and rewrite traversal. Rewrite rules, domain evaluation, canonicalization, and fixed-point policies are defined by the downstream AST and are not fixed semantics of this module."
+msgstr ""
+
+#: manual/semantics.md:19
+msgid "Expected failures at public boundaries are represented as structured data. `RuleName::new`, for example, returns `RuleNameError::Empty` for an empty name. Aborting `unsafe_*` constructors are reserved for callers that already establish the corresponding internal invariant."
+msgstr ""

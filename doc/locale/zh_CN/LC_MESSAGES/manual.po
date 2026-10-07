@@ -1,0 +1,112 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Luna-Flow documentation\n"
+"Report-Msgid-Bugs-To: https://github.com/Luna-Flow\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: conf.json:summary
+msgid "A formal semantic substrate for Luna-Flow symbolic computation, with binding, substitution, rewriting, evaluation strategies, and lambda/type-theoretic cores."
+msgstr "Luna-Flow 符号计算的形式语义基础，提供绑定、代换、重写、求值策略以及 lambda 演算与类型论核心。"
+
+#: manual/index.md:1
+msgid "type_theory"
+msgstr "type_theory"
+
+#: manual/index.md:3
+msgid "This module provides reusable named and De Bruijn binding semantics, capture-avoiding substitution, structured single-step reduction, and bounded untyped NbE."
+msgstr "本模块提供可复用的命名变量与 De Bruijn 绑定语义、捕获规避代换、结构化单步规约，以及带 fuel 的无类型 NbE。"
+
+#: manual/index.md:7
+msgid "Custom domain ASTs should implement `BindingSyntax` to use one-pass generic substitution and arbitrary custom rewrite rules. Lambda users may choose named syntax, De Bruijn small-step reduction, or bounded NbE with quote."
+msgstr "任意自定义领域 AST 都可以实现 `BindingSyntax`，以使用一次性的 simultaneous substitution 和自定义规约规则。Lambda 层可以选择命名语法、De Bruijn 小步规约或带 quote 的有界 NbE。"
+
+#: manual/index.md:11
+msgid "Packages"
+msgstr "包"
+
+#: manual/index.md:13
+msgid "Package"
+msgstr "包"
+
+#: manual/index.md:13
+msgid "Contents"
+msgstr "内容"
+
+#: manual/index.md:15
+msgid "Names, contexts, telescopes, freshness, and finite renamings."
+msgstr "名称、上下文、telescope、新鲜名与有限重命名。"
+
+#: manual/index.md:16
+msgid "Generic named `Term[T]` plus the open `BindingSyntax` trait."
+msgstr "通用命名项 `Term[T]` 以及开放的 `BindingSyntax` trait。"
+
+#: manual/index.md:17
+msgid "Capture-avoiding named and downstream-AST substitution."
+msgstr "面向命名项与下游 AST 的捕获规避代换。"
+
+#: manual/index.md:18
+msgid "Structured single-step reduction, paths, traces, and bounded loops."
+msgstr "结构化单步规约、路径、trace 与有界循环。"
+
+#: manual/index.md:19
+msgid "Normal-order, applicative-order, weak-head, and full traversal facades."
+msgstr "正规序、应用序、弱头与完全遍历的外观接口。"
+
+#: manual/index.md:20
+msgid "De Bruijn syntax, conversion, scope checking, shifting, and beta."
+msgstr "De Bruijn 语法、转换、作用域检查、移位与 beta。"
+
+#: manual/index.md:21
+msgid "Untyped named beta/eta reference calculus."
+msgstr "无类型命名 beta/eta 参考演算。"
+
+#: manual/index.md:22
+msgid "Lazy, fuel-bounded untyped normalization by evaluation and quote."
+msgstr "惰性、受 fuel 限制的无类型求值正规化（NbE）与 quote。"
+
+#: manual/index.md:23
+msgid "Simply typed lambda calculus over the shared substrate, with bidirectional typechecking, checked operational normalization, and typed eta-long normalization by evaluation."
+msgstr "建立在共享基础之上的简单类型 lambda 演算，提供双向类型检查、带检查的操作正规化以及带类型的 eta-long NbE。"
+
+#: manual/index.md:25
+msgid "The generated `pkg.generated.mbti` file of each package is the authoritative list of its public names and signatures."
+msgstr "各包生成的 `pkg.generated.mbti` 文件是其公开名称与签名的权威列表。"
+
+#: manual/index.md:28
+msgid "Further reading"
+msgstr "延伸阅读"
+
+#: manual/index.md:30
+msgid "[Semantic design](semantics.md) explains how reduction, NbE, the two syntax representations, and failure reporting fit together."
+msgstr "[语义设计](semantics.md)说明规约、NbE、两种语法表示以及失败报告如何协同工作。"
+
+#: manual/index.md:32
+msgid "The [correctness checklist](../../CORRECTNESS_CHECKLIST.md) records the audited invariants and known boundaries."
+msgstr "[正确性检查清单](../../CORRECTNESS_CHECKLIST.md)记录已审计的不变量与已知边界。"
+
+#: manual/semantics.md:1
+msgid "Semantic design"
+msgstr "语义设计"
+
+#: manual/semantics.md:3
+msgid "The operational semantics is defined by structured single-step reduction. Bounded normalizers and traces repeatedly invoke that interface."
+msgstr "单步规约是操作语义的权威接口，多步正规化和 trace 只能循环调用该接口。"
+
+#: manual/semantics.md:6
+msgid "NbE is an independent denotational implementation using lazy delayed terms, closures, neutral levels, and quote. It shares De Bruijn scope and binder primitives with the operational reducer and is checked for result agreement."
+msgstr "NbE 使用惰性 thunk、closure、neutral level 与 quote 作为独立的指称式实现。它与操作规约器共享 De Bruijn 作用域和绑定原语，并通过测试保持结果一致。"
+
+#: manual/semantics.md:10
+msgid "Named and De Bruijn syntax are both public. Conversion into De Bruijn removes alpha-renaming from the reduction kernel; conversion back selects deterministic fresh names."
+msgstr "命名语法与 De Bruijn 语法都是公开的。转换为 De Bruijn 后，规约内核不再需要 alpha 重命名；转换回命名语法时会确定性地选择新鲜名。"
+
+#: manual/semantics.md:14
+msgid "Any custom AST that implements `BindingSyntax` can use generic substitution and rewrite traversal. Rewrite rules, domain evaluation, canonicalization, and fixed-point policies are defined by the downstream AST and are not fixed semantics of this module."
+msgstr "实现 `BindingSyntax` 的任意自定义 AST 都可以使用通用代换与规约遍历。规约规则、领域求值、canonicalization 和 fixed-point 策略由下游 AST 自己定义，不属于本模块的固定语义。"
+
+#: manual/semantics.md:19
+msgid "Expected failures at public boundaries are represented as structured data. `RuleName::new`, for example, returns `RuleNameError::Empty` for an empty name. Aborting `unsafe_*` constructors are reserved for callers that already establish the corresponding internal invariant."
+msgstr "公开 API 边界上的预期失败使用结构化数据表示。例如，`RuleName::new` 在名称为空时返回 `RuleNameError::Empty`。会中止执行的 `unsafe_*` 构造器仅用于调用方已经保证相应内部 invariant 的场景。"

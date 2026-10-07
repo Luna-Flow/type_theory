@@ -1,0 +1,8 @@
+{
+  "title": "type_theory",
+  "summary": "A formal semantic substrate for Luna-Flow symbolic computation, with binding, substitution, rewriting, evaluation strategies, and lambda/type-theoretic cores.",
+  "locales": [
+    "zh_CN",
+    "ja_JP"
+  ]
+}

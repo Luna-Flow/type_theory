@@ -43,6 +43,12 @@ For example, `RuleName::new` returns `Result[RuleName, RuleNameError]`; use
 `RuleName::unsafe_new` only when a non-empty name is guaranteed by an internal
 invariant, such as a static rule-name literal.
 
+## Documentation
+
+The manual is published at <https://luna-flow.github.io/en/type_theory/>, with
+Chinese and Japanese translations. Its English source lives in
+[`doc/manual/`](./doc/manual/index.md).
+
 ## Development
 
 ```bash

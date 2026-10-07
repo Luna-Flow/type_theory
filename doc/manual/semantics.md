@@ -1,4 +1,4 @@
-# Design
+# Semantic design
 
 The operational semantics is defined by structured single-step reduction.
 Bounded normalizers and traces repeatedly invoke that interface.
@@ -10,6 +10,11 @@ primitives with the operational reducer and is checked for result agreement.
 Named and De Bruijn syntax are both public. Conversion into De Bruijn removes
 alpha-renaming from the reduction kernel; conversion back selects deterministic
 fresh names.
+
+Any custom AST that implements `BindingSyntax` can use generic substitution and
+rewrite traversal. Rewrite rules, domain evaluation, canonicalization, and
+fixed-point policies are defined by the downstream AST and are not fixed
+semantics of this module.
 
 Expected failures at public boundaries are represented as structured data.
 `RuleName::new`, for example, returns `RuleNameError::Empty` for an empty name.
