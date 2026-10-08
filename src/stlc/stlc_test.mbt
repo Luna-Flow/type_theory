@@ -452,3 +452,30 @@ test "redex inference keeps the parameter when trailing arguments do not mention
   )
   assert_true(@stlc.infer(sig, ctx, nested) == Ok(b))
 }
+
+///|
+test "empty applications are rejected anywhere in a spine" {
+  // issue #2: STLC keeps rejecting empty applications, also nested ones
+  let a = base("A")
+  let ctx = @stlc.TypeContext::empty()
+    .extend_with(@core.Name::new("f"), @stlc.Ty::Arrow(a, a))
+    .extend_with(@core.Name::new("u"), a)
+  let sig = @stlc.Signature::empty()
+  let nested = @syntax.Term::Apply(@syntax.Term::Apply(tm_var("f"), []), [
+    tm_var("u"),
+  ])
+  assert_true(
+    @stlc.infer(sig, ctx, nested) == Err(@stlc.TypeError::EmptyApplication),
+  )
+  assert_true(
+    @stlc.normalize_eta_long(sig, ctx, nested, a) ==
+    Err(@stlc.TypeError::EmptyApplication),
+  )
+  let redex = @syntax.Term::Apply(
+    @syntax.Term::Apply(lam("x", tm_var("x")), []),
+    [tm_var("u")],
+  )
+  assert_true(
+    @stlc.check(sig, ctx, redex, a) == Err(@stlc.TypeError::EmptyApplication),
+  )
+}

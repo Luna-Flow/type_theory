@@ -64,3 +64,17 @@ test "public eval reflect and quote expose the semantic pipeline" {
     _ => assert_false(true)
   }
 }
+
+///|
+test "nbe and small step agree on empty applications" {
+  // (λ. 0) a with the head wrapped in an empty application (issue #2)
+  let a = @core.Name::new("a")
+  let term : @debruijn.DbTerm[Int] = Apply(Apply(Bind(Bound(0)), []), [Free(a)])
+  assert_true(
+    @debruijn.normalize(term, 10) == @debruijn.NormalForm(term=Free(a), steps=1),
+  )
+  match @nbe.normalize(term, 100) {
+    NormalForm(term=normal, ..) => assert_true(normal == Free(a))
+    _ => assert_false(true)
+  }
+}
