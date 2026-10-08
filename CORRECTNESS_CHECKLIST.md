@@ -1,6 +1,6 @@
 # Correctness Checklist
 
-Last audited: 2026-06-16
+Last audited: 2026-10-09
 
 | Area | Status | Evidence | Contract |
 | --- | --- | --- | --- |
@@ -14,7 +14,7 @@ Last audited: 2026-06-16
 | Shift and instantiation | Correct | nested binder beta tests | standard cutoff-based shifting |
 | De Bruijn small-step | Correct | path and normalization tests | leftmost-outermost beta |
 | UTLC untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests | beta-normalization may exhaust fuel |
-| STLC bidirectional typechecking | Correct | typing, rejection, and shadowing tests | inference is syntax-directed and lambdas check against arrows |
+| STLC bidirectional typechecking | Known issue | typing, rejection, and shadowing tests | inference is syntax-directed and lambdas check against arrows; unsound for the redex case below |
 | STLC typed eta-long NbE | Correct | eta-expansion, open neutral, and beta/eta tests | well-typed STLC terms normalize by type-directed readback |
 | Custom AST integration | Contract tested | mock downstream AST | domain canonicalization remains downstream |
 
@@ -39,5 +39,18 @@ Last audited: 2026-06-16
 - STLC redex inference (`(λx. b) a1 a2 ... an` with `n >= 2`) types the
   arguments `a2 ... an` in a context that already binds the parameter `x`. If
   such an argument has a free variable named `x`, `infer` uses the parameter's
-  type, and `normalize_eta_long` rejects the term. Found while documenting
-  (2026-10-08); not yet fixed.
+  type. This makes `check` unsound: with `x : B`, `check` accepts
+  `(λx. λy. y) () x` at `Unit` (its only type is `B`) and rejects it at `B`,
+  and `normalize_checked` at `Unit` returns `x`. `normalize_eta_long` rejects
+  the term at both types. Found while documenting (2026-10-08), soundness
+  impact confirmed 2026-10-09; not yet fixed.
+- An empty application `Apply(h, [])` is never a beta redex for
+  `@lambda.beta_rule` or `@debruijn.reduce_once` and hides a redex in its head
+  position, while `@nbe.normalize` evaluates it as `h`. The small-step and NbE
+  normalizers therefore disagree on terms such as
+  `Apply(Apply(Bind(Bound(0)), []), [Free(a)])`. Documented 2026-10-09; the
+  constructors in `utlc/lambda` never build empty applications.
+- `@debruijn.reduce_once` and `@debruijn.normalize` do not validate scope: a
+  negative index outside the contracted redex is ignored (`Bind(Bound(-1))`
+  is reported as a normal form) and a dangling index is shifted like a free
+  one. Callers must `validate` untrusted input. Documented 2026-10-09.
