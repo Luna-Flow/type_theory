@@ -376,3 +376,79 @@ test "typed eta long nbe agrees with beta and eta expectations" {
     Err(_) => assert_false(true)
   }
 }
+
+///|
+fn spine(head : @stlc.Term, arguments : Array[@stlc.Term]) -> @stlc.Term {
+  @syntax.Apply(head, arguments)
+}
+
+///|
+test "redex inference types trailing arguments in the outer context" {
+  // Γ = x : B ⊢ (λx. λy. y) () x : B   (issue #1)
+  let b = base("B")
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty().extend_with(@core.Name::new("x"), b)
+  let term = spine(lam("x", lam("y", tm_var("y"))), [unit_term(), tm_var("x")])
+  assert_true(@stlc.infer(sig, ctx, term) == Ok(b))
+  assert_true(@stlc.check(sig, ctx, term, b) == Ok(()))
+  assert_true(
+    @stlc.check(sig, ctx, term, @stlc.Ty::Unit) ==
+    Err(@stlc.TypeError::TypeMismatch(expected=@stlc.Ty::Unit, actual=b)),
+  )
+  assert_true(
+    @stlc.normalize_checked(sig, ctx, term, @stlc.Ty::Unit, 10) ==
+    Err(@stlc.TypeError::TypeMismatch(expected=@stlc.Ty::Unit, actual=b)),
+  )
+  assert_true(
+    @stlc.normalize_checked(sig, ctx, term, b, 10) ==
+    Ok(@rewrite.NormalForm(term=tm_var("x"), steps=2)),
+  )
+  match @stlc.normalize_eta_long(sig, ctx, term, b) {
+    Ok(normal) => assert_true(normal == tm_var("x"))
+    Err(_) => fail("well typed at B")
+  }
+}
+
+///|
+test "redex inference renames a parameter that is free in several trailing arguments" {
+  // Γ = x : B, f : B -> A -> B ⊢ (λx. λg. λz. g z x) c f x : B   with c : A
+  let a = base("A")
+  let b = base("B")
+  let sig = @stlc.Signature::empty().extend_with(@core.Name::new("c"), a)
+  let ctx = @stlc.TypeContext::empty()
+    .extend_with(@core.Name::new("x"), b)
+    .extend_with(
+      @core.Name::new("f"),
+      @stlc.Ty::Arrow(b, @stlc.Ty::Arrow(a, b)),
+    )
+  // the parameter x : A is used in the body; the trailing x is the outer x : B
+  let body = lam("g", lam("z", spine(tm_var("g"), [tm_var("z"), tm_var("x")])))
+  let term = spine(lam("x", body), [con("c"), tm_var("f"), tm_var("x")])
+  assert_true(@stlc.infer(sig, ctx, term) == Ok(b))
+  let bad = spine(lam("x", lam("y", lam("w", tm_var("w")))), [
+    con("c"),
+    tm_var("x"),
+    tm_var("x"),
+  ])
+  assert_true(@stlc.infer(sig, ctx, bad) == Ok(b))
+  match @stlc.normalize_eta_long(sig, ctx, bad, b) {
+    Ok(normal) => assert_true(normal == tm_var("x"))
+    Err(_) => fail("well typed at B")
+  }
+}
+
+///|
+test "redex inference keeps the parameter when trailing arguments do not mention it" {
+  // the parameter still shadows the outer x inside the body
+  let a = base("A")
+  let b = base("B")
+  let sig = @stlc.Signature::empty().extend_with(@core.Name::new("c"), a)
+  let ctx = @stlc.TypeContext::empty().extend_with(@core.Name::new("x"), b)
+  let term = spine(lam("x", lam("y", tm_var("x"))), [con("c"), unit_term()])
+  assert_true(@stlc.infer(sig, ctx, term) == Ok(a))
+  let nested = spine(
+    lam("x", spine(lam("x", lam("y", tm_var("y"))), [tm_var("x")])),
+    [unit_term(), tm_var("x")],
+  )
+  assert_true(@stlc.infer(sig, ctx, nested) == Ok(b))
+}

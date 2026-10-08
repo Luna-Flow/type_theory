@@ -33,6 +33,40 @@ fn flatten_application(term : Term) -> (Term, Array[Term]) {
 }
 
 ///|
+/// Renames the parameter of a redex `(λparameter. body) a1 a2 ... an` away
+/// from the free variables of the trailing arguments `a2 ... an`.
+///
+/// The trailing arguments are typed after the parameter has been added to the
+/// context. Without the renaming, a free occurrence of the parameter's name in
+/// one of them would be captured and typed with the parameter's type.
+fn rename_parameter_apart(
+  ctx : TypeContext,
+  parameter : @core.Name,
+  body : Term,
+  trailing : ArrayView[Term],
+) -> (@core.Name, Term) {
+  let mut trailing_free = @hashset.new()
+  for argument in trailing {
+    trailing_free = trailing_free.union(@syntax.free_variables(argument))
+  }
+  if !trailing_free.contains(parameter) {
+    return (parameter, body)
+  }
+  let mut used = @syntax.all_names(body).add(parameter)
+  for argument in trailing {
+    used = used.union(@syntax.all_names(argument))
+  }
+  for entry in ctx.to_array() {
+    used = used.add(entry.0)
+  }
+  let fresh = @core.fresh_name(parameter, used)
+  match body.alpha_rename_bound(parameter, fresh) {
+    Some(renamed) => (fresh, renamed)
+    None => abort("fresh parameter name unexpectedly occurs in the body")
+  }
+}
+
+///|
 fn infer_lambda_application(
   sig : Signature,
   ctx : TypeContext,
@@ -43,6 +77,12 @@ fn infer_lambda_application(
   if arguments.length() == 0 {
     return Err(TypeError::EmptyApplication)
   }
+  let (parameter, body) = rename_parameter_apart(
+    ctx,
+    parameter,
+    body,
+    arguments[1:],
+  )
   match infer(sig, ctx, arguments[0]) {
     Ok(argument_type) => {
       let next_ctx = ctx.extend_with(parameter, argument_type)

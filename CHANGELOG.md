@@ -30,6 +30,14 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   `Term::variable`, `Term::apply`, `Term::bind`) are hidden and deprecated; use
   `@syntax.BindingSyntax::project(term)` and the `Term` constructors.
 
+### Fixed
+
+- `stlc`: `infer` and `check` typed the trailing arguments `a2 ... an` of a
+  redex `(λx. b) a1 a2 ... an` with the parameter `x` in scope, so a free `x`
+  in those arguments was captured and the checker could accept a wrong type.
+  The parameter is now renamed apart from the trailing arguments, in the
+  checker and in the typed NbE evaluator (#1).
+
 ### Documentation
 
 - Documentation rewritten: API reference, tutorial and design note for every
