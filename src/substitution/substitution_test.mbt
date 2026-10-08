@@ -6,7 +6,7 @@ test "substitution accepts generic values and avoids capture" {
     y,
     Apply(Variable(x), [Value(1), Variable(y)]),
   )
-  let result = Substitution::singleton(x, Variable(y)).apply(term)
+  let result = @substitution.Substitution::singleton(x, Variable(y)).apply(term)
   let expected : @syntax.Term[Int] = Bind(
     @core.Name::new("y_1"),
     Apply(Variable(y), [Value(1), Variable(@core.Name::new("y_1"))]),
@@ -18,8 +18,11 @@ test "substitution accepts generic values and avoids capture" {
 test "substitution composition agrees with sequential application" {
   let x = @core.Name::new("x")
   let y = @core.Name::new("y")
-  let first : Substitution[Int] = Substitution::singleton(x, Variable(y))
-  let second = Substitution::singleton(y, Value(42))
+  let first : @substitution.Substitution[Int] = @substitution.Substitution::singleton(
+    x,
+    Variable(y),
+  )
+  let second = @substitution.Substitution::singleton(y, Value(42))
   let term : @syntax.Term[Int] = @syntax.Apply(@syntax.Variable(x), [
     @syntax.Variable(y),
   ])
@@ -30,7 +33,7 @@ test "substitution composition agrees with sequential application" {
 test "renaming embeds into substitution" {
   let x = @core.Name::new("x")
   let y = @core.Name::new("y")
-  let substitution : Substitution[String] = from_renaming(
+  let substitution : @substitution.Substitution[String] = @substitution.from_renaming(
     [x],
     @core.Renaming::singleton(x, y),
   )
@@ -46,7 +49,7 @@ test "freshening avoids names used only by nested binders" {
     y,
     @syntax.Bind(y1, @syntax.Variable(y)),
   )
-  let result = Substitution::singleton(x, @syntax.Variable(y)).apply(
+  let result = @substitution.Substitution::singleton(x, @syntax.Variable(y)).apply(
     @syntax.Apply(@syntax.Variable(x), [term]),
   )
   let expected : @syntax.Term[Int] = @syntax.Apply(@syntax.Variable(y), [term])
@@ -62,7 +65,9 @@ test "capture avoidance skips a nested binder name during alpha conversion" {
     y,
     @syntax.Apply(@syntax.Variable(x), [@syntax.Bind(y1, @syntax.Variable(y))]),
   )
-  let result = Substitution::singleton(x, @syntax.Variable(y)).apply(term)
+  let result = @substitution.Substitution::singleton(x, @syntax.Variable(y)).apply(
+    term,
+  )
   let expected : @syntax.Term[Int] = @syntax.Bind(
     @core.Name::new("y_2"),
     @syntax.Apply(@syntax.Variable(y), [
@@ -78,7 +83,7 @@ test "fresh binders avoid the substitution domain" {
   let y = @core.Name::new("y")
   let y1 = @core.Name::new("y_1")
   let v = @core.Name::new("v")
-  let substitution : Substitution[Int] = Substitution::singleton(
+  let substitution : @substitution.Substitution[Int] = @substitution.Substitution::singleton(
     x,
     @syntax.Variable(y),
   ).set(y1, @syntax.Variable(v))

@@ -1,6 +1,6 @@
 ///|
 /// Minimal polynomial-shaped AST used to verify downstream trait integration.
-enum PolyExpr {
+priv enum PolyExpr {
   Scalar(Int)
   Variable(@core.Name)
   Add(PolyExpr, Array[PolyExpr])
