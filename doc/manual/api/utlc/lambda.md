@@ -74,9 +74,9 @@ pub fn[T] beta_rule(@syntax.Term[T]) -> @syntax.Term[T]?
 
 For `Apply(Bind(x, body), [a, ..rest])` it returns the capture-avoiding
 substitution `body[x := a]`, applied to `rest` when `rest` is not empty. For
-every other term it returns `None`; in particular an empty application
-`Apply(Bind(x, body), [])` is not a redex, and neither is
-`Apply(Apply(Bind(x, body), []), [a])`, whose head is not literally a `Bind`.
+every other term it returns `None`. An empty application `Apply(h, [])` is
+read as `h`: `Apply(Apply(Bind(x, body), []), [a])` is a redex, while
+`Apply(Bind(x, body), [])` alone has no argument and is not.
 It works for any domain type `T`, because values are never inspected.
 
 ### `eta_rule`
@@ -89,7 +89,10 @@ pub fn[T] eta_rule(@syntax.Term[T]) -> @syntax.Term[T]?
 
 For `Bind(x, Apply(f, [Variable(x)]))` with `x` not free in `f` it returns
 `f`; otherwise `None`. Only a unary application is an eta redex:
-`Bind(x, Apply(f, [a, Variable(x)]))` is not contracted.
+`Bind(x, Apply(f, [a, Variable(x)]))` is not contracted. Empty applications
+around the body or the argument are read as their head, so
+`Bind(x, Apply(Apply(f, [Apply(Variable(x), [])]), []))` is contracted to
+`f` as well.
 
 ### `beta_eta_rule`
 

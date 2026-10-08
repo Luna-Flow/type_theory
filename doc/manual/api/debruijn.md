@@ -244,16 +244,18 @@ pub fn[T] reduce_once(DbTerm[T]) -> DbStepResult[T]
 ```
 
 A redex is `Apply(Bind(body), [a, ..rest])`; it becomes
-`instantiate(body, a)`, applied to `rest` if `rest` is not empty. The search
+`instantiate(body, a)`, applied to `rest` if `rest` is not empty. An empty
+application `Apply(h, [])` is read as `h`, so a head wrapped in empty
+applications, as in `Apply(Apply(Bind(body), []), [a])`, still forms a redex;
+`Apply(Bind(body), [])` alone has no argument and is not one. The search
 order is the root, then the head, then the arguments from left to right, and
-binder bodies are entered. An empty application `Apply(h, [])` is not a
-redex, even when `h` is a `Bind`.
+binder bodies are entered.
 
-`reduce_once` does not validate its input. It returns `ScopeFailure` only
-when the redex it contracts contains a negative index; a negative index
-elsewhere is skipped like any other variable, and a dangling index is
-shifted like a free one (`(λ. 5) 1` reduces to `Bound(4)`). Call `validate`
-first if the term may be ill scoped.
+`reduce_once` validates the whole term first, as `validate` does: an
+ill-scoped term gives `ScopeFailure` with the first error in pre-order,
+wherever the bad index is, for example `ScopeFailure(NegativeIndex(index=-1))`
+for `Bind(Bound(-1))` and `ScopeFailure(UnboundIndex(index=5, depth=1))` for
+`(λ. 5) 1`. A well-scoped term never gives `ScopeFailure`.
 
 ### `DbNormalizationResult`, `DbNormalizationResult::equal`
 
@@ -268,8 +270,9 @@ pub(all) enum DbNormalizationResult[T] {
 pub fn[T : Eq] DbNormalizationResult::equal(Self[T], Self[T]) -> Bool
 ```
 
-`ScopeFailure` carries the term on which the failing step was attempted and
-the number of steps taken before it.
+`ScopeFailure` carries the term that was found ill scoped, the error and
+the number of steps taken before it; `normalize` reports it only for its
+input, with `steps=0`.
 
 ### `normalize`
 
@@ -281,10 +284,12 @@ pub fn[T] normalize(DbTerm[T], Int) -> DbNormalizationResult[T]
 ```
 
 It has the step-count contract of `@rewrite.normalize`: at most `max_steps`
-steps, and one extra `reduce_once` call to classify the final term. Like
-`reduce_once` it does not validate: on an ill-scoped input it may return
-`NormalForm` (for `Bind(Bound(-1))`, say), so `ScopeFailure` proves the input
-ill scoped but its absence proves nothing.
+steps, and one extra step attempt to classify the final term. It validates
+the input once: an ill-scoped term gives `ScopeFailure(term, error, steps=0)`
+without any step. Reducts of a well-scoped term are well scoped (see the
+[debruijn design](../design/debruijn.md)), so the later steps are not
+validated again, and the result is `ScopeFailure` exactly when the input is
+ill scoped.
 
 ```moonbit
 test "nameless beta reduction" {

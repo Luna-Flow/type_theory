@@ -201,10 +201,10 @@ gives `FuelExhausted(consumed=0)`, not `ScopeFailure`.
 Applications in the result are unary: a normal form $f\,a\,b$ is returned as
 `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary
 spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])`
-evaluates to the value of `h`, so it disappears from the result, while the
-small-step reducers keep it and do not reduce through it. The two
-normalizers agree after spines are flattened, for terms without empty
-applications.
+evaluates to the value of `h`, so it disappears from the result; the
+small-step reducers also read it as `h` but leave the node in place. The two
+normalizers agree after spines are flattened, where flattening merges nested
+applications and drops empty ones.
 
 ```moonbit
 test "lazy evaluation skips an unused divergent argument" {

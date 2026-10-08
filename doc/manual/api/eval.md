@@ -81,12 +81,10 @@ one rewritten position and its path. For `NormalOrder`, `FullNormal` and
 of the application spine; the term is then in weak head normal form for the
 rule, but may contain redexes under binders or in arguments.
 
-With `@lambda.beta_rule`, a redex is an `Apply` whose head is literally a
-`Bind` and whose argument array is not empty. An empty application
-`Apply(h, [])` is never a redex and hides any redex in its position: in
-`Apply(Apply(Bind(x, b), []), [a])` no strategy contracts $(\lambda x.\,b)\,a$.
-Build applications with at least one argument (for example with
-`@lambda.application`).
+With `@lambda.beta_rule`, a redex is an `Apply` with a non-empty argument
+array whose head is a `Bind`, possibly wrapped in empty applications
+`Apply(h, [])`, which are read as `h`. Every strategy therefore contracts
+$(\lambda x.\,b)\,a$ in `Apply(Apply(Bind(x, b), []), [a])`, at the root.
 
 ```moonbit
 test "weak head stops at a binder" {

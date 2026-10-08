@@ -55,8 +55,8 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
 - Documentation rewritten: API reference, tutorial and design note for every
   package, a semantic architecture guide, and a Typst note with the De Bruijn
   index lemmas, with zh_CN and ja_JP translations.
-- `CORRECTNESS_CHECKLIST.md` records the spine shape of NbE normal forms, the
-  missing unit eta law, and a known issue in STLC redex inference.
+- `CORRECTNESS_CHECKLIST.md` records the spine shape of NbE normal forms and
+  the missing unit eta law, and lists the issues fixed above.
 - The manual follows the Luna Flow documentation standard: API pages open
   with Purpose and Importing sections and give every public item a heading,
   tutorials start with an "I want to / Use" table, design pages state their
@@ -69,7 +69,5 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   agreement of the three untyped normalizers is restated (the named
   normalizer also contracts eta), and the fuel-determinism argument of NbE is
   spelled out.
-- Known behaviour is now documented where users meet it: `@stlc.check` can
-  accept a wrong type in the redex case above (a soundness bug, not yet
-  fixed), empty applications `Apply(h, [])` block small-step reduction but not
-  NbE, and the De Bruijn reducers do not validate scope.
+- The manual describes the fixed behaviour of the three bugs above, and the
+  STLC soundness theorem is now unconditional.

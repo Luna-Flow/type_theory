@@ -46,13 +46,14 @@ A term on which weak head reduction finds no beta redex is in *weak head
 normal form*: an abstraction $\lambda x.\,t$, or a spine
 $h\,u_1 \cdots u_n$ whose head $h$ is a variable or a value.
 
-The n-ary encoding adds one degenerate case. The beta rule matches
-`Apply(Bind(x, b), [a, ..])` literally, so an application with an empty
-argument array, `Apply(h, [])`, is never a redex, and every strategy treats
-it as a stuck node: `Apply(Apply(Bind(x, b), []), [a])` is normal for all of
-them, although its curried reading $(\lambda x.\,b)\,a$ is a redex. The
-characterizations of this page hold for terms without empty applications,
-which is what the constructors of [utlc/lambda](utlc/lambda.md) build.
+The n-ary encoding adds one degenerate case, the empty spine
+`Apply(h, [])`, whose curried reading is $h$ itself. The beta rule of
+[utlc/lambda](utlc/lambda.md) reads it that way: it looks through empty
+applications around the head, so `Apply(Apply(Bind(x, b), []), [a])` is the
+redex $(\lambda x.\,b)\,a$ for every strategy. The node itself is not
+removed, so the characterization above holds up to empty applications: a
+weak head normal form is, after dropping them, an abstraction or a spine
+with a variable or a value at its head.
 
 ### Classical results for beta
 

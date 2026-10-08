@@ -117,11 +117,14 @@ nothing for correct callers and turns a silent corruption into data for
 incorrect ones. This follows the library rule that expected failures at
 public boundaries are structured values.
 
-The reducers check less. `reduce_once` looks at indices only inside the redex
-it contracts, through `instantiate`: a negative index elsewhere is passed over
-like a variable, and no operation except `validate` and `to_named` detects a
-dangling (too large) index, which `instantiate` shifts like a free one. Scope
-is checked once, by `validate`, not on every step.
+The index operations work on open terms, so they cannot tell a dangling
+(too large) index from one that points at a binder outside the term:
+`instantiate` shifts it like a free index. The reducers work on whole terms
+and validate them. `reduce_once` runs `validate` before searching and
+returns its error as `ScopeFailure`; `normalize` validates its input once,
+and Lemma 2 below shows that the later terms need no check. The search
+itself is a private function that is also applied to binder bodies, whose
+indices may point at enclosing binders.
 
 ### Instantiation never fails on well-scoped input
 
@@ -159,9 +162,10 @@ $\{1, \dots, n\} \to \{0, \dots, n - 1\}$ without a negative result. $\square$
 
 Hence `instantiate` and `reduce_once` return no `ScopeError` on well-scoped
 input, and a reduct of a well-scoped term is well scoped (subject reduction
-for scope). A `ScopeFailure` from `normalize` therefore always means that the
-input was ill scoped. The converse fails: `normalize(Bind(Bound(-1)), k)`
-returns `NormalForm`, and `(λ. 5) 1` reduces to `Bound(4)` without an error.
+for scope). Together with the validation of the input, `normalize` returns
+`ScopeFailure` exactly when its input is ill scoped, and then with
+`steps=0`: `Bind(Bound(-1))` gives `NegativeIndex(index=-1)` and `(λ. 5) 1`
+gives `UnboundIndex(index=5, depth=1)`.
 
 The detailed proofs, including the commutation of shifts with different
 cutoffs and the De Bruijn substitution lemma, are in the attachment:
@@ -219,7 +223,8 @@ checks an instance that needs renaming on the named side.
 
 `Apply(head, args)` is a curried spine: `Apply(Bind(t), [a, ..rest])` is the
 redex $(\lambda.\,t)\,a$ applied to `rest`, and a step contracts only the first
-argument. `reduce_once` searches root, head, arguments, and enters binders: it
+argument. An empty spine `Apply(h, [])` stands for $h$ itself, so empty
+applications around the `Bind` are looked through when a redex is matched. `reduce_once` searches root, head, arguments, and enters binders: it
 is the normal-order strategy of the [eval design](eval.md) on nameless terms,
 so the normalization theorem applies to `normalize`.
 
@@ -229,6 +234,8 @@ so the normalization theorem applies to `normalize`.
 - Round trips (1)–(3) above; `==` on well-scoped `DbTerm` is alpha-equivalence.
 - Lemma 2: on well-scoped input `instantiate` succeeds and preserves scope;
   `reduce_once` never returns `ScopeFailure`, and every reduct is well scoped.
+  On ill-scoped input `reduce_once` and `normalize` return `ScopeFailure`
+  with the error `validate` reports.
 - `reduce_once` satisfies the one-redex contract of
   [rewrite](rewrite.md), with rule name `"beta"`.
 - `shift(t, 0, c) == Ok(t)` for every `t` without negative indices, and
@@ -254,12 +261,10 @@ inserted copy is shifted. A `reduce_once` step costs one search plus one
 ## Boundaries
 
 - Binder names are not preserved: `to_named` chooses `x`, `x_1`, ….
-- `substitute_bound`, `instantiate`, `reduce_once` and `normalize` do not
-  detect unbound indices, and the reducers ignore negative indices outside
-  the redex they contract; call `validate` on untrusted input.
-- An empty application `Apply(h, [])` is not a redex and blocks any redex in
-  its head position (`Apply(Apply(Bind(b), []), [a])` is in normal form for
-  `reduce_once`), while [utlc/nbe](utlc/nbe.md) erases it. Build applications
-  with at least one argument.
+- `shift`, `substitute_bound` and `instantiate` operate on open terms and do
+  not detect dangling indices; the reducers and `validate` do.
+- An empty application `Apply(h, [])` is read as `h` when a redex is matched,
+  so it never hides a redex, but `reduce_once` leaves the node in place,
+  whereas [utlc/nbe](utlc/nbe.md) drops it from its normal forms.
 - Only beta is implemented; there is no eta rule for De Bruijn terms.
 - Values are opaque; their contents are never shifted.

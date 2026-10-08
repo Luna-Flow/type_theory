@@ -95,7 +95,7 @@ $$
 
 $$
 \textsc{Redex}\;
-\frac{\Gamma \vdash a_1 \Rightarrow \sigma \qquad \Gamma, x{:}\sigma \vdash b\,a_2 \cdots a_n \Rightarrow \tau}
+\frac{\Gamma \vdash a_1 \Rightarrow \sigma \qquad \Gamma, x'{:}\sigma \vdash b\{x \mapsto x'\}\,a_2 \cdots a_n \Rightarrow \tau}
      {\Gamma \vdash (\lambda x.\,b)\,a_1\,a_2 \cdots a_n \Rightarrow \tau}
 \qquad
 \textsc{Lam}\;
@@ -107,8 +107,23 @@ $$
 
 In $\textsc{App}$ the spine is flattened first, so nested `Apply` nodes are one
 application $h\,a_1 \cdots a_n$; if $h$ has fewer arrows than arguments the
-result is `ExpectedFunction`. In $\textsc{Redex}$ with $n = 1$ the second
-premise is $\Gamma, x{:}\sigma \vdash b \Rightarrow \tau$. $\textsc{Sub}$
+result is `ExpectedFunction`, and an `Apply` node of the spine without
+arguments gives `EmptyApplication`. In $\textsc{Redex}$ the parameter is
+renamed apart from the trailing arguments:
+
+$$
+x' =
+\begin{cases}
+x & \text{if } x \notin \mathrm{FV}(a_2, \dots, a_n),\\
+\operatorname{fresh}\big(x,\ \mathrm{names}(b) \cup \mathrm{names}(a_2, \dots, a_n) \cup \operatorname{dom}\Gamma \cup \{x\}\big) & \text{otherwise,}
+\end{cases}
+$$
+
+with $b\{x \mapsto x'\}$ the checked bound renaming of the
+[syntax design](syntax.md); in both cases
+$\lambda x.\,b =_\alpha \lambda x'.\,b\{x \mapsto x'\}$ and
+$x' \notin \mathrm{FV}(a_2, \dots, a_n)$. With $n = 1$ there is nothing to
+rename and the second premise is $\Gamma, x{:}\sigma \vdash b \Rightarrow \tau$. $\textsc{Sub}$
 applies to every term except a lambda checked against an arrow; a lambda in
 inference position fails with `CannotInferLambda`. Type equality in
 $\textsc{Sub}$ is syntactic, which is exact for simple types.
@@ -124,50 +139,46 @@ without annotations.
 
 ### Soundness of the checker
 
-**Theorem (conditional soundness).** If `check(Σ, Γ, t, τ)` succeeds, then
+**Theorem (soundness).** If `check(Σ, Γ, t, τ)` succeeds, then
 $\Gamma \vdash t : \tau$; if `infer(Σ, Γ, t)` returns $\tau$, then
-$\Gamma \vdash t : \tau$ — provided every use of $\textsc{Redex}$ satisfies
-$x \notin \mathrm{FV}(a_2, \dots, a_n)$. Without that proviso the checker is
-unsound, as the example below shows.
+$\Gamma \vdash t : \tau$.
 
 *Proof sketch.* Induction on the algorithmic derivation. $\textsc{Lam}$ and the
 axioms map to their declarative counterparts; $\textsc{Sub}$ is immediate;
 $\textsc{App}$ is $n$ uses of the declarative application rule. For
-$\textsc{Redex}$, invert the second premise: $\Gamma, x{:}\sigma \vdash b \Rightarrow \tau_2 \to \cdots \to \tau_n \to \tau$
-and $\Gamma, x{:}\sigma \vdash a_i : \tau_i$ for $i \ge 2$. Then
+$\textsc{Redex}$, write $b' = b\{x \mapsto x'\}$. The second premise is a
+derivation for the smaller term $b'\,a_2 \cdots a_n$, so by induction
+$\Gamma, x'{:}\sigma \vdash b'\,a_2 \cdots a_n : \tau$, and the generation
+lemma for application gives types $\tau_2, \dots, \tau_n$ with
+$\Gamma, x'{:}\sigma \vdash b' : \tau_2 \to \cdots \to \tau_n \to \tau$ and
+$\Gamma, x'{:}\sigma \vdash a_i : \tau_i$ for $i \ge 2$. Then
 
 $$
 \begin{aligned}
-&\Gamma \vdash \lambda x.\,b : \sigma \to \tau_2 \to \cdots \to \tau && \text{abstraction} \\
+&\Gamma \vdash \lambda x'.\,b' : \sigma \to \tau_2 \to \cdots \to \tau && \text{abstraction} \\
+&\Gamma \vdash \lambda x.\,b : \sigma \to \tau_2 \to \cdots \to \tau && \lambda x.\,b =_\alpha \lambda x'.\,b' \\
 &\Gamma \vdash (\lambda x.\,b)\,a_1 : \tau_2 \to \cdots \to \tau && \text{application, } \Gamma \vdash a_1 : \sigma \\
-&\Gamma \vdash a_i : \tau_i \ (i \ge 2) && \text{strengthening, needs } x \notin \mathrm{FV}(a_i) \\
+&\Gamma \vdash a_i : \tau_i \ (i \ge 2) && \text{strengthening, } x' \notin \mathrm{FV}(a_i) \\
 &\Gamma \vdash (\lambda x.\,b)\,a_1 \cdots a_n : \tau && \text{application } (n - 1 \text{ times}).
 \end{aligned}
 $$
 
 $\square$
 
-The strengthening step is where the side condition is used, and the
-implementation does not enforce it: for $\Gamma = x{:}B$,
+The strengthening step is where the renaming is needed. For
+$\Gamma = x{:}B$ the term
 
 $$
 (\lambda x.\,\lambda y.\,y)\;()\;x
 $$
 
-has declarative type $B$ and no other (the outer $x$ has type $B$), but
-`infer` types the second argument in $\Gamma, x{:}\mathsf{Unit}$ and returns
-`Unit`. Hence `check` succeeds at `Unit` and fails at `B`, and
-`normalize_checked` at `Unit` returns `NormalForm(x, 2)`: a variable of type
-$B$ presented as a normal form of type `Unit`. `normalize_eta_long` rejects
-the term at both types with `TypeMismatch`, because its evaluator checks the
-arguments in the original context; it is incomplete here but not unsound.
-
-> [!WARNING]
-> This is a soundness bug of `infer` and `check`, recorded in the correctness
-> checklist and not yet fixed. Renaming the parameter apart from the free
-> variables of $a_2, \dots, a_n$ before extending the context, or typing
-> $a_2, \dots, a_n$ in $\Gamma$ itself, would restore the theorem without
-> its proviso.
+has declarative type $B$ and no other. Without the renaming, the trailing
+$x$ would be typed in $\Gamma, x{:}\mathsf{Unit}$ and the checker would
+answer `Unit`; versions before the fix did exactly that, and `check` accepted
+the term at `Unit`. With $x' = x_1$ the trailing $x$ keeps its type $B$, and
+`infer` returns $B$. The typed evaluator computes the type of a redex head
+with the same rule, so `normalize_eta_long` accepts the same terms as
+`check`.
 
 **Completeness for normal forms.** If $t$ is beta-normal and
 $\Gamma \vdash t : \tau$, then `check(Σ, Γ, t, τ)` succeeds. A beta-normal
@@ -182,7 +193,8 @@ The checker terminates. Measure a call by the size of its term, and break
 ties by counting a `check` call above an `infer` call. $\textsc{Sub}$ goes
 from `check` to `infer` on the same term, which lowers the measure; every
 other recursive call is on a strictly smaller term ($\textsc{Redex}$ recurses
-on $b\,a_2 \cdots a_n$, which lacks the binder and $a_1$).
+on $b\{x \mapsto x'\}\,a_2 \cdots a_n$, which lacks the binder and $a_1$;
+renaming does not change the size).
 
 ### Two normalizers with different jobs
 
@@ -306,12 +318,11 @@ input, and a neutral variable is never captured by a binder introduced later.
 ## Correctness and invariants
 
 - `check` and `infer` terminate; on success, the term is declaratively typable
-  at the reported type, *provided* no redex parameter occurs free in a later
-  argument of its spine. Otherwise `check` can accept a wrong type (known
-  issue above), and so can `normalize_checked`.
+  at the reported type (soundness theorem). The regression tests include
+  redexes whose parameter occurs free in a trailing argument.
 - `check` accepts every well-typed beta-normal term.
-- `normalize_eta_long` returns `Ok` exactly for terms that `check` accepts,
-  except for terms hit by the known issue, which it rejects; its result is in
+- `normalize_eta_long` returns `Ok` exactly for terms that `check` accepts;
+  its result is in
   $\mathit{Nf}^\tau$, is $\beta\eta$-equal to the input, and is the same (up to
   $=_\alpha$) for $\beta\eta$-equal inputs.
 - `normalize_checked` returns `Err` before any reduction for ill-typed input.
@@ -342,8 +353,5 @@ small terms.
   dependent types.
 - No unit eta; normal forms are eta-long for arrow types only.
 - Constants are opaque: there are no delta rules.
-- The $\textsc{Redex}$ rule does not rename its parameter apart from later
-  arguments, so `check` is unsound on redexes whose parameter occurs free in
-  a later argument (known issue).
 - `normalize_checked` is bounded by a step limit because it reuses the untyped
   reducer.

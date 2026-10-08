@@ -106,11 +106,6 @@ public names.
   `TypeContext::extend` (`stlc`): use `extend_with`. `extend` is a reserved
   word since MoonBit 0.10; the old names remain as deprecated aliases.
 
-> [!WARNING]
-> `@stlc.check` can accept a term at a wrong type when a lambda applied to
-> several arguments has a parameter that occurs free in a later argument.
-> The [stlc API](api/stlc.md) describes the case and how to avoid it.
-
 ## Where to read next
 
 - New to the library: start with the [syntax tutorial](tutorial/syntax.md),

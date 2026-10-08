@@ -10,11 +10,11 @@ Last audited: 2026-10-09
 | Generic AST substitution | Correct | downstream adapter tests | inserted replacements are not revisited |
 | Structured reduction | Correct | path and trace tests | one call contracts at most one redex |
 | Named/De Bruijn conversion | Correct | both round-trip laws | named round trip is alpha-equivalent |
-| De Bruijn scope | Correct | dangling and negative index tests | invalid indices return `ScopeError` |
+| De Bruijn scope | Correct | dangling and negative index tests, reducer scope regressions (#3) | invalid indices return `ScopeError`; `reduce_once` and `normalize` validate their input |
 | Shift and instantiation | Correct | nested binder beta tests | standard cutoff-based shifting |
-| De Bruijn small-step | Correct | path and normalization tests | leftmost-outermost beta |
+| De Bruijn small-step | Correct | path, normalization and empty-application tests (#2) | leftmost-outermost beta; `Apply(h, [])` is read as `h` |
 | UTLC untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests | beta-normalization may exhaust fuel |
-| STLC bidirectional typechecking | Known issue | typing, rejection, and shadowing tests | inference is syntax-directed and lambdas check against arrows; unsound for the redex case below |
+| STLC bidirectional typechecking | Correct | typing, rejection, shadowing and trailing-argument capture tests (#1) | inference is syntax-directed and lambdas check against arrows; a redex parameter is renamed apart from trailing arguments |
 | STLC typed eta-long NbE | Correct | eta-expansion, open neutral, and beta/eta tests | well-typed STLC terms normalize by type-directed readback |
 | Custom AST integration | Contract tested | mock downstream AST | domain canonicalization remains downstream |
 
@@ -36,21 +36,14 @@ Last audited: 2026-10-09
 
 ## Known Issues
 
-- STLC redex inference (`(λx. b) a1 a2 ... an` with `n >= 2`) types the
-  arguments `a2 ... an` in a context that already binds the parameter `x`. If
-  such an argument has a free variable named `x`, `infer` uses the parameter's
-  type. This makes `check` unsound: with `x : B`, `check` accepts
-  `(λx. λy. y) () x` at `Unit` (its only type is `B`) and rejects it at `B`,
-  and `normalize_checked` at `Unit` returns `x`. `normalize_eta_long` rejects
-  the term at both types. Found while documenting (2026-10-08), soundness
-  impact confirmed 2026-10-09; not yet fixed.
-- An empty application `Apply(h, [])` is never a beta redex for
-  `@lambda.beta_rule` or `@debruijn.reduce_once` and hides a redex in its head
-  position, while `@nbe.normalize` evaluates it as `h`. The small-step and NbE
-  normalizers therefore disagree on terms such as
-  `Apply(Apply(Bind(Bound(0)), []), [Free(a)])`. Documented 2026-10-09; the
-  constructors in `utlc/lambda` never build empty applications.
-- `@debruijn.reduce_once` and `@debruijn.normalize` do not validate scope: a
-  negative index outside the contracted redex is ignored (`Bind(Bound(-1))`
-  is reported as a normal form) and a dangling index is shifted like a free
-  one. Callers must `validate` untrusted input. Documented 2026-10-09.
+None open. Fixed on 2026-10-09:
+
+- STLC redex inference typed the trailing arguments `a2 ... an` of
+  `(λx. b) a1 a2 ... an` with the parameter `x` in scope, so `check` accepted
+  `(λx. λy. y) () x` at `Unit` under `x : B` (#1). The parameter is now renamed
+  apart from the trailing arguments.
+- Empty applications `Apply(h, [])` hid a redex from the small-step reducers
+  while NbE read them as `h` (#2). All normalizers now read them as `h`;
+  `stlc` rejects them anywhere in a spine.
+- `@debruijn.reduce_once` and `@debruijn.normalize` did not validate scope
+  (#3). Both now return `ScopeFailure` for ill-scoped input.

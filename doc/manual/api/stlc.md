@@ -158,7 +158,7 @@ pub fn TypeError::equal(Self, Self) -> Bool
 | `CannotInferLambda` | a lambda appears where its type must be inferred. |
 | `ExpectedFunction(ty)` | a term of the non-function type `ty` is applied. |
 | `TypeMismatch(expected, actual)` | the inferred type differs from the expected one. |
-| `EmptyApplication` | `Apply(head, [])` has no argument. |
+| `EmptyApplication` | an application node, `Apply(head, [])`, has no argument. |
 | `ScopeError(e)` | reserved for De Bruijn scope failures; not produced by the current functions. |
 | `NormalizationError(message)` | an internal invariant of typed NbE failed; not expected for checked input. |
 
@@ -176,8 +176,12 @@ The unit literal has type `Unit`, constants and variables have their declared
 types, and an application `f a_1 … a_n` has the result type of `f` after
 checking each argument against the corresponding domain. A lambda alone
 cannot be inferred (`CannotInferLambda`). A lambda applied directly to
-arguments is inferred by inferring the first argument's type and the body
-under that assumption.
+arguments, $(\lambda x.\,b)\,a_1 \cdots a_n$, is inferred by inferring the
+type of $a_1$ and then typing $b\,a_2 \cdots a_n$ with $x$ given that type.
+If $x$ occurs free in $a_2, \dots, a_n$, the parameter is first renamed to a
+fresh name, so those arguments keep the types they have in the context. An
+application with no arguments, at the root of a spine or nested in its head,
+gives `EmptyApplication`.
 
 ### `check`
 
@@ -210,18 +214,28 @@ test "infer and check" {
 }
 ```
 
-> [!WARNING]
-> When a lambda is applied to two or more arguments, `infer` types the
-> remaining arguments in a context that already contains the lambda's
-> parameter. If one of those arguments mentions a free variable with the same
-> name as the parameter, it is typed with the parameter's type, and the
-> checker can then *accept a wrong type*. With `x : B` in the context,
-> `check` accepts $(\lambda x.\,\lambda y.\,y)\;()\;x$ at `Unit` and rejects
-> it at its real type `B`; `normalize_checked` then returns `x`, a term of
-> type `B`, as a normal form "of type `Unit`". `normalize_eta_long` rejects
-> the term at both types. Until this is fixed, make sure the parameter of
-> such a redex does not occur free in the later arguments (rename it, or
-> apply the arguments one at a time).
+The trailing arguments of a redex are typed in the context of the redex, not
+under its parameter:
+
+```moonbit
+test "trailing redex arguments keep their own types" {
+  let x = @core.Name::new("x")
+  let y = @core.Name::new("y")
+  let b = @stlc.Ty::Base(@core.Name::new("B"))
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty().extend_with(x, b)
+  // (λx. λy. y) () x, where the last x is the x : B of the context
+  let term : @stlc.Term = Apply(Bind(x, Bind(y, Variable(y))), [
+    Value(@stlc.Atom::UnitLit),
+    Variable(x),
+  ])
+  assert_eq(@stlc.infer(sig, ctx, term), Ok(b))
+  assert_eq(
+    @stlc.check(sig, ctx, term, @stlc.Ty::Unit),
+    Err(@stlc.TypeError::TypeMismatch(expected=@stlc.Ty::Unit, actual=b)),
+  )
+}
+```
 
 ## Normalization
 
@@ -239,8 +253,7 @@ On a type error it returns `Err` without reducing. Otherwise it returns
 a step limit. Its normal forms are beta-normal and eta-*short* (for unary
 applications, see [`@lambda.eta_rule`](utlc/lambda.md)). Because every
 well-typed term is strongly normalizing, a large enough `max_steps` always
-gives `NormalForm`. The result is only as trustworthy as `check`; see the
-warning above.
+gives `NormalForm`.
 
 ### `normalize_eta_long`
 

@@ -244,11 +244,9 @@ calculi), so you can instantiate a typed template with
   Use `check` with the expected type.
 - **Unit eta.** A neutral term of type `Unit`, such as a variable `u : Unit`,
   is not replaced by `()`. `f u` and `f ()` have different normal forms.
-- **Parameter names in redexes with several arguments.** In
-  $(\lambda x.\,b)\,a_1\,a_2$, if $a_2$ mentions a free variable also called
-  $x$, `infer` types it with the parameter's type (known issue), and `check`
-  may then accept the term at a type it does not have. Use a parameter name
-  that does not occur free in the later arguments.
+- **Empty applications.** `Apply(f, [])` is rejected with
+  `EmptyApplication`, also inside a spine such as `Apply(Apply(f, []), [a])`.
+  Build applications with at least one argument.
 - **Comparing normal forms with `==`.** Generated binders are `x`, `x_1`, …;
   compare with `@syntax.alpha_equal`.
 

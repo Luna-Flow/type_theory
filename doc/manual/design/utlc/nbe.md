@@ -180,11 +180,11 @@ form, and by confluence the normal form is unique.[^nbe]
 
 **Agreement with small-step reduction.** By soundness and confluence,
 whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form
-for the same well-scoped term without empty applications, the two normal
-forms are equal after spine flattening. Evaluation reads `Apply(h, [])` as
-$h$, while the small-step reducer treats it as a stuck node (see the
-[eval design](../eval.md)), so on such terms NbE may reduce a redex that the
-small-step reducer never sees. The
+for the same well-scoped term, the two normal forms are equal after spine
+flattening, which merges nested applications and drops empty ones. Both read
+`Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer
+looks through it when it matches a redex (see the
+[eval design](../eval.md)). The
 tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on
 $(\lambda.\,7)\,\Omega$, fuel exhaustion on $\Omega$, and that quote turns
 levels back into indices.

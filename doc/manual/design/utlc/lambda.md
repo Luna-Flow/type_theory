@@ -157,8 +157,8 @@ priority inside `beta_eta_rule` never changes the outcome of a step.
 - No sharing: a duplicated argument is reduced once per copy. Use
   [utlc/nbe](nbe.md) for efficient normalization.
 - Eta recognises unary applications only.
-- An empty application `Apply(h, [])` is not a beta redex and hides any
-  redex in its head position (see the [eval design](../eval.md)); build
-  applications with `application` or with at least one argument.
+- An empty application `Apply(h, [])` is read as $h$ when a redex is
+  matched, but it is not removed from the term (see the
+  [eval design](../eval.md)).
 - Constants (`Value`) have no reduction rules here; add domain rules with
   [rewrite](../rewrite.md) or [eval](../eval.md).
