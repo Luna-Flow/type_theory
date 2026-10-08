@@ -81,3 +81,42 @@ test "empty applications are read as their head" {
   let lone : @debruijn.DbTerm[Int] = Apply(Bind(Bound(0)), [])
   assert_true(@debruijn.reduce_once(lone) == NoStep)
 }
+
+///|
+test "reducers report ill-scoped input" {
+  // issue #3
+  let negative : @debruijn.DbTerm[Int] = Bind(Bound(-1))
+  assert_true(
+    @debruijn.reduce_once(negative) == ScopeFailure(NegativeIndex(index=-1)),
+  )
+  assert_true(
+    @debruijn.normalize(negative, 10) ==
+    ScopeFailure(term=negative, error=NegativeIndex(index=-1), steps=0),
+  )
+  let dangling : @debruijn.DbTerm[Int] = Apply(Bind(Bound(5)), [Value(1)])
+  assert_true(
+    @debruijn.reduce_once(dangling) ==
+    ScopeFailure(UnboundIndex(index=5, depth=1)),
+  )
+  assert_true(
+    @debruijn.normalize(dangling, 10) ==
+    ScopeFailure(term=dangling, error=UnboundIndex(index=5, depth=1), steps=0),
+  )
+  // a bad index away from every redex is reported too
+  let elsewhere : @debruijn.DbTerm[Int] = Apply(Free(@core.Name::new("f")), [
+    Apply(Bind(Bound(0)), [Value(1)]),
+    Bound(0),
+  ])
+  assert_true(
+    @debruijn.reduce_once(elsewhere) ==
+    ScopeFailure(UnboundIndex(index=0, depth=0)),
+  )
+  // a well-scoped term with redexes under binders still reduces
+  let under : @debruijn.DbTerm[Int] = Bind(
+    Apply(Bind(Apply(Bound(1), [Bound(0)])), [Value(2)]),
+  )
+  assert_true(
+    @debruijn.normalize(under, 10) ==
+    NormalForm(term=Bind(Apply(Bound(0), [Value(2)])), steps=1),
+  )
+}
