@@ -97,7 +97,13 @@ fn head_type_for_application(
     return Err(TypeError::EmptyApplication)
   }
   match head {
-    @syntax.Bind(parameter, body) =>
+    @syntax.Bind(parameter, body) => {
+      let (parameter, body) = rename_parameter_apart(
+        ctx,
+        parameter,
+        body,
+        arguments[1:],
+      )
       match infer(sig, ctx, arguments[0]) {
         Err(error) => Err(error)
         Ok(domain) => {
@@ -119,6 +125,7 @@ fn head_type_for_application(
           Ok(Ty::Arrow(domain, codomain))
         }
       }
+    }
     _ => infer(sig, ctx, head)
   }
 }
