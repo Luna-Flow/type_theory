@@ -44,6 +44,11 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   `Apply(Apply(Bind(Bound(0)), []), [Free(a)])`. `stlc` now rejects empty
   applications nested in the head of a spine with `EmptyApplication`, as it
   already did at the root (#2).
+- `debruijn`: `reduce_once` and `normalize` now validate their input and
+  report an ill-scoped term through their `ScopeFailure` case. Before, a
+  negative index outside the contracted redex was skipped (`Bind(Bound(-1))`
+  was a normal form) and a dangling index was shifted silently
+  (`(λ. 5) 1` reduced to `Bound(4)`) (#3).
 
 ### Documentation
 
