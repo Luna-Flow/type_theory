@@ -249,8 +249,8 @@ msgstr "これは昇格された `Eq` 実装である。新しいコードでは
 
 #: manual/api/core.md:332
 #: manual/api/core.md:334
-#: manual/api/stlc.md:283
-#: manual/api/stlc.md:285
+#: manual/api/stlc.md:296
+#: manual/api/stlc.md:298
 #: manual/api/syntax.md:329
 #: manual/api/syntax.md:331
 #: manual/index.md:103
@@ -258,7 +258,7 @@ msgid "Deprecated"
 msgstr "非推奨"
 
 #: manual/api/core.md:334
-#: manual/api/stlc.md:285
+#: manual/api/stlc.md:298
 #: manual/api/syntax.md:331
 msgid "Replacement"
 msgstr "代替"
@@ -419,28 +419,28 @@ msgid "`reduce_once` performs one leftmost-outermost beta step."
 msgstr "`reduce_once` は最左最外の β ステップを 1 回行う。"
 
 #: manual/api/debruijn.md:246
-msgid "A redex is `Apply(Bind(body), [a, ..rest])`; it becomes `instantiate(body, a)`, applied to `rest` if `rest` is not empty. The search order is the root, then the head, then the arguments from left to right, and binder bodies are entered. An empty application `Apply(h, [])` is not a redex, even when `h` is a `Bind`."
-msgstr "簡約基は `Apply(Bind(body), [a, ..rest])` であり、`instantiate(body, a)` になる。`rest` が空でなければそれを `rest` に適用する。探索順序は根、次に先頭、次に引数を左から右へであり、束縛子の本体にも入る。空の適用 `Apply(h, [])` は、`h` が `Bind` であっても簡約基ではない。"
+msgid "A redex is `Apply(Bind(body), [a, ..rest])`; it becomes `instantiate(body, a)`, applied to `rest` if `rest` is not empty. An empty application `Apply(h, [])` is read as `h`, so a head wrapped in empty applications, as in `Apply(Apply(Bind(body), []), [a])`, still forms a redex; `Apply(Bind(body), [])` alone has no argument and is not one. The search order is the root, then the head, then the arguments from left to right, and binder bodies are entered."
+msgstr "簡約基は `Apply(Bind(body), [a, ..rest])` であり、`instantiate(body, a)` になる。`rest` が空でなければそれを `rest` に適用する。空の適用 `Apply(h, [])` は `h` と読まれるので、`Apply(Apply(Bind(body), []), [a])` のように空の適用に包まれた先頭も簡約基をなす。`Apply(Bind(body), [])` だけでは引数がなく、簡約基ではない。探索順序は根、次に先頭、次に引数を左から右へであり、束縛子の本体にも入る。"
 
-#: manual/api/debruijn.md:252
-msgid "`reduce_once` does not validate its input. It returns `ScopeFailure` only when the redex it contracts contains a negative index; a negative index elsewhere is skipped like any other variable, and a dangling index is shifted like a free one (`(λ. 5) 1` reduces to `Bound(4)`). Call `validate` first if the term may be ill scoped."
-msgstr "`reduce_once` は入力を検証しない。`ScopeFailure` を返すのは、縮約する簡約基が負のインデックスを含む場合だけである。それ以外の場所にある負のインデックスは他の変数と同様に読み飛ばされ、ぶら下がったインデックスは自由なインデックスと同様にシフトされる（`(λ. 5) 1` は `Bound(4)` に簡約される）。項のスコープが正しくない可能性がある場合は、先に `validate` を呼ぶこと。"
+#: manual/api/debruijn.md:254
+msgid "`reduce_once` validates the whole term first, as `validate` does: an ill-scoped term gives `ScopeFailure` with the first error in pre-order, wherever the bad index is, for example `ScopeFailure(NegativeIndex(index=-1))` for `Bind(Bound(-1))` and `ScopeFailure(UnboundIndex(index=5, depth=1))` for `(λ. 5) 1`. A well-scoped term never gives `ScopeFailure`."
+msgstr "`reduce_once` は `validate` と同じように、まず項全体を検証する：スコープの正しくない項は、悪いインデックスがどこにあっても、前順序で最初のエラーを持つ `ScopeFailure` になる。たとえば `Bind(Bound(-1))` では `ScopeFailure(NegativeIndex(index=-1))`、`(λ. 5) 1` では `ScopeFailure(UnboundIndex(index=5, depth=1))` である。スコープの正しい項が `ScopeFailure` になることはない。"
 
-#: manual/api/debruijn.md:260
+#: manual/api/debruijn.md:262
 msgid "`DbNormalizationResult[T]` is the outcome of bounded De Bruijn normalization."
 msgstr "`DbNormalizationResult[T]` は上限付き De Bruijn 正規化の結果である。"
 
-#: manual/api/debruijn.md:271
-msgid "`ScopeFailure` carries the term on which the failing step was attempted and the number of steps taken before it."
-msgstr "`ScopeFailure` は失敗したステップが試みられた項と、それ以前に行われたステップ数を保持する。"
+#: manual/api/debruijn.md:273
+msgid "`ScopeFailure` carries the term that was found ill scoped, the error and the number of steps taken before it; `normalize` reports it only for its input, with `steps=0`."
+msgstr "`ScopeFailure` は、スコープが正しくないと判明した項、エラー、それまでに行ったステップ数を持つ。`normalize` はこれを入力についてのみ、`steps=0` で報告する。"
 
-#: manual/api/debruijn.md:276
+#: manual/api/debruijn.md:279
 msgid "`normalize` repeats `reduce_once` until no step applies, a step fails, or a step limit is reached."
 msgstr "`normalize` は、適用できるステップがなくなるか、ステップが失敗するか、ステップ数の上限に達するまで `reduce_once` を繰り返す。"
 
-#: manual/api/debruijn.md:283
-msgid "It has the step-count contract of `@rewrite.normalize`: at most `max_steps` steps, and one extra `reduce_once` call to classify the final term. Like `reduce_once` it does not validate: on an ill-scoped input it may return `NormalForm` (for `Bind(Bound(-1))`, say), so `ScopeFailure` proves the input ill scoped but its absence proves nothing."
-msgstr "`@rewrite.normalize` のステップ数の契約を持つ：最大 `max_steps` ステップと、最終項を分類するための追加の `reduce_once` 呼び出し 1 回である。`reduce_once` と同様に検証は行わない：スコープの正しくない入力に対して `NormalForm` を返すことがある（たとえば `Bind(Bound(-1))`）。したがって `ScopeFailure` は入力のスコープが正しくないことを証明するが、それが返らないことは何も証明しない。"
+#: manual/api/debruijn.md:286
+msgid "It has the step-count contract of `@rewrite.normalize`: at most `max_steps` steps, and one extra step attempt to classify the final term. It validates the input once: an ill-scoped term gives `ScopeFailure(term, error, steps=0)` without any step. Reducts of a well-scoped term are well scoped (see the [debruijn design](../design/debruijn.md)), so the later steps are not validated again, and the result is `ScopeFailure` exactly when the input is ill scoped."
+msgstr "`@rewrite.normalize` のステップ数の契約を持つ：最大 `max_steps` ステップと、最終項を分類するための追加のステップの試み 1 回である。入力は一度だけ検証される：スコープの正しくない項は、ステップを行わずに `ScopeFailure(term, error, steps=0)` になる。スコープの正しい項の簡約結果はスコープが正しい（[debruijn の設計](../design/debruijn.md)を参照）ので、後のステップは再検証されず、結果が `ScopeFailure` になるのはちょうど入力のスコープが正しくないときである。"
 
 #: manual/api/eval.md:1
 msgid "eval API"
@@ -527,22 +527,22 @@ msgid "The result follows the contract of `@rewrite.StepResult`: `Reduced` repor
 msgstr "結果は `@rewrite.StepResult` の契約に従う：`Reduced` は書き換えられた 1 つの位置とそのパスを報告する。`NormalOrder`、`FullNormal`、`ApplicativeOrder` では、`NoStep` は規則がどこにも適用できないことを意味する。`WeakHead` では、`NoStep` は規則が根にも適用スパインのどの先頭位置にも適用できないことを意味する。このとき項はその規則について弱頭部正規形であるが、束縛子の下や引数の中に簡約基を含みうる。"
 
 #: manual/api/eval.md:84
-msgid "With `@lambda.beta_rule`, a redex is an `Apply` whose head is literally a `Bind` and whose argument array is not empty. An empty application `Apply(h, [])` is never a redex and hides any redex in its position: in `Apply(Apply(Bind(x, b), []), [a])` no strategy contracts $(\\lambda x.\\,b)\\,a$. Build applications with at least one argument (for example with `@lambda.application`)."
-msgstr "`@lambda.beta_rule` では、簡約基とは先頭が文字どおり `Bind` であり、引数の配列が空でない `Apply` である。空の適用 `Apply(h, [])` は決して簡約基にならず、その位置にある簡約基を隠してしまう：`Apply(Apply(Bind(x, b), []), [a])` では、どの戦略も $(\\lambda x.\\,b)\\,a$ を縮約しない。適用は少なくとも 1 つの引数で構築すること（たとえば `@lambda.application` を使う）。"
+msgid "With `@lambda.beta_rule`, a redex is an `Apply` with a non-empty argument array whose head is a `Bind`, possibly wrapped in empty applications `Apply(h, [])`, which are read as `h`. Every strategy therefore contracts $(\\lambda x.\\,b)\\,a$ in `Apply(Apply(Bind(x, b), []), [a])`, at the root."
+msgstr "`@lambda.beta_rule` では、簡約基とは引数の配列が空でない `Apply` であり、その先頭が `Bind` であるもの（`h` と読まれる空の適用 `Apply(h, [])` に包まれていてもよい）である。したがってどの戦略も、`Apply(Apply(Bind(x, b), []), [a])` の根で $(\\lambda x.\\,b)\\,a$ を縮約する。"
 
-#: manual/api/eval.md:112
+#: manual/api/eval.md:110
 msgid "`evaluate` normalizes a term by repeating `reduce_once` with one strategy."
 msgstr "`evaluate` は 1 つの戦略で `reduce_once` を繰り返して項を正規化する。"
 
-#: manual/api/eval.md:118
+#: manual/api/eval.md:116
 msgid "`evaluate(term, name, rule, strategy, max_steps)` is `@rewrite.normalize(term, t => reduce_once(t, name, rule, strategy), max_steps)`, with the same step-count contract: at most `max_steps` steps, and `NormalForm` only for a term on which the strategy finds no step."
 msgstr "`evaluate(term, name, rule, strategy, max_steps)` は `@rewrite.normalize(term, t => reduce_once(t, name, rule, strategy), max_steps)` であり、同じステップ数の契約を持つ：高々 `max_steps` ステップであり、`NormalForm` は戦略がステップを見つけられない項に対してのみ返される。"
 
-#: manual/api/eval.md:145
+#: manual/api/eval.md:143
 msgid "`trace` normalizes like `evaluate` and records every step."
 msgstr "`trace` は `evaluate` と同様に正規化し、各ステップを記録する。"
 
-#: manual/api/eval.md:151
+#: manual/api/eval.md:149
 msgid "It is `@rewrite.trace` with the step function of the strategy. Every strategy reports its own input as `before`, so the trace satisfies the chaining invariants of `@rewrite.ReductionTrace`."
 msgstr "これはその戦略のステップ関数を与えた `@rewrite.trace` である。どの戦略も自分の入力を `before` として報告するので、トレースは `@rewrite.ReductionTrace` の連鎖不変条件を満たす。"
 
@@ -824,8 +824,8 @@ msgid "the inferred type differs from the expected one."
 msgstr "推論された型が期待される型と異なる。"
 
 #: manual/api/stlc.md:161
-msgid "`Apply(head, [])` has no argument."
-msgstr "`Apply(head, [])` に引数がない。"
+msgid "an application node, `Apply(head, [])`, has no argument."
+msgstr "適用ノード `Apply(head, [])` に引数がない。"
 
 #: manual/api/stlc.md:162
 msgid "reserved for De Bruijn scope failures; not produced by the current functions."
@@ -844,44 +844,44 @@ msgid "`infer` synthesizes the type of a term."
 msgstr "`infer` は項の型を合成する。"
 
 #: manual/api/stlc.md:175
-msgid "The unit literal has type `Unit`, constants and variables have their declared types, and an application `f a_1 … a_n` has the result type of `f` after checking each argument against the corresponding domain. A lambda alone cannot be inferred (`CannotInferLambda`). A lambda applied directly to arguments is inferred by inferring the first argument's type and the body under that assumption."
-msgstr "単位リテラルの型は `Unit` であり、定数と変数は宣言された型を持つ。適用 `f a_1 … a_n` は、各引数を対応する定義域に対して検査した後の `f` の結果型を持つ。単独のラムダは推論できない（`CannotInferLambda`）。引数に直接適用されたラムダは、最初の引数の型を推論し、その仮定の下で本体を推論することで推論される。"
+msgid "The unit literal has type `Unit`, constants and variables have their declared types, and an application `f a_1 … a_n` has the result type of `f` after checking each argument against the corresponding domain. A lambda alone cannot be inferred (`CannotInferLambda`). A lambda applied directly to arguments, $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$, is inferred by inferring the type of $a_1$ and then typing $b\\,a_2 \\cdots a_n$ with $x$ given that type. If $x$ occurs free in $a_2, \\dots, a_n$, the parameter is first renamed to a fresh name, so those arguments keep the types they have in the context. An application with no arguments, at the root of a spine or nested in its head, gives `EmptyApplication`."
+msgstr "単位リテラルの型は `Unit` であり、定数と変数は宣言された型を持つ。適用 `f a_1 … a_n` は、各引数を対応する定義域に対して検査した後の `f` の結果型を持つ。単独のラムダは推論できない（`CannotInferLambda`）。引数に直接適用されたラムダ $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$ は、$a_1$ の型を推論し、$x$ にその型を与えて $b\\,a_2 \\cdots a_n$ を型付けすることで推論される。$x$ が $a_2, \\dots, a_n$ に自由に現れる場合は、まずパラメータを新しい名前に替えるので、それらの引数は文脈における型を保つ。引数のない適用は、スパインの根にあっても先頭に入れ子になっていても `EmptyApplication` になる。"
 
-#: manual/api/stlc.md:184
+#: manual/api/stlc.md:188
 msgid "`check` verifies a term against a type."
 msgstr "`check` は項を型に対して検査する。"
 
-#: manual/api/stlc.md:190
+#: manual/api/stlc.md:194
 msgid "A lambda checks against an arrow type by checking its body against the codomain, with the parameter given the domain. Every other term is inferred and compared with `==`; a difference gives `TypeMismatch`."
 msgstr "ラムダは矢印型に対して、パラメータに定義域を与えたうえで本体を値域に対して検査することで検査される。それ以外の項はすべて型を推論し `==` で比較する。異なれば `TypeMismatch` となる。"
 
-#: manual/api/stlc.md:213
-msgid "[!WARNING] When a lambda is applied to two or more arguments, `infer` types the remaining arguments in a context that already contains the lambda's parameter. If one of those arguments mentions a free variable with the same name as the parameter, it is typed with the parameter's type, and the checker can then *accept a wrong type*. With `x : B` in the context, `check` accepts $(\\lambda x.\\,\\lambda y.\\,y)\\;()\\;x$ at `Unit` and rejects it at its real type `B`; `normalize_checked` then returns `x`, a term of type `B`, as a normal form \"of type `Unit`\". `normalize_eta_long` rejects the term at both types. Until this is fixed, make sure the parameter of such a redex does not occur free in the later arguments (rename it, or apply the arguments one at a time)."
-msgstr "[!WARNING] ラムダが二つ以上の引数に適用されると、`infer` は残りの引数を、すでにラムダのパラメータを含む文脈で型付けする。それらの引数のいずれかがパラメータと同じ名前の自由変数に言及していると、その変数はパラメータの型で型付けされ、検査器は*誤った型を受理*しうる。文脈に `x : B` があるとき、`check` は $(\\lambda x.\\,\\lambda y.\\,y)\\;()\\;x$ を `Unit` で受理し、本当の型 `B` では拒否する。そのうえ `normalize_checked` は型 `B` の項 `x` を「型 `Unit` の」正規形として返す。`normalize_eta_long` はどちらの型でもこの項を拒否する。修正されるまでは、そのような簡約基のパラメータが後続の引数に自由に現れないようにすること（パラメータの名前を変えるか、引数を一つずつ適用する）。"
+#: manual/api/stlc.md:217
+msgid "The trailing arguments of a redex are typed in the context of the redex, not under its parameter:"
+msgstr "簡約基の後続の引数は、そのパラメータの下ではなく、簡約基の文脈で型付けされる："
 
-#: manual/api/stlc.md:226
-#: manual/api/utlc/lambda.md:120
+#: manual/api/stlc.md:240
+#: manual/api/utlc/lambda.md:123
 #: manual/api/utlc/nbe.md:170
 msgid "Normalization"
 msgstr "正規化"
 
-#: manual/api/stlc.md:230
+#: manual/api/stlc.md:244
 msgid "`normalize_checked` checks a term against a type and then normalizes it with the untyped beta-eta reducer."
 msgstr "`normalize_checked` は項を型に対して検査し、その後、型なしの βη 簡約器で正規化する。"
 
-#: manual/api/stlc.md:237
-msgid "On a type error it returns `Err` without reducing. Otherwise it returns `Ok(@lambda.normalize(term, max_steps))`: normal-order beta-eta reduction with a step limit. Its normal forms are beta-normal and eta-*short* (for unary applications, see [`@lambda.eta_rule`](utlc/lambda.md)). Because every well-typed term is strongly normalizing, a large enough `max_steps` always gives `NormalForm`. The result is only as trustworthy as `check`; see the warning above."
-msgstr "型エラーの場合は簡約せずに `Err` を返す。そうでなければ `Ok(@lambda.normalize(term, max_steps))` を返す。これはステップ上限付きの正規順序 βη 簡約である。その正規形は β 正規かつ η *短*形式である（単項適用について。[`@lambda.eta_rule`](utlc/lambda.md) を参照）。よく型付けされた項はすべて強正規化可能なので、`max_steps` を十分大きくすれば必ず `NormalForm` が得られる。結果は `check` と同程度にしか信頼できない。上の警告を参照のこと。"
+#: manual/api/stlc.md:251
+msgid "On a type error it returns `Err` without reducing. Otherwise it returns `Ok(@lambda.normalize(term, max_steps))`: normal-order beta-eta reduction with a step limit. Its normal forms are beta-normal and eta-*short* (for unary applications, see [`@lambda.eta_rule`](utlc/lambda.md)). Because every well-typed term is strongly normalizing, a large enough `max_steps` always gives `NormalForm`."
+msgstr "型エラーの場合は簡約せずに `Err` を返す。そうでなければ `Ok(@lambda.normalize(term, max_steps))` を返す。これはステップ上限付きの正規順序 βη 簡約である。その正規形は β 正規かつ η *短*形式である（単項適用について。[`@lambda.eta_rule`](utlc/lambda.md) を参照）。よく型付けされた項はすべて強正規化可能なので、`max_steps` を十分大きくすれば必ず `NormalForm` が得られる。"
 
-#: manual/api/stlc.md:247
+#: manual/api/stlc.md:260
 msgid "`normalize_eta_long` checks a term against a type and returns its beta-normal, eta-long form, computed by typed normalization by evaluation."
 msgstr "`normalize_eta_long` は項を型に対して検査し、その β 正規・η 長形式を返す。これは型付きの評価による正規化で計算される。"
 
-#: manual/api/stlc.md:254
+#: manual/api/stlc.md:267
 msgid "In the result, every subterm of arrow type is a lambda, and every application has a variable or a constant at its head. Variables of the context and constants of the signature are kept as they are and eta-expanded according to their types. No step limit is needed: well-typed terms always normalize. New binder names are `x`, `x_1`, … chosen to avoid every name of the term and the context."
 msgstr "結果において、矢印型の部分項はすべてラムダであり、すべての適用は頭部に変数または定数を持つ。文脈の変数とシグネチャの定数はそのまま保たれ、それぞれの型に従って η 展開される。ステップ上限は不要である。型の付く項は常に正規化されるからである。新しい束縛子の名前は `x`、`x_1`、… であり、項と文脈のすべての名前を避けるように選ばれる。"
 
-#: manual/api/stlc.md:290
+#: manual/api/stlc.md:303
 msgid "The hidden method forms `not_equal` and `to_repr` on the types of this package are deprecated; use `!=` and `Repr(x)`."
 msgstr "このパッケージの型にある隠されたメソッド形式 `not_equal` と `to_repr` は非推奨である。`!=` と `Repr(x)` を使うこと。"
 
@@ -1199,38 +1199,38 @@ msgid "`beta_rule` contracts a beta redex at the root of a term."
 msgstr "`beta_rule` は項の根にある β 簡約基を縮約する。"
 
 #: manual/api/utlc/lambda.md:75
-msgid "For `Apply(Bind(x, body), [a, ..rest])` it returns the capture-avoiding substitution `body[x := a]`, applied to `rest` when `rest` is not empty. For every other term it returns `None`; in particular an empty application `Apply(Bind(x, body), [])` is not a redex, and neither is `Apply(Apply(Bind(x, body), []), [a])`, whose head is not literally a `Bind`. It works for any domain type `T`, because values are never inspected."
-msgstr "`Apply(Bind(x, body), [a, ..rest])` に対しては捕獲回避代入 `body[x := a]` を返し、`rest` が空でなければそれを `rest` に適用する。それ以外のすべての項に対しては `None` を返す。特に空の適用 `Apply(Bind(x, body), [])` は簡約基ではなく、先頭が文字どおりの `Bind` ではない `Apply(Apply(Bind(x, body), []), [a])` も簡約基ではない。値は一切調べられないので、任意のドメイン型 `T` で動作する。"
+msgid "For `Apply(Bind(x, body), [a, ..rest])` it returns the capture-avoiding substitution `body[x := a]`, applied to `rest` when `rest` is not empty. For every other term it returns `None`. An empty application `Apply(h, [])` is read as `h`: `Apply(Apply(Bind(x, body), []), [a])` is a redex, while `Apply(Bind(x, body), [])` alone has no argument and is not. It works for any domain type `T`, because values are never inspected."
+msgstr "`Apply(Bind(x, body), [a, ..rest])` に対しては捕獲回避代入 `body[x := a]` を返し、`rest` が空でなければそれを `rest` に適用する。それ以外のすべての項に対しては `None` を返す。空の適用 `Apply(h, [])` は `h` と読まれる：`Apply(Apply(Bind(x, body), []), [a])` は簡約基であるが、`Apply(Bind(x, body), [])` だけでは引数がなく簡約基ではない。値は一切調べられないので、任意のドメイン型 `T` で動作する。"
 
 #: manual/api/utlc/lambda.md:84
 msgid "`eta_rule` contracts an eta redex at the root of a term."
 msgstr "`eta_rule` は項の根にある η 簡約基を縮約する。"
 
 #: manual/api/utlc/lambda.md:90
-msgid "For `Bind(x, Apply(f, [Variable(x)]))` with `x` not free in `f` it returns `f`; otherwise `None`. Only a unary application is an eta redex: `Bind(x, Apply(f, [a, Variable(x)]))` is not contracted."
-msgstr "`x` が `f` に自由に出現しない `Bind(x, Apply(f, [Variable(x)]))` に対しては `f` を返し、そうでなければ `None` を返す。単項適用だけが η 簡約基である。`Bind(x, Apply(f, [a, Variable(x)]))` は縮約されない。"
+msgid "For `Bind(x, Apply(f, [Variable(x)]))` with `x` not free in `f` it returns `f`; otherwise `None`. Only a unary application is an eta redex: `Bind(x, Apply(f, [a, Variable(x)]))` is not contracted. Empty applications around the body or the argument are read as their head, so `Bind(x, Apply(Apply(f, [Apply(Variable(x), [])]), []))` is contracted to `f` as well."
+msgstr "`x` が `f` に自由に出現しない `Bind(x, Apply(f, [Variable(x)]))` に対しては `f` を返し、そうでなければ `None` を返す。単項適用だけが η 簡約基である。`Bind(x, Apply(f, [a, Variable(x)]))` は縮約されない。本体や引数を包む空の適用はその先頭と読まれるので、`Bind(x, Apply(Apply(f, [Apply(Variable(x), [])]), []))` も `f` に縮約される。"
 
-#: manual/api/utlc/lambda.md:96
+#: manual/api/utlc/lambda.md:99
 msgid "`beta_eta_rule` tries `beta_rule` and, if it does not apply, `eta_rule`."
 msgstr "`beta_eta_rule` は `beta_rule` を試し、適用できなければ `eta_rule` を試す。"
 
-#: manual/api/utlc/lambda.md:102
+#: manual/api/utlc/lambda.md:105
 msgid "A term cannot be both a beta and an eta redex at the root (one is an `Apply`, the other a `Bind`), so the order only documents priority."
 msgstr "項が根において β 簡約基と η 簡約基の両方であることはありえない（一方は `Apply`、他方は `Bind`）ので、順序は優先度を記述しているにすぎない。"
 
-#: manual/api/utlc/lambda.md:124
+#: manual/api/utlc/lambda.md:127
 msgid "`normalize` reduces a term to beta-eta normal form with normal-order reduction, within a step limit."
 msgstr "`normalize` は正規順序簡約により、ステップ数の上限内で項を beta-eta 正規形まで簡約する。"
 
-#: manual/api/utlc/lambda.md:131
+#: manual/api/utlc/lambda.md:134
 msgid "It is `@eval.evaluate(term, \"beta_eta\", beta_eta_rule, NormalOrder, max_steps)`: at each step it contracts the leftmost-outermost beta or eta redex, anywhere in the term, including under binders. `NormalForm(t, n)` means `t` has no beta or eta redex (in the unary sense above) and was reached in `n` steps; `StepLimitReached` means the limit was used up. Divergent terms such as $\\Omega$ always end with `StepLimitReached`."
 msgstr "これは `@eval.evaluate(term, \"beta_eta\", beta_eta_rule, NormalOrder, max_steps)` そのものである。各ステップで、項の任意の位置（束縛子の下も含む）にある最左最外の beta または eta 簡約基を縮約する。`NormalForm(t, n)` は `t` が（上述の単項の意味で）beta 簡約基も eta 簡約基も持たず、`n` ステップで到達したことを意味し、`StepLimitReached` は上限を使い切ったことを意味する。$\\Omega$ のような発散する項は必ず `StepLimitReached` で終わる。"
 
-#: manual/api/utlc/lambda.md:148
+#: manual/api/utlc/lambda.md:151
 msgid "The first step is beta and produces $\\lambda y_1.\\,y\\,y_1$; the second is eta."
 msgstr "最初のステップは beta で $\\lambda y_1.\\,y\\,y_1$ を生成し、2 番目は eta である。"
 
-#: manual/api/utlc/lambda.md:150
+#: manual/api/utlc/lambda.md:153
 msgid "Because `normalize` also contracts eta redexes, its result can differ from the beta normal form that `@debruijn.normalize` and `@nbe.normalize` return: $\\lambda x.\\,f\\,x$ normalizes to $f$ here and stays $\\lambda.\\,f\\,0$ there. Use `@eval.evaluate` with `beta_rule` and `NormalOrder` when you need the beta normal form."
 msgstr "`normalize` は η 簡約基も縮約するので、その結果は `@debruijn.normalize` や `@nbe.normalize` が返す β 正規形と異なりうる：$\\lambda x.\\,f\\,x$ はここでは $f$ に正規化されるが、あちらでは $\\lambda.\\,f\\,0$ のままである。β 正規形が必要なときは、`beta_rule` と `NormalOrder` を指定して `@eval.evaluate` を使うこと。"
 
@@ -1327,8 +1327,8 @@ msgid "It validates the term, evaluates it and quotes the result at level 0, wit
 msgstr "項を検証し、評価し、結果をレベル 0 で quote する。これらは 1 つの予算を共有する。`NormalForm(t, c)`：`t` は beta 正規形であり、`c` 単位で到達した。`FuelExhausted(c)`：予算が尽きた。項は発散するかもしれないし、より多くの燃料が必要なだけかもしれない。`ScopeFailure`：入力にぶら下がった、または負のインデックスがある。燃料の検査が先に行われるので、燃料が `<= 0` のときはスコープの正しくない項でも `ScopeFailure` ではなく `FuelExhausted(consumed=0)` になる。"
 
 #: manual/api/utlc/nbe.md:201
-msgid "Applications in the result are unary: a normal form $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])` evaluates to the value of `h`, so it disappears from the result, while the small-step reducers keep it and do not reduce through it. The two normalizers agree after spines are flattened, for terms without empty applications."
-msgstr "結果の適用は単項である。正規形 $f\\,a\\,b$ は `Apply(Apply(f, [a]), [b])` として返されるが、`@debruijn.normalize` は入力の n 項スパイン `Apply(f, [a, b])` を保つ。空の適用 `Apply(h, [])` は `h` の値に評価されるので結果から消えるが、小ステップの簡約器はそれを残し、それを通して簡約しない。空の適用を含まない項については、スパインを平坦化すれば両方の正規化器は一致する。"
+msgid "Applications in the result are unary: a normal form $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])` evaluates to the value of `h`, so it disappears from the result; the small-step reducers also read it as `h` but leave the node in place. The two normalizers agree after spines are flattened, where flattening merges nested applications and drops empty ones."
+msgstr "結果の適用は単項である。正規形 $f\\,a\\,b$ は `Apply(Apply(f, [a]), [b])` として返されるが、`@debruijn.normalize` は入力の n 項スパイン `Apply(f, [a, b])` を保つ。空の適用 `Apply(h, [])` は `h` の値に評価されるので結果から消える。小ステップの簡約器もそれを `h` と読むが、ノードはそのまま残す。2 つの正規化器はスパインを平坦化すれば一致する。ここで平坦化とは、入れ子の適用をまとめ、空の適用を取り除くことである。"
 
 #: manual/design/adapter.md:1
 msgid "adapter design"
@@ -1440,7 +1440,7 @@ msgstr "`generic_top_down_once` は [rewrite の設計](rewrite.md)の単一簡�
 #: manual/design/adapter.md:81
 #: manual/design/core.md:125
 #: manual/design/debruijn.md:105
-#: manual/design/eval.md:88
+#: manual/design/eval.md:89
 #: manual/design/rewrite.md:78
 #: manual/design/stlc.md:67
 #: manual/design/substitution.md:62
@@ -1500,10 +1500,10 @@ msgstr "下流の変数型は単射（異なる変数を異なる名前へ写す
 
 #: manual/design/adapter.md:132
 #: manual/design/core.md:168
-#: manual/design/debruijn.md:226
-#: manual/design/eval.md:133
+#: manual/design/debruijn.md:231
+#: manual/design/eval.md:134
 #: manual/design/rewrite.md:171
-#: manual/design/stlc.md:306
+#: manual/design/stlc.md:318
 #: manual/design/substitution.md:130
 #: manual/design/syntax.md:234
 #: manual/design/utlc/lambda.md:116
@@ -1553,10 +1553,10 @@ msgstr "下流の adapter は自身のノード種別について (V1)–(V5) �
 
 #: manual/design/adapter.md:147
 #: manual/design/core.md:182
-#: manual/design/debruijn.md:242
-#: manual/design/eval.md:150
+#: manual/design/debruijn.md:249
+#: manual/design/eval.md:151
 #: manual/design/rewrite.md:196
-#: manual/design/stlc.md:326
+#: manual/design/stlc.md:337
 #: manual/design/substitution.md:329
 #: manual/design/syntax.md:254
 #: manual/design/utlc/lambda.md:142
@@ -1578,10 +1578,10 @@ msgstr "**実行時に法則を検査する。** 法則はすべてのノード�
 
 #: manual/design/adapter.md:158
 #: manual/design/core.md:195
-#: manual/design/debruijn.md:254
-#: manual/design/eval.md:164
+#: manual/design/debruijn.md:261
+#: manual/design/eval.md:165
 #: manual/design/rewrite.md:208
-#: manual/design/stlc.md:339
+#: manual/design/stlc.md:350
 #: manual/design/substitution.md:343
 #: manual/design/syntax.md:268
 #: manual/design/utlc/lambda.md:153
@@ -1895,146 +1895,146 @@ msgid "**Choice.** `shift` returns `Err(NegativeShift)` instead, and `shift`, `s
 msgstr "**選択。** 代わりに `shift` は `Err(NegativeShift)` を返し、`shift`、`substitute_bound`、`instantiate`、`validate`、`to_named` は出会った負のインデックスに対して `NegativeIndex` を報告する。以下の補題は、スコープの正しい入力からはエラーの場合に到達しないことを示すので、`Result` は正しい呼び出し側には何のコストもなく、誤った呼び出し側に対しては黙った破損をデータに変える。これは、公開境界で想定される失敗は構造化された値であるというライブラリの規則に従う。"
 
 #: manual/design/debruijn.md:120
-msgid "The reducers check less. `reduce_once` looks at indices only inside the redex it contracts, through `instantiate`: a negative index elsewhere is passed over like a variable, and no operation except `validate` and `to_named` detects a dangling (too large) index, which `instantiate` shifts like a free one. Scope is checked once, by `validate`, not on every step."
-msgstr "簡約器が検査するものはもっと少ない。`reduce_once` は、縮約する簡約基の内部のインデックスだけを `instantiate` を通して見る：それ以外の場所にある負のインデックスは変数と同様に素通りされ、`validate` と `to_named` 以外のどの操作もぶら下がった（大きすぎる）インデックスを検出しない。`instantiate` はそれを自由なインデックスと同様にシフトする。スコープは各ステップではなく、`validate` によって一度だけ検査される。"
+msgid "The index operations work on open terms, so they cannot tell a dangling (too large) index from one that points at a binder outside the term: `instantiate` shifts it like a free index. The reducers work on whole terms and validate them. `reduce_once` runs `validate` before searching and returns its error as `ScopeFailure`; `normalize` validates its input once, and Lemma 2 below shows that the later terms need no check. The search itself is a private function that is also applied to binder bodies, whose indices may point at enclosing binders."
+msgstr "インデックス操作は開いた項を扱うので、ぶら下がった（大きすぎる）インデックスと項の外の束縛子を指すインデックスを区別できない：`instantiate` はそれを自由なインデックスと同様にシフトする。簡約器は項全体を扱い、それを検証する。`reduce_once` は探索の前に `validate` を実行し、そのエラーを `ScopeFailure` として返す。`normalize` は入力を一度だけ検証し、後の項に検査が不要であることは下の補題 2 が示す。探索そのものは非公開の関数であり、束縛子の本体にも適用される。本体のインデックスは外側の束縛子を指しうるからである。"
 
-#: manual/design/debruijn.md:126
+#: manual/design/debruijn.md:129
 msgid "Instantiation never fails on well-scoped input"
 msgstr "スコープの正しい入力では具体化は失敗しない"
 
-#: manual/design/debruijn.md:128
+#: manual/design/debruijn.md:131
 msgid "**Lemma 1 (shift composition).** For $a, b \\ge 0$: $\\uparrow^{a}_{c}\\uparrow^{b}_{c} t = \\uparrow^{a+b}_{c} t$, and $\\uparrow^{0}_{c} t = t$."
 msgstr "**補題 1（シフトの合成）。** $a, b \\ge 0$ について $\\uparrow^{a}_{c}\\uparrow^{b}_{c} t = \\uparrow^{a+b}_{c} t$ であり、$\\uparrow^{0}_{c} t = t$ である。"
 
-#: manual/design/debruijn.md:132
+#: manual/design/debruijn.md:135
 msgid "On an index $i$ relative to the current cutoff: if $i < c$ both sides leave it; if $i \\ge c$ then $i + b \\ge c$, so"
 msgstr "現在のカットオフに対する添字 $i$ について：$i < c$ ならば両辺ともそのまま残し、$i \\ge c$ ならば $i + b \\ge c$ であるので"
 
-#: manual/design/debruijn.md:139
+#: manual/design/debruijn.md:142
 msgid "The binder case raises the cutoff on both sides alike. $\\square$"
 msgstr "束縛子の場合は両辺で同様にカットオフを引き上げる。$\\square$"
 
-#: manual/design/debruijn.md:141
+#: manual/design/debruijn.md:144
 msgid "**Lemma 2 (safety of the downward shift).** Let $\\lambda.\\,t$ and $s$ be well scoped at depth $n$. Then every free index of $u = [\\,0 \\mapsto \\uparrow^{1}_{0} s\\,]\\,t$ lies in $\\{1, \\dots, n\\}$, so $\\uparrow^{-1}_{0} u$ succeeds and is well scoped at depth $n$."
 msgstr "**補題 2（下方向シフトの安全性）。** $\\lambda.\\,t$ と $s$ が深さ $n$ でスコープ整合であるとする。このとき $u = [\\,0 \\mapsto \\uparrow^{1}_{0} s\\,]\\,t$ のすべての自由添字は $\\{1, \\dots, n\\}$ に属するので、$\\uparrow^{-1}_{0} u$ は成功し、深さ $n$ でスコープ整合である。"
 
-#: manual/design/debruijn.md:146
+#: manual/design/debruijn.md:149
 msgid "The body $t$ is well scoped at depth $n + 1$, so its free indices lie in $\\{0, \\dots, n\\}$. Follow a free occurrence in $t$ under $k$ inner binders:"
 msgstr "本体 $t$ は深さ $n + 1$ でスコープ整合であるので、その自由添字は $\\{0, \\dots, n\\}$ に属する。$t$ 内で $k$ 個の内側の束縛子の下にある自由な出現を追う："
 
-#: manual/design/debruijn.md:157
+#: manual/design/debruijn.md:160
 msgid "No free index $0$ remains, so the shift by $-1$ maps $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$ without a negative result. $\\square$"
 msgstr "自由添字 $0$ はもはや残らないので、$-1$ によるシフトは負の結果を生じることなく $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$ と写す。$\\square$"
 
-#: manual/design/debruijn.md:160
-msgid "Hence `instantiate` and `reduce_once` return no `ScopeError` on well-scoped input, and a reduct of a well-scoped term is well scoped (subject reduction for scope). A `ScopeFailure` from `normalize` therefore always means that the input was ill scoped. The converse fails: `normalize(Bind(Bound(-1)), k)` returns `NormalForm`, and `(λ. 5) 1` reduces to `Bound(4)` without an error."
-msgstr "したがって `instantiate` と `reduce_once` はスコープ整合な入力に対して `ScopeError` を返さず、スコープ整合な項の簡約結果はスコープ整合である（スコープに関する主部簡約性）。ゆえに `normalize` からの `ScopeFailure` は常に入力がスコープ不整合であったことを意味する。逆は成り立たない：`normalize(Bind(Bound(-1)), k)` は `NormalForm` を返し、`(λ. 5) 1` はエラーなしに `Bound(4)` に簡約される。"
+#: manual/design/debruijn.md:163
+msgid "Hence `instantiate` and `reduce_once` return no `ScopeError` on well-scoped input, and a reduct of a well-scoped term is well scoped (subject reduction for scope). Together with the validation of the input, `normalize` returns `ScopeFailure` exactly when its input is ill scoped, and then with `steps=0`: `Bind(Bound(-1))` gives `NegativeIndex(index=-1)` and `(λ. 5) 1` gives `UnboundIndex(index=5, depth=1)`."
+msgstr "したがって `instantiate` と `reduce_once` はスコープ整合な入力に対して `ScopeError` を返さず、スコープ整合な項の簡約結果はスコープ整合である（スコープに関する主部簡約性）。入力の検証と合わせると、`normalize` が `ScopeFailure` を返すのはちょうど入力がスコープ不整合であるときであり、そのとき `steps=0` である：`Bind(Bound(-1))` は `NegativeIndex(index=-1)` を、`(λ. 5) 1` は `UnboundIndex(index=5, depth=1)` を与える。"
 
-#: manual/design/debruijn.md:166
+#: manual/design/debruijn.md:170
 msgid "The detailed proofs, including the commutation of shifts with different cutoffs and the De Bruijn substitution lemma, are in the attachment:"
 msgstr "異なるカットオフをもつシフトの可換性や De Bruijn 代入補題を含む詳細な証明は、添付資料にある："
 
-#: manual/design/debruijn.md:169
+#: manual/design/debruijn.md:173
 msgid "[Index lemmas for De Bruijn terms](../../attachments/design_debruijn_index-lemmas.typ)"
 msgstr "[De Bruijn 項の添字に関する補題](../../attachments/design_debruijn_index-lemmas.typ)"
 
-#: manual/design/debruijn.md:171
+#: manual/design/debruijn.md:175
 msgid "Exact translations"
 msgstr "厳密な相互変換"
 
-#: manual/design/debruijn.md:173
+#: manual/design/debruijn.md:177
 msgid "`from_named` keeps a stack of binder names and translates an occurrence of $x$ to the distance to the nearest binder of $x$, or to `Free(x)` if there is none. `to_named` invents a binder name with `fresh_name(\"x\", U)`, where $U$ contains the free names of the term and the names of the enclosing binders."
 msgstr "`from_named` は束縛子名のスタックを保持し、$x$ の出現を最も近い $x$ の束縛子までの距離に変換する。そのような束縛子がなければ `Free(x)` に変換する。`to_named` は `fresh_name(\"x\", U)` で束縛子名を生成する。ここで $U$ は項の自由な名前と外側の束縛子の名前を含む。"
 
-#: manual/design/debruijn.md:178
+#: manual/design/debruijn.md:182
 msgid "**Theorem (round trips).**"
 msgstr "**定理（往復変換）。**"
 
-#: manual/design/debruijn.md:180
+#: manual/design/debruijn.md:184
 msgid "$\\texttt{to\\_named}(\\texttt{from\\_named}(t)) =_\\alpha t$ for every named $t$."
 msgstr "すべての名前付き項 $t$ について $\\texttt{to\\_named}(\\texttt{from\\_named}(t)) =_\\alpha t$。"
 
-#: manual/design/debruijn.md:181
+#: manual/design/debruijn.md:185
 msgid "$\\texttt{from\\_named}(\\texttt{to\\_named}(d)) = d$ for every well-scoped $d$."
 msgstr "すべてのスコープ整合な $d$ について $\\texttt{from\\_named}(\\texttt{to\\_named}(d)) = d$。"
 
-#: manual/design/debruijn.md:184
+#: manual/design/debruijn.md:188
 msgid "For (2): along any path from the root, the names chosen by `to_named` are pairwise distinct and distinct from all free names, because each is chosen fresh for a set that contains the free names and every enclosing binder name. An occurrence of index $i$ under $n$ binders becomes the name of the binder at level $n - 1 - i$; translating back, the nearest binder with that name is that same binder (no other enclosing binder has the name), at distance $i$. A `Free(x)` becomes $x$, which is not the name of any binder on the path, so it translates back to `Free(x)`. (3) is de Bruijn's theorem; (1) follows from (2) and (3), since $\\texttt{from\\_named}(\\texttt{to\\_named}(\\texttt{from\\_named}(t))) = \\texttt{from\\_named}(t)$."
 msgstr "(2) について：根からの任意の経路に沿って、`to_named` が選ぶ名前は互いに異なり、かつすべての自由な名前とも異なる。各名前は、自由な名前と外側のすべての束縛子名を含む集合に対して新しく選ばれるからである。$n$ 個の束縛子の下にある添字 $i$ の出現は、レベル $n - 1 - i$ の束縛子の名前になる。逆変換すると、その名前をもつ最も近い束縛子はまさにその束縛子であり（外側の他の束縛子はその名前をもたない）、距離は $i$ である。`Free(x)` は $x$ になり、これは経路上のどの束縛子の名前でもないので、`Free(x)` に戻る。(3) は de Bruijn の定理であり、(1) は (2) と (3) から従う。$\\texttt{from\\_named}(\\texttt{to\\_named}(\\texttt{from\\_named}(t))) = \\texttt{from\\_named}(t)$ だからである。"
 
-#: manual/design/debruijn.md:194
+#: manual/design/debruijn.md:198
 msgid "Named and nameless beta agree"
 msgstr "名前付きと名前なしの β 簡約の一致"
 
-#: manual/design/debruijn.md:196
+#: manual/design/debruijn.md:200
 msgid "For named terms, beta is $(\\lambda x.\\,b)\\,a \\to b[x := a]$ with the capture-avoiding substitution of [substitution](substitution.md). Write $\\ulcorner b \\urcorner_{x}$ for the translation of $b$ with $x$ as the innermost binder. Then"
 msgstr "名前付き項に対して、β 簡約は $(\\lambda x.\\,b)\\,a \\to b[x := a]$ であり、[代入](substitution.md) の捕獲回避代入を用いる。$x$ を最も内側の束縛子としたときの $b$ の変換を $\\ulcorner b \\urcorner_{x}$ と書く。このとき"
 
-#: manual/design/debruijn.md:205
+#: manual/design/debruijn.md:209
 msgid "by induction on $b$: an occurrence of $x$ under $k$ inner binders has index $k$ and receives $\\uparrow^{k}_{0}\\ulcorner a \\urcorner$, which is the translation of $a$ placed under those $k$ binders; at the root $\\ulcorner a \\urcorner$ has no free indices, so the shift changes nothing. Renaming of binders by the named substitution is invisible after translation by (3), and the translation lemma of the [substitution design](substitution.md) makes this induction precise. Since the translation also preserves the shape of terms, the beta-only named reducer (`@eval.evaluate` with `@lambda.beta_rule` and `NormalOrder`) and `reduce_once` choose the same leftmost-outermost redex, and one step commutes with translation up to $=_\\alpha$. (`@lambda.normalize` also contracts eta redexes, so its normal forms can be eta-shorter.) The test \"named and debruijn beta reduction agree modulo alpha\" checks an instance that needs renaming on the named side."
 msgstr "$b$ に関する帰納法による：$k$ 個の内側の束縛子の下にある $x$ の出現は添字 $k$ をもち、$\\uparrow^{k}_{0}\\ulcorner a \\urcorner$ を受け取る。これはそれら $k$ 個の束縛子の下に置かれた $a$ の変換である。根では $\\ulcorner a \\urcorner$ は自由な添字を持たないので、シフトは何も変えない。名前付き代入による束縛子の名前替えは、(3) により変換後には見えず、[substitution の設計](substitution.md)の変換補題がこの帰納法を厳密にする。変換は項の形も保つので、β のみの名前付き簡約器（`@lambda.beta_rule` と `NormalOrder` を指定した `@eval.evaluate`）と `reduce_once` は同じ最左最外の簡約基を選び、1 ステップは $=_\\alpha$ を除いて変換と可換である。（`@lambda.normalize` は η 簡約基も縮約するので、その正規形は η についてより短くなりうる。）テスト \"named and debruijn beta reduction agree modulo alpha\" は、名前付き側で名前替えが必要となる例を検査する。"
 
-#: manual/design/debruijn.md:218
+#: manual/design/debruijn.md:222
 msgid "Spines and reduction order"
 msgstr "スパインと簡約順序"
 
-#: manual/design/debruijn.md:220
-msgid "`Apply(head, args)` is a curried spine: `Apply(Bind(t), [a, ..rest])` is the redex $(\\lambda.\\,t)\\,a$ applied to `rest`, and a step contracts only the first argument. `reduce_once` searches root, head, arguments, and enters binders: it is the normal-order strategy of the [eval design](eval.md) on nameless terms, so the normalization theorem applies to `normalize`."
-msgstr "`Apply(head, args)` はカリー化されたスパインである：`Apply(Bind(t), [a, ..rest])` は `rest` に適用された簡約基 $(\\lambda.\\,t)\\,a$ であり、1 ステップは最初の引数のみを縮約する。`reduce_once` は根、ヘッド、引数を探索し、束縛子の中にも入る：これは名前なし項上の [eval の設計](eval.md) の正規順序戦略であり、したがって正規化定理が `normalize` に適用される。"
+#: manual/design/debruijn.md:224
+msgid "`Apply(head, args)` is a curried spine: `Apply(Bind(t), [a, ..rest])` is the redex $(\\lambda.\\,t)\\,a$ applied to `rest`, and a step contracts only the first argument. An empty spine `Apply(h, [])` stands for $h$ itself, so empty applications around the `Bind` are looked through when a redex is matched. `reduce_once` searches root, head, arguments, and enters binders: it is the normal-order strategy of the [eval design](eval.md) on nameless terms, so the normalization theorem applies to `normalize`."
+msgstr "`Apply(head, args)` はカリー化されたスパインである：`Apply(Bind(t), [a, ..rest])` は `rest` に適用された簡約基 $(\\lambda.\\,t)\\,a$ であり、1 ステップは最初の引数のみを縮約する。空のスパイン `Apply(h, [])` は $h$ そのものを表すので、簡約基を照合するときは `Bind` を包む空の適用を透過して見る。`reduce_once` は根、ヘッド、引数を探索し、束縛子の中にも入る：これは名前なし項上の [eval の設計](eval.md) の正規順序戦略であり、したがって正規化定理が `normalize` に適用される。"
 
-#: manual/design/debruijn.md:228
+#: manual/design/debruijn.md:233
 msgid "`validate(from_named(t)) == Ok(())` for every named $t$."
 msgstr "すべての名前付き項 $t$ について `validate(from_named(t)) == Ok(())`。"
 
-#: manual/design/debruijn.md:229
+#: manual/design/debruijn.md:234
 msgid "Round trips (1)–(3) above; `==` on well-scoped `DbTerm` is alpha-equivalence."
 msgstr "上記の往復変換 (1)–(3)。スコープ整合な `DbTerm` 上の `==` は α同値である。"
 
-#: manual/design/debruijn.md:230
-msgid "Lemma 2: on well-scoped input `instantiate` succeeds and preserves scope; `reduce_once` never returns `ScopeFailure`, and every reduct is well scoped."
-msgstr "補題 2：スコープ整合な入力に対して `instantiate` は成功しスコープを保つ。`reduce_once` は決して `ScopeFailure` を返さず、すべての簡約結果はスコープ整合である。"
+#: manual/design/debruijn.md:235
+msgid "Lemma 2: on well-scoped input `instantiate` succeeds and preserves scope; `reduce_once` never returns `ScopeFailure`, and every reduct is well scoped. On ill-scoped input `reduce_once` and `normalize` return `ScopeFailure` with the error `validate` reports."
+msgstr "補題 2：スコープ整合な入力に対して `instantiate` は成功しスコープを保つ。`reduce_once` は決して `ScopeFailure` を返さず、すべての簡約結果はスコープ整合である。スコープ不整合な入力に対しては、`reduce_once` と `normalize` は `validate` が報告するエラーとともに `ScopeFailure` を返す。"
 
-#: manual/design/debruijn.md:232
+#: manual/design/debruijn.md:239
 msgid "`reduce_once` satisfies the one-redex contract of [rewrite](rewrite.md), with rule name `\"beta\"`."
 msgstr "`reduce_once` は [rewrite](rewrite.md) の単一簡約基契約を満たし、規則名は `\"beta\"` である。"
 
-#: manual/design/debruijn.md:234
+#: manual/design/debruijn.md:241
 msgid "`shift(t, 0, c) == Ok(t)` for every `t` without negative indices, and shifts with one cutoff compose (Lemma 1)."
 msgstr "負の添字を含まないすべての `t` について `shift(t, 0, c) == Ok(t)` であり、同じカットオフのシフトは合成できる（補題 1）。"
 
-#: manual/design/debruijn.md:237
+#: manual/design/debruijn.md:244
 msgid "Cost: `shift` and `validate` are linear in the term size. `substitute_bound` costs $O(|t| + m \\cdot |s|)$ for $m$ occurrences of the index, because each inserted copy is shifted. A `reduce_once` step costs one search plus one `instantiate`."
 msgstr "コスト：`shift` と `validate` は項のサイズに対して線形である。添字が $m$ 回出現する場合、挿入される各コピーがシフトされるため、`substitute_bound` のコストは $O(|t| + m \\cdot |s|)$ である。`reduce_once` の 1 ステップのコストは探索 1 回と `instantiate` 1 回である。"
 
-#: manual/design/debruijn.md:244
+#: manual/design/debruijn.md:251
 msgid "**Levels instead of indices in syntax.** Levels make weakening free but substitution under binders more complex; indices are the standard for syntax, and levels are used where they help (NbE)."
 msgstr "**構文で添字の代わりにレベルを使う。** レベルを使うと弱化はコストなしになるが、束縛子の下での代入が複雑になる。構文には添字が標準であり、レベルは役立つ場面（NbE）で用いる。"
 
-#: manual/design/debruijn.md:247
+#: manual/design/debruijn.md:254
 msgid "**Fully nameless free variables.** Free variables are kept as names so that open terms from users and downstream ASTs need no global variable numbering, and so that `to_named` can restore them exactly."
 msgstr "**完全に名前なしの自由変数。** 自由変数は名前のまま保持される。これにより、ユーザーや下流の AST からの開いた項に大域的な変数番号付けが不要となり、`to_named` がそれらを正確に復元できる。"
 
-#: manual/design/debruijn.md:250
+#: manual/design/debruijn.md:257
 msgid "**Explicit substitutions.** A calculus with suspended substitutions avoids repeated shifting but complicates every consumer; the NbE package provides the efficient path instead."
 msgstr "**明示的代入。** 保留された代入をもつ計算体系は繰り返しのシフトを避けられるが、すべての利用側を複雑にする。代わりに効率的な経路は NbE パッケージが提供する。"
 
-#: manual/design/debruijn.md:256
+#: manual/design/debruijn.md:263
 msgid "Binder names are not preserved: `to_named` chooses `x`, `x_1`, …."
 msgstr "束縛子名は保存されない：`to_named` は `x`、`x_1`、… を選ぶ。"
 
-#: manual/design/debruijn.md:257
-msgid "`substitute_bound`, `instantiate`, `reduce_once` and `normalize` do not detect unbound indices, and the reducers ignore negative indices outside the redex they contract; call `validate` on untrusted input."
-msgstr "`substitute_bound`、`instantiate`、`reduce_once`、`normalize` は束縛されていない添字を検出せず、簡約器は縮約する簡約基の外にある負の添字を無視する。信頼できない入力には `validate` を呼ぶこと。"
-
-#: manual/design/debruijn.md:260
-msgid "An empty application `Apply(h, [])` is not a redex and blocks any redex in its head position (`Apply(Apply(Bind(b), []), [a])` is in normal form for `reduce_once`), while [utlc/nbe](utlc/nbe.md) erases it. Build applications with at least one argument."
-msgstr "空の適用 `Apply(h, [])` は簡約基ではなく、その先頭位置にある簡約基をすべて妨げる（`Apply(Apply(Bind(b), []), [a])` は `reduce_once` にとって正規形である）が、[utlc/nbe](utlc/nbe.md) はそれを消去する。適用は少なくとも 1 つの引数で構築すること。"
-
 #: manual/design/debruijn.md:264
+msgid "`shift`, `substitute_bound` and `instantiate` operate on open terms and do not detect dangling indices; the reducers and `validate` do."
+msgstr "`shift`、`substitute_bound`、`instantiate` は開いた項を扱い、ぶら下がったインデックスを検出しない。簡約器と `validate` は検出する。"
+
+#: manual/design/debruijn.md:266
+msgid "An empty application `Apply(h, [])` is read as `h` when a redex is matched, so it never hides a redex, but `reduce_once` leaves the node in place, whereas [utlc/nbe](utlc/nbe.md) drops it from its normal forms."
+msgstr "空の適用 `Apply(h, [])` は簡約基の照合で `h` と読まれるので、決して簡約基を隠さない。ただし `reduce_once` はそのノードを残し、[utlc/nbe](utlc/nbe.md) は正規形からそれを取り除く。"
+
+#: manual/design/debruijn.md:269
 msgid "Only beta is implemented; there is no eta rule for De Bruijn terms."
 msgstr "実装されているのは β のみであり、De Bruijn 項に対する η 規則はない。"
 
-#: manual/design/debruijn.md:265
+#: manual/design/debruijn.md:270
 msgid "Values are opaque; their contents are never shifted."
 msgstr "値は不透明であり、その内容がシフトされることはない。"
 
@@ -2083,118 +2083,118 @@ msgid "A term on which weak head reduction finds no beta redex is in *weak head 
 msgstr "弱頭部簡約が β 簡約基を見つけない項は*弱頭部正規形*である：抽象 $\\lambda x.\\,t$、またはヘッド $h$ が変数か値であるスパイン $h\\,u_1 \\cdots u_n$ である。"
 
 #: manual/design/eval.md:49
-msgid "The n-ary encoding adds one degenerate case. The beta rule matches `Apply(Bind(x, b), [a, ..])` literally, so an application with an empty argument array, `Apply(h, [])`, is never a redex, and every strategy treats it as a stuck node: `Apply(Apply(Bind(x, b), []), [a])` is normal for all of them, although its curried reading $(\\lambda x.\\,b)\\,a$ is a redex. The characterizations of this page hold for terms without empty applications, which is what the constructors of [utlc/lambda](utlc/lambda.md) build."
-msgstr "n 項による符号化は退化した場合を 1 つ加える。β 規則は `Apply(Bind(x, b), [a, ..])` に文字どおりに照合するので、引数の配列が空の適用 `Apply(h, [])` は決して簡約基にならず、すべての戦略はそれを行き詰まったノードとして扱う：`Apply(Apply(Bind(x, b), []), [a])` は、カリー化した読み方 $(\\lambda x.\\,b)\\,a$ では簡約基であるにもかかわらず、どの戦略にとっても正規である。このページの特徴付けは空の適用を含まない項について成り立ち、[utlc/lambda](utlc/lambda.md) の構築子が作るのはそのような項である。"
+msgid "The n-ary encoding adds one degenerate case, the empty spine `Apply(h, [])`, whose curried reading is $h$ itself. The beta rule of [utlc/lambda](utlc/lambda.md) reads it that way: it looks through empty applications around the head, so `Apply(Apply(Bind(x, b), []), [a])` is the redex $(\\lambda x.\\,b)\\,a$ for every strategy. The node itself is not removed, so the characterization above holds up to empty applications: a weak head normal form is, after dropping them, an abstraction or a spine with a variable or a value at its head."
+msgstr "n 項による符号化は退化した場合を 1 つ加える。空のスパイン `Apply(h, [])` であり、そのカリー化した読み方は $h$ そのものである。[utlc/lambda](utlc/lambda.md) の β 規則はそのように読む：先頭を包む空の適用を透過して見るので、`Apply(Apply(Bind(x, b), []), [a])` はどの戦略にとっても簡約基 $(\\lambda x.\\,b)\\,a$ である。ノード自体は取り除かれないので、上の特徴付けは空の適用を除いて成り立つ：弱頭部正規形とは、それらを取り除くと、抽象か、先頭が変数または値であるスパインになるものである。"
 
-#: manual/design/eval.md:57
+#: manual/design/eval.md:58
 msgid "Classical results for beta"
 msgstr "β に関する古典的な結果"
 
-#: manual/design/eval.md:59
+#: manual/design/eval.md:60
 msgid "**Standardization and normalization.** If a term has a beta normal form, normal order reduction reaches it.[^normal] Normal order is therefore a *normalizing* strategy, which is why it is the default of the lambda calculus packages."
 msgstr "**標準化と正規化。** 項が β 正規形をもつならば、正規順序簡約はそこに到達する。[^normal] したがって正規順序は*正規化*戦略であり、これがラムダ計算パッケージの既定である理由である。"
 
-#: manual/design/eval.md:64
+#: manual/design/eval.md:65
 msgid "Curry and Feys, *Combinatory Logic I*, 1958; see Barendregt, *The Lambda Calculus*, Theorem 13.2.2."
 msgstr "Curry と Feys、*Combinatory Logic I*、1958。Barendregt、*The Lambda Calculus*、定理 13.2.2 も参照。"
 
-#: manual/design/eval.md:66
+#: manual/design/eval.md:67
 msgid "**Applicative order is not normalizing.** Let $\\Omega = (\\lambda w.\\,w\\,w)(\\lambda w.\\,w\\,w)$, which reduces only to itself. For $t = (\\lambda x.\\,y)\\,\\Omega$:"
 msgstr "**適用順序は正規化的ではない。** $\\Omega = (\\lambda w.\\,w\\,w)(\\lambda w.\\,w\\,w)$ とする。これは自分自身にしか簡約されない。$t = (\\lambda x.\\,y)\\,\\Omega$ について："
 
-#: manual/design/eval.md:77
+#: manual/design/eval.md:78
 msgid "**Agreement.** Beta reduction is confluent (Church–Rosser), so whenever two strategies both reach a beta normal form, the normal forms are alpha-equivalent.[^cr] A strategy can fail to terminate, but it cannot produce a *different* normal form."
 msgstr "**一致性。** β 簡約は合流的（Church–Rosser）であるので、二つの戦略がともに β 正規形に到達するならば、それらの正規形は α同値である。[^cr] 戦略は停止しないことはあり得るが、*異なる*正規形を生み出すことはない。"
 
-#: manual/design/eval.md:82
+#: manual/design/eval.md:83
 msgid "Church and Rosser, \"Some properties of conversion\", Transactions of the AMS 39, 1936."
 msgstr "Church と Rosser、\"Some properties of conversion\"、Transactions of the AMS 39、1936。"
 
-#: manual/design/eval.md:84
+#: manual/design/eval.md:85
 msgid "**Weak head reduction** computes the weak head normal form when one exists; it is the evaluation order of call-by-name languages and of the lazy evaluator in [utlc/nbe](utlc/nbe.md)."
 msgstr "**弱頭部簡約** は、弱頭部正規形が存在すればそれを計算する。これは名前呼び言語および [utlc/nbe](utlc/nbe.md) の遅延評価器の評価順序である。"
 
-#: manual/design/eval.md:90
+#: manual/design/eval.md:91
 msgid "Strategies as an enum"
 msgstr "列挙型としての戦略"
 
-#: manual/design/eval.md:92
+#: manual/design/eval.md:93
 msgid "**Problem.** Callers need to select, record and compare strategies, for example in a test that checks two strategies against each other."
 msgstr "**問題。** 呼び出し側は戦略を選択・記録・比較する必要がある。たとえば二つの戦略を互いに照合するテストなどである。"
 
-#: manual/design/eval.md:95
+#: manual/design/eval.md:96
 msgid "**Options.** Pass a step function; pass a trait object; select from an enum."
 msgstr "**選択肢。** ステップ関数を渡す。トレイトオブジェクトを渡す。列挙型から選ぶ。"
 
-#: manual/design/eval.md:97
+#: manual/design/eval.md:98
 msgid "**Choice.** `Strategy` is a plain enum with `Eq` and `Debug`, interpreted by `reduce_once`. Custom strategies remain possible: any step function can be given to `@rewrite.normalize` and `@rewrite.trace` directly. The enum covers the named strategies only."
 msgstr "**選択。** `Strategy` は `Eq` と `Debug` をもつ単純な列挙型であり、`reduce_once` によって解釈される。独自の戦略も引き続き可能である：任意のステップ関数を `@rewrite.normalize` や `@rewrite.trace` に直接渡せる。列挙型は名前付きの戦略のみを扱う。"
 
-#: manual/design/eval.md:102
+#: manual/design/eval.md:103
 msgid "Each strategy is one traversal of rewrite"
 msgstr "各戦略は rewrite の一つの走査である"
 
-#: manual/design/eval.md:112
+#: manual/design/eval.md:113
 msgid "Pre-order search returns the first redex that no other redex contains, scanning head before arguments and arguments left to right; this is the leftmost-outermost redex, and the normal-form lemma of the [rewrite design](rewrite.md) shows that `NoStep` means \"normal\". Post-order search returns a redex that contains no other redex, the leftmost-innermost one. Weak head search follows only the spine, so its `NoStep` means \"weak head normal\" and nothing more."
 msgstr "前順探索は、他のどの簡約基にも含まれない最初の簡約基を返す。ヘッドを引数より先に、引数は左から右へ走査する。これは最左最外の簡約基であり、[rewrite の設計](rewrite.md) の正規形補題により `NoStep` は「正規形である」ことを意味する。後順探索は他の簡約基を含まない簡約基、すなわち最左最内のものを返す。弱頭部探索はスパインのみをたどるので、その `NoStep` は「弱頭部正規形である」ことのみを意味し、それ以上の意味はない。"
 
-#: manual/design/eval.md:120
+#: manual/design/eval.md:121
 msgid "`evaluate` and `trace` add no reduction logic of their own: they pass the strategy's step function to `@rewrite.normalize` and `@rewrite.trace`. As a result, every strategy has a trace, and the step-count contract is the same for all of them."
 msgstr "`evaluate` と `trace` は独自の簡約ロジックを追加しない：戦略のステップ関数を `@rewrite.normalize` と `@rewrite.trace` に渡すだけである。その結果、すべての戦略がトレースをもち、ステップ数の契約はすべての戦略で同じになる。"
 
-#: manual/design/eval.md:125
+#: manual/design/eval.md:126
 msgid "`FullNormal` as a separate name"
 msgstr "独立した名前としての `FullNormal`"
 
-#: manual/design/eval.md:127
+#: manual/design/eval.md:128
 msgid "`FullNormal` maps to the same traversal as `NormalOrder` today. The distinction is one of intent: `NormalOrder` promises the order of steps (leftmost-outermost), `FullNormal` only promises a full normal form. Keeping two names lets a faster full normalizer replace `FullNormal` later without changing the meaning of `NormalOrder`."
 msgstr "現在 `FullNormal` は `NormalOrder` と同じ走査に対応している。違いは意図にある：`NormalOrder` はステップの順序（最左最外）を約束し、`FullNormal` は完全な正規形のみを約束する。二つの名前を保つことで、`NormalOrder` の意味を変えずに、将来 `FullNormal` をより高速な完全正規化器に置き換えられる。"
 
-#: manual/design/eval.md:135
+#: manual/design/eval.md:136
 msgid "`reduce_once` satisfies the one-redex contract of [rewrite](rewrite.md) for every strategy; the reported path of a `WeakHead` step consists of `ApplyHead` frames only."
 msgstr "`reduce_once` はすべての戦略について [rewrite](rewrite.md) の単一簡約基契約を満たす。`WeakHead` のステップで報告される経路は `ApplyHead` フレームのみからなる。"
 
-#: manual/design/eval.md:138
+#: manual/design/eval.md:139
 msgid "For `NormalOrder`, `FullNormal` and `ApplicativeOrder`, `NoStep` means the rule applies nowhere; for `WeakHead`, nowhere on the head spine."
 msgstr "`NormalOrder`、`FullNormal`、`ApplicativeOrder` では、`NoStep` は規則がどこにも適用できないことを意味する。`WeakHead` では、ヘッドスパイン上のどこにも適用できないことを意味する。"
 
-#: manual/design/eval.md:140
+#: manual/design/eval.md:141
 msgid "With the beta rule, `evaluate(t, _, beta, NormalOrder, k)` returns `NormalForm` for every $t$ that has a beta normal form, provided $k$ is at least the length of the normal-order reduction (normalization theorem)."
 msgstr "β 規則のもとで、β 正規形をもつすべての $t$ に対し、$k$ が正規順序簡約の長さ以上であれば、`evaluate(t, _, beta, NormalOrder, k)` は `NormalForm` を返す（正規化定理）。"
 
-#: manual/design/eval.md:143
+#: manual/design/eval.md:144
 msgid "If two strategies both return `NormalForm` for a confluent rule, the terms are alpha-equivalent (Church–Rosser)."
 msgstr "合流的な規則に対して二つの戦略がともに `NormalForm` を返すならば、それらの項は α同値である（Church–Rosser）。"
 
-#: manual/design/eval.md:146
+#: manual/design/eval.md:147
 msgid "The library's tests check named and De Bruijn beta steps against each other (`src/utlc/lambda/lambda_test.mbt`), and normal order against the NbE normalizer (`src/utlc/nbe/nbe_test.mbt`)."
 msgstr "ライブラリのテストは、名前付きと De Bruijn の β ステップを互いに照合し（`src/utlc/lambda/lambda_test.mbt`）、正規順序を NbE 正規化器と照合する（`src/utlc/nbe/nbe_test.mbt`）。"
 
-#: manual/design/eval.md:152
+#: manual/design/eval.md:153
 msgid "**Call-by-value evaluation to values.** The usual call-by-value strategy does not reduce under binders and treats abstractions as values. It is expressible as a custom step function, but it is not one of the full or head strategies the packages need, so it is not in the enum."
 msgstr "**値への値呼び評価。** 通常の値呼び戦略は束縛子の下で簡約せず、抽象を値として扱う。これは独自のステップ関数として表現できるが、パッケージが必要とする完全戦略やヘッド戦略の一つではないため、列挙型には含まれない。"
 
-#: manual/design/eval.md:156
+#: manual/design/eval.md:157
 msgid "**Head reduction under binders.** Head reduction (reducing $\\lambda \\bar x.\\,(\\lambda y.\\,b)\\,a\\,\\bar u$ under the outer binders) can be written as a custom step function; the enum keeps to the strategies that are used."
 msgstr "**束縛子の下での頭部簡約。** 頭部簡約（外側の束縛子の下で $\\lambda \\bar x.\\,(\\lambda y.\\,b)\\,a\\,\\bar u$ を簡約すること）は独自のステップ関数として書ける。列挙型は実際に使われる戦略に限っている。"
 
-#: manual/design/eval.md:160
+#: manual/design/eval.md:161
 msgid "**Strategy-specific result types.** All strategies share `NormalizationResult`, so callers can switch strategies without changing their code."
 msgstr "**戦略固有の結果型。** すべての戦略は `NormalizationResult` を共有するので、呼び出し側はコードを変えずに戦略を切り替えられる。"
 
-#: manual/design/eval.md:166
+#: manual/design/eval.md:167
 msgid "Strategies only choose positions; they never rename, share or memoize. Repeated subterms are reduced separately."
 msgstr "戦略は位置を選ぶだけであり、名前替え・共有・メモ化は一切行わない。繰り返し現れる部分項は別々に簡約される。"
 
-#: manual/design/eval.md:168
+#: manual/design/eval.md:169
 msgid "No call-by-value, call-by-need or head strategy is provided as a named case."
 msgstr "値呼び、必要呼び、頭部戦略は名前付きのケースとしては提供されない。"
 
-#: manual/design/eval.md:170
+#: manual/design/eval.md:171
 msgid "Termination is bounded by `max_steps`, not decided."
 msgstr "停止性は `max_steps` によって制限されるのであって、判定されるわけではない。"
 
-#: manual/design/eval.md:171
+#: manual/design/eval.md:172
 msgid "`eval` works on `Term[T]` only; downstream ASTs use `@rewrite.generic_normalize`, which is top-down."
 msgstr "`eval` は `Term[T]` のみを扱う。下流の AST はトップダウンの `@rewrite.generic_normalize` を使う。"
 
@@ -2475,174 +2475,170 @@ msgid "**Choice.** Two mutually recursive judgements: inference $\\Gamma \\vdash
 msgstr "**選択。** 相互再帰する二つの判断：推論 $\\Gamma \\vdash t \\Rightarrow \\tau$（`infer`）と検査 $\\Gamma \\vdash t \\Leftarrow \\tau$（`check`）。情報は期待される型からラムダへ流れ込み、変数や定数から適用へと流れ出す。[^bidir] 実装された規則は次のとおりである"
 
 #: manual/design/stlc.md:108
-msgid "In $\\textsc{App}$ the spine is flattened first, so nested `Apply` nodes are one application $h\\,a_1 \\cdots a_n$; if $h$ has fewer arrows than arguments the result is `ExpectedFunction`. In $\\textsc{Redex}$ with $n = 1$ the second premise is $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$. $\\textsc{Sub}$ applies to every term except a lambda checked against an arrow; a lambda in inference position fails with `CannotInferLambda`. Type equality in $\\textsc{Sub}$ is syntactic, which is exact for simple types."
-msgstr "$\\textsc{App}$ ではまずスパインを平坦化するので、入れ子の `Apply` ノードは一つの適用 $h\\,a_1 \\cdots a_n$ になる。$h$ の矢印の数が引数より少なければ結果は `ExpectedFunction` である。$n = 1$ の $\\textsc{Redex}$ では、第 2 前提は $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$ である。$\\textsc{Sub}$ は、矢印型に対して検査されるラムダを除くすべての項に適用される。推論位置にあるラムダは `CannotInferLambda` で失敗する。$\\textsc{Sub}$ における型の等しさは構文的であり、単純型に対しては厳密である。"
+msgid "In $\\textsc{App}$ the spine is flattened first, so nested `Apply` nodes are one application $h\\,a_1 \\cdots a_n$; if $h$ has fewer arrows than arguments the result is `ExpectedFunction`, and an `Apply` node of the spine without arguments gives `EmptyApplication`. In $\\textsc{Redex}$ the parameter is renamed apart from the trailing arguments:"
+msgstr "$\\textsc{App}$ ではまずスパインを平坦化するので、入れ子の `Apply` ノードは一つの適用 $h\\,a_1 \\cdots a_n$ になる。$h$ の矢印の数が引数より少なければ結果は `ExpectedFunction` であり、引数のないスパインの `Apply` ノードは `EmptyApplication` になる。$\\textsc{Redex}$ ではパラメータを後続の引数と衝突しない名前に替える："
 
-#: manual/design/stlc.md:116
+#: manual/design/stlc.md:122
+msgid ""
+"with $b\\{x \\mapsto x'\\}$ the checked bound renaming of the [syntax design](syntax.md); in both cases $\\lambda x.\\,b =_\\alpha \\lambda x'.\\,b\\{x \\mapsto x'\\}$ and $x' \\n"
+"otin \\mathrm{FV}(a_2, \\dots, a_n)$. With $n = 1$ there is nothing to rename and the second premise is $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$. $\\textsc{Sub}$ applies to every term except a lambda checked against an arrow; a lambda in inference position fails with `CannotInferLambda`. Type equality in $\\textsc{Sub}$ is syntactic, which is exact for simple types."
+msgstr ""
+"ここで $b\\{x \\mapsto x'\\}$ は [syntax の設計](syntax.md)の検査付き束縛名前替えである。どちらの場合も $\\lambda x.\\,b =_\\alpha \\lambda x'.\\,b\\{x \\mapsto x'\\}$ かつ $x' \\n"
+"otin \\mathrm{FV}(a_2, \\dots, a_n)$ である。$n = 1$ では名前替えするものはなく、第 2 前提は $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$ である。$\\textsc{Sub}$ は、矢印型に対して検査されるラムダを除くすべての項に適用される。推論位置にあるラムダは `CannotInferLambda` で失敗する。$\\textsc{Sub}$ における型の等しさは構文的であり、単純型に対しては厳密である。"
+
+#: manual/design/stlc.md:131
 msgid "J. Dunfield and N. Krishnaswami, \"Bidirectional typing\", ACM Computing Surveys 54(5), 2021."
 msgstr "J. Dunfield と N. Krishnaswami、\"Bidirectional typing\"、ACM Computing Surveys 54(5)、2021。"
 
-#: manual/design/stlc.md:118
+#: manual/design/stlc.md:133
 msgid "**Why the extra $\\textsc{Redex}$ rule.** Plain bidirectional typing cannot infer $(\\lambda x.\\,b)\\,a$, because the head is a lambda. The rule treats the redex like $\\mathsf{let}\\ x = a\\ \\mathsf{in}\\ b$: the argument's type is inferred and given to the parameter. It makes terms produced by substitution-style programming, such as $(\\lambda x.\\,x)\\,()$, checkable without annotations."
 msgstr "**追加の $\\textsc{Redex}$ 規則が必要な理由。** 素朴な双方向型付けでは、ヘッドがラムダであるため $(\\lambda x.\\,b)\\,a$ を推論できない。この規則は簡約基を $\\mathsf{let}\\ x = a\\ \\mathsf{in}\\ b$ のように扱う：引数の型を推論し、それを仮引数に与える。これにより、$(\\lambda x.\\,x)\\,()$ のような代入スタイルのプログラミングで生じる項を、注釈なしで検査できるようになる。"
 
-#: manual/design/stlc.md:125
+#: manual/design/stlc.md:140
 msgid "Soundness of the checker"
 msgstr "検査器の健全性"
 
-#: manual/design/stlc.md:127
-msgid ""
-"**Theorem (conditional soundness).** If `check(Σ, Γ, t, τ)` succeeds, then $\\Gamma \\vdash t : \\tau$; if `infer(Σ, Γ, t)` returns $\\tau$, then $\\Gamma \\vdash t : \\tau$ — provided every use of $\\textsc{Redex}$ satisfies $x \\n"
-"otin \\mathrm{FV}(a_2, \\dots, a_n)$. Without that proviso the checker is unsound, as the example below shows."
-msgstr ""
-"**定理（条件付き健全性）。** `check(Σ, Γ, t, τ)` が成功すれば $\\Gamma \\vdash t : \\tau$ であり、`infer(Σ, Γ, t)` が $\\tau$ を返せば $\\Gamma \\vdash t : \\tau$ である。ただし $\\textsc{Redex}$ のすべての使用が $x \\n"
-"otin \\mathrm{FV}(a_2, \\dots, a_n)$ を満たすものとする。この但し書きがなければ、下の例が示すように検査器は健全でない。"
+#: manual/design/stlc.md:142
+msgid "**Theorem (soundness).** If `check(Σ, Γ, t, τ)` succeeds, then $\\Gamma \\vdash t : \\tau$; if `infer(Σ, Γ, t)` returns $\\tau$, then $\\Gamma \\vdash t : \\tau$."
+msgstr "**定理（健全性）。** `check(Σ, Γ, t, τ)` が成功すれば $\\Gamma \\vdash t : \\tau$ であり、`infer(Σ, Γ, t)` が $\\tau$ を返せば $\\Gamma \\vdash t : \\tau$ である。"
 
-#: manual/design/stlc.md:133
-msgid "*Proof sketch.* Induction on the algorithmic derivation. $\\textsc{Lam}$ and the axioms map to their declarative counterparts; $\\textsc{Sub}$ is immediate; $\\textsc{App}$ is $n$ uses of the declarative application rule. For $\\textsc{Redex}$, invert the second premise: $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$ and $\\Gamma, x{:}\\sigma \\vdash a_i : \\tau_i$ for $i \\ge 2$. Then"
-msgstr "*証明の概略。* アルゴリズム的導出に関する帰納法による。$\\textsc{Lam}$ と公理は対応する宣言的規則に写る。$\\textsc{Sub}$ は自明である。$\\textsc{App}$ は宣言的な適用規則を $n$ 回使うことである。$\\textsc{Redex}$ については第 2 前提を反転する：$\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$ かつ $i \\ge 2$ について $\\Gamma, x{:}\\sigma \\vdash a_i : \\tau_i$ である。このとき"
+#: manual/design/stlc.md:146
+msgid "*Proof sketch.* Induction on the algorithmic derivation. $\\textsc{Lam}$ and the axioms map to their declarative counterparts; $\\textsc{Sub}$ is immediate; $\\textsc{App}$ is $n$ uses of the declarative application rule. For $\\textsc{Redex}$, write $b' = b\\{x \\mapsto x'\\}$. The second premise is a derivation for the smaller term $b'\\,a_2 \\cdots a_n$, so by induction $\\Gamma, x'{:}\\sigma \\vdash b'\\,a_2 \\cdots a_n : \\tau$, and the generation lemma for application gives types $\\tau_2, \\dots, \\tau_n$ with $\\Gamma, x'{:}\\sigma \\vdash b' : \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$ and $\\Gamma, x'{:}\\sigma \\vdash a_i : \\tau_i$ for $i \\ge 2$. Then"
+msgstr "*証明の概略。* アルゴリズム的導出に関する帰納法による。$\\textsc{Lam}$ と公理は対応する宣言的規則に写る。$\\textsc{Sub}$ は自明である。$\\textsc{App}$ は宣言的な適用規則を $n$ 回使うことである。$\\textsc{Redex}$ については $b' = b\\{x \\mapsto x'\\}$ と書く。第 2 前提はより小さな項 $b'\\,a_2 \\cdots a_n$ の導出であるので、帰納法により $\\Gamma, x'{:}\\sigma \\vdash b'\\,a_2 \\cdots a_n : \\tau$ であり、適用の生成補題により型 $\\tau_2, \\dots, \\tau_n$ があって $\\Gamma, x'{:}\\sigma \\vdash b' : \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$ かつ $i \\ge 2$ について $\\Gamma, x'{:}\\sigma \\vdash a_i : \\tau_i$ となる。このとき"
 
-#: manual/design/stlc.md:150
-msgid "The strengthening step is where the side condition is used, and the implementation does not enforce it: for $\\Gamma = x{:}B$,"
-msgstr "強化のステップが副条件を使う箇所であり、実装はそれを強制しない：$\\Gamma = x{:}B$ について、"
+#: manual/design/stlc.md:168
+msgid "The strengthening step is where the renaming is needed. For $\\Gamma = x{:}B$ the term"
+msgstr "強化のステップが名前替えの必要な箇所である。$\\Gamma = x{:}B$ について、項"
 
-#: manual/design/stlc.md:157
-msgid "has declarative type $B$ and no other (the outer $x$ has type $B$), but `infer` types the second argument in $\\Gamma, x{:}\\mathsf{Unit}$ and returns `Unit`. Hence `check` succeeds at `Unit` and fails at `B`, and `normalize_checked` at `Unit` returns `NormalForm(x, 2)`: a variable of type $B$ presented as a normal form of type `Unit`. `normalize_eta_long` rejects the term at both types with `TypeMismatch`, because its evaluator checks the arguments in the original context; it is incomplete here but not unsound."
-msgstr "は宣言的な型 $B$ を持ち、それ以外の型は持たない（外側の $x$ は型 $B$ を持つ）。しかし `infer` は 2 番目の引数を $\\Gamma, x{:}\\mathsf{Unit}$ で型付けし、`Unit` を返す。したがって `check` は `Unit` で成功し `B` で失敗し、`Unit` での `normalize_checked` は `NormalForm(x, 2)` を返す：型 $B$ の変数が型 `Unit` の正規形として提示される。`normalize_eta_long` はその評価器が元の文脈で引数を検査するので、どちらの型でもこの項を `TypeMismatch` で拒否する。ここでは完全ではないが、健全性は損なわない。"
+#: manual/design/stlc.md:175
+msgid "has declarative type $B$ and no other. Without the renaming, the trailing $x$ would be typed in $\\Gamma, x{:}\\mathsf{Unit}$ and the checker would answer `Unit`; versions before the fix did exactly that, and `check` accepted the term at `Unit`. With $x' = x_1$ the trailing $x$ keeps its type $B$, and `infer` returns $B$. The typed evaluator computes the type of a redex head with the same rule, so `normalize_eta_long` accepts the same terms as `check`."
+msgstr "は宣言的な型 $B$ を持ち、それ以外の型は持たない。名前替えがなければ、後続の $x$ は $\\Gamma, x{:}\\mathsf{Unit}$ で型付けされ、検査器は `Unit` と答えてしまう。修正前の版はまさにそうしており、`check` はこの項を `Unit` で受理していた。$x' = x_1$ とすれば後続の $x$ は型 $B$ を保ち、`infer` は $B$ を返す。型付き評価器は簡約基の先頭の型を同じ規則で計算するので、`normalize_eta_long` は `check` と同じ項を受理する。"
 
-#: manual/design/stlc.md:165
-msgid "[!WARNING] This is a soundness bug of `infer` and `check`, recorded in the correctness checklist and not yet fixed. Renaming the parameter apart from the free variables of $a_2, \\dots, a_n$ before extending the context, or typing $a_2, \\dots, a_n$ in $\\Gamma$ itself, would restore the theorem without its proviso."
-msgstr "[!WARNING] これは `infer` と `check` の健全性のバグであり、正しさのチェックリストに記録されているが、まだ修正されていない。文脈を拡張する前にパラメータを $a_2, \\dots, a_n$ の自由変数と衝突しない名前に替えるか、$a_2, \\dots, a_n$ を $\\Gamma$ そのもので型付けすれば、定理は但し書きなしで成り立つようになる。"
-
-#: manual/design/stlc.md:172
+#: manual/design/stlc.md:183
 msgid "**Completeness for normal forms.** If $t$ is beta-normal and $\\Gamma \\vdash t : \\tau$, then `check(Σ, Γ, t, τ)` succeeds. A beta-normal term is either a lambda, handled by $\\textsc{Lam}$, or a spine whose head is a variable, a constant or $()$; its type is determined by $\\Gamma$ or $\\Sigma$ and its arguments are again normal, so $\\textsc{App}$ and induction apply. Terms with redexes are accepted when each redex's first argument is inferable; $(\\lambda f.\\,f\\,())\\,(\\lambda y.\\,y)$ is rejected with `CannotInferLambda` although it is typable."
 msgstr "**正規形に対する完全性。** $t$ が β 正規で $\\Gamma \\vdash t : \\tau$ ならば、`check(Σ, Γ, t, τ)` は成功する。β 正規な項は、$\\textsc{Lam}$ が扱うラムダであるか、ヘッドが変数・定数・$()$ であるスパインである。その型は $\\Gamma$ または $\\Sigma$ によって決まり、引数もまた正規形であるので、$\\textsc{App}$ と帰納法が適用できる。簡約基を含む項は、各簡約基の最初の引数が推論可能であれば受理される。$(\\lambda f.\\,f\\,())\\,(\\lambda y.\\,y)$ は型が付くにもかかわらず `CannotInferLambda` で拒否される。"
 
-#: manual/design/stlc.md:181
-msgid "The checker terminates. Measure a call by the size of its term, and break ties by counting a `check` call above an `infer` call. $\\textsc{Sub}$ goes from `check` to `infer` on the same term, which lowers the measure; every other recursive call is on a strictly smaller term ($\\textsc{Redex}$ recurses on $b\\,a_2 \\cdots a_n$, which lacks the binder and $a_1$)."
-msgstr "検査器は停止する。呼び出しをその項の大きさで測り、同じ大きさでは `check` 呼び出しを `infer` 呼び出しより上に数える。$\\textsc{Sub}$ は同じ項について `check` から `infer` に移り、測度を下げる。それ以外の再帰呼び出しはすべて真に小さな項に対するものである（$\\textsc{Redex}$ は束縛子と $a_1$ を除いた $b\\,a_2 \\cdots a_n$ について再帰する）。"
+#: manual/design/stlc.md:192
+msgid "The checker terminates. Measure a call by the size of its term, and break ties by counting a `check` call above an `infer` call. $\\textsc{Sub}$ goes from `check` to `infer` on the same term, which lowers the measure; every other recursive call is on a strictly smaller term ($\\textsc{Redex}$ recurses on $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$, which lacks the binder and $a_1$; renaming does not change the size)."
+msgstr "検査器は停止する。呼び出しをその項の大きさで測り、同じ大きさでは `check` 呼び出しを `infer` 呼び出しより上に数える。$\\textsc{Sub}$ は同じ項について `check` から `infer` に移り、測度を下げる。それ以外の再帰呼び出しはすべて真に小さな項に対するものである（$\\textsc{Redex}$ は束縛子と $a_1$ を除いた $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ について再帰する。名前替えは大きさを変えない）。"
 
-#: manual/design/stlc.md:187
+#: manual/design/stlc.md:199
 msgid "Two normalizers with different jobs"
 msgstr "役割の異なる二つの正規化器"
 
-#: manual/design/stlc.md:189
+#: manual/design/stlc.md:201
 msgid "`normalize_checked` reuses the untyped normal-order beta-eta reducer of [utlc/lambda](utlc/lambda.md) after checking the type. Its value is that it is the *reference* semantics, with traces and step counts; it is step-bounded only because it is shared with the untyped calculus. By strong normalization it always ends in `NormalForm` for a large enough limit. Its normal forms are eta-*short*."
 msgstr "`normalize_checked` は型を検査した後、[utlc/lambda](utlc/lambda.md) の型なし正規順序 βη 簡約器を再利用する。その価値は、トレースとステップ数を伴う*参照*意味論である点にある。ステップ数に上限があるのは型なし計算と共有しているためにすぎない。強正規化性により、上限が十分大きければ必ず `NormalForm` で終わる。その正規形は η *短*形である。"
 
-#: manual/design/stlc.md:196
+#: manual/design/stlc.md:208
 msgid "`normalize_eta_long` is typed normalization by evaluation. It needs no limit, and it returns the canonical representative of the $\\beta\\eta$ class, so two well-typed terms are $\\beta\\eta$-equal iff their eta-long normal forms are alpha-equivalent: the normalizer decides conversion."
 msgstr "`normalize_eta_long` は型付きの評価による正規化（normalization by evaluation）である。上限を必要とせず、$\\beta\\eta$ 同値類の標準的な代表元を返すので、二つの well-typed な項が $\\beta\\eta$ 等しいのは、それらの η 長正規形が α同値であるとき、かつそのときに限る。すなわちこの正規化器は変換可能性を決定する。"
 
-#: manual/design/stlc.md:201
+#: manual/design/stlc.md:213
 msgid "Beta-normal, eta-long forms"
 msgstr "β正規・η長形式"
 
-#: manual/design/stlc.md:203
+#: manual/design/stlc.md:215
 msgid "Normal forms $\\mathit{Nf}^\\tau$ and neutral terms $\\mathit{Ne}$ are defined by type:"
 msgstr "正規形 $\\mathit{Nf}^\\tau$ と中立項 $\\mathit{Ne}$ は型ごとに定義される。"
 
-#: manual/design/stlc.md:215
+#: manual/design/stlc.md:227
 msgid "Every term of arrow type is a lambda (eta-long), and every application has a variable or a constant at its head (beta-normal). Neutral terms of type $\\mathsf{Unit}$ are kept: the eta law for the unit type ($t = ()$ for every $t : \\mathsf{Unit}$) is not implemented, so for $f : \\mathsf{Unit} \\to \\mathsf{Unit}$ and $u : \\mathsf{Unit}$ the terms $f\\,u$ and $f\\,()$ have different normal forms."
 msgstr "矢印型の項はすべてラムダであり（η 長）、すべての適用は頭部に変数または定数を持つ（β 正規）。$\\mathsf{Unit}$ 型の中立項はそのまま残される。unit 型の η 法則（すべての $t : \\mathsf{Unit}$ について $t = ()$）は実装されていないため、$f : \\mathsf{Unit} \\to \\mathsf{Unit}$ と $u : \\mathsf{Unit}$ に対して項 $f\\,u$ と $f\\,()$ は異なる正規形を持つ。"
 
-#: manual/design/stlc.md:222
+#: manual/design/stlc.md:234
 msgid "Typed normalization by evaluation"
 msgstr "型付きの評価による正規化"
 
-#: manual/design/stlc.md:224
+#: manual/design/stlc.md:236
 msgid "The semantic domain interprets each type:"
 msgstr "意味領域は各型を次のように解釈する。"
 
-#: manual/design/stlc.md:230
+#: manual/design/stlc.md:242
 msgid "where a closure stores a lambda body with its environment and its type, and a semantic neutral is a free variable, a constant, or a neutral applied to a value together with the value's type. Evaluation $\\llbracket t \\rrbracket\\rho$ maps variables through the environment, lambdas to closures, constants to neutrals, and applies closures by evaluating their bodies (call by value, which is safe because evaluation of typed terms terminates). Reflection $\\uparrow^\\tau$ embeds a neutral as a value; here it is the identity on neutrals, because all eta expansion is deferred to reification. Reification $\\downarrow^\\tau : V_\\tau \\to \\mathit{Nf}^\\tau$ is"
 msgstr "ここでクロージャはラムダ本体をその環境と型とともに保持し、意味的な中立項は自由変数、定数、または中立項を値に適用したもの（その値の型も併せて保持する）である。評価 $\\llbracket t \\rrbracket\\rho$ は変数を環境を通じて写し、ラムダをクロージャに、定数を中立項に写し、クロージャはその本体を評価することで適用する（値呼び。型付き項の評価は停止するので安全である）。反映 $\\uparrow^\\tau$ は中立項を値として埋め込む。ここでは中立項上の恒等写像である。η展開はすべて具象化（reification）まで遅延されるからである。具象化 $\\downarrow^\\tau : V_\\tau \\to \\mathit{Nf}^\\tau$ は次のとおりである。"
 
-#: manual/design/stlc.md:250
+#: manual/design/stlc.md:262
 msgid "and the normal form of $\\Gamma \\vdash t : \\tau$ is $\\downarrow^\\tau \\llbracket t \\rrbracket \\rho_\\Gamma$, where $\\rho_\\Gamma$ maps each $x{:}\\sigma \\in \\Gamma$ to $\\uparrow^\\sigma x$. Reifying at an arrow type applies the value to a fresh variable, which performs eta expansion; a neutral application records the domain type of its argument so that the argument can be reified at the right type later.[^bs]"
 msgstr "そして $\\Gamma \\vdash t : \\tau$ の正規形は $\\downarrow^\\tau \\llbracket t \\rrbracket \\rho_\\Gamma$ である。ここで $\\rho_\\Gamma$ は各 $x{:}\\sigma \\in \\Gamma$ を $\\uparrow^\\sigma x$ に写す。矢印型での具象化は値を新しい変数に適用し、これが η展開を行う。中立な適用は引数の定義域の型を記録しておき、後でその引数を正しい型で具象化できるようにする。[^bs]"
 
-#: manual/design/stlc.md:257
+#: manual/design/stlc.md:269
 msgid "U. Berger and H. Schwichtenberg, \"An inverse of the evaluation functional for typed λ-calculus\", LICS 1991. The type-directed presentation follows A. Abel, *Normalization by Evaluation: Dependent Types and Impredicativity*, habilitation thesis, 2013."
 msgstr "U. Berger and H. Schwichtenberg, \"An inverse of the evaluation functional for typed λ-calculus\", LICS 1991. 型主導の提示は A. Abel, *Normalization by Evaluation: Dependent Types and Impredicativity*, habilitation thesis, 2013 に従う。"
 
-#: manual/design/stlc.md:259
+#: manual/design/stlc.md:271
 msgid "**Correctness (sketch).** Define a Kripke logical relation $t \\mathrel{R_\\tau} d$ between terms and values, monotone under context extension:"
 msgstr "**正しさ（証明の概略）。** 項と値の間の Kripke 論理関係 $t \\mathrel{R_\\tau} d$ を、文脈の拡張について単調なものとして定義する。"
 
-#: manual/design/stlc.md:271
+#: manual/design/stlc.md:283
 msgid "By induction on $\\tau$ one proves two lemmas together: *reflection* ($t =_{\\beta\\eta} \\mathrm{quote}(n)$ implies $t \\mathrel{R_\\tau} \\uparrow^\\tau n$) and *reification* ($t \\mathrel{R_\\tau} d$ implies $t =_{\\beta\\eta} \\downarrow^\\tau d$). The arrow case of reification is the eta step:"
 msgstr "$\\tau$ に関する帰納法で二つの補題を同時に証明する。*反映*（$t =_{\\beta\\eta} \\mathrm{quote}(n)$ ならば $t \\mathrel{R_\\tau} \\uparrow^\\tau n$）と*具象化*（$t \\mathrel{R_\\tau} d$ ならば $t =_{\\beta\\eta} \\downarrow^\\tau d$）である。具象化の矢印型の場合が η ステップである。"
 
-#: manual/design/stlc.md:281
+#: manual/design/stlc.md:293
 msgid "using $x \\mathrel{R_\\sigma} \\uparrow^\\sigma x$ (reflection) and the definition of $R_{\\sigma \\to \\tau}$. The *fundamental lemma* states that $\\Gamma \\vdash t : \\tau$ and $\\gamma \\mathrel{R_\\Gamma} \\rho$ imply $t[\\gamma] \\mathrel{R_\\tau} \\llbracket t \\rrbracket \\rho$; it is proved by induction on the typing derivation, the lambda case using that beta-reduction is in $=_{\\beta\\eta}$. With $\\gamma$ the identity and $\\rho_\\Gamma$ (related by reflection), reification gives $t =_{\\beta\\eta} \\mathrm{nf}(t)$ (soundness). Completeness, that $\\beta\\eta$-equal terms have alpha-equivalent normal forms, needs a second argument: a partial equivalence relation on values, defined by induction on types like $R$, under which $\\llbracket t \\rrbracket$ and $\\llbracket t' \\rrbracket$ are related whenever $t =_{\\beta\\eta} t'$ (beta is function application in the model, and eta holds because reification always expands), and related values reify to the same normal form; Abel's thesis, cited above, gives the details. The relation $R$, read as a computability predicate, also shows that evaluation terminates on well-typed terms, which is why no fuel is needed."
 msgstr "ここでは $x \\mathrel{R_\\sigma} \\uparrow^\\sigma x$（反映）と $R_{\\sigma \\to \\tau}$ の定義を用いる。*基本補題*は、$\\Gamma \\vdash t : \\tau$ かつ $\\gamma \\mathrel{R_\\Gamma} \\rho$ ならば $t[\\gamma] \\mathrel{R_\\tau} \\llbracket t \\rrbracket \\rho$ であることを主張する。これは型導出に関する帰納法で証明され、ラムダの場合には β簡約が $=_{\\beta\\eta}$ に含まれることを用いる。$\\gamma$ を恒等代入とし $\\rho_\\Gamma$ を取ると（両者は反映によって関係づけられる）、具象化により $t =_{\\beta\\eta} \\mathrm{nf}(t)$（健全性）が得られる。完全性、すなわち $\\beta\\eta$ 等しい項が α 同値な正規形を持つことには、第二の論証が必要である：値の上の部分同値関係を $R$ と同様に型に関する帰納法で定義し、$t =_{\\beta\\eta} t'$ ならば $\\llbracket t \\rrbracket$ と $\\llbracket t' \\rrbracket$ が関係づけられ（β はモデルにおける関数適用であり、η は具象化が常に展開するので成り立つ）、関係づけられた値は同じ正規形に具象化されることを示す。詳細は上で引用した Abel の論文にある。関係 $R$ を計算可能性述語として読めば、well-typed な項上で評価が停止することも示され、これが燃料（fuel）を必要としない理由である。"
 
-#: manual/design/stlc.md:298
+#: manual/design/stlc.md:310
 msgid "Fresh names in readback"
 msgstr "読み戻しにおける新しい名前"
 
-#: manual/design/stlc.md:300
+#: manual/design/stlc.md:312
 msgid "Readback invents binder names with `fresh_name(\"x\", used)`, where `used` contains every name of the input term and context, the names in closure environments, and the names already introduced on the path. Generated names are therefore distinct from each other along a path and from all names of the input, and a neutral variable is never captured by a binder introduced later."
 msgstr "読み戻しは `fresh_name(\"x\", used)` によって束縛子の名前を生成する。ここで `used` は入力項と文脈のすべての名前、クロージャ環境内の名前、そして経路上ですでに導入された名前を含む。したがって生成された名前は同じ経路上で互いに異なり、入力のすべての名前とも異なるので、中立変数が後から導入される束縛子に捕獲されることはない。"
 
-#: manual/design/stlc.md:308
-msgid "`check` and `infer` terminate; on success, the term is declaratively typable at the reported type, *provided* no redex parameter occurs free in a later argument of its spine. Otherwise `check` can accept a wrong type (known issue above), and so can `normalize_checked`."
-msgstr "`check` と `infer` は停止する。成功した場合、その項は報告された型で宣言的に型付け可能である。*ただし*、どの簡約基のパラメータもそのスパインの後続の引数に自由に現れないものとする。そうでなければ `check` は誤った型を受理しうる（上の既知の問題）。`normalize_checked` も同様である。"
+#: manual/design/stlc.md:320
+msgid "`check` and `infer` terminate; on success, the term is declaratively typable at the reported type (soundness theorem). The regression tests include redexes whose parameter occurs free in a trailing argument."
+msgstr "`check` と `infer` は停止する。成功した場合、その項は報告された型で宣言的に型付け可能である（健全性定理）。回帰テストには、パラメータが後続の引数に自由に現れる簡約基が含まれる。"
 
-#: manual/design/stlc.md:312
+#: manual/design/stlc.md:323
 msgid "`check` accepts every well-typed beta-normal term."
 msgstr "`check` は well-typed な β 正規項をすべて受理する。"
 
-#: manual/design/stlc.md:313
-msgid "`normalize_eta_long` returns `Ok` exactly for terms that `check` accepts, except for terms hit by the known issue, which it rejects; its result is in $\\mathit{Nf}^\\tau$, is $\\beta\\eta$-equal to the input, and is the same (up to $=_\\alpha$) for $\\beta\\eta$-equal inputs."
-msgstr "`normalize_eta_long` はちょうど `check` が受理する項に対して `Ok` を返す。ただし既知の問題に当たる項は除き、それらは拒否する。その結果は $\\mathit{Nf}^\\tau$ に属し、入力と $\\beta\\eta$ 等しく、$\\beta\\eta$ 等しい入力に対しては（$=_\\alpha$ を除いて）同じである。"
+#: manual/design/stlc.md:324
+msgid "`normalize_eta_long` returns `Ok` exactly for terms that `check` accepts; its result is in $\\mathit{Nf}^\\tau$, is $\\beta\\eta$-equal to the input, and is the same (up to $=_\\alpha$) for $\\beta\\eta$-equal inputs."
+msgstr "`normalize_eta_long` はちょうど `check` が受理する項に対して `Ok` を返す。その結果は $\\mathit{Nf}^\\tau$ に属し、入力と $\\beta\\eta$ 等しく、$\\beta\\eta$ 等しい入力に対しては（$=_\\alpha$ を除いて）同じである。"
 
-#: manual/design/stlc.md:317
+#: manual/design/stlc.md:328
 msgid "`normalize_checked` returns `Err` before any reduction for ill-typed input."
 msgstr "型の誤った入力に対して、`normalize_checked` は簡約を行う前に `Err` を返す。"
 
-#: manual/design/stlc.md:318
+#: manual/design/stlc.md:329
 msgid "`NormalizationError` signals a violated internal invariant and is not produced for checked input."
 msgstr "`NormalizationError` は内部不変条件の違反を示し、検査済みの入力に対しては生じない。"
 
-#: manual/design/stlc.md:321
+#: manual/design/stlc.md:332
 msgid "The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing, eta expansion of open variables and of constants (including nested arrow types and higher-order arguments), and agreement of the two normalizers on small terms."
 msgstr "`src/stlc/stlc_test.mbt` のテストは、型付けと拒否、シャドーイング、開いた変数および定数の η展開（入れ子の矢印型や高階の引数を含む）、そして小さな項における二つの正規化器の一致を扱う。"
 
-#: manual/design/stlc.md:328
+#: manual/design/stlc.md:339
 msgid "**Church-style annotated lambdas.** Annotations would make inference complete but change the shared `Term` syntax; the bidirectional checker keeps terms unannotated."
 msgstr "**Church 流の注釈付きラムダ。** 注釈があれば型推論は完全になるが、共有の `Term` 構文を変えてしまう。双方向型検査器は項を注釈なしのまま保つ。"
 
-#: manual/design/stlc.md:331
+#: manual/design/stlc.md:342
 msgid "**Hindley–Milner inference.** Unification would infer types of unannotated lambdas, but polymorphism and type variables are beyond this calculus."
 msgstr "**Hindley–Milner 型推論。** 単一化により注釈なしラムダの型を推論できるが、多相性と型変数はこの計算の範囲外である。"
 
-#: manual/design/stlc.md:333
+#: manual/design/stlc.md:344
 msgid "**Fuel for typed NbE.** Unnecessary by strong normalization; the untyped [utlc/nbe](utlc/nbe.md) keeps fuel because it needs it."
 msgstr "**型付き NbE の燃料。** 強正規化性により不要である。型なしの [utlc/nbe](utlc/nbe.md) が燃料を保持するのは、それが必要だからである。"
 
-#: manual/design/stlc.md:335
+#: manual/design/stlc.md:346
 msgid "**Eta for the unit type.** Implementable by reifying every neutral of type $\\mathsf{Unit}$ as $()$; not done, so that neutrals stay observable. The decided equality is $\\beta\\eta$ for arrows only."
 msgstr "**unit 型の η。** $\\mathsf{Unit}$ 型のすべての中立項を $()$ として具象化すれば実装できるが、中立項を観測可能に保つため行っていない。決定される等価性は矢印型に対する $\\beta\\eta$ のみである。"
 
-#: manual/design/stlc.md:341
+#: manual/design/stlc.md:352
 msgid "Types are $b$, $\\mathsf{Unit}$ and arrows: no products, sums, polymorphism or dependent types."
 msgstr "型は $b$、$\\mathsf{Unit}$、矢印型のみである。直積、直和、多相性、依存型はない。"
 
-#: manual/design/stlc.md:343
+#: manual/design/stlc.md:354
 msgid "No unit eta; normal forms are eta-long for arrow types only."
 msgstr "unit 型の η はない。正規形が η 長であるのは矢印型についてのみである。"
 
-#: manual/design/stlc.md:344
+#: manual/design/stlc.md:355
 msgid "Constants are opaque: there are no delta rules."
 msgstr "定数は不透明である。δ 規則はない。"
 
-#: manual/design/stlc.md:345
-msgid "The $\\textsc{Redex}$ rule does not rename its parameter apart from later arguments, so `check` is unsound on redexes whose parameter occurs free in a later argument (known issue)."
-msgstr "$\\textsc{Redex}$ 規則は、そのパラメータを後続の引数と衝突しないよう名前替えしないので、パラメータが後続の引数に自由に現れる簡約基について `check` は健全でない（既知の問題）。"
-
-#: manual/design/stlc.md:348
+#: manual/design/stlc.md:356
 msgid "`normalize_checked` is bounded by a step limit because it reuses the untyped reducer."
 msgstr "`normalize_checked` は型なし簡約器を再利用するため、ステップ数の上限に縛られる。"
 
@@ -3335,8 +3331,8 @@ msgid "Eta recognises unary applications only."
 msgstr "η は単項適用のみを認識する。"
 
 #: manual/design/utlc/lambda.md:160
-msgid "An empty application `Apply(h, [])` is not a beta redex and hides any redex in its head position (see the [eval design](../eval.md)); build applications with `application` or with at least one argument."
-msgstr "空の適用 `Apply(h, [])` は β 簡約基ではなく、その先頭位置にある簡約基をすべて隠す（[eval の設計](../eval.md)を参照）。適用は `application` で、または少なくとも 1 つの引数で構築すること。"
+msgid "An empty application `Apply(h, [])` is read as $h$ when a redex is matched, but it is not removed from the term (see the [eval design](../eval.md))."
+msgstr "空の適用 `Apply(h, [])` は簡約基の照合で $h$ と読まれるが、項からは取り除かれない（[eval の設計](../eval.md)を参照）。"
 
 #: manual/design/utlc/lambda.md:163
 msgid "Constants (`Value`) have no reduction rules here; add domain rules with [rewrite](../rewrite.md) or [eval](../eval.md)."
@@ -3463,8 +3459,8 @@ msgid "For untyped NbE see K. Aehlig and F. Joachimski, \"Operational aspects of
 msgstr "型なし NbE については K. Aehlig and F. Joachimski, \"Operational aspects of untyped normalisation by evaluation\", Mathematical Structures in Computer Science 14, 2004 を、評価による強簡約については B. Grégoire and X. Leroy, \"A compiled implementation of strong reduction\", ICFP 2002 を参照。"
 
 #: manual/design/utlc/nbe.md:181
-msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term without empty applications, the two normal forms are equal after spine flattening. Evaluation reads `Apply(h, [])` as $h$, while the small-step reducer treats it as a stuck node (see the [eval design](../eval.md)), so on such terms NbE may reduce a redex that the small-step reducer never sees. The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices."
-msgstr "**スモールステップ簡約との一致。** 健全性と合流性により、空の適用を含まない同じスコープ整合な項に対して `@nbe.normalize` と `@debruijn.normalize` がともに正規形を返すときは常に、2 つの正規形はスパインの平坦化後に等しい。評価は `Apply(h, [])` を $h$ と読むが、スモールステップの簡約器はそれを行き詰まったノードとして扱う（[eval の設計](../eval.md)を参照）ので、そのような項では NbE はスモールステップの簡約器が決して見ない簡約基を簡約しうる。`src/utlc/nbe/nbe_test.mbt` のテストはこれに加え、$(\\lambda.\\,7)\\,\\Omega$ での遅延性、$\\Omega$ での燃料切れ、quote がレベルをインデックスに戻すことを検査する。"
+msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices."
+msgstr "**スモールステップ簡約との一致。** 健全性と合流性により、同じスコープ整合な項に対して `@nbe.normalize` と `@debruijn.normalize` がともに正規形を返すときは常に、2 つの正規形はスパインの平坦化（入れ子の適用をまとめ、空の適用を取り除くこと）の後に等しい。どちらも `Apply(h, [])` を $h$ と読む：評価はそのノードを消去し、スモールステップの簡約器は簡約基の照合でそれを透過して見る（[eval の設計](../eval.md)を参照）。`src/utlc/nbe/nbe_test.mbt` のテストはこれに加え、$(\\lambda.\\,7)\\,\\Omega$ での遅延性、$\\Omega$ での燃料切れ、quote がレベルをインデックスに戻すことを検査する。"
 
 #: manual/design/utlc/nbe.md:192
 msgid "Other invariants:"
@@ -3771,42 +3767,38 @@ msgid "`Context::extend`, `Telescope::extend` (`core`) and `Signature::extend`, 
 msgstr "`Context::extend`、`Telescope::extend`（`core`）と `Signature::extend`、`TypeContext::extend`（`stlc`）：`extend_with` を使うこと。`extend` は MoonBit 0.10 から予約語であり、古い名前は非推奨の別名として残っている。"
 
 #: manual/index.md:109
-msgid "[!WARNING] `@stlc.check` can accept a term at a wrong type when a lambda applied to several arguments has a parameter that occurs free in a later argument. The [stlc API](api/stlc.md) describes the case and how to avoid it."
-msgstr "[!WARNING] 複数の引数に適用されたラムダのパラメータが後続の引数に自由に現れると、`@stlc.check` は項を誤った型で受理しうる。[stlc API](api/stlc.md) がこの場合と回避方法を説明している。"
-
-#: manual/index.md:114
 msgid "Where to read next"
 msgstr "次に読むもの"
 
-#: manual/index.md:116
+#: manual/index.md:111
 msgid "New to the library: start with the [syntax tutorial](tutorial/syntax.md), then [substitution](tutorial/substitution.md) and [rewrite](tutorial/rewrite.md). These three are enough to manipulate terms with binders safely. For the lambda calculi, continue with [utlc/lambda](tutorial/utlc/lambda.md), [eval](tutorial/eval.md), [debruijn](tutorial/debruijn.md), [utlc/nbe](tutorial/utlc/nbe.md) and [stlc](tutorial/stlc.md) in that order."
 msgstr "ライブラリを初めて使う場合：[syntax チュートリアル](tutorial/syntax.md)から始め、次に [substitution](tutorial/substitution.md) と [rewrite](tutorial/rewrite.md) に進む。この 3 つで束縛子を含む項を安全に操作するには十分である。λ計算については、[utlc/lambda](tutorial/utlc/lambda.md)、[eval](tutorial/eval.md)、[debruijn](tutorial/debruijn.md)、[utlc/nbe](tutorial/utlc/nbe.md)、[stlc](tutorial/stlc.md) の順に進む。"
 
-#: manual/index.md:123
+#: manual/index.md:118
 msgid "Using it in a library: read the [adapter tutorial](tutorial/adapter.md), which implements `BindingSyntax` for a small expression language and uses generic substitution and rewriting on it. Keep the API pages at hand, and the [adapter design](design/adapter.md) for the laws your implementation must satisfy."
 msgstr "ライブラリの中で使う場合：[adapter チュートリアル](tutorial/adapter.md)を読む。そこでは小さな式言語に対して `BindingSyntax` を実装し、その上で汎用代入と書き換えを用いる。API ページを手元に置き、実装が満たすべき法則については [adapter の設計](design/adapter.md)を参照する。"
 
-#: manual/index.md:128
+#: manual/index.md:123
 msgid "Contributing: read the design pages; they define every operation mathematically, derive its laws, and state what each package deliberately does not do. The [correctness checklist](../../CORRECTNESS_CHECKLIST.md) records the audited invariants and known issues; changes to substitution, alpha-equivalence, shifting, beta instantiation, quote or fuel accounting must update it."
 msgstr "貢献する場合：設計ページを読むこと。各操作を数学的に定義し、その法則を導出し、各パッケージが意図的に行わないことを明記している。[正しさのチェックリスト](../../CORRECTNESS_CHECKLIST.md)は監査済みの不変条件と既知の問題を記録しており、代入、α同値、シフト、β のインスタンス化、quote、燃料の計上に対する変更ではこれを更新しなければならない。"
 
-#: manual/index.md:135
+#: manual/index.md:130
 msgid "Validation"
 msgstr "検証"
 
-#: manual/index.md:137
+#: manual/index.md:132
 msgid "Recommended release checks, from the repository root:"
 msgstr "リポジトリのルートから実行する、リリース前の推奨検査："
 
-#: manual/index.md:145
+#: manual/index.md:140
 msgid "`./run_test.sh` runs `moon test` on `wasm-gc`, `js`, `native` and `wasm`."
 msgstr "`./run_test.sh` は `wasm-gc`、`js`、`native`、`wasm` で `moon test` を実行する。"
 
-#: manual/index.md:147
+#: manual/index.md:142
 msgid "Used by"
 msgstr "利用先"
 
-#: manual/index.md:149
+#: manual/index.md:144
 msgid "Downstream Luna Flow repositories such as [luna-poly](https://lunaflow.cn/en/luna-poly/) and [floating](https://lunaflow.cn/en/floating/) build on these packages; their own manuals describe how."
 msgstr "[luna-poly](https://lunaflow.cn/en/luna-poly/) や [floating](https://lunaflow.cn/en/floating/) などの下流の Luna Flow リポジトリはこれらのパッケージの上に構築されている。その方法はそれぞれのマニュアルで説明されている。"
 
@@ -3916,8 +3908,8 @@ msgid "They agree in the following sense. Conversion to De Bruijn form commutes 
 msgstr "これらは次の意味で一致する。De Bruijn 形式への変換は α同値を除いて β ステップと可換であり（[debruijn の設計](design/debruijn.md)）、したがって β のみの名前付き簡約器（`@lambda.beta_rule` と `NormalOrder` を指定した `@eval.evaluate`）と名前なしの簡約器は対応するステップを踏む。NbE は β に関して健全であり、同じ正規化戦略を実現する（[utlc/nbe の設計](design/utlc/nbe.md)）。β 簡約は合流的なので、これら 3 つの β 正規形は、変換と適用スパインの平坦化の後に一致する。"
 
 #: manual/semantics.md:59
-msgid "`@lambda.normalize` also contracts eta redexes, so its result is the eta normal form of that common beta normal form, not the beta normal form itself: $\\lambda x.\\,f\\,x$ normalizes to $f$ there and to $\\lambda.\\,f\\,0$ in the other two ([utlc/lambda design](design/utlc/lambda.md)). All of this assumes terms without empty applications `Apply(h, [])`: the small-step reducers treat such a node as stuck, while NbE reads it as $h$ ([eval design](design/eval.md))."
-msgstr "`@lambda.normalize` は η 簡約基も縮約するので、その結果はその共通の β 正規形そのものではなく、その η 正規形である：$\\lambda x.\\,f\\,x$ はそちらでは $f$ に、他の 2 つでは $\\lambda.\\,f\\,0$ に正規化される（[utlc/lambda の設計](design/utlc/lambda.md)）。これらはすべて空の適用 `Apply(h, [])` を含まない項を前提とする：スモールステップの簡約器はそのようなノードを行き詰まったものとして扱うが、NbE はそれを $h$ と読む（[eval の設計](design/eval.md)）。"
+msgid "`@lambda.normalize` also contracts eta redexes, so its result is the eta normal form of that common beta normal form, not the beta normal form itself: $\\lambda x.\\,f\\,x$ normalizes to $f$ there and to $\\lambda.\\,f\\,0$ in the other two ([utlc/lambda design](design/utlc/lambda.md)). All normalizers read an empty application `Apply(h, [])` as $h$; NbE drops the node, the small-step reducers keep it, so spine flattening also drops empty applications ([eval design](design/eval.md))."
+msgstr "`@lambda.normalize` は η 簡約基も縮約するので、その結果はその共通の β 正規形そのものではなく、その η 正規形である：$\\lambda x.\\,f\\,x$ はそちらでは $f$ に、他の 2 つでは $\\lambda.\\,f\\,0$ に正規化される（[utlc/lambda の設計](design/utlc/lambda.md)）。すべての正規化器は空の適用 `Apply(h, [])` を $h$ と読む。NbE はそのノードを取り除き、スモールステップの簡約器は残すので、スパインの平坦化では空の適用も取り除く（[eval の設計](design/eval.md)）。"
 
 #: manual/semantics.md:67
 msgid "For typed terms, [stlc](design/stlc.md) adds a fourth normalizer: type-directed NbE, which needs no bound and returns beta-normal, eta-long forms, and therefore decides beta-eta equality of well-typed terms (eta for function types)."
@@ -3967,11 +3959,7 @@ msgstr "型なしの正規化は全域的ではない。発散する項に対し
 msgid "The simply typed calculus has base types, `Unit` and arrows only, and no eta law for `Unit`."
 msgstr "単純型付き計算体系には基本型、`Unit`、矢印型しかなく、`Unit` に対する η 則もない。"
 
-#: manual/semantics.md:98
-msgid "Known issue: `@stlc.infer` and `@stlc.check` type the later arguments of a redex $(\\lambda x.\\,b)\\,a_1\\,a_2 \\cdots$ with $x$ in scope, so they can accept a wrong type when $x$ occurs free in $a_2, \\dots$ ([stlc design](design/stlc.md))."
-msgstr "既知の問題：`@stlc.infer` と `@stlc.check` は簡約基 $(\\lambda x.\\,b)\\,a_1\\,a_2 \\cdots$ の後続の引数を $x$ がスコープにある状態で型付けするので、$x$ が $a_2, \\dots$ に自由に現れると誤った型を受理しうる（[stlc の設計](design/stlc.md)）。"
-
-#: manual/semantics.md:103
+#: manual/semantics.md:99
 msgid "The [correctness checklist](../../CORRECTNESS_CHECKLIST.md) lists the audited invariants, their evidence and the known issues."
 msgstr "[正しさのチェックリスト](../../CORRECTNESS_CHECKLIST.md)には、監査済みの不変条件、その根拠、既知の問題が列挙されている。"
 
@@ -4175,7 +4163,7 @@ msgstr "**繰り返しの代入を期待する。** `apply_once` は一度だけ
 #: manual/tutorial/debruijn.md:189
 #: manual/tutorial/eval.md:229
 #: manual/tutorial/rewrite.md:225
-#: manual/tutorial/stlc.md:255
+#: manual/tutorial/stlc.md:253
 #: manual/tutorial/substitution.md:209
 #: manual/tutorial/syntax.md:211
 #: manual/tutorial/utlc/lambda.md:191
@@ -4861,22 +4849,22 @@ msgid "**Unit eta.** A neutral term of type `Unit`, such as a variable `u : Unit
 msgstr "**Unit の eta。** `Unit` 型の中立項（たとえば変数 `u : Unit`）は `()` に置き換えられない。`f u` と `f ()` の正規形は異なる。"
 
 #: manual/tutorial/stlc.md:247
-msgid "**Parameter names in redexes with several arguments.** In $(\\lambda x.\\,b)\\,a_1\\,a_2$, if $a_2$ mentions a free variable also called $x$, `infer` types it with the parameter's type (known issue), and `check` may then accept the term at a type it does not have. Use a parameter name that does not occur free in the later arguments."
-msgstr "**複数の引数を持つ簡約基の仮引数名。** $(\\lambda x.\\,b)\\,a_1\\,a_2$ において、$a_2$ が同じく $x$ という名前の自由変数に言及していると、`infer` はそれに仮引数の型を付けてしまい（既知の問題）、その結果 `check` は項をそれが持たない型で受理しうる。後続の引数に自由に現れない仮引数名を使うこと。"
+msgid "**Empty applications.** `Apply(f, [])` is rejected with `EmptyApplication`, also inside a spine such as `Apply(Apply(f, []), [a])`. Build applications with at least one argument."
+msgstr "**空の適用。** `Apply(f, [])` は、`Apply(Apply(f, []), [a])` のようにスパインの内部にある場合も含めて `EmptyApplication` で拒否される。適用は少なくとも 1 つの引数で構築すること。"
 
-#: manual/tutorial/stlc.md:252
+#: manual/tutorial/stlc.md:250
 msgid "**Comparing normal forms with `==`.** Generated binders are `x`, `x_1`, …; compare with `@syntax.alpha_equal`."
 msgstr "**`==` による正規形の比較。** 生成される束縛子は `x`、`x_1`、… である。`@syntax.alpha_equal` で比較すること。"
 
-#: manual/tutorial/stlc.md:257
+#: manual/tutorial/stlc.md:255
 msgid "[stlc API](../api/stlc.md) for all types, errors and functions."
 msgstr "[stlc API](../api/stlc.md)：すべての型、エラー、関数。"
 
-#: manual/tutorial/stlc.md:258
+#: manual/tutorial/stlc.md:256
 msgid "[stlc design](../design/stlc.md) for the typing rules, the eta-long normal forms and the correctness argument of typed NbE."
 msgstr "[stlc の設計](../design/stlc.md)：型付け規則、η 長形式の正規形、型付き NbE の正しさの論証。"
 
-#: manual/tutorial/stlc.md:260
+#: manual/tutorial/stlc.md:258
 msgid "[utlc/nbe tutorial](utlc/nbe.md) for the untyped, fuel-bounded counterpart."
 msgstr "[utlc/nbe チュートリアル](utlc/nbe.md)：型なしで燃料に制限された対応物。"
 
@@ -5379,6 +5367,51 @@ msgstr "[utlc/nbe の設計](../../design/utlc/nbe.md)：意味領域と健全�
 #: manual/tutorial/utlc/nbe.md:203
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc チュートリアル](../stlc.md)：型付きの η 長形式 NbE。"
+
+#~ msgid "`reduce_once` does not validate its input. It returns `ScopeFailure` only when the redex it contracts contains a negative index; a negative index elsewhere is skipped like any other variable, and a dangling index is shifted like a free one (`(λ. 5) 1` reduces to `Bound(4)`). Call `validate` first if the term may be ill scoped."
+#~ msgstr "`reduce_once` は入力を検証しない。`ScopeFailure` を返すのは、縮約する簡約基が負のインデックスを含む場合だけである。それ以外の場所にある負のインデックスは他の変数と同様に読み飛ばされ、ぶら下がったインデックスは自由なインデックスと同様にシフトされる（`(λ. 5) 1` は `Bound(4)` に簡約される）。項のスコープが正しくない可能性がある場合は、先に `validate` を呼ぶこと。"
+
+#~ msgid "`ScopeFailure` carries the term on which the failing step was attempted and the number of steps taken before it."
+#~ msgstr "`ScopeFailure` は失敗したステップが試みられた項と、それ以前に行われたステップ数を保持する。"
+
+#~ msgid "It has the step-count contract of `@rewrite.normalize`: at most `max_steps` steps, and one extra `reduce_once` call to classify the final term. Like `reduce_once` it does not validate: on an ill-scoped input it may return `NormalForm` (for `Bind(Bound(-1))`, say), so `ScopeFailure` proves the input ill scoped but its absence proves nothing."
+#~ msgstr "`@rewrite.normalize` のステップ数の契約を持つ：最大 `max_steps` ステップと、最終項を分類するための追加の `reduce_once` 呼び出し 1 回である。`reduce_once` と同様に検証は行わない：スコープの正しくない入力に対して `NormalForm` を返すことがある（たとえば `Bind(Bound(-1))`）。したがって `ScopeFailure` は入力のスコープが正しくないことを証明するが、それが返らないことは何も証明しない。"
+
+#~ msgid "[!WARNING] When a lambda is applied to two or more arguments, `infer` types the remaining arguments in a context that already contains the lambda's parameter. If one of those arguments mentions a free variable with the same name as the parameter, it is typed with the parameter's type, and the checker can then *accept a wrong type*. With `x : B` in the context, `check` accepts $(\\lambda x.\\,\\lambda y.\\,y)\\;()\\;x$ at `Unit` and rejects it at its real type `B`; `normalize_checked` then returns `x`, a term of type `B`, as a normal form \"of type `Unit`\". `normalize_eta_long` rejects the term at both types. Until this is fixed, make sure the parameter of such a redex does not occur free in the later arguments (rename it, or apply the arguments one at a time)."
+#~ msgstr "[!WARNING] ラムダが二つ以上の引数に適用されると、`infer` は残りの引数を、すでにラムダのパラメータを含む文脈で型付けする。それらの引数のいずれかがパラメータと同じ名前の自由変数に言及していると、その変数はパラメータの型で型付けされ、検査器は*誤った型を受理*しうる。文脈に `x : B` があるとき、`check` は $(\\lambda x.\\,\\lambda y.\\,y)\\;()\\;x$ を `Unit` で受理し、本当の型 `B` では拒否する。そのうえ `normalize_checked` は型 `B` の項 `x` を「型 `Unit` の」正規形として返す。`normalize_eta_long` はどちらの型でもこの項を拒否する。修正されるまでは、そのような簡約基のパラメータが後続の引数に自由に現れないようにすること（パラメータの名前を変えるか、引数を一つずつ適用する）。"
+
+#~ msgid "The reducers check less. `reduce_once` looks at indices only inside the redex it contracts, through `instantiate`: a negative index elsewhere is passed over like a variable, and no operation except `validate` and `to_named` detects a dangling (too large) index, which `instantiate` shifts like a free one. Scope is checked once, by `validate`, not on every step."
+#~ msgstr "簡約器が検査するものはもっと少ない。`reduce_once` は、縮約する簡約基の内部のインデックスだけを `instantiate` を通して見る：それ以外の場所にある負のインデックスは変数と同様に素通りされ、`validate` と `to_named` 以外のどの操作もぶら下がった（大きすぎる）インデックスを検出しない。`instantiate` はそれを自由なインデックスと同様にシフトする。スコープは各ステップではなく、`validate` によって一度だけ検査される。"
+
+#~ msgid "`substitute_bound`, `instantiate`, `reduce_once` and `normalize` do not detect unbound indices, and the reducers ignore negative indices outside the redex they contract; call `validate` on untrusted input."
+#~ msgstr "`substitute_bound`、`instantiate`、`reduce_once`、`normalize` は束縛されていない添字を検出せず、簡約器は縮約する簡約基の外にある負の添字を無視する。信頼できない入力には `validate` を呼ぶこと。"
+
+#~ msgid "An empty application `Apply(h, [])` is not a redex and blocks any redex in its head position (`Apply(Apply(Bind(b), []), [a])` is in normal form for `reduce_once`), while [utlc/nbe](utlc/nbe.md) erases it. Build applications with at least one argument."
+#~ msgstr "空の適用 `Apply(h, [])` は簡約基ではなく、その先頭位置にある簡約基をすべて妨げる（`Apply(Apply(Bind(b), []), [a])` は `reduce_once` にとって正規形である）が、[utlc/nbe](utlc/nbe.md) はそれを消去する。適用は少なくとも 1 つの引数で構築すること。"
+
+#~ msgid "has declarative type $B$ and no other (the outer $x$ has type $B$), but `infer` types the second argument in $\\Gamma, x{:}\\mathsf{Unit}$ and returns `Unit`. Hence `check` succeeds at `Unit` and fails at `B`, and `normalize_checked` at `Unit` returns `NormalForm(x, 2)`: a variable of type $B$ presented as a normal form of type `Unit`. `normalize_eta_long` rejects the term at both types with `TypeMismatch`, because its evaluator checks the arguments in the original context; it is incomplete here but not unsound."
+#~ msgstr "は宣言的な型 $B$ を持ち、それ以外の型は持たない（外側の $x$ は型 $B$ を持つ）。しかし `infer` は 2 番目の引数を $\\Gamma, x{:}\\mathsf{Unit}$ で型付けし、`Unit` を返す。したがって `check` は `Unit` で成功し `B` で失敗し、`Unit` での `normalize_checked` は `NormalForm(x, 2)` を返す：型 $B$ の変数が型 `Unit` の正規形として提示される。`normalize_eta_long` はその評価器が元の文脈で引数を検査するので、どちらの型でもこの項を `TypeMismatch` で拒否する。ここでは完全ではないが、健全性は損なわない。"
+
+#~ msgid "[!WARNING] This is a soundness bug of `infer` and `check`, recorded in the correctness checklist and not yet fixed. Renaming the parameter apart from the free variables of $a_2, \\dots, a_n$ before extending the context, or typing $a_2, \\dots, a_n$ in $\\Gamma$ itself, would restore the theorem without its proviso."
+#~ msgstr "[!WARNING] これは `infer` と `check` の健全性のバグであり、正しさのチェックリストに記録されているが、まだ修正されていない。文脈を拡張する前にパラメータを $a_2, \\dots, a_n$ の自由変数と衝突しない名前に替えるか、$a_2, \\dots, a_n$ を $\\Gamma$ そのもので型付けすれば、定理は但し書きなしで成り立つようになる。"
+
+#~ msgid "`check` and `infer` terminate; on success, the term is declaratively typable at the reported type, *provided* no redex parameter occurs free in a later argument of its spine. Otherwise `check` can accept a wrong type (known issue above), and so can `normalize_checked`."
+#~ msgstr "`check` と `infer` は停止する。成功した場合、その項は報告された型で宣言的に型付け可能である。*ただし*、どの簡約基のパラメータもそのスパインの後続の引数に自由に現れないものとする。そうでなければ `check` は誤った型を受理しうる（上の既知の問題）。`normalize_checked` も同様である。"
+
+#~ msgid "The $\\textsc{Redex}$ rule does not rename its parameter apart from later arguments, so `check` is unsound on redexes whose parameter occurs free in a later argument (known issue)."
+#~ msgstr "$\\textsc{Redex}$ 規則は、そのパラメータを後続の引数と衝突しないよう名前替えしないので、パラメータが後続の引数に自由に現れる簡約基について `check` は健全でない（既知の問題）。"
+
+#~ msgid "An empty application `Apply(h, [])` is not a beta redex and hides any redex in its head position (see the [eval design](../eval.md)); build applications with `application` or with at least one argument."
+#~ msgstr "空の適用 `Apply(h, [])` は β 簡約基ではなく、その先頭位置にある簡約基をすべて隠す（[eval の設計](../eval.md)を参照）。適用は `application` で、または少なくとも 1 つの引数で構築すること。"
+
+#~ msgid "[!WARNING] `@stlc.check` can accept a term at a wrong type when a lambda applied to several arguments has a parameter that occurs free in a later argument. The [stlc API](api/stlc.md) describes the case and how to avoid it."
+#~ msgstr "[!WARNING] 複数の引数に適用されたラムダのパラメータが後続の引数に自由に現れると、`@stlc.check` は項を誤った型で受理しうる。[stlc API](api/stlc.md) がこの場合と回避方法を説明している。"
+
+#~ msgid "Known issue: `@stlc.infer` and `@stlc.check` type the later arguments of a redex $(\\lambda x.\\,b)\\,a_1\\,a_2 \\cdots$ with $x$ in scope, so they can accept a wrong type when $x$ occurs free in $a_2, \\dots$ ([stlc design](design/stlc.md))."
+#~ msgstr "既知の問題：`@stlc.infer` と `@stlc.check` は簡約基 $(\\lambda x.\\,b)\\,a_1\\,a_2 \\cdots$ の後続の引数を $x$ がスコープにある状態で型付けするので、$x$ が $a_2, \\dots$ に自由に現れると誤った型を受理しうる（[stlc の設計](design/stlc.md)）。"
+
+#~ msgid "**Parameter names in redexes with several arguments.** In $(\\lambda x.\\,b)\\,a_1\\,a_2$, if $a_2$ mentions a free variable also called $x$, `infer` types it with the parameter's type (known issue), and `check` may then accept the term at a type it does not have. Use a parameter name that does not occur free in the later arguments."
+#~ msgstr "**複数の引数を持つ簡約基の仮引数名。** $(\\lambda x.\\,b)\\,a_1\\,a_2$ において、$a_2$ が同じく $x$ という名前の自由変数に言及していると、`infer` はそれに仮引数の型を付けてしまい（既知の問題）、その結果 `check` は項をそれが持たない型で受理しうる。後続の引数に自由に現れない仮引数名を使うこと。"
 
 #~ msgid "Import it in `moon.pkg`:"
 #~ msgstr "`moon.pkg` でインポートする："

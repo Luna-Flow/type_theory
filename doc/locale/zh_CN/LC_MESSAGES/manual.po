@@ -249,8 +249,8 @@ msgstr "它是提升的 `Eq` 实现；新代码中请使用 `==`。"
 
 #: manual/api/core.md:332
 #: manual/api/core.md:334
-#: manual/api/stlc.md:283
-#: manual/api/stlc.md:285
+#: manual/api/stlc.md:296
+#: manual/api/stlc.md:298
 #: manual/api/syntax.md:329
 #: manual/api/syntax.md:331
 #: manual/index.md:103
@@ -258,7 +258,7 @@ msgid "Deprecated"
 msgstr "已弃用"
 
 #: manual/api/core.md:334
-#: manual/api/stlc.md:285
+#: manual/api/stlc.md:298
 #: manual/api/syntax.md:331
 msgid "Replacement"
 msgstr "替代项"
@@ -419,28 +419,28 @@ msgid "`reduce_once` performs one leftmost-outermost beta step."
 msgstr "`reduce_once` 执行一步最左最外 β 归约。"
 
 #: manual/api/debruijn.md:246
-msgid "A redex is `Apply(Bind(body), [a, ..rest])`; it becomes `instantiate(body, a)`, applied to `rest` if `rest` is not empty. The search order is the root, then the head, then the arguments from left to right, and binder bodies are entered. An empty application `Apply(h, [])` is not a redex, even when `h` is a `Bind`."
-msgstr "可约式形如 `Apply(Bind(body), [a, ..rest])`；它变为 `instantiate(body, a)`，若 `rest` 非空则再应用于 `rest`。搜索顺序为：根，然后头部，然后从左到右的各参数，并且会进入绑定子的体。空应用 `Apply(h, [])` 不是可约式，即使 `h` 是 `Bind` 也是如此。"
+msgid "A redex is `Apply(Bind(body), [a, ..rest])`; it becomes `instantiate(body, a)`, applied to `rest` if `rest` is not empty. An empty application `Apply(h, [])` is read as `h`, so a head wrapped in empty applications, as in `Apply(Apply(Bind(body), []), [a])`, still forms a redex; `Apply(Bind(body), [])` alone has no argument and is not one. The search order is the root, then the head, then the arguments from left to right, and binder bodies are entered."
+msgstr "可约式是 `Apply(Bind(body), [a, ..rest])`；它变为 `instantiate(body, a)`，若 `rest` 非空则再应用于 `rest`。空应用 `Apply(h, [])` 被读作 `h`，因此被空应用包裹的头部，如 `Apply(Apply(Bind(body), []), [a])`，仍然构成可约式；单独的 `Apply(Bind(body), [])` 没有参数，不是可约式。搜索顺序是根，然后是头部，然后从左到右是各参数，并且会进入绑定子的体。"
 
-#: manual/api/debruijn.md:252
-msgid "`reduce_once` does not validate its input. It returns `ScopeFailure` only when the redex it contracts contains a negative index; a negative index elsewhere is skipped like any other variable, and a dangling index is shifted like a free one (`(λ. 5) 1` reduces to `Bound(4)`). Call `validate` first if the term may be ill scoped."
-msgstr "`reduce_once` 不验证其输入。仅当它收缩的可约式含有负索引时，它才返回 `ScopeFailure`；其他位置的负索引会像其他变量一样被跳过，悬空索引会像自由索引一样被移位（`(λ. 5) 1` 归约为 `Bound(4)`）。如果项可能作用域不良，请先调用 `validate`。"
+#: manual/api/debruijn.md:254
+msgid "`reduce_once` validates the whole term first, as `validate` does: an ill-scoped term gives `ScopeFailure` with the first error in pre-order, wherever the bad index is, for example `ScopeFailure(NegativeIndex(index=-1))` for `Bind(Bound(-1))` and `ScopeFailure(UnboundIndex(index=5, depth=1))` for `(λ. 5) 1`. A well-scoped term never gives `ScopeFailure`."
+msgstr "`reduce_once` 先像 `validate` 一样验证整个项：作用域不良的项无论坏索引在何处，都会得到带有先序中第一个错误的 `ScopeFailure`，例如 `Bind(Bound(-1))` 得到 `ScopeFailure(NegativeIndex(index=-1))`，`(λ. 5) 1` 得到 `ScopeFailure(UnboundIndex(index=5, depth=1))`。良作用域的项永远不会得到 `ScopeFailure`。"
 
-#: manual/api/debruijn.md:260
+#: manual/api/debruijn.md:262
 msgid "`DbNormalizationResult[T]` is the outcome of bounded De Bruijn normalization."
 msgstr "`DbNormalizationResult[T]` 是有界 De Bruijn 范式化的结果。"
 
-#: manual/api/debruijn.md:271
-msgid "`ScopeFailure` carries the term on which the failing step was attempted and the number of steps taken before it."
-msgstr "`ScopeFailure` 携带尝试失败步骤时所在的项，以及在此之前已执行的步数。"
+#: manual/api/debruijn.md:273
+msgid "`ScopeFailure` carries the term that was found ill scoped, the error and the number of steps taken before it; `normalize` reports it only for its input, with `steps=0`."
+msgstr "`ScopeFailure` 携带被发现作用域不良的项、错误以及在此之前已执行的步数；`normalize` 只对其输入报告它，此时 `steps=0`。"
 
-#: manual/api/debruijn.md:276
+#: manual/api/debruijn.md:279
 msgid "`normalize` repeats `reduce_once` until no step applies, a step fails, or a step limit is reached."
 msgstr "`normalize` 重复执行 `reduce_once`，直到没有可执行的步骤、某一步失败或达到步数上限。"
 
-#: manual/api/debruijn.md:283
-msgid "It has the step-count contract of `@rewrite.normalize`: at most `max_steps` steps, and one extra `reduce_once` call to classify the final term. Like `reduce_once` it does not validate: on an ill-scoped input it may return `NormalForm` (for `Bind(Bound(-1))`, say), so `ScopeFailure` proves the input ill scoped but its absence proves nothing."
-msgstr "它遵循 `@rewrite.normalize` 的步数契约：最多 `max_steps` 步，并额外调用一次 `reduce_once` 来判定最终项。与 `reduce_once` 一样，它不做验证：对作用域不良的输入，它可能返回 `NormalForm`（例如对 `Bind(Bound(-1))`），因此 `ScopeFailure` 能证明输入作用域不良，但没有得到它并不能证明任何事。"
+#: manual/api/debruijn.md:286
+msgid "It has the step-count contract of `@rewrite.normalize`: at most `max_steps` steps, and one extra step attempt to classify the final term. It validates the input once: an ill-scoped term gives `ScopeFailure(term, error, steps=0)` without any step. Reducts of a well-scoped term are well scoped (see the [debruijn design](../design/debruijn.md)), so the later steps are not validated again, and the result is `ScopeFailure` exactly when the input is ill scoped."
+msgstr "它遵循 `@rewrite.normalize` 的步数契约：至多 `max_steps` 步，再加一次额外的步进尝试来判定最终项。输入只验证一次：作用域不良的项不执行任何步骤，直接得到 `ScopeFailure(term, error, steps=0)`。良作用域项的归约结果仍是良作用域的（见 [debruijn 设计](../design/debruijn.md)），因此后续步骤不再重新验证，且结果为 `ScopeFailure` 当且仅当输入作用域不良。"
 
 #: manual/api/eval.md:1
 msgid "eval API"
@@ -527,22 +527,22 @@ msgid "The result follows the contract of `@rewrite.StepResult`: `Reduced` repor
 msgstr "结果遵循 `@rewrite.StepResult` 的契约：`Reduced` 报告一个被重写的位置及其路径。对于 `NormalOrder`、`FullNormal` 和 `ApplicativeOrder`，`NoStep` 表示规则在任何位置都不适用。对于 `WeakHead`，`NoStep` 表示规则既不适用于根，也不适用于应用脊上的任何头部位置；此时该项相对于该规则处于弱头范式，但在绑定子之下或参数中仍可能包含可约式。"
 
 #: manual/api/eval.md:84
-msgid "With `@lambda.beta_rule`, a redex is an `Apply` whose head is literally a `Bind` and whose argument array is not empty. An empty application `Apply(h, [])` is never a redex and hides any redex in its position: in `Apply(Apply(Bind(x, b), []), [a])` no strategy contracts $(\\lambda x.\\,b)\\,a$. Build applications with at least one argument (for example with `@lambda.application`)."
-msgstr "使用 `@lambda.beta_rule` 时，可约式是头部字面上为 `Bind` 且参数数组非空的 `Apply`。空应用 `Apply(h, [])` 从不是可约式，并会遮住其所在位置上的任何可约式：在 `Apply(Apply(Bind(x, b), []), [a])` 中，没有任何策略会收缩 $(\\lambda x.\\,b)\\,a$。构造应用时请至少给出一个参数（例如使用 `@lambda.application`）。"
+msgid "With `@lambda.beta_rule`, a redex is an `Apply` with a non-empty argument array whose head is a `Bind`, possibly wrapped in empty applications `Apply(h, [])`, which are read as `h`. Every strategy therefore contracts $(\\lambda x.\\,b)\\,a$ in `Apply(Apply(Bind(x, b), []), [a])`, at the root."
+msgstr "对于 `@lambda.beta_rule`，可约式是参数数组非空、头部为 `Bind` 的 `Apply`；头部可以被空应用 `Apply(h, [])` 包裹，空应用被读作 `h`。因此每种策略都会在根部收缩 `Apply(Apply(Bind(x, b), []), [a])` 中的 $(\\lambda x.\\,b)\\,a$。"
 
-#: manual/api/eval.md:112
+#: manual/api/eval.md:110
 msgid "`evaluate` normalizes a term by repeating `reduce_once` with one strategy."
 msgstr "`evaluate` 通过以某个策略重复 `reduce_once` 来范式化一个项。"
 
-#: manual/api/eval.md:118
+#: manual/api/eval.md:116
 msgid "`evaluate(term, name, rule, strategy, max_steps)` is `@rewrite.normalize(term, t => reduce_once(t, name, rule, strategy), max_steps)`, with the same step-count contract: at most `max_steps` steps, and `NormalForm` only for a term on which the strategy finds no step."
 msgstr "`evaluate(term, name, rule, strategy, max_steps)` 即 `@rewrite.normalize(term, t => reduce_once(t, name, rule, strategy), max_steps)`，具有相同的步数契约：最多 `max_steps` 步，且仅当策略在某个项上找不到步骤时才返回 `NormalForm`。"
 
-#: manual/api/eval.md:145
+#: manual/api/eval.md:143
 msgid "`trace` normalizes like `evaluate` and records every step."
 msgstr "`trace` 像 `evaluate` 一样范式化，并记录每一步。"
 
-#: manual/api/eval.md:151
+#: manual/api/eval.md:149
 msgid "It is `@rewrite.trace` with the step function of the strategy. Every strategy reports its own input as `before`, so the trace satisfies the chaining invariants of `@rewrite.ReductionTrace`."
 msgstr "它就是带有该策略步进函数的 `@rewrite.trace`。每个策略都把自身的输入报告为 `before`，因此该轨迹满足 `@rewrite.ReductionTrace` 的链接不变式。"
 
@@ -824,8 +824,8 @@ msgid "the inferred type differs from the expected one."
 msgstr "推断出的类型与期望的类型不同。"
 
 #: manual/api/stlc.md:161
-msgid "`Apply(head, [])` has no argument."
-msgstr "`Apply(head, [])` 没有参数。"
+msgid "an application node, `Apply(head, [])`, has no argument."
+msgstr "一个应用节点 `Apply(head, [])` 没有参数。"
 
 #: manual/api/stlc.md:162
 msgid "reserved for De Bruijn scope failures; not produced by the current functions."
@@ -844,44 +844,44 @@ msgid "`infer` synthesizes the type of a term."
 msgstr "`infer` 合成项的类型。"
 
 #: manual/api/stlc.md:175
-msgid "The unit literal has type `Unit`, constants and variables have their declared types, and an application `f a_1 … a_n` has the result type of `f` after checking each argument against the corresponding domain. A lambda alone cannot be inferred (`CannotInferLambda`). A lambda applied directly to arguments is inferred by inferring the first argument's type and the body under that assumption."
-msgstr "单位字面量的类型是 `Unit`，常量和变量具有其声明的类型；对于应用 `f a_1 … a_n`，在将每个参数对照相应的定义域检查之后，其类型为 `f` 的结果类型。单独的 lambda 无法推断（`CannotInferLambda`）。直接应用于参数的 lambda 的推断方式是：先推断第一个参数的类型，再在该假设下推断体的类型。"
+msgid "The unit literal has type `Unit`, constants and variables have their declared types, and an application `f a_1 … a_n` has the result type of `f` after checking each argument against the corresponding domain. A lambda alone cannot be inferred (`CannotInferLambda`). A lambda applied directly to arguments, $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$, is inferred by inferring the type of $a_1$ and then typing $b\\,a_2 \\cdots a_n$ with $x$ given that type. If $x$ occurs free in $a_2, \\dots, a_n$, the parameter is first renamed to a fresh name, so those arguments keep the types they have in the context. An application with no arguments, at the root of a spine or nested in its head, gives `EmptyApplication`."
+msgstr "单位字面量的类型是 `Unit`，常量与变量具有其声明的类型，应用 `f a_1 … a_n` 在每个参数都对相应定义域检查之后，具有 `f` 的结果类型。单独的 lambda 无法推断（`CannotInferLambda`）。直接应用于参数的 lambda $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$ 的推断方式是：先推断 $a_1$ 的类型，再在 $x$ 具有该类型的前提下为 $b\\,a_2 \\cdots a_n$ 定型。若 $x$ 在 $a_2, \\dots, a_n$ 中自由出现，形参会先被改名为新名字，使这些参数保持它们在上下文中的类型。没有参数的应用，无论位于脊的根部还是嵌套在其头部，都会得到 `EmptyApplication`。"
 
-#: manual/api/stlc.md:184
+#: manual/api/stlc.md:188
 msgid "`check` verifies a term against a type."
 msgstr "`check` 将项对照类型进行检验。"
 
-#: manual/api/stlc.md:190
+#: manual/api/stlc.md:194
 msgid "A lambda checks against an arrow type by checking its body against the codomain, with the parameter given the domain. Every other term is inferred and compared with `==`; a difference gives `TypeMismatch`."
 msgstr "lambda 对照箭头类型进行检查时，会以定义域作为参数的类型，将体对照陪域进行检查。其他所有项都先推断类型，再用 `==` 比较；若不同则给出 `TypeMismatch`。"
 
-#: manual/api/stlc.md:213
-msgid "[!WARNING] When a lambda is applied to two or more arguments, `infer` types the remaining arguments in a context that already contains the lambda's parameter. If one of those arguments mentions a free variable with the same name as the parameter, it is typed with the parameter's type, and the checker can then *accept a wrong type*. With `x : B` in the context, `check` accepts $(\\lambda x.\\,\\lambda y.\\,y)\\;()\\;x$ at `Unit` and rejects it at its real type `B`; `normalize_checked` then returns `x`, a term of type `B`, as a normal form \"of type `Unit`\". `normalize_eta_long` rejects the term at both types. Until this is fixed, make sure the parameter of such a redex does not occur free in the later arguments (rename it, or apply the arguments one at a time)."
-msgstr "[!WARNING] 当 lambda 被应用于两个或更多参数时，`infer` 会在已经包含该 lambda 形参的上下文中为其余参数确定类型。如果其中某个参数提到了与该形参同名的自由变量，它就会被赋予该形参的类型，于是检查器可能*接受错误的类型*。当上下文中有 `x : B` 时，`check` 在 `Unit` 下接受 $(\\lambda x.\\,\\lambda y.\\,y)\\;()\\;x$，却在其真实类型 `B` 下拒绝它；随后 `normalize_checked` 把类型为 `B` 的项 `x` 作为“类型为 `Unit`”的范式返回。`normalize_eta_long` 在两个类型下都拒绝该项。在此问题修复之前，请确保这类可约式的形参不在后续参数中自由出现（重命名该形参，或者逐个应用参数）。"
+#: manual/api/stlc.md:217
+msgid "The trailing arguments of a redex are typed in the context of the redex, not under its parameter:"
+msgstr "可约式的后续参数在可约式的上下文中定型，而不是在其形参之下："
 
-#: manual/api/stlc.md:226
-#: manual/api/utlc/lambda.md:120
+#: manual/api/stlc.md:240
+#: manual/api/utlc/lambda.md:123
 #: manual/api/utlc/nbe.md:170
 msgid "Normalization"
 msgstr "范式化"
 
-#: manual/api/stlc.md:230
+#: manual/api/stlc.md:244
 msgid "`normalize_checked` checks a term against a type and then normalizes it with the untyped beta-eta reducer."
 msgstr "`normalize_checked` 将项对照类型进行检查，然后用无类型的 β-η 归约器对其范式化。"
 
-#: manual/api/stlc.md:237
-msgid "On a type error it returns `Err` without reducing. Otherwise it returns `Ok(@lambda.normalize(term, max_steps))`: normal-order beta-eta reduction with a step limit. Its normal forms are beta-normal and eta-*short* (for unary applications, see [`@lambda.eta_rule`](utlc/lambda.md)). Because every well-typed term is strongly normalizing, a large enough `max_steps` always gives `NormalForm`. The result is only as trustworthy as `check`; see the warning above."
-msgstr "遇到类型错误时，它返回 `Err` 而不进行归约。否则返回 `Ok(@lambda.normalize(term, max_steps))`：带步数上限的正规序 β-η 归约。其范式是 β-范式且 η-*短*的（针对一元应用，见 [`@lambda.eta_rule`](utlc/lambda.md)）。由于每个良类型项都是强范式化的，足够大的 `max_steps` 总会得到 `NormalForm`。结果的可信程度不超过 `check`；见上面的警告。"
+#: manual/api/stlc.md:251
+msgid "On a type error it returns `Err` without reducing. Otherwise it returns `Ok(@lambda.normalize(term, max_steps))`: normal-order beta-eta reduction with a step limit. Its normal forms are beta-normal and eta-*short* (for unary applications, see [`@lambda.eta_rule`](utlc/lambda.md)). Because every well-typed term is strongly normalizing, a large enough `max_steps` always gives `NormalForm`."
+msgstr "遇到类型错误时，它返回 `Err` 而不进行归约。否则返回 `Ok(@lambda.normalize(term, max_steps))`：带步数上限的正规序 β-η 归约。其范式是 β-范式且 η-*短*的（针对一元应用，见 [`@lambda.eta_rule`](utlc/lambda.md)）。由于每个良类型项都是强范式化的，足够大的 `max_steps` 总会得到 `NormalForm`。"
 
-#: manual/api/stlc.md:247
+#: manual/api/stlc.md:260
 msgid "`normalize_eta_long` checks a term against a type and returns its beta-normal, eta-long form, computed by typed normalization by evaluation."
 msgstr "`normalize_eta_long` 将项对照类型进行检查，并返回其 β-范式、η-长形式，该形式通过带类型的求值范式化计算得到。"
 
-#: manual/api/stlc.md:254
+#: manual/api/stlc.md:267
 msgid "In the result, every subterm of arrow type is a lambda, and every application has a variable or a constant at its head. Variables of the context and constants of the signature are kept as they are and eta-expanded according to their types. No step limit is needed: well-typed terms always normalize. New binder names are `x`, `x_1`, … chosen to avoid every name of the term and the context."
 msgstr "在结果中，每个箭头类型的子项都是 lambda，每个应用的头部都是变量或常量。上下文中的变量和签名中的常量保持原样，并按其类型进行 η-展开。不需要步数上限：良类型的项总能范式化。新的绑定子名称为 `x`、`x_1`、…，其选取会避开项和上下文中的所有名字。"
 
-#: manual/api/stlc.md:290
+#: manual/api/stlc.md:303
 msgid "The hidden method forms `not_equal` and `to_repr` on the types of this package are deprecated; use `!=` and `Repr(x)`."
 msgstr "本包中各类型上隐藏的方法形式 `not_equal` 和 `to_repr` 已弃用；请使用 `!=` 和 `Repr(x)`。"
 
@@ -1199,38 +1199,38 @@ msgid "`beta_rule` contracts a beta redex at the root of a term."
 msgstr "`beta_rule` 收缩项根部的 β 可约式。"
 
 #: manual/api/utlc/lambda.md:75
-msgid "For `Apply(Bind(x, body), [a, ..rest])` it returns the capture-avoiding substitution `body[x := a]`, applied to `rest` when `rest` is not empty. For every other term it returns `None`; in particular an empty application `Apply(Bind(x, body), [])` is not a redex, and neither is `Apply(Apply(Bind(x, body), []), [a])`, whose head is not literally a `Bind`. It works for any domain type `T`, because values are never inspected."
-msgstr "对于 `Apply(Bind(x, body), [a, ..rest])`，它返回避免捕获的代换 `body[x := a]`，当 `rest` 非空时再将其应用于 `rest`。对于其他所有项，它返回 `None`；特别地，空应用 `Apply(Bind(x, body), [])` 不是可约式，`Apply(Apply(Bind(x, body), []), [a])` 也不是，因为其头部字面上不是 `Bind`。它适用于任意领域类型 `T`，因为值从不被检查。"
+msgid "For `Apply(Bind(x, body), [a, ..rest])` it returns the capture-avoiding substitution `body[x := a]`, applied to `rest` when `rest` is not empty. For every other term it returns `None`. An empty application `Apply(h, [])` is read as `h`: `Apply(Apply(Bind(x, body), []), [a])` is a redex, while `Apply(Bind(x, body), [])` alone has no argument and is not. It works for any domain type `T`, because values are never inspected."
+msgstr "对于 `Apply(Bind(x, body), [a, ..rest])`，它返回避免捕获的代换 `body[x := a]`，若 `rest` 非空则再应用于 `rest`。对其他所有项返回 `None`。空应用 `Apply(h, [])` 被读作 `h`：`Apply(Apply(Bind(x, body), []), [a])` 是可约式，而单独的 `Apply(Bind(x, body), [])` 没有参数，不是可约式。由于从不检查值，它适用于任意领域类型 `T`。"
 
 #: manual/api/utlc/lambda.md:84
 msgid "`eta_rule` contracts an eta redex at the root of a term."
 msgstr "`eta_rule` 收缩项根部的 η 可约式。"
 
 #: manual/api/utlc/lambda.md:90
-msgid "For `Bind(x, Apply(f, [Variable(x)]))` with `x` not free in `f` it returns `f`; otherwise `None`. Only a unary application is an eta redex: `Bind(x, Apply(f, [a, Variable(x)]))` is not contracted."
-msgstr "对于 `x` 在 `f` 中不自由的 `Bind(x, Apply(f, [Variable(x)]))`，它返回 `f`；否则返回 `None`。只有一元应用才是 η 可约式：`Bind(x, Apply(f, [a, Variable(x)]))` 不会被收缩。"
+msgid "For `Bind(x, Apply(f, [Variable(x)]))` with `x` not free in `f` it returns `f`; otherwise `None`. Only a unary application is an eta redex: `Bind(x, Apply(f, [a, Variable(x)]))` is not contracted. Empty applications around the body or the argument are read as their head, so `Bind(x, Apply(Apply(f, [Apply(Variable(x), [])]), []))` is contracted to `f` as well."
+msgstr "对于 `x` 不在 `f` 中自由出现的 `Bind(x, Apply(f, [Variable(x)]))`，它返回 `f`；否则返回 `None`。只有一元应用才是 eta 可约式：`Bind(x, Apply(f, [a, Variable(x)]))` 不会被收缩。包裹体或参数的空应用被读作其头部，因此 `Bind(x, Apply(Apply(f, [Apply(Variable(x), [])]), []))` 同样收缩为 `f`。"
 
-#: manual/api/utlc/lambda.md:96
+#: manual/api/utlc/lambda.md:99
 msgid "`beta_eta_rule` tries `beta_rule` and, if it does not apply, `eta_rule`."
 msgstr "`beta_eta_rule` 先尝试 `beta_rule`，若不适用再尝试 `eta_rule`。"
 
-#: manual/api/utlc/lambda.md:102
+#: manual/api/utlc/lambda.md:105
 msgid "A term cannot be both a beta and an eta redex at the root (one is an `Apply`, the other a `Bind`), so the order only documents priority."
 msgstr "一个项不可能在根部既是 β 可约式又是 η 可约式（一个是 `Apply`，另一个是 `Bind`），因此顺序只是说明优先级。"
 
-#: manual/api/utlc/lambda.md:124
+#: manual/api/utlc/lambda.md:127
 msgid "`normalize` reduces a term to beta-eta normal form with normal-order reduction, within a step limit."
 msgstr "`normalize` 在步数上限内用正规序归约把项归约到 beta-eta 范式。"
 
-#: manual/api/utlc/lambda.md:131
+#: manual/api/utlc/lambda.md:134
 msgid "It is `@eval.evaluate(term, \"beta_eta\", beta_eta_rule, NormalOrder, max_steps)`: at each step it contracts the leftmost-outermost beta or eta redex, anywhere in the term, including under binders. `NormalForm(t, n)` means `t` has no beta or eta redex (in the unary sense above) and was reached in `n` steps; `StepLimitReached` means the limit was used up. Divergent terms such as $\\Omega$ always end with `StepLimitReached`."
 msgstr "它就是 `@eval.evaluate(term, \"beta_eta\", beta_eta_rule, NormalOrder, max_steps)`：每一步收缩项中任意位置（包括绑定子之下）最左最外的 beta 或 eta 可约式。`NormalForm(t, n)` 表示 `t` 没有 beta 或 eta 可约式（按上文的一元意义），且在 `n` 步内得到；`StepLimitReached` 表示步数上限已用完。发散项（例如 $\\Omega$）总是以 `StepLimitReached` 结束。"
 
-#: manual/api/utlc/lambda.md:148
+#: manual/api/utlc/lambda.md:151
 msgid "The first step is beta and produces $\\lambda y_1.\\,y\\,y_1$; the second is eta."
 msgstr "第一步是 beta，得到 $\\lambda y_1.\\,y\\,y_1$；第二步是 eta。"
 
-#: manual/api/utlc/lambda.md:150
+#: manual/api/utlc/lambda.md:153
 msgid "Because `normalize` also contracts eta redexes, its result can differ from the beta normal form that `@debruijn.normalize` and `@nbe.normalize` return: $\\lambda x.\\,f\\,x$ normalizes to $f$ here and stays $\\lambda.\\,f\\,0$ there. Use `@eval.evaluate` with `beta_rule` and `NormalOrder` when you need the beta normal form."
 msgstr "由于 `normalize` 还会收缩 η 可约式，其结果可能不同于 `@debruijn.normalize` 和 `@nbe.normalize` 返回的 β 范式：$\\lambda x.\\,f\\,x$ 在这里范式化为 $f$，在那两者中则保持为 $\\lambda.\\,f\\,0$。需要 β 范式时，请将 `@eval.evaluate` 与 `beta_rule` 和 `NormalOrder` 一起使用。"
 
@@ -1327,8 +1327,8 @@ msgid "It validates the term, evaluates it and quotes the result at level 0, wit
 msgstr "它校验项、对其求值并在层级 0 对结果 quote，三者共享同一预算。`NormalForm(t, c)`：`t` 是 beta 范式，用 `c` 个单位得到。`FuelExhausted(c)`：预算耗尽；该项可能发散，也可能需要更多燃料。`ScopeFailure`：输入含有悬空或负的索引。燃料检测先进行，因此燃料 `<= 0` 时，作用域不良的项给出 `FuelExhausted(consumed=0)`，而不是 `ScopeFailure`。"
 
 #: manual/api/utlc/nbe.md:201
-msgid "Applications in the result are unary: a normal form $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])` evaluates to the value of `h`, so it disappears from the result, while the small-step reducers keep it and do not reduce through it. The two normalizers agree after spines are flattened, for terms without empty applications."
-msgstr "结果中的应用是一元的：范式 $f\\,a\\,b$ 以 `Apply(Apply(f, [a]), [b])` 返回，而 `@debruijn.normalize` 保留输入的 n 元脊 `Apply(f, [a, b])`。空应用 `Apply(h, [])` 求值为 `h` 的值，因此会从结果中消失，而小步归约器会保留它，并且不会穿过它进行归约。对不含空应用的项，两个范式化器的结果在脊展平后一致。"
+msgid "Applications in the result are unary: a normal form $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])` evaluates to the value of `h`, so it disappears from the result; the small-step reducers also read it as `h` but leave the node in place. The two normalizers agree after spines are flattened, where flattening merges nested applications and drops empty ones."
+msgstr "结果中的应用是一元的：范式 $f\\,a\\,b$ 以 `Apply(Apply(f, [a]), [b])` 返回，而 `@debruijn.normalize` 保留输入的 n 元脊 `Apply(f, [a, b])`。空应用 `Apply(h, [])` 求值为 `h` 的值，因此从结果中消失；小步归约器同样把它读作 `h`，但保留该节点。两个范式化器在脊展平之后一致，其中展平是指合并嵌套的应用并去掉空应用。"
 
 #: manual/design/adapter.md:1
 msgid "adapter design"
@@ -1440,7 +1440,7 @@ msgstr "`generic_top_down_once` 满足 [rewrite 设计](rewrite.md)中的单可�
 #: manual/design/adapter.md:81
 #: manual/design/core.md:125
 #: manual/design/debruijn.md:105
-#: manual/design/eval.md:88
+#: manual/design/eval.md:89
 #: manual/design/rewrite.md:78
 #: manual/design/stlc.md:67
 #: manual/design/substitution.md:62
@@ -1500,10 +1500,10 @@ msgstr "下游变量类型通过单射（不同变量映射到不同名）转换
 
 #: manual/design/adapter.md:132
 #: manual/design/core.md:168
-#: manual/design/debruijn.md:226
-#: manual/design/eval.md:133
+#: manual/design/debruijn.md:231
+#: manual/design/eval.md:134
 #: manual/design/rewrite.md:171
-#: manual/design/stlc.md:306
+#: manual/design/stlc.md:318
 #: manual/design/substitution.md:130
 #: manual/design/syntax.md:234
 #: manual/design/utlc/lambda.md:116
@@ -1553,10 +1553,10 @@ msgstr "下游 adapter 应为自己的节点种类添加 (V1)–(V5) 的测试�
 
 #: manual/design/adapter.md:147
 #: manual/design/core.md:182
-#: manual/design/debruijn.md:242
-#: manual/design/eval.md:150
+#: manual/design/debruijn.md:249
+#: manual/design/eval.md:151
 #: manual/design/rewrite.md:196
-#: manual/design/stlc.md:326
+#: manual/design/stlc.md:337
 #: manual/design/substitution.md:329
 #: manual/design/syntax.md:254
 #: manual/design/utlc/lambda.md:142
@@ -1578,10 +1578,10 @@ msgstr "**在运行时检查定律。** 这些定律是关于所有节点的等�
 
 #: manual/design/adapter.md:158
 #: manual/design/core.md:195
-#: manual/design/debruijn.md:254
-#: manual/design/eval.md:164
+#: manual/design/debruijn.md:261
+#: manual/design/eval.md:165
 #: manual/design/rewrite.md:208
-#: manual/design/stlc.md:339
+#: manual/design/stlc.md:350
 #: manual/design/substitution.md:343
 #: manual/design/syntax.md:268
 #: manual/design/utlc/lambda.md:153
@@ -1895,146 +1895,146 @@ msgid "**Choice.** `shift` returns `Err(NegativeShift)` instead, and `shift`, `s
 msgstr "**选择。** `shift` 改为返回 `Err(NegativeShift)`，并且 `shift`、`substitute_bound`、`instantiate`、`validate` 和 `to_named` 在遇到任何负索引时都报告 `NegativeIndex`。下面的引理表明，从良作用域的输入出发不可能到达错误情形，因此 `Result` 对正确的调用者没有代价，而对错误的调用者则把无声的损坏变成数据。这遵循本库的规则：公共边界上预期的失败是结构化的值。"
 
 #: manual/design/debruijn.md:120
-msgid "The reducers check less. `reduce_once` looks at indices only inside the redex it contracts, through `instantiate`: a negative index elsewhere is passed over like a variable, and no operation except `validate` and `to_named` detects a dangling (too large) index, which `instantiate` shifts like a free one. Scope is checked once, by `validate`, not on every step."
-msgstr "归约器检查得更少。`reduce_once` 只通过 `instantiate` 查看它所收缩的可约式内部的索引：其他位置的负索引会像变量一样被略过；除 `validate` 和 `to_named` 外，没有任何操作检测悬空（过大的）索引，`instantiate` 会像对待自由索引一样对其移位。作用域只由 `validate` 检查一次，而不是每一步都检查。"
+msgid "The index operations work on open terms, so they cannot tell a dangling (too large) index from one that points at a binder outside the term: `instantiate` shifts it like a free index. The reducers work on whole terms and validate them. `reduce_once` runs `validate` before searching and returns its error as `ScopeFailure`; `normalize` validates its input once, and Lemma 2 below shows that the later terms need no check. The search itself is a private function that is also applied to binder bodies, whose indices may point at enclosing binders."
+msgstr "索引操作作用于开放项，因此无法区分悬空（过大）索引与指向项外绑定子的索引：`instantiate` 把它当作自由索引来移位。归约器作用于整个项并对其进行验证。`reduce_once` 在搜索前运行 `validate`，并把其错误作为 `ScopeFailure` 返回；`normalize` 只验证一次输入，下面的引理 2 说明后续的项无需检查。搜索本身是一个私有函数，也会应用于绑定子的体，因为体中的索引可能指向外层绑定子。"
 
-#: manual/design/debruijn.md:126
+#: manual/design/debruijn.md:129
 msgid "Instantiation never fails on well-scoped input"
 msgstr "实例化在良作用域输入上从不失败"
 
-#: manual/design/debruijn.md:128
+#: manual/design/debruijn.md:131
 msgid "**Lemma 1 (shift composition).** For $a, b \\ge 0$: $\\uparrow^{a}_{c}\\uparrow^{b}_{c} t = \\uparrow^{a+b}_{c} t$, and $\\uparrow^{0}_{c} t = t$."
 msgstr "**引理 1（移位复合）。** 对 $a, b \\ge 0$：$\\uparrow^{a}_{c}\\uparrow^{b}_{c} t = \\uparrow^{a+b}_{c} t$，且 $\\uparrow^{0}_{c} t = t$。"
 
-#: manual/design/debruijn.md:132
+#: manual/design/debruijn.md:135
 msgid "On an index $i$ relative to the current cutoff: if $i < c$ both sides leave it; if $i \\ge c$ then $i + b \\ge c$, so"
 msgstr "对相对于当前截断值的索引 $i$：若 $i < c$，两边都保持不变；若 $i \\ge c$，则 $i + b \\ge c$，因此"
 
-#: manual/design/debruijn.md:139
+#: manual/design/debruijn.md:142
 msgid "The binder case raises the cutoff on both sides alike. $\\square$"
 msgstr "绑定子情形在两边同样地提升截断值。$\\square$"
 
-#: manual/design/debruijn.md:141
+#: manual/design/debruijn.md:144
 msgid "**Lemma 2 (safety of the downward shift).** Let $\\lambda.\\,t$ and $s$ be well scoped at depth $n$. Then every free index of $u = [\\,0 \\mapsto \\uparrow^{1}_{0} s\\,]\\,t$ lies in $\\{1, \\dots, n\\}$, so $\\uparrow^{-1}_{0} u$ succeeds and is well scoped at depth $n$."
 msgstr "**引理 2（向下移位的安全性）。** 设 $\\lambda.\\,t$ 与 $s$ 在深度 $n$ 下良作用域。则 $u = [\\,0 \\mapsto \\uparrow^{1}_{0} s\\,]\\,t$ 的每个自由索引都位于 $\\{1, \\dots, n\\}$ 中，因此 $\\uparrow^{-1}_{0} u$ 成功，且在深度 $n$ 下良作用域。"
 
-#: manual/design/debruijn.md:146
+#: manual/design/debruijn.md:149
 msgid "The body $t$ is well scoped at depth $n + 1$, so its free indices lie in $\\{0, \\dots, n\\}$. Follow a free occurrence in $t$ under $k$ inner binders:"
 msgstr "体 $t$ 在深度 $n + 1$ 下良作用域，因此其自由索引位于 $\\{0, \\dots, n\\}$ 中。考察 $t$ 中位于 $k$ 个内层绑定子之下的一个自由出现："
 
-#: manual/design/debruijn.md:157
+#: manual/design/debruijn.md:160
 msgid "No free index $0$ remains, so the shift by $-1$ maps $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$ without a negative result. $\\square$"
 msgstr "不再有自由索引 $0$，因此按 $-1$ 的移位将 $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$ 映射过去，不会产生负值。$\\square$"
 
-#: manual/design/debruijn.md:160
-msgid "Hence `instantiate` and `reduce_once` return no `ScopeError` on well-scoped input, and a reduct of a well-scoped term is well scoped (subject reduction for scope). A `ScopeFailure` from `normalize` therefore always means that the input was ill scoped. The converse fails: `normalize(Bind(Bound(-1)), k)` returns `NormalForm`, and `(λ. 5) 1` reduces to `Bound(4)` without an error."
-msgstr "因此，`instantiate` 与 `reduce_once` 在良作用域的输入上不会返回 `ScopeError`，且良作用域的项的归约结果仍然良作用域（作用域的主体归约性质）。所以 `normalize` 返回的 `ScopeFailure` 总是意味着输入的作用域不良。反之不成立：`normalize(Bind(Bound(-1)), k)` 返回 `NormalForm`，而 `(λ. 5) 1` 会无错误地归约为 `Bound(4)`。"
+#: manual/design/debruijn.md:163
+msgid "Hence `instantiate` and `reduce_once` return no `ScopeError` on well-scoped input, and a reduct of a well-scoped term is well scoped (subject reduction for scope). Together with the validation of the input, `normalize` returns `ScopeFailure` exactly when its input is ill scoped, and then with `steps=0`: `Bind(Bound(-1))` gives `NegativeIndex(index=-1)` and `(λ. 5) 1` gives `UnboundIndex(index=5, depth=1)`."
+msgstr "因此，`instantiate` 与 `reduce_once` 在良作用域输入上不会返回 `ScopeError`，且良作用域项的归约结果仍是良作用域的（作用域的主体归约性）。结合对输入的验证，`normalize` 返回 `ScopeFailure` 当且仅当其输入作用域不良，此时 `steps=0`：`Bind(Bound(-1))` 给出 `NegativeIndex(index=-1)`，`(λ. 5) 1` 给出 `UnboundIndex(index=5, depth=1)`。"
 
-#: manual/design/debruijn.md:166
+#: manual/design/debruijn.md:170
 msgid "The detailed proofs, including the commutation of shifts with different cutoffs and the De Bruijn substitution lemma, are in the attachment:"
 msgstr "详细证明，包括不同截断值下移位的交换性以及 De Bruijn 代换引理，见附件："
 
-#: manual/design/debruijn.md:169
+#: manual/design/debruijn.md:173
 msgid "[Index lemmas for De Bruijn terms](../../attachments/design_debruijn_index-lemmas.typ)"
 msgstr "[De Bruijn 项的索引引理](../../attachments/design_debruijn_index-lemmas.typ)"
 
-#: manual/design/debruijn.md:171
+#: manual/design/debruijn.md:175
 msgid "Exact translations"
 msgstr "精确的互译"
 
-#: manual/design/debruijn.md:173
+#: manual/design/debruijn.md:177
 msgid "`from_named` keeps a stack of binder names and translates an occurrence of $x$ to the distance to the nearest binder of $x$, or to `Free(x)` if there is none. `to_named` invents a binder name with `fresh_name(\"x\", U)`, where $U$ contains the free names of the term and the names of the enclosing binders."
 msgstr "`from_named` 维护一个绑定子名称栈，把 $x$ 的一次出现翻译为到最近的 $x$ 绑定子的距离；若不存在这样的绑定子，则翻译为 `Free(x)`。`to_named` 用 `fresh_name(\"x\", U)` 生成绑定子名称，其中 $U$ 包含项的自由名称和外围绑定子的名称。"
 
-#: manual/design/debruijn.md:178
+#: manual/design/debruijn.md:182
 msgid "**Theorem (round trips).**"
 msgstr "**定理（往返）。**"
 
-#: manual/design/debruijn.md:180
+#: manual/design/debruijn.md:184
 msgid "$\\texttt{to\\_named}(\\texttt{from\\_named}(t)) =_\\alpha t$ for every named $t$."
 msgstr "对每个具名项 $t$，$\\texttt{to\\_named}(\\texttt{from\\_named}(t)) =_\\alpha t$。"
 
-#: manual/design/debruijn.md:181
+#: manual/design/debruijn.md:185
 msgid "$\\texttt{from\\_named}(\\texttt{to\\_named}(d)) = d$ for every well-scoped $d$."
 msgstr "对每个良作用域的 $d$，$\\texttt{from\\_named}(\\texttt{to\\_named}(d)) = d$。"
 
-#: manual/design/debruijn.md:184
+#: manual/design/debruijn.md:188
 msgid "For (2): along any path from the root, the names chosen by `to_named` are pairwise distinct and distinct from all free names, because each is chosen fresh for a set that contains the free names and every enclosing binder name. An occurrence of index $i$ under $n$ binders becomes the name of the binder at level $n - 1 - i$; translating back, the nearest binder with that name is that same binder (no other enclosing binder has the name), at distance $i$. A `Free(x)` becomes $x$, which is not the name of any binder on the path, so it translates back to `Free(x)`. (3) is de Bruijn's theorem; (1) follows from (2) and (3), since $\\texttt{from\\_named}(\\texttt{to\\_named}(\\texttt{from\\_named}(t))) = \\texttt{from\\_named}(t)$."
 msgstr "对于 (2)：沿从根出发的任一路径，`to_named` 选择的名称两两不同，且与所有自由名称不同，因为每个名称都是针对一个包含自由名称和每个外围绑定子名称的集合新选取的。位于 $n$ 个绑定子之下的索引 $i$ 的出现变为第 $n - 1 - i$ 层绑定子的名称；翻译回来时，具有该名称的最近绑定子正是同一个绑定子（其他外围绑定子都不具有该名称），距离为 $i$。`Free(x)` 变为 $x$，它不是路径上任何绑定子的名称，因此翻译回 `Free(x)`。(3) 是 de Bruijn 定理；(1) 由 (2) 和 (3) 得出，因为 $\\texttt{from\\_named}(\\texttt{to\\_named}(\\texttt{from\\_named}(t))) = \\texttt{from\\_named}(t)$。"
 
-#: manual/design/debruijn.md:194
+#: manual/design/debruijn.md:198
 msgid "Named and nameless beta agree"
 msgstr "具名与无名的 beta 归约一致"
 
-#: manual/design/debruijn.md:196
+#: manual/design/debruijn.md:200
 msgid "For named terms, beta is $(\\lambda x.\\,b)\\,a \\to b[x := a]$ with the capture-avoiding substitution of [substitution](substitution.md). Write $\\ulcorner b \\urcorner_{x}$ for the translation of $b$ with $x$ as the innermost binder. Then"
 msgstr "对于具名项，beta 归约为 $(\\lambda x.\\,b)\\,a \\to b[x := a]$，其中使用 [代换](substitution.md) 中避免捕获的代换。记 $\\ulcorner b \\urcorner_{x}$ 为以 $x$ 为最内层绑定子时 $b$ 的翻译。于是"
 
-#: manual/design/debruijn.md:205
+#: manual/design/debruijn.md:209
 msgid "by induction on $b$: an occurrence of $x$ under $k$ inner binders has index $k$ and receives $\\uparrow^{k}_{0}\\ulcorner a \\urcorner$, which is the translation of $a$ placed under those $k$ binders; at the root $\\ulcorner a \\urcorner$ has no free indices, so the shift changes nothing. Renaming of binders by the named substitution is invisible after translation by (3), and the translation lemma of the [substitution design](substitution.md) makes this induction precise. Since the translation also preserves the shape of terms, the beta-only named reducer (`@eval.evaluate` with `@lambda.beta_rule` and `NormalOrder`) and `reduce_once` choose the same leftmost-outermost redex, and one step commutes with translation up to $=_\\alpha$. (`@lambda.normalize` also contracts eta redexes, so its normal forms can be eta-shorter.) The test \"named and debruijn beta reduction agree modulo alpha\" checks an instance that needs renaming on the named side."
 msgstr "对 $b$ 归纳：位于 $k$ 个内层绑定子之下的 $x$ 的出现具有索引 $k$，并接收 $\\uparrow^{k}_{0}\\ulcorner a \\urcorner$，即置于这 $k$ 个绑定子之下的 $a$ 的翻译；在根处 $\\ulcorner a \\urcorner$ 没有自由索引，因此移位不改变任何东西。由 (3)，具名代换对绑定子的重命名在翻译后不可见，而 [substitution 设计](substitution.md)中的翻译引理使这一归纳变得严格。由于翻译还保持项的形状，仅含 β 的具名归约器（使用 `@lambda.beta_rule` 和 `NormalOrder` 的 `@eval.evaluate`）与 `reduce_once` 选择同一个最左最外的可约式，因此一步归约与翻译在 $=_\\alpha$ 意义下可交换。（`@lambda.normalize` 还会收缩 η 可约式，因此其范式可能更 η-短。）测试 \"named and debruijn beta reduction agree modulo alpha\" 检查了一个在具名一侧需要重命名的实例。"
 
-#: manual/design/debruijn.md:218
+#: manual/design/debruijn.md:222
 msgid "Spines and reduction order"
 msgstr "脊柱与归约顺序"
 
-#: manual/design/debruijn.md:220
-msgid "`Apply(head, args)` is a curried spine: `Apply(Bind(t), [a, ..rest])` is the redex $(\\lambda.\\,t)\\,a$ applied to `rest`, and a step contracts only the first argument. `reduce_once` searches root, head, arguments, and enters binders: it is the normal-order strategy of the [eval design](eval.md) on nameless terms, so the normalization theorem applies to `normalize`."
-msgstr "`Apply(head, args)` 是柯里化的脊柱：`Apply(Bind(t), [a, ..rest])` 是应用到 `rest` 的可约式 $(\\lambda.\\,t)\\,a$，一步只收缩第一个参数。`reduce_once` 依次搜索根、头部、参数，并进入绑定子：它是 [eval 设计](eval.md) 中的正规序策略在无名项上的版本，因此正规化定理适用于 `normalize`。"
+#: manual/design/debruijn.md:224
+msgid "`Apply(head, args)` is a curried spine: `Apply(Bind(t), [a, ..rest])` is the redex $(\\lambda.\\,t)\\,a$ applied to `rest`, and a step contracts only the first argument. An empty spine `Apply(h, [])` stands for $h$ itself, so empty applications around the `Bind` are looked through when a redex is matched. `reduce_once` searches root, head, arguments, and enters binders: it is the normal-order strategy of the [eval design](eval.md) on nameless terms, so the normalization theorem applies to `normalize`."
+msgstr "`Apply(head, args)` 是柯里化的脊：`Apply(Bind(t), [a, ..rest])` 是应用于 `rest` 的可约式 $(\\lambda.\\,t)\\,a$，一步只收缩第一个参数。空脊 `Apply(h, [])` 表示 $h$ 本身，因此匹配可约式时会透过包裹 `Bind` 的空应用。`reduce_once` 依次搜索根、头部、参数，并进入绑定子：这正是 [eval 设计](eval.md) 中的正规序策略在无名项上的版本，因此范式化定理适用于 `normalize`。"
 
-#: manual/design/debruijn.md:228
+#: manual/design/debruijn.md:233
 msgid "`validate(from_named(t)) == Ok(())` for every named $t$."
 msgstr "对每个具名项 $t$，`validate(from_named(t)) == Ok(())`。"
 
-#: manual/design/debruijn.md:229
+#: manual/design/debruijn.md:234
 msgid "Round trips (1)–(3) above; `==` on well-scoped `DbTerm` is alpha-equivalence."
 msgstr "上文的往返 (1)–(3)；良作用域的 `DbTerm` 上的 `==` 即 alpha 等价。"
 
-#: manual/design/debruijn.md:230
-msgid "Lemma 2: on well-scoped input `instantiate` succeeds and preserves scope; `reduce_once` never returns `ScopeFailure`, and every reduct is well scoped."
-msgstr "引理 2：在良作用域的输入上，`instantiate` 成功并保持作用域；`reduce_once` 从不返回 `ScopeFailure`，且每个归约结果都良作用域。"
+#: manual/design/debruijn.md:235
+msgid "Lemma 2: on well-scoped input `instantiate` succeeds and preserves scope; `reduce_once` never returns `ScopeFailure`, and every reduct is well scoped. On ill-scoped input `reduce_once` and `normalize` return `ScopeFailure` with the error `validate` reports."
+msgstr "引理 2：在良作用域输入上，`instantiate` 成功并保持作用域；`reduce_once` 从不返回 `ScopeFailure`，且每个归约结果都是良作用域的。在作用域不良的输入上，`reduce_once` 与 `normalize` 返回带有 `validate` 所报告错误的 `ScopeFailure`。"
 
-#: manual/design/debruijn.md:232
+#: manual/design/debruijn.md:239
 msgid "`reduce_once` satisfies the one-redex contract of [rewrite](rewrite.md), with rule name `\"beta\"`."
 msgstr "`reduce_once` 满足 [rewrite](rewrite.md) 的单可约式契约，规则名为 `\"beta\"`。"
 
-#: manual/design/debruijn.md:234
+#: manual/design/debruijn.md:241
 msgid "`shift(t, 0, c) == Ok(t)` for every `t` without negative indices, and shifts with one cutoff compose (Lemma 1)."
 msgstr "对每个不含负索引的 `t`，`shift(t, 0, c) == Ok(t)`，且同一截断值下的移位可以复合（引理 1）。"
 
-#: manual/design/debruijn.md:237
+#: manual/design/debruijn.md:244
 msgid "Cost: `shift` and `validate` are linear in the term size. `substitute_bound` costs $O(|t| + m \\cdot |s|)$ for $m$ occurrences of the index, because each inserted copy is shifted. A `reduce_once` step costs one search plus one `instantiate`."
 msgstr "代价：`shift` 与 `validate` 与项的大小成线性关系。对于索引的 $m$ 次出现，`substitute_bound` 的代价为 $O(|t| + m \\cdot |s|)$，因为每个插入的副本都要移位。一次 `reduce_once` 步骤的代价为一次搜索加一次 `instantiate`。"
 
-#: manual/design/debruijn.md:244
+#: manual/design/debruijn.md:251
 msgid "**Levels instead of indices in syntax.** Levels make weakening free but substitution under binders more complex; indices are the standard for syntax, and levels are used where they help (NbE)."
 msgstr "**在语法中使用层级而非索引。** 层级使弱化无需代价，但使绑定子下的代换更复杂；索引是语法表示的标准做法，层级则用在有帮助的地方（NbE）。"
 
-#: manual/design/debruijn.md:247
+#: manual/design/debruijn.md:254
 msgid "**Fully nameless free variables.** Free variables are kept as names so that open terms from users and downstream ASTs need no global variable numbering, and so that `to_named` can restore them exactly."
 msgstr "**完全无名的自由变量。** 自由变量保留为名称，这样来自用户和下游 AST 的开项无需全局变量编号，并且 `to_named` 可以精确地还原它们。"
 
-#: manual/design/debruijn.md:250
+#: manual/design/debruijn.md:257
 msgid "**Explicit substitutions.** A calculus with suspended substitutions avoids repeated shifting but complicates every consumer; the NbE package provides the efficient path instead."
 msgstr "**显式代换。** 带有挂起代换的演算可以避免重复移位，但会使每个使用者都变得复杂；高效路径改由 NbE 包提供。"
 
-#: manual/design/debruijn.md:256
+#: manual/design/debruijn.md:263
 msgid "Binder names are not preserved: `to_named` chooses `x`, `x_1`, …."
 msgstr "绑定子名称不会被保留：`to_named` 选择 `x`、`x_1`、…。"
 
-#: manual/design/debruijn.md:257
-msgid "`substitute_bound`, `instantiate`, `reduce_once` and `normalize` do not detect unbound indices, and the reducers ignore negative indices outside the redex they contract; call `validate` on untrusted input."
-msgstr "`substitute_bound`、`instantiate`、`reduce_once` 与 `normalize` 不检测未绑定的索引，且归约器会忽略其所收缩的可约式之外的负索引；对不可信输入请调用 `validate`。"
-
-#: manual/design/debruijn.md:260
-msgid "An empty application `Apply(h, [])` is not a redex and blocks any redex in its head position (`Apply(Apply(Bind(b), []), [a])` is in normal form for `reduce_once`), while [utlc/nbe](utlc/nbe.md) erases it. Build applications with at least one argument."
-msgstr "空应用 `Apply(h, [])` 不是可约式，并会阻塞其头部位置上的任何可约式（对 `reduce_once` 而言，`Apply(Apply(Bind(b), []), [a])` 是范式），而 [utlc/nbe](utlc/nbe.md) 会将其消除。构造应用时请至少给出一个参数。"
-
 #: manual/design/debruijn.md:264
+msgid "`shift`, `substitute_bound` and `instantiate` operate on open terms and do not detect dangling indices; the reducers and `validate` do."
+msgstr "`shift`、`substitute_bound` 与 `instantiate` 作用于开放项，不检测悬空索引；归约器和 `validate` 会检测。"
+
+#: manual/design/debruijn.md:266
+msgid "An empty application `Apply(h, [])` is read as `h` when a redex is matched, so it never hides a redex, but `reduce_once` leaves the node in place, whereas [utlc/nbe](utlc/nbe.md) drops it from its normal forms."
+msgstr "空应用 `Apply(h, [])` 在匹配可约式时被读作 `h`，因此从不隐藏可约式；但 `reduce_once` 保留该节点，而 [utlc/nbe](utlc/nbe.md) 会把它从范式中去掉。"
+
+#: manual/design/debruijn.md:269
 msgid "Only beta is implemented; there is no eta rule for De Bruijn terms."
 msgstr "只实现了 beta；De Bruijn 项没有 eta 规则。"
 
-#: manual/design/debruijn.md:265
+#: manual/design/debruijn.md:270
 msgid "Values are opaque; their contents are never shifted."
 msgstr "值是不透明的；其内容从不被移位。"
 
@@ -2083,118 +2083,118 @@ msgid "A term on which weak head reduction finds no beta redex is in *weak head 
 msgstr "弱头归约找不到 beta 可约式的项处于*弱头范式*：即抽象 $\\lambda x.\\,t$，或头部 $h$ 为变量或值的脊柱 $h\\,u_1 \\cdots u_n$。"
 
 #: manual/design/eval.md:49
-msgid "The n-ary encoding adds one degenerate case. The beta rule matches `Apply(Bind(x, b), [a, ..])` literally, so an application with an empty argument array, `Apply(h, [])`, is never a redex, and every strategy treats it as a stuck node: `Apply(Apply(Bind(x, b), []), [a])` is normal for all of them, although its curried reading $(\\lambda x.\\,b)\\,a$ is a redex. The characterizations of this page hold for terms without empty applications, which is what the constructors of [utlc/lambda](utlc/lambda.md) build."
-msgstr "n 元编码带来一种退化情形。β 规则字面地匹配 `Apply(Bind(x, b), [a, ..])`，因此参数数组为空的应用 `Apply(h, [])` 从不是可约式，每个策略都把它当作卡住的节点：`Apply(Apply(Bind(x, b), []), [a])` 对所有策略都是范式，尽管按柯里化读法 $(\\lambda x.\\,b)\\,a$ 是一个可约式。本页的刻画对不含空应用的项成立，而 [utlc/lambda](utlc/lambda.md) 的构造器构建的正是这样的项。"
+msgid "The n-ary encoding adds one degenerate case, the empty spine `Apply(h, [])`, whose curried reading is $h$ itself. The beta rule of [utlc/lambda](utlc/lambda.md) reads it that way: it looks through empty applications around the head, so `Apply(Apply(Bind(x, b), []), [a])` is the redex $(\\lambda x.\\,b)\\,a$ for every strategy. The node itself is not removed, so the characterization above holds up to empty applications: a weak head normal form is, after dropping them, an abstraction or a spine with a variable or a value at its head."
+msgstr "n 元编码多出一种退化情形：空脊 `Apply(h, [])`，其柯里化读法就是 $h$ 本身。[utlc/lambda](utlc/lambda.md) 的 beta 规则正是这样读的：它透过包裹头部的空应用，因此对每种策略而言，`Apply(Apply(Bind(x, b), []), [a])` 都是可约式 $(\\lambda x.\\,b)\\,a$。节点本身不会被去掉，因此上面的刻画在忽略空应用的意义下成立：弱头范式在去掉空应用后，是一个抽象，或是一个头部为变量或值的脊。"
 
-#: manual/design/eval.md:57
+#: manual/design/eval.md:58
 msgid "Classical results for beta"
 msgstr "beta 的经典结果"
 
-#: manual/design/eval.md:59
+#: manual/design/eval.md:60
 msgid "**Standardization and normalization.** If a term has a beta normal form, normal order reduction reaches it.[^normal] Normal order is therefore a *normalizing* strategy, which is why it is the default of the lambda calculus packages."
 msgstr "**标准化与正规化。** 若一个项具有 beta 范式，则正规序归约能到达它。[^normal] 因此正规序是一个*正规化*策略，这也是它成为 lambda 演算各包默认策略的原因。"
 
-#: manual/design/eval.md:64
+#: manual/design/eval.md:65
 msgid "Curry and Feys, *Combinatory Logic I*, 1958; see Barendregt, *The Lambda Calculus*, Theorem 13.2.2."
 msgstr "Curry 与 Feys，*Combinatory Logic I*，1958；另见 Barendregt，*The Lambda Calculus*，定理 13.2.2。"
 
-#: manual/design/eval.md:66
+#: manual/design/eval.md:67
 msgid "**Applicative order is not normalizing.** Let $\\Omega = (\\lambda w.\\,w\\,w)(\\lambda w.\\,w\\,w)$, which reduces only to itself. For $t = (\\lambda x.\\,y)\\,\\Omega$:"
 msgstr "**应用序不是正规化的。** 令 $\\Omega = (\\lambda w.\\,w\\,w)(\\lambda w.\\,w\\,w)$，它只归约到自身。对于 $t = (\\lambda x.\\,y)\\,\\Omega$："
 
-#: manual/design/eval.md:77
+#: manual/design/eval.md:78
 msgid "**Agreement.** Beta reduction is confluent (Church–Rosser), so whenever two strategies both reach a beta normal form, the normal forms are alpha-equivalent.[^cr] A strategy can fail to terminate, but it cannot produce a *different* normal form."
 msgstr "**一致性。** beta 归约是合流的（Church–Rosser），因此只要两个策略都到达 beta 范式，这些范式就是 alpha 等价的。[^cr] 一个策略可能不终止，但不可能产生*不同的*范式。"
 
-#: manual/design/eval.md:82
+#: manual/design/eval.md:83
 msgid "Church and Rosser, \"Some properties of conversion\", Transactions of the AMS 39, 1936."
 msgstr "Church 与 Rosser，\"Some properties of conversion\"，Transactions of the AMS 39，1936。"
 
-#: manual/design/eval.md:84
+#: manual/design/eval.md:85
 msgid "**Weak head reduction** computes the weak head normal form when one exists; it is the evaluation order of call-by-name languages and of the lazy evaluator in [utlc/nbe](utlc/nbe.md)."
 msgstr "**弱头归约** 在弱头范式存在时计算出它；它是传名调用语言以及 [utlc/nbe](utlc/nbe.md) 中惰性求值器的求值顺序。"
 
-#: manual/design/eval.md:90
+#: manual/design/eval.md:91
 msgid "Strategies as an enum"
 msgstr "以枚举表示策略"
 
-#: manual/design/eval.md:92
+#: manual/design/eval.md:93
 msgid "**Problem.** Callers need to select, record and compare strategies, for example in a test that checks two strategies against each other."
 msgstr "**问题。** 调用者需要选择、记录和比较策略，例如在一个将两个策略相互比对的测试中。"
 
-#: manual/design/eval.md:95
+#: manual/design/eval.md:96
 msgid "**Options.** Pass a step function; pass a trait object; select from an enum."
 msgstr "**备选方案。** 传入一个单步函数；传入一个 trait 对象；从枚举中选择。"
 
-#: manual/design/eval.md:97
+#: manual/design/eval.md:98
 msgid "**Choice.** `Strategy` is a plain enum with `Eq` and `Debug`, interpreted by `reduce_once`. Custom strategies remain possible: any step function can be given to `@rewrite.normalize` and `@rewrite.trace` directly. The enum covers the named strategies only."
 msgstr "**选择。** `Strategy` 是一个带有 `Eq` 和 `Debug` 的普通枚举，由 `reduce_once` 解释。自定义策略仍然可行：任何单步函数都可以直接传给 `@rewrite.normalize` 和 `@rewrite.trace`。该枚举只涵盖有名称的策略。"
 
-#: manual/design/eval.md:102
+#: manual/design/eval.md:103
 msgid "Each strategy is one traversal of rewrite"
 msgstr "每个策略都是 rewrite 的一种遍历"
 
-#: manual/design/eval.md:112
+#: manual/design/eval.md:113
 msgid "Pre-order search returns the first redex that no other redex contains, scanning head before arguments and arguments left to right; this is the leftmost-outermost redex, and the normal-form lemma of the [rewrite design](rewrite.md) shows that `NoStep` means \"normal\". Post-order search returns a redex that contains no other redex, the leftmost-innermost one. Weak head search follows only the spine, so its `NoStep` means \"weak head normal\" and nothing more."
 msgstr "前序搜索返回第一个不被其他可约式包含的可约式，先扫描头部再扫描参数，参数从左到右；这就是最左最外的可约式，而 [rewrite 设计](rewrite.md) 中的范式引理表明 `NoStep` 意味着\"已是范式\"。后序搜索返回一个不包含其他可约式的可约式，即最左最内的那个。弱头搜索只沿脊柱进行，因此它的 `NoStep` 仅意味着\"已是弱头范式\"，别无其他。"
 
-#: manual/design/eval.md:120
+#: manual/design/eval.md:121
 msgid "`evaluate` and `trace` add no reduction logic of their own: they pass the strategy's step function to `@rewrite.normalize` and `@rewrite.trace`. As a result, every strategy has a trace, and the step-count contract is the same for all of them."
 msgstr "`evaluate` 与 `trace` 不添加任何自身的归约逻辑：它们把策略的单步函数传给 `@rewrite.normalize` 和 `@rewrite.trace`。因此每个策略都有轨迹，且步数契约对所有策略都相同。"
 
-#: manual/design/eval.md:125
+#: manual/design/eval.md:126
 msgid "`FullNormal` as a separate name"
 msgstr "`FullNormal` 作为单独的名称"
 
-#: manual/design/eval.md:127
+#: manual/design/eval.md:128
 msgid "`FullNormal` maps to the same traversal as `NormalOrder` today. The distinction is one of intent: `NormalOrder` promises the order of steps (leftmost-outermost), `FullNormal` only promises a full normal form. Keeping two names lets a faster full normalizer replace `FullNormal` later without changing the meaning of `NormalOrder`."
 msgstr "目前 `FullNormal` 与 `NormalOrder` 映射到同一种遍历。区别在于意图：`NormalOrder` 承诺步骤的顺序（最左最外），`FullNormal` 只承诺得到完全范式。保留两个名称使得以后可以用更快的完全正规化器替换 `FullNormal`，而不改变 `NormalOrder` 的含义。"
 
-#: manual/design/eval.md:135
+#: manual/design/eval.md:136
 msgid "`reduce_once` satisfies the one-redex contract of [rewrite](rewrite.md) for every strategy; the reported path of a `WeakHead` step consists of `ApplyHead` frames only."
 msgstr "对每个策略，`reduce_once` 都满足 [rewrite](rewrite.md) 的单可约式契约；`WeakHead` 步骤报告的路径仅由 `ApplyHead` 帧组成。"
 
-#: manual/design/eval.md:138
+#: manual/design/eval.md:139
 msgid "For `NormalOrder`, `FullNormal` and `ApplicativeOrder`, `NoStep` means the rule applies nowhere; for `WeakHead`, nowhere on the head spine."
 msgstr "对于 `NormalOrder`、`FullNormal` 和 `ApplicativeOrder`，`NoStep` 意味着规则在任何位置都不适用；对于 `WeakHead`，意味着在头部脊柱上的任何位置都不适用。"
 
-#: manual/design/eval.md:140
+#: manual/design/eval.md:141
 msgid "With the beta rule, `evaluate(t, _, beta, NormalOrder, k)` returns `NormalForm` for every $t$ that has a beta normal form, provided $k$ is at least the length of the normal-order reduction (normalization theorem)."
 msgstr "使用 beta 规则时，对每个具有 beta 范式的 $t$，只要 $k$ 至少为正规序归约的长度，`evaluate(t, _, beta, NormalOrder, k)` 就返回 `NormalForm`（正规化定理）。"
 
-#: manual/design/eval.md:143
+#: manual/design/eval.md:144
 msgid "If two strategies both return `NormalForm` for a confluent rule, the terms are alpha-equivalent (Church–Rosser)."
 msgstr "若对于一个合流的规则两个策略都返回 `NormalForm`，则这些项是 alpha 等价的（Church–Rosser）。"
 
-#: manual/design/eval.md:146
+#: manual/design/eval.md:147
 msgid "The library's tests check named and De Bruijn beta steps against each other (`src/utlc/lambda/lambda_test.mbt`), and normal order against the NbE normalizer (`src/utlc/nbe/nbe_test.mbt`)."
 msgstr "库的测试将具名与 De Bruijn 的 beta 步骤相互比对（`src/utlc/lambda/lambda_test.mbt`），并将正规序与 NbE 正规化器相互比对（`src/utlc/nbe/nbe_test.mbt`）。"
 
-#: manual/design/eval.md:152
+#: manual/design/eval.md:153
 msgid "**Call-by-value evaluation to values.** The usual call-by-value strategy does not reduce under binders and treats abstractions as values. It is expressible as a custom step function, but it is not one of the full or head strategies the packages need, so it is not in the enum."
 msgstr "**求值到值的传值调用求值。** 通常的传值调用策略不在绑定子下归约，并把抽象视为值。它可以表达为自定义单步函数，但它不属于各包所需的完全策略或头部策略，因此不在枚举中。"
 
-#: manual/design/eval.md:156
+#: manual/design/eval.md:157
 msgid "**Head reduction under binders.** Head reduction (reducing $\\lambda \\bar x.\\,(\\lambda y.\\,b)\\,a\\,\\bar u$ under the outer binders) can be written as a custom step function; the enum keeps to the strategies that are used."
 msgstr "**绑定子下的头归约。** 头归约（在外层绑定子下归约 $\\lambda \\bar x.\\,(\\lambda y.\\,b)\\,a\\,\\bar u$）可以写成自定义单步函数；枚举只保留实际使用的策略。"
 
-#: manual/design/eval.md:160
+#: manual/design/eval.md:161
 msgid "**Strategy-specific result types.** All strategies share `NormalizationResult`, so callers can switch strategies without changing their code."
 msgstr "**策略专属的结果类型。** 所有策略共享 `NormalizationResult`，因此调用者无需修改代码即可切换策略。"
 
-#: manual/design/eval.md:166
+#: manual/design/eval.md:167
 msgid "Strategies only choose positions; they never rename, share or memoize. Repeated subterms are reduced separately."
 msgstr "策略只选择位置；它们从不重命名、共享或记忆化。重复的子项会被分别归约。"
 
-#: manual/design/eval.md:168
+#: manual/design/eval.md:169
 msgid "No call-by-value, call-by-need or head strategy is provided as a named case."
 msgstr "没有以具名情形提供传值调用、传需求调用或头部策略。"
 
-#: manual/design/eval.md:170
+#: manual/design/eval.md:171
 msgid "Termination is bounded by `max_steps`, not decided."
 msgstr "终止性由 `max_steps` 加以限制，而不是被判定。"
 
-#: manual/design/eval.md:171
+#: manual/design/eval.md:172
 msgid "`eval` works on `Term[T]` only; downstream ASTs use `@rewrite.generic_normalize`, which is top-down."
 msgstr "`eval` 只作用于 `Term[T]`；下游 AST 使用自顶向下的 `@rewrite.generic_normalize`。"
 
@@ -2475,174 +2475,170 @@ msgid "**Choice.** Two mutually recursive judgements: inference $\\Gamma \\vdash
 msgstr "**选择。** 两个相互递归的判断：推断 $\\Gamma \\vdash t \\Rightarrow \\tau$（`infer`）与检查 $\\Gamma \\vdash t \\Leftarrow \\tau$（`check`）。信息从期望类型流入 lambda，并从变量和常量流出到应用。[^bidir] 实现的规则为"
 
 #: manual/design/stlc.md:108
-msgid "In $\\textsc{App}$ the spine is flattened first, so nested `Apply` nodes are one application $h\\,a_1 \\cdots a_n$; if $h$ has fewer arrows than arguments the result is `ExpectedFunction`. In $\\textsc{Redex}$ with $n = 1$ the second premise is $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$. $\\textsc{Sub}$ applies to every term except a lambda checked against an arrow; a lambda in inference position fails with `CannotInferLambda`. Type equality in $\\textsc{Sub}$ is syntactic, which is exact for simple types."
-msgstr "在 $\\textsc{App}$ 中先展平脊柱，因此嵌套的 `Apply` 节点是一个应用 $h\\,a_1 \\cdots a_n$；若 $h$ 的箭头数少于参数数，结果为 `ExpectedFunction`。在 $n = 1$ 的 $\\textsc{Redex}$ 中，第二个前提为 $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$。$\\textsc{Sub}$ 适用于除\"对箭头类型检查的 lambda\"之外的每个项；处于推断位置的 lambda 以 `CannotInferLambda` 失败。$\\textsc{Sub}$ 中的类型相等是语法相等，这对简单类型是精确的。"
+msgid "In $\\textsc{App}$ the spine is flattened first, so nested `Apply` nodes are one application $h\\,a_1 \\cdots a_n$; if $h$ has fewer arrows than arguments the result is `ExpectedFunction`, and an `Apply` node of the spine without arguments gives `EmptyApplication`. In $\\textsc{Redex}$ the parameter is renamed apart from the trailing arguments:"
+msgstr "在 $\\textsc{App}$ 中先展平脊，使嵌套的 `Apply` 节点成为一个应用 $h\\,a_1 \\cdots a_n$；若 $h$ 的箭头数少于参数个数，结果为 `ExpectedFunction`，而脊中没有参数的 `Apply` 节点给出 `EmptyApplication`。在 $\\textsc{Redex}$ 中，形参被改名，使其与后续参数不冲突："
 
-#: manual/design/stlc.md:116
+#: manual/design/stlc.md:122
+msgid ""
+"with $b\\{x \\mapsto x'\\}$ the checked bound renaming of the [syntax design](syntax.md); in both cases $\\lambda x.\\,b =_\\alpha \\lambda x'.\\,b\\{x \\mapsto x'\\}$ and $x' \\n"
+"otin \\mathrm{FV}(a_2, \\dots, a_n)$. With $n = 1$ there is nothing to rename and the second premise is $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$. $\\textsc{Sub}$ applies to every term except a lambda checked against an arrow; a lambda in inference position fails with `CannotInferLambda`. Type equality in $\\textsc{Sub}$ is syntactic, which is exact for simple types."
+msgstr ""
+"其中 $b\\{x \\mapsto x'\\}$ 是 [syntax 设计](syntax.md) 中带检查的约束改名；两种情况下都有 $\\lambda x.\\,b =_\\alpha \\lambda x'.\\,b\\{x \\mapsto x'\\}$ 且 $x' \\n"
+"otin \\mathrm{FV}(a_2, \\dots, a_n)$。当 $n = 1$ 时无需改名，第二个前提为 $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$。$\\textsc{Sub}$ 适用于除对箭头类型检查的 lambda 之外的所有项；处于推断位置的 lambda 以 `CannotInferLambda` 失败。$\\textsc{Sub}$ 中的类型相等是语法相等，对简单类型而言是精确的。"
+
+#: manual/design/stlc.md:131
 msgid "J. Dunfield and N. Krishnaswami, \"Bidirectional typing\", ACM Computing Surveys 54(5), 2021."
 msgstr "J. Dunfield 与 N. Krishnaswami，\"Bidirectional typing\"，ACM Computing Surveys 54(5)，2021。"
 
-#: manual/design/stlc.md:118
+#: manual/design/stlc.md:133
 msgid "**Why the extra $\\textsc{Redex}$ rule.** Plain bidirectional typing cannot infer $(\\lambda x.\\,b)\\,a$, because the head is a lambda. The rule treats the redex like $\\mathsf{let}\\ x = a\\ \\mathsf{in}\\ b$: the argument's type is inferred and given to the parameter. It makes terms produced by substitution-style programming, such as $(\\lambda x.\\,x)\\,()$, checkable without annotations."
 msgstr "**为何需要额外的 $\\textsc{Redex}$ 规则。** 普通的双向类型检查无法推断 $(\\lambda x.\\,b)\\,a$，因为头部是 lambda。该规则把可约式当作 $\\mathsf{let}\\ x = a\\ \\mathsf{in}\\ b$ 处理：推断参数的类型并赋给形参。它使得由代换式编程产生的项（如 $(\\lambda x.\\,x)\\,()$）无需标注即可检查。"
 
-#: manual/design/stlc.md:125
+#: manual/design/stlc.md:140
 msgid "Soundness of the checker"
 msgstr "检查器的可靠性"
 
-#: manual/design/stlc.md:127
-msgid ""
-"**Theorem (conditional soundness).** If `check(Σ, Γ, t, τ)` succeeds, then $\\Gamma \\vdash t : \\tau$; if `infer(Σ, Γ, t)` returns $\\tau$, then $\\Gamma \\vdash t : \\tau$ — provided every use of $\\textsc{Redex}$ satisfies $x \\n"
-"otin \\mathrm{FV}(a_2, \\dots, a_n)$. Without that proviso the checker is unsound, as the example below shows."
-msgstr ""
-"**定理（条件可靠性）。** 若 `check(Σ, Γ, t, τ)` 成功，则 $\\Gamma \\vdash t : \\tau$；若 `infer(Σ, Γ, t)` 返回 $\\tau$，则 $\\Gamma \\vdash t : \\tau$——前提是 $\\textsc{Redex}$ 的每次使用都满足 $x \\n"
-"otin \\mathrm{FV}(a_2, \\dots, a_n)$。没有这一前提，检查器是不可靠的，如下例所示。"
+#: manual/design/stlc.md:142
+msgid "**Theorem (soundness).** If `check(Σ, Γ, t, τ)` succeeds, then $\\Gamma \\vdash t : \\tau$; if `infer(Σ, Γ, t)` returns $\\tau$, then $\\Gamma \\vdash t : \\tau$."
+msgstr "**定理（可靠性）。** 若 `check(Σ, Γ, t, τ)` 成功，则 $\\Gamma \\vdash t : \\tau$；若 `infer(Σ, Γ, t)` 返回 $\\tau$，则 $\\Gamma \\vdash t : \\tau$。"
 
-#: manual/design/stlc.md:133
-msgid "*Proof sketch.* Induction on the algorithmic derivation. $\\textsc{Lam}$ and the axioms map to their declarative counterparts; $\\textsc{Sub}$ is immediate; $\\textsc{App}$ is $n$ uses of the declarative application rule. For $\\textsc{Redex}$, invert the second premise: $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$ and $\\Gamma, x{:}\\sigma \\vdash a_i : \\tau_i$ for $i \\ge 2$. Then"
-msgstr "*证明概要。* 对算法推导进行归纳。$\\textsc{Lam}$ 与各公理对应到其声明式对应规则；$\\textsc{Sub}$ 是直接的；$\\textsc{App}$ 是 $n$ 次使用声明式应用规则。对于 $\\textsc{Redex}$，反演第二个前提：$\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$，且对 $i \\ge 2$ 有 $\\Gamma, x{:}\\sigma \\vdash a_i : \\tau_i$。于是"
+#: manual/design/stlc.md:146
+msgid "*Proof sketch.* Induction on the algorithmic derivation. $\\textsc{Lam}$ and the axioms map to their declarative counterparts; $\\textsc{Sub}$ is immediate; $\\textsc{App}$ is $n$ uses of the declarative application rule. For $\\textsc{Redex}$, write $b' = b\\{x \\mapsto x'\\}$. The second premise is a derivation for the smaller term $b'\\,a_2 \\cdots a_n$, so by induction $\\Gamma, x'{:}\\sigma \\vdash b'\\,a_2 \\cdots a_n : \\tau$, and the generation lemma for application gives types $\\tau_2, \\dots, \\tau_n$ with $\\Gamma, x'{:}\\sigma \\vdash b' : \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$ and $\\Gamma, x'{:}\\sigma \\vdash a_i : \\tau_i$ for $i \\ge 2$. Then"
+msgstr "*证明梗概。* 对算法推导作归纳。$\\textsc{Lam}$ 与公理对应到各自的声明式规则；$\\textsc{Sub}$ 是直接的；$\\textsc{App}$ 是对声明式应用规则的 $n$ 次使用。对于 $\\textsc{Redex}$，记 $b' = b\\{x \\mapsto x'\\}$。第二个前提是更小项 $b'\\,a_2 \\cdots a_n$ 的推导，因此由归纳假设得 $\\Gamma, x'{:}\\sigma \\vdash b'\\,a_2 \\cdots a_n : \\tau$，再由应用的生成引理得到类型 $\\tau_2, \\dots, \\tau_n$，使得 $\\Gamma, x'{:}\\sigma \\vdash b' : \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$，且对 $i \\ge 2$ 有 $\\Gamma, x'{:}\\sigma \\vdash a_i : \\tau_i$。于是"
 
-#: manual/design/stlc.md:150
-msgid "The strengthening step is where the side condition is used, and the implementation does not enforce it: for $\\Gamma = x{:}B$,"
-msgstr "强化步骤正是使用附加条件之处，而实现并不强制它：对于 $\\Gamma = x{:}B$，"
+#: manual/design/stlc.md:168
+msgid "The strengthening step is where the renaming is needed. For $\\Gamma = x{:}B$ the term"
+msgstr "加强这一步正是需要改名的地方。对于 $\\Gamma = x{:}B$，项"
 
-#: manual/design/stlc.md:157
-msgid "has declarative type $B$ and no other (the outer $x$ has type $B$), but `infer` types the second argument in $\\Gamma, x{:}\\mathsf{Unit}$ and returns `Unit`. Hence `check` succeeds at `Unit` and fails at `B`, and `normalize_checked` at `Unit` returns `NormalForm(x, 2)`: a variable of type $B$ presented as a normal form of type `Unit`. `normalize_eta_long` rejects the term at both types with `TypeMismatch`, because its evaluator checks the arguments in the original context; it is incomplete here but not unsound."
-msgstr "具有声明式类型 $B$ 且没有其他类型（外层 $x$ 的类型为 $B$），但 `infer` 在 $\\Gamma, x{:}\\mathsf{Unit}$ 中为第二个参数定型并返回 `Unit`。因此 `check` 在 `Unit` 下成功、在 `B` 下失败，而 `normalize_checked` 在 `Unit` 下返回 `NormalForm(x, 2)`：一个类型为 $B$ 的变量被当作类型为 `Unit` 的范式给出。`normalize_eta_long` 在两个类型下都以 `TypeMismatch` 拒绝该项，因为其求值器在原始上下文中检查参数；它在这里是不完备的，但并非不可靠。"
+#: manual/design/stlc.md:175
+msgid "has declarative type $B$ and no other. Without the renaming, the trailing $x$ would be typed in $\\Gamma, x{:}\\mathsf{Unit}$ and the checker would answer `Unit`; versions before the fix did exactly that, and `check` accepted the term at `Unit`. With $x' = x_1$ the trailing $x$ keeps its type $B$, and `infer` returns $B$. The typed evaluator computes the type of a redex head with the same rule, so `normalize_eta_long` accepts the same terms as `check`."
+msgstr "具有声明式类型 $B$，且没有其他类型。若不改名，后续的 $x$ 会在 $\\Gamma, x{:}\\mathsf{Unit}$ 中定型，检查器就会回答 `Unit`；修复之前的版本正是如此，`check` 曾在 `Unit` 下接受该项。取 $x' = x_1$ 后，后续的 $x$ 保持其类型 $B$，`infer` 返回 $B$。带类型的求值器用同一规则计算可约式头部的类型，因此 `normalize_eta_long` 与 `check` 接受相同的项。"
 
-#: manual/design/stlc.md:165
-msgid "[!WARNING] This is a soundness bug of `infer` and `check`, recorded in the correctness checklist and not yet fixed. Renaming the parameter apart from the free variables of $a_2, \\dots, a_n$ before extending the context, or typing $a_2, \\dots, a_n$ in $\\Gamma$ itself, would restore the theorem without its proviso."
-msgstr "[!WARNING] 这是 `infer` 和 `check` 的一个可靠性缺陷，已记录在正确性检查清单中，尚未修复。在扩展上下文之前将形参重命名，使其与 $a_2, \\dots, a_n$ 的自由变量相区别，或者直接在 $\\Gamma$ 中为 $a_2, \\dots, a_n$ 定型，都可以恢复该定理而无需其前提。"
-
-#: manual/design/stlc.md:172
+#: manual/design/stlc.md:183
 msgid "**Completeness for normal forms.** If $t$ is beta-normal and $\\Gamma \\vdash t : \\tau$, then `check(Σ, Γ, t, τ)` succeeds. A beta-normal term is either a lambda, handled by $\\textsc{Lam}$, or a spine whose head is a variable, a constant or $()$; its type is determined by $\\Gamma$ or $\\Sigma$ and its arguments are again normal, so $\\textsc{App}$ and induction apply. Terms with redexes are accepted when each redex's first argument is inferable; $(\\lambda f.\\,f\\,())\\,(\\lambda y.\\,y)$ is rejected with `CannotInferLambda` although it is typable."
 msgstr "**对范式的完备性。** 若 $t$ 是 beta 范式且 $\\Gamma \\vdash t : \\tau$，则 `check(Σ, Γ, t, τ)` 成功。beta 范式的项要么是由 $\\textsc{Lam}$ 处理的 lambda，要么是头部为变量、常量或 $()$ 的脊柱；其类型由 $\\Gamma$ 或 $\\Sigma$ 决定，其参数也是范式，因此可以应用 $\\textsc{App}$ 和归纳。当每个可约式的第一个参数都可推断时，含可约式的项会被接受；$(\\lambda f.\\,f\\,())\\,(\\lambda y.\\,y)$ 虽然可定型，却会以 `CannotInferLambda` 被拒绝。"
 
-#: manual/design/stlc.md:181
-msgid "The checker terminates. Measure a call by the size of its term, and break ties by counting a `check` call above an `infer` call. $\\textsc{Sub}$ goes from `check` to `infer` on the same term, which lowers the measure; every other recursive call is on a strictly smaller term ($\\textsc{Redex}$ recurses on $b\\,a_2 \\cdots a_n$, which lacks the binder and $a_1$)."
-msgstr "检查器必然终止。以调用所作用的项的大小作为度量，大小相同时把 `check` 调用计为高于 `infer` 调用。$\\textsc{Sub}$ 从 `check` 转到同一项上的 `infer`，这降低了度量；其他每个递归调用都作用于严格更小的项（$\\textsc{Redex}$ 递归处理 $b\\,a_2 \\cdots a_n$，它不含该绑定子和 $a_1$）。"
+#: manual/design/stlc.md:192
+msgid "The checker terminates. Measure a call by the size of its term, and break ties by counting a `check` call above an `infer` call. $\\textsc{Sub}$ goes from `check` to `infer` on the same term, which lowers the measure; every other recursive call is on a strictly smaller term ($\\textsc{Redex}$ recurses on $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$, which lacks the binder and $a_1$; renaming does not change the size)."
+msgstr "检查器会终止。以调用所处理项的大小作为度量，大小相同时把 `check` 调用计为高于 `infer` 调用。$\\textsc{Sub}$ 在同一项上从 `check` 转到 `infer`，度量下降；其他每个递归调用都作用于严格更小的项（$\\textsc{Redex}$ 在 $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ 上递归，它少了绑定子和 $a_1$；改名不改变大小）。"
 
-#: manual/design/stlc.md:187
+#: manual/design/stlc.md:199
 msgid "Two normalizers with different jobs"
 msgstr "职责不同的两个范式化器"
 
-#: manual/design/stlc.md:189
+#: manual/design/stlc.md:201
 msgid "`normalize_checked` reuses the untyped normal-order beta-eta reducer of [utlc/lambda](utlc/lambda.md) after checking the type. Its value is that it is the *reference* semantics, with traces and step counts; it is step-bounded only because it is shared with the untyped calculus. By strong normalization it always ends in `NormalForm` for a large enough limit. Its normal forms are eta-*short*."
 msgstr "`normalize_checked` 在检查类型之后，复用 [utlc/lambda](utlc/lambda.md) 中无类型的正规序 β-η 归约器。它的价值在于它是*参考*语义，带有归约轨迹和步数统计；它之所以有步数上限，只是因为它与无类型演算共用。由强范式化性，只要上限足够大，它总会以 `NormalForm` 结束。它给出的范式是 η-*短*的。"
 
-#: manual/design/stlc.md:196
+#: manual/design/stlc.md:208
 msgid "`normalize_eta_long` is typed normalization by evaluation. It needs no limit, and it returns the canonical representative of the $\\beta\\eta$ class, so two well-typed terms are $\\beta\\eta$-equal iff their eta-long normal forms are alpha-equivalent: the normalizer decides conversion."
 msgstr "`normalize_eta_long` 是带类型的求值范式化（normalization by evaluation）。它不需要上限，并返回 $\\beta\\eta$ 等价类的规范代表元，因此两个良类型项 $\\beta\\eta$-相等当且仅当它们的 η-长范式 α-等价：该范式化器判定了可转换性。"
 
-#: manual/design/stlc.md:201
+#: manual/design/stlc.md:213
 msgid "Beta-normal, eta-long forms"
 msgstr "β-范式、η-长形式"
 
-#: manual/design/stlc.md:203
+#: manual/design/stlc.md:215
 msgid "Normal forms $\\mathit{Nf}^\\tau$ and neutral terms $\\mathit{Ne}$ are defined by type:"
 msgstr "范式 $\\mathit{Nf}^\\tau$ 与中性项 $\\mathit{Ne}$ 按类型定义："
 
-#: manual/design/stlc.md:215
+#: manual/design/stlc.md:227
 msgid "Every term of arrow type is a lambda (eta-long), and every application has a variable or a constant at its head (beta-normal). Neutral terms of type $\\mathsf{Unit}$ are kept: the eta law for the unit type ($t = ()$ for every $t : \\mathsf{Unit}$) is not implemented, so for $f : \\mathsf{Unit} \\to \\mathsf{Unit}$ and $u : \\mathsf{Unit}$ the terms $f\\,u$ and $f\\,()$ have different normal forms."
 msgstr "每个箭头类型的项都是 lambda（η-长），每个应用的头部都是变量或常量（β-范式）。$\\mathsf{Unit}$ 类型的中性项会被保留：单位类型的 η 律（对每个 $t : \\mathsf{Unit}$ 有 $t = ()$）没有实现，因此对 $f : \\mathsf{Unit} \\to \\mathsf{Unit}$ 和 $u : \\mathsf{Unit}$，项 $f\\,u$ 与 $f\\,()$ 的范式不同。"
 
-#: manual/design/stlc.md:222
+#: manual/design/stlc.md:234
 msgid "Typed normalization by evaluation"
 msgstr "带类型的求值范式化"
 
-#: manual/design/stlc.md:224
+#: manual/design/stlc.md:236
 msgid "The semantic domain interprets each type:"
 msgstr "语义域对每个类型的解释为："
 
-#: manual/design/stlc.md:230
+#: manual/design/stlc.md:242
 msgid "where a closure stores a lambda body with its environment and its type, and a semantic neutral is a free variable, a constant, or a neutral applied to a value together with the value's type. Evaluation $\\llbracket t \\rrbracket\\rho$ maps variables through the environment, lambdas to closures, constants to neutrals, and applies closures by evaluating their bodies (call by value, which is safe because evaluation of typed terms terminates). Reflection $\\uparrow^\\tau$ embeds a neutral as a value; here it is the identity on neutrals, because all eta expansion is deferred to reification. Reification $\\downarrow^\\tau : V_\\tau \\to \\mathit{Nf}^\\tau$ is"
 msgstr "其中闭包保存 lambda 体及其环境和类型，语义中性项是自由变量、常量，或者作用于某个值的中性项（同时记录该值的类型）。求值 $\\llbracket t \\rrbracket\\rho$ 通过环境映射变量，把 lambda 映射为闭包、常量映射为中性项，并通过对闭包体求值来应用闭包（按值调用；这是安全的，因为带类型项的求值必然终止）。反射 $\\uparrow^\\tau$ 把中性项嵌入为值；这里它在中性项上是恒等映射，因为所有 η-展开都推迟到具体化（reification）时进行。具体化 $\\downarrow^\\tau : V_\\tau \\to \\mathit{Nf}^\\tau$ 定义为"
 
-#: manual/design/stlc.md:250
+#: manual/design/stlc.md:262
 msgid "and the normal form of $\\Gamma \\vdash t : \\tau$ is $\\downarrow^\\tau \\llbracket t \\rrbracket \\rho_\\Gamma$, where $\\rho_\\Gamma$ maps each $x{:}\\sigma \\in \\Gamma$ to $\\uparrow^\\sigma x$. Reifying at an arrow type applies the value to a fresh variable, which performs eta expansion; a neutral application records the domain type of its argument so that the argument can be reified at the right type later.[^bs]"
 msgstr "而 $\\Gamma \\vdash t : \\tau$ 的范式是 $\\downarrow^\\tau \\llbracket t \\rrbracket \\rho_\\Gamma$，其中 $\\rho_\\Gamma$ 把每个 $x{:}\\sigma \\in \\Gamma$ 映射为 $\\uparrow^\\sigma x$。在箭头类型上具体化时，会把值应用于一个新鲜变量，这就完成了 η-展开；中性应用会记录其参数的定义域类型，以便之后能在正确的类型上具体化该参数。[^bs]"
 
-#: manual/design/stlc.md:257
+#: manual/design/stlc.md:269
 msgid "U. Berger and H. Schwichtenberg, \"An inverse of the evaluation functional for typed λ-calculus\", LICS 1991. The type-directed presentation follows A. Abel, *Normalization by Evaluation: Dependent Types and Impredicativity*, habilitation thesis, 2013."
 msgstr "U. Berger and H. Schwichtenberg, \"An inverse of the evaluation functional for typed λ-calculus\", LICS 1991. 按类型制导的表述遵循 A. Abel, *Normalization by Evaluation: Dependent Types and Impredicativity*, habilitation thesis, 2013."
 
-#: manual/design/stlc.md:259
+#: manual/design/stlc.md:271
 msgid "**Correctness (sketch).** Define a Kripke logical relation $t \\mathrel{R_\\tau} d$ between terms and values, monotone under context extension:"
 msgstr "**正确性（证明概要）。** 在项与值之间定义一个 Kripke 逻辑关系 $t \\mathrel{R_\\tau} d$，它在上下文扩展下单调："
 
-#: manual/design/stlc.md:271
+#: manual/design/stlc.md:283
 msgid "By induction on $\\tau$ one proves two lemmas together: *reflection* ($t =_{\\beta\\eta} \\mathrm{quote}(n)$ implies $t \\mathrel{R_\\tau} \\uparrow^\\tau n$) and *reification* ($t \\mathrel{R_\\tau} d$ implies $t =_{\\beta\\eta} \\downarrow^\\tau d$). The arrow case of reification is the eta step:"
 msgstr "对 $\\tau$ 归纳，同时证明两个引理：*反射*（$t =_{\\beta\\eta} \\mathrm{quote}(n)$ 蕴含 $t \\mathrel{R_\\tau} \\uparrow^\\tau n$）与*具体化*（$t \\mathrel{R_\\tau} d$ 蕴含 $t =_{\\beta\\eta} \\downarrow^\\tau d$）。具体化的箭头情形就是 η 步骤："
 
-#: manual/design/stlc.md:281
+#: manual/design/stlc.md:293
 msgid "using $x \\mathrel{R_\\sigma} \\uparrow^\\sigma x$ (reflection) and the definition of $R_{\\sigma \\to \\tau}$. The *fundamental lemma* states that $\\Gamma \\vdash t : \\tau$ and $\\gamma \\mathrel{R_\\Gamma} \\rho$ imply $t[\\gamma] \\mathrel{R_\\tau} \\llbracket t \\rrbracket \\rho$; it is proved by induction on the typing derivation, the lambda case using that beta-reduction is in $=_{\\beta\\eta}$. With $\\gamma$ the identity and $\\rho_\\Gamma$ (related by reflection), reification gives $t =_{\\beta\\eta} \\mathrm{nf}(t)$ (soundness). Completeness, that $\\beta\\eta$-equal terms have alpha-equivalent normal forms, needs a second argument: a partial equivalence relation on values, defined by induction on types like $R$, under which $\\llbracket t \\rrbracket$ and $\\llbracket t' \\rrbracket$ are related whenever $t =_{\\beta\\eta} t'$ (beta is function application in the model, and eta holds because reification always expands), and related values reify to the same normal form; Abel's thesis, cited above, gives the details. The relation $R$, read as a computability predicate, also shows that evaluation terminates on well-typed terms, which is why no fuel is needed."
 msgstr "这里用到了 $x \\mathrel{R_\\sigma} \\uparrow^\\sigma x$（反射）以及 $R_{\\sigma \\to \\tau}$ 的定义。*基本引理*指出：$\\Gamma \\vdash t : \\tau$ 且 $\\gamma \\mathrel{R_\\Gamma} \\rho$ 蕴含 $t[\\gamma] \\mathrel{R_\\tau} \\llbracket t \\rrbracket \\rho$；它对类型推导归纳证明，其中 lambda 情形用到 β-归约包含于 $=_{\\beta\\eta}$。取 $\\gamma$ 为恒等代换并取 $\\rho_\\Gamma$（二者通过反射相关），具体化给出 $t =_{\\beta\\eta} \\mathrm{nf}(t)$（可靠性）。完备性，即 $\\beta\\eta$-相等的项具有 α-等价的范式，需要另一个论证：值上的一个偏等价关系，像 $R$ 一样对类型归纳定义；在该关系下，只要 $t =_{\\beta\\eta} t'$，$\\llbracket t \\rrbracket$ 与 $\\llbracket t' \\rrbracket$ 就相关（β 是模型中的函数应用，η 成立是因为具体化总会展开），并且相关的值具体化为同一个范式；细节见上文引用的 Abel 的博士论文。关系 $R$ 作为可计算性谓词来解读，还表明在良类型项上求值必然终止，这就是不需要燃料（fuel）的原因。"
 
-#: manual/design/stlc.md:298
+#: manual/design/stlc.md:310
 msgid "Fresh names in readback"
 msgstr "读回中的新鲜名字"
 
-#: manual/design/stlc.md:300
+#: manual/design/stlc.md:312
 msgid "Readback invents binder names with `fresh_name(\"x\", used)`, where `used` contains every name of the input term and context, the names in closure environments, and the names already introduced on the path. Generated names are therefore distinct from each other along a path and from all names of the input, and a neutral variable is never captured by a binder introduced later."
 msgstr "读回通过 `fresh_name(\"x\", used)` 生成绑定子名字，其中 `used` 包含输入项与上下文中的所有名字、闭包环境中的名字，以及路径上已经引入的名字。因此生成的名字在同一路径上彼此不同，也与输入的所有名字不同，中性变量永远不会被之后引入的绑定子捕获。"
 
-#: manual/design/stlc.md:308
-msgid "`check` and `infer` terminate; on success, the term is declaratively typable at the reported type, *provided* no redex parameter occurs free in a later argument of its spine. Otherwise `check` can accept a wrong type (known issue above), and so can `normalize_checked`."
-msgstr "`check` 与 `infer` 必然终止；成功时，该项在所报告的类型下是声明式可定型的，*前提是*没有可约式的形参在其脊的后续参数中自由出现。否则 `check` 可能接受错误的类型（见上文的已知问题），`normalize_checked` 也是如此。"
+#: manual/design/stlc.md:320
+msgid "`check` and `infer` terminate; on success, the term is declaratively typable at the reported type (soundness theorem). The regression tests include redexes whose parameter occurs free in a trailing argument."
+msgstr "`check` 与 `infer` 会终止；成功时，该项在所报告的类型下是声明式可定型的（可靠性定理）。回归测试包含形参在后续参数中自由出现的可约式。"
 
-#: manual/design/stlc.md:312
+#: manual/design/stlc.md:323
 msgid "`check` accepts every well-typed beta-normal term."
 msgstr "`check` 接受每个良类型的 β-范式项。"
 
-#: manual/design/stlc.md:313
-msgid "`normalize_eta_long` returns `Ok` exactly for terms that `check` accepts, except for terms hit by the known issue, which it rejects; its result is in $\\mathit{Nf}^\\tau$, is $\\beta\\eta$-equal to the input, and is the same (up to $=_\\alpha$) for $\\beta\\eta$-equal inputs."
-msgstr "除受已知问题影响的项（它会拒绝这些项）外，`normalize_eta_long` 恰好对 `check` 接受的项返回 `Ok`；其结果属于 $\\mathit{Nf}^\\tau$，与输入 $\\beta\\eta$-相等，并且对 $\\beta\\eta$-相等的输入结果相同（在 $=_\\alpha$ 意义下）。"
+#: manual/design/stlc.md:324
+msgid "`normalize_eta_long` returns `Ok` exactly for terms that `check` accepts; its result is in $\\mathit{Nf}^\\tau$, is $\\beta\\eta$-equal to the input, and is the same (up to $=_\\alpha$) for $\\beta\\eta$-equal inputs."
+msgstr "`normalize_eta_long` 恰好对 `check` 接受的项返回 `Ok`；其结果属于 $\\mathit{Nf}^\\tau$，与输入 $\\beta\\eta$-相等，并且对 $\\beta\\eta$-相等的输入结果相同（在 $=_\\alpha$ 意义下）。"
 
-#: manual/design/stlc.md:317
+#: manual/design/stlc.md:328
 msgid "`normalize_checked` returns `Err` before any reduction for ill-typed input."
 msgstr "对于类型不正确的输入，`normalize_checked` 会在任何归约之前返回 `Err`。"
 
-#: manual/design/stlc.md:318
+#: manual/design/stlc.md:329
 msgid "`NormalizationError` signals a violated internal invariant and is not produced for checked input."
 msgstr "`NormalizationError` 表示内部不变式被违反，对已检查的输入不会产生。"
 
-#: manual/design/stlc.md:321
+#: manual/design/stlc.md:332
 msgid "The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing, eta expansion of open variables and of constants (including nested arrow types and higher-order arguments), and agreement of the two normalizers on small terms."
 msgstr "`src/stlc/stlc_test.mbt` 中的测试覆盖了类型化与拒绝、遮蔽、开放变量和常量的 η-展开（包括嵌套箭头类型和高阶参数），以及两个范式化器在小项上的一致性。"
 
-#: manual/design/stlc.md:328
+#: manual/design/stlc.md:339
 msgid "**Church-style annotated lambdas.** Annotations would make inference complete but change the shared `Term` syntax; the bidirectional checker keeps terms unannotated."
 msgstr "**Church 风格的带标注 lambda。** 标注会使类型推断完备，但会改变共享的 `Term` 语法；双向检查器使项保持无标注。"
 
-#: manual/design/stlc.md:331
+#: manual/design/stlc.md:342
 msgid "**Hindley–Milner inference.** Unification would infer types of unannotated lambdas, but polymorphism and type variables are beyond this calculus."
 msgstr "**Hindley–Milner 推断。** 合一可以推断无标注 lambda 的类型，但多态与类型变量超出了本演算的范围。"
 
-#: manual/design/stlc.md:333
+#: manual/design/stlc.md:344
 msgid "**Fuel for typed NbE.** Unnecessary by strong normalization; the untyped [utlc/nbe](utlc/nbe.md) keeps fuel because it needs it."
 msgstr "**带类型 NbE 的燃料。** 由强范式化性可知不必要；无类型的 [utlc/nbe](utlc/nbe.md) 保留燃料，是因为它确实需要。"
 
-#: manual/design/stlc.md:335
+#: manual/design/stlc.md:346
 msgid "**Eta for the unit type.** Implementable by reifying every neutral of type $\\mathsf{Unit}$ as $()$; not done, so that neutrals stay observable. The decided equality is $\\beta\\eta$ for arrows only."
 msgstr "**单位类型的 η。** 可以通过把每个 $\\mathsf{Unit}$ 类型的中性项具体化为 $()$ 来实现；之所以没有这样做，是为了让中性项保持可观察。所判定的相等只是箭头类型上的 $\\beta\\eta$。"
 
-#: manual/design/stlc.md:341
+#: manual/design/stlc.md:352
 msgid "Types are $b$, $\\mathsf{Unit}$ and arrows: no products, sums, polymorphism or dependent types."
 msgstr "类型只有 $b$、$\\mathsf{Unit}$ 和箭头：没有积、和、多态或依赖类型。"
 
-#: manual/design/stlc.md:343
+#: manual/design/stlc.md:354
 msgid "No unit eta; normal forms are eta-long for arrow types only."
 msgstr "没有单位类型的 η；范式只在箭头类型上是 η-长的。"
 
-#: manual/design/stlc.md:344
+#: manual/design/stlc.md:355
 msgid "Constants are opaque: there are no delta rules."
 msgstr "常量是不透明的：没有 δ 规则。"
 
-#: manual/design/stlc.md:345
-msgid "The $\\textsc{Redex}$ rule does not rename its parameter apart from later arguments, so `check` is unsound on redexes whose parameter occurs free in a later argument (known issue)."
-msgstr "$\\textsc{Redex}$ 规则不会把其形参重命名以区别于后续参数，因此对于形参在后续参数中自由出现的可约式，`check` 是不可靠的（已知问题）。"
-
-#: manual/design/stlc.md:348
+#: manual/design/stlc.md:356
 msgid "`normalize_checked` is bounded by a step limit because it reuses the untyped reducer."
 msgstr "`normalize_checked` 受步数上限约束，因为它复用了无类型归约器。"
 
@@ -3335,8 +3331,8 @@ msgid "Eta recognises unary applications only."
 msgstr "η 只识别一元应用。"
 
 #: manual/design/utlc/lambda.md:160
-msgid "An empty application `Apply(h, [])` is not a beta redex and hides any redex in its head position (see the [eval design](../eval.md)); build applications with `application` or with at least one argument."
-msgstr "空应用 `Apply(h, [])` 不是 β 可约式，并且会隐藏其头部位置中的任何可约式（见 [eval 设计](../eval.md)）；请用 `application` 或至少带一个参数来构建应用。"
+msgid "An empty application `Apply(h, [])` is read as $h$ when a redex is matched, but it is not removed from the term (see the [eval design](../eval.md))."
+msgstr "空应用 `Apply(h, [])` 在匹配可约式时被读作 $h$，但不会从项中去掉（见 [eval 设计](../eval.md)）。"
 
 #: manual/design/utlc/lambda.md:163
 msgid "Constants (`Value`) have no reduction rules here; add domain rules with [rewrite](../rewrite.md) or [eval](../eval.md)."
@@ -3463,8 +3459,8 @@ msgid "For untyped NbE see K. Aehlig and F. Joachimski, \"Operational aspects of
 msgstr "关于无类型 NbE，见 K. Aehlig 与 F. Joachimski，\"Operational aspects of untyped normalisation by evaluation\"，Mathematical Structures in Computer Science 14，2004；关于通过求值实现的强归约，见 B. Grégoire 与 X. Leroy，\"A compiled implementation of strong reduction\"，ICFP 2002。"
 
 #: manual/design/utlc/nbe.md:181
-msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term without empty applications, the two normal forms are equal after spine flattening. Evaluation reads `Apply(h, [])` as $h$, while the small-step reducer treats it as a stuck node (see the [eval design](../eval.md)), so on such terms NbE may reduce a redex that the small-step reducer never sees. The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices."
-msgstr "**与小步归约的一致性。** 由可靠性与合流性，只要 `@nbe.normalize` 与 `@debruijn.normalize` 对同一个不含空应用的良作用域项都返回范式，这两个范式在脊展平后相等。求值把 `Apply(h, [])` 读作 $h$，而小步归约器把它当作卡住的节点（见 [eval 设计](../eval.md)），因此在这类项上 NbE 可能归约小步归约器永远看不到的可约式。`src/utlc/nbe/nbe_test.mbt` 中的测试检查了这一点，以及 $(\\lambda.\\,7)\\,\\Omega$ 上的惰性、$\\Omega$ 上的燃料耗尽，以及 quote 会把层级转换回索引。"
+msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices."
+msgstr "**与小步归约一致。** 由可靠性与合流性，只要 `@nbe.normalize` 与 `@debruijn.normalize` 对同一个良作用域项都返回范式，两个范式在脊展平（合并嵌套的应用并去掉空应用）之后相等。两者都把 `Apply(h, [])` 读作 $h$：求值会抹去该节点，小步归约器在匹配可约式时透过它（见 [eval 设计](../eval.md)）。`src/utlc/nbe/nbe_test.mbt` 中的测试检查这一点，以及 $(\\lambda.\\,7)\\,\\Omega$ 上的惰性、$\\Omega$ 上的燃料耗尽，以及 quote 把层级转回索引。"
 
 #: manual/design/utlc/nbe.md:192
 msgid "Other invariants:"
@@ -3771,42 +3767,38 @@ msgid "`Context::extend`, `Telescope::extend` (`core`) and `Signature::extend`, 
 msgstr "`Context::extend`、`Telescope::extend`（`core`）以及 `Signature::extend`、`TypeContext::extend`（`stlc`）：请改用 `extend_with`。`extend` 自 MoonBit 0.10 起是保留字；旧名字作为已弃用的别名保留。"
 
 #: manual/index.md:109
-msgid "[!WARNING] `@stlc.check` can accept a term at a wrong type when a lambda applied to several arguments has a parameter that occurs free in a later argument. The [stlc API](api/stlc.md) describes the case and how to avoid it."
-msgstr "[!WARNING] 当一个应用于多个参数的 lambda 的形参在后面某个实参中自由出现时，`@stlc.check` 可能以错误的类型接受项。[stlc API](api/stlc.md) 描述了这种情形及其规避方法。"
-
-#: manual/index.md:114
 msgid "Where to read next"
 msgstr "接下来阅读"
 
-#: manual/index.md:116
+#: manual/index.md:111
 msgid "New to the library: start with the [syntax tutorial](tutorial/syntax.md), then [substitution](tutorial/substitution.md) and [rewrite](tutorial/rewrite.md). These three are enough to manipulate terms with binders safely. For the lambda calculi, continue with [utlc/lambda](tutorial/utlc/lambda.md), [eval](tutorial/eval.md), [debruijn](tutorial/debruijn.md), [utlc/nbe](tutorial/utlc/nbe.md) and [stlc](tutorial/stlc.md) in that order."
 msgstr "初次使用本库：从 [syntax 教程](tutorial/syntax.md)开始，然后是 [substitution](tutorial/substitution.md) 和 [rewrite](tutorial/rewrite.md)。这三者足以安全地操作带绑定子的项。对于 λ 演算，请依次继续阅读 [utlc/lambda](tutorial/utlc/lambda.md)、[eval](tutorial/eval.md)、[debruijn](tutorial/debruijn.md)、[utlc/nbe](tutorial/utlc/nbe.md) 和 [stlc](tutorial/stlc.md)。"
 
-#: manual/index.md:123
+#: manual/index.md:118
 msgid "Using it in a library: read the [adapter tutorial](tutorial/adapter.md), which implements `BindingSyntax` for a small expression language and uses generic substitution and rewriting on it. Keep the API pages at hand, and the [adapter design](design/adapter.md) for the laws your implementation must satisfy."
 msgstr "在库中使用：阅读 [adapter 教程](tutorial/adapter.md)，它为一个小型表达式语言实现 `BindingSyntax`，并在其上使用泛型代换与重写。请把 API 页面放在手边，并参考 [adapter 设计](design/adapter.md)了解你的实现必须满足的定律。"
 
-#: manual/index.md:128
+#: manual/index.md:123
 msgid "Contributing: read the design pages; they define every operation mathematically, derive its laws, and state what each package deliberately does not do. The [correctness checklist](../../CORRECTNESS_CHECKLIST.md) records the audited invariants and known issues; changes to substitution, alpha-equivalence, shifting, beta instantiation, quote or fuel accounting must update it."
 msgstr "参与贡献：阅读设计页面；它们以数学方式定义每个操作，推导其定律，并说明每个包刻意不做什么。[正确性检查清单](../../CORRECTNESS_CHECKLIST.md)记录了经审计的不变式与已知问题；对代换、α-等价、移位、β 实例化、quote 或燃料计量的修改都必须更新它。"
 
-#: manual/index.md:135
+#: manual/index.md:130
 msgid "Validation"
 msgstr "验证"
 
-#: manual/index.md:137
+#: manual/index.md:132
 msgid "Recommended release checks, from the repository root:"
 msgstr "推荐的发布检查（在仓库根目录运行）："
 
-#: manual/index.md:145
+#: manual/index.md:140
 msgid "`./run_test.sh` runs `moon test` on `wasm-gc`, `js`, `native` and `wasm`."
 msgstr "`./run_test.sh` 在 `wasm-gc`、`js`、`native` 和 `wasm` 上运行 `moon test`。"
 
-#: manual/index.md:147
+#: manual/index.md:142
 msgid "Used by"
 msgstr "使用者"
 
-#: manual/index.md:149
+#: manual/index.md:144
 msgid "Downstream Luna Flow repositories such as [luna-poly](https://lunaflow.cn/en/luna-poly/) and [floating](https://lunaflow.cn/en/floating/) build on these packages; their own manuals describe how."
 msgstr "诸如 [luna-poly](https://lunaflow.cn/en/luna-poly/) 和 [floating](https://lunaflow.cn/en/floating/) 等下游 Luna Flow 仓库构建于这些包之上；它们各自的手册说明了具体方式。"
 
@@ -3916,8 +3908,8 @@ msgid "They agree in the following sense. Conversion to De Bruijn form commutes 
 msgstr "它们在如下意义上一致。转换为 De Bruijn 形式与 β 步在 α-等价意义下交换（[debruijn 设计](design/debruijn.md)），因此具名的仅 β 归约器（`@eval.evaluate` 配合 `@lambda.beta_rule` 与 `NormalOrder`）与无名归约器执行对应的步骤。NbE 对 β 是可靠的，并实现了相同的范式化策略（[utlc/nbe 设计](design/utlc/nbe.md)）。由于 β 归约是合流的，这三者的 β 范式在转换并展平应用脊之后一致。"
 
 #: manual/semantics.md:59
-msgid "`@lambda.normalize` also contracts eta redexes, so its result is the eta normal form of that common beta normal form, not the beta normal form itself: $\\lambda x.\\,f\\,x$ normalizes to $f$ there and to $\\lambda.\\,f\\,0$ in the other two ([utlc/lambda design](design/utlc/lambda.md)). All of this assumes terms without empty applications `Apply(h, [])`: the small-step reducers treat such a node as stuck, while NbE reads it as $h$ ([eval design](design/eval.md))."
-msgstr "`@lambda.normalize` 还会收缩 η 可约式，因此其结果是该公共 β 范式的 η 范式，而不是 β 范式本身：$\\lambda x.\\,f\\,x$ 在那里范式化为 $f$，而在另外两者中范式化为 $\\lambda.\\,f\\,0$（[utlc/lambda 设计](design/utlc/lambda.md)）。以上都假定项中没有空应用 `Apply(h, [])`：小步归约器把这样的节点当作卡住的，而 NbE 把它读作 $h$（[eval 设计](design/eval.md)）。"
+msgid "`@lambda.normalize` also contracts eta redexes, so its result is the eta normal form of that common beta normal form, not the beta normal form itself: $\\lambda x.\\,f\\,x$ normalizes to $f$ there and to $\\lambda.\\,f\\,0$ in the other two ([utlc/lambda design](design/utlc/lambda.md)). All normalizers read an empty application `Apply(h, [])` as $h$; NbE drops the node, the small-step reducers keep it, so spine flattening also drops empty applications ([eval design](design/eval.md))."
+msgstr "`@lambda.normalize` 还会收缩 eta 可约式，因此其结果是这个公共 beta 范式的 eta 范式，而不是该 beta 范式本身：$\\lambda x.\\,f\\,x$ 在那里范式化为 $f$，在另外两者中为 $\\lambda.\\,f\\,0$（[utlc/lambda 设计](design/utlc/lambda.md)）。所有范式化器都把空应用 `Apply(h, [])` 读作 $h$；NbE 去掉该节点，小步归约器保留它，因此脊展平也会去掉空应用（[eval 设计](design/eval.md)）。"
 
 #: manual/semantics.md:67
 msgid "For typed terms, [stlc](design/stlc.md) adds a fourth normalizer: type-directed NbE, which needs no bound and returns beta-normal, eta-long forms, and therefore decides beta-eta equality of well-typed terms (eta for function types)."
@@ -3967,11 +3959,7 @@ msgstr "无类型范式化不是全函数：对于发散的项，出现 `StepLim
 msgid "The simply typed calculus has base types, `Unit` and arrows only, and no eta law for `Unit`."
 msgstr "简单类型演算只有基本类型、`Unit` 和箭头类型，并且对 `Unit` 没有 η 律。"
 
-#: manual/semantics.md:98
-msgid "Known issue: `@stlc.infer` and `@stlc.check` type the later arguments of a redex $(\\lambda x.\\,b)\\,a_1\\,a_2 \\cdots$ with $x$ in scope, so they can accept a wrong type when $x$ occurs free in $a_2, \\dots$ ([stlc design](design/stlc.md))."
-msgstr "已知问题：`@stlc.infer` 和 `@stlc.check` 在 $x$ 处于作用域内的情况下为可约式 $(\\lambda x.\\,b)\\,a_1\\,a_2 \\cdots$ 的后续参数定型，因此当 $x$ 在 $a_2, \\dots$ 中自由出现时，它们可能接受错误的类型（[stlc 设计](design/stlc.md)）。"
-
-#: manual/semantics.md:103
+#: manual/semantics.md:99
 msgid "The [correctness checklist](../../CORRECTNESS_CHECKLIST.md) lists the audited invariants, their evidence and the known issues."
 msgstr "[正确性检查清单](../../CORRECTNESS_CHECKLIST.md)列出了经过审查的不变式、其依据以及已知问题。"
 
@@ -4175,7 +4163,7 @@ msgstr "**期望重复代换。** `apply_once` 只代换一次；如果替换项
 #: manual/tutorial/debruijn.md:189
 #: manual/tutorial/eval.md:229
 #: manual/tutorial/rewrite.md:225
-#: manual/tutorial/stlc.md:255
+#: manual/tutorial/stlc.md:253
 #: manual/tutorial/substitution.md:209
 #: manual/tutorial/syntax.md:211
 #: manual/tutorial/utlc/lambda.md:191
@@ -4861,22 +4849,22 @@ msgid "**Unit eta.** A neutral term of type `Unit`, such as a variable `u : Unit
 msgstr "**Unit 的 eta。** `Unit` 类型的中性项（例如变量 `u : Unit`）不会被替换为 `()`。`f u` 和 `f ()` 的范式不同。"
 
 #: manual/tutorial/stlc.md:247
-msgid "**Parameter names in redexes with several arguments.** In $(\\lambda x.\\,b)\\,a_1\\,a_2$, if $a_2$ mentions a free variable also called $x$, `infer` types it with the parameter's type (known issue), and `check` may then accept the term at a type it does not have. Use a parameter name that does not occur free in the later arguments."
-msgstr "**多参数可约式中的参数名。** 在 $(\\lambda x.\\,b)\\,a_1\\,a_2$ 中，如果 $a_2$ 提及一个同样叫 $x$ 的自由变量，`infer` 会用参数的类型为它定型（已知问题），于是 `check` 可能以该项实际并不具有的类型接受它。请使用不在后续参数中自由出现的参数名。"
+msgid "**Empty applications.** `Apply(f, [])` is rejected with `EmptyApplication`, also inside a spine such as `Apply(Apply(f, []), [a])`. Build applications with at least one argument."
+msgstr "**空应用。** `Apply(f, [])` 会以 `EmptyApplication` 被拒绝，包括出现在脊内部的情形，例如 `Apply(Apply(f, []), [a])`。构造应用时至少给一个参数。"
 
-#: manual/tutorial/stlc.md:252
+#: manual/tutorial/stlc.md:250
 msgid "**Comparing normal forms with `==`.** Generated binders are `x`, `x_1`, …; compare with `@syntax.alpha_equal`."
 msgstr "**用 `==` 比较范式。** 生成的绑定子是 `x`、`x_1`、…；请用 `@syntax.alpha_equal` 比较。"
 
-#: manual/tutorial/stlc.md:257
+#: manual/tutorial/stlc.md:255
 msgid "[stlc API](../api/stlc.md) for all types, errors and functions."
 msgstr "[stlc API](../api/stlc.md)：所有类型、错误和函数。"
 
-#: manual/tutorial/stlc.md:258
+#: manual/tutorial/stlc.md:256
 msgid "[stlc design](../design/stlc.md) for the typing rules, the eta-long normal forms and the correctness argument of typed NbE."
 msgstr "[stlc 设计](../design/stlc.md)：定型规则、η-长形式范式，以及带类型 NbE 的正确性论证。"
 
-#: manual/tutorial/stlc.md:260
+#: manual/tutorial/stlc.md:258
 msgid "[utlc/nbe tutorial](utlc/nbe.md) for the untyped, fuel-bounded counterpart."
 msgstr "[utlc/nbe 教程](utlc/nbe.md)：无类型、受燃料限制的对应物。"
 
@@ -5379,6 +5367,51 @@ msgstr "[utlc/nbe 设计](../../design/utlc/nbe.md)：语义域与可靠性论�
 #: manual/tutorial/utlc/nbe.md:203
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc 教程](../stlc.md)：带类型的 η-长形式 NbE。"
+
+#~ msgid "`reduce_once` does not validate its input. It returns `ScopeFailure` only when the redex it contracts contains a negative index; a negative index elsewhere is skipped like any other variable, and a dangling index is shifted like a free one (`(λ. 5) 1` reduces to `Bound(4)`). Call `validate` first if the term may be ill scoped."
+#~ msgstr "`reduce_once` 不验证其输入。仅当它收缩的可约式含有负索引时，它才返回 `ScopeFailure`；其他位置的负索引会像其他变量一样被跳过，悬空索引会像自由索引一样被移位（`(λ. 5) 1` 归约为 `Bound(4)`）。如果项可能作用域不良，请先调用 `validate`。"
+
+#~ msgid "`ScopeFailure` carries the term on which the failing step was attempted and the number of steps taken before it."
+#~ msgstr "`ScopeFailure` 携带尝试失败步骤时所在的项，以及在此之前已执行的步数。"
+
+#~ msgid "It has the step-count contract of `@rewrite.normalize`: at most `max_steps` steps, and one extra `reduce_once` call to classify the final term. Like `reduce_once` it does not validate: on an ill-scoped input it may return `NormalForm` (for `Bind(Bound(-1))`, say), so `ScopeFailure` proves the input ill scoped but its absence proves nothing."
+#~ msgstr "它遵循 `@rewrite.normalize` 的步数契约：最多 `max_steps` 步，并额外调用一次 `reduce_once` 来判定最终项。与 `reduce_once` 一样，它不做验证：对作用域不良的输入，它可能返回 `NormalForm`（例如对 `Bind(Bound(-1))`），因此 `ScopeFailure` 能证明输入作用域不良，但没有得到它并不能证明任何事。"
+
+#~ msgid "[!WARNING] When a lambda is applied to two or more arguments, `infer` types the remaining arguments in a context that already contains the lambda's parameter. If one of those arguments mentions a free variable with the same name as the parameter, it is typed with the parameter's type, and the checker can then *accept a wrong type*. With `x : B` in the context, `check` accepts $(\\lambda x.\\,\\lambda y.\\,y)\\;()\\;x$ at `Unit` and rejects it at its real type `B`; `normalize_checked` then returns `x`, a term of type `B`, as a normal form \"of type `Unit`\". `normalize_eta_long` rejects the term at both types. Until this is fixed, make sure the parameter of such a redex does not occur free in the later arguments (rename it, or apply the arguments one at a time)."
+#~ msgstr "[!WARNING] 当 lambda 被应用于两个或更多参数时，`infer` 会在已经包含该 lambda 形参的上下文中为其余参数确定类型。如果其中某个参数提到了与该形参同名的自由变量，它就会被赋予该形参的类型，于是检查器可能*接受错误的类型*。当上下文中有 `x : B` 时，`check` 在 `Unit` 下接受 $(\\lambda x.\\,\\lambda y.\\,y)\\;()\\;x$，却在其真实类型 `B` 下拒绝它；随后 `normalize_checked` 把类型为 `B` 的项 `x` 作为“类型为 `Unit`”的范式返回。`normalize_eta_long` 在两个类型下都拒绝该项。在此问题修复之前，请确保这类可约式的形参不在后续参数中自由出现（重命名该形参，或者逐个应用参数）。"
+
+#~ msgid "The reducers check less. `reduce_once` looks at indices only inside the redex it contracts, through `instantiate`: a negative index elsewhere is passed over like a variable, and no operation except `validate` and `to_named` detects a dangling (too large) index, which `instantiate` shifts like a free one. Scope is checked once, by `validate`, not on every step."
+#~ msgstr "归约器检查得更少。`reduce_once` 只通过 `instantiate` 查看它所收缩的可约式内部的索引：其他位置的负索引会像变量一样被略过；除 `validate` 和 `to_named` 外，没有任何操作检测悬空（过大的）索引，`instantiate` 会像对待自由索引一样对其移位。作用域只由 `validate` 检查一次，而不是每一步都检查。"
+
+#~ msgid "`substitute_bound`, `instantiate`, `reduce_once` and `normalize` do not detect unbound indices, and the reducers ignore negative indices outside the redex they contract; call `validate` on untrusted input."
+#~ msgstr "`substitute_bound`、`instantiate`、`reduce_once` 与 `normalize` 不检测未绑定的索引，且归约器会忽略其所收缩的可约式之外的负索引；对不可信输入请调用 `validate`。"
+
+#~ msgid "An empty application `Apply(h, [])` is not a redex and blocks any redex in its head position (`Apply(Apply(Bind(b), []), [a])` is in normal form for `reduce_once`), while [utlc/nbe](utlc/nbe.md) erases it. Build applications with at least one argument."
+#~ msgstr "空应用 `Apply(h, [])` 不是可约式，并会阻塞其头部位置上的任何可约式（对 `reduce_once` 而言，`Apply(Apply(Bind(b), []), [a])` 是范式），而 [utlc/nbe](utlc/nbe.md) 会将其消除。构造应用时请至少给出一个参数。"
+
+#~ msgid "has declarative type $B$ and no other (the outer $x$ has type $B$), but `infer` types the second argument in $\\Gamma, x{:}\\mathsf{Unit}$ and returns `Unit`. Hence `check` succeeds at `Unit` and fails at `B`, and `normalize_checked` at `Unit` returns `NormalForm(x, 2)`: a variable of type $B$ presented as a normal form of type `Unit`. `normalize_eta_long` rejects the term at both types with `TypeMismatch`, because its evaluator checks the arguments in the original context; it is incomplete here but not unsound."
+#~ msgstr "具有声明式类型 $B$ 且没有其他类型（外层 $x$ 的类型为 $B$），但 `infer` 在 $\\Gamma, x{:}\\mathsf{Unit}$ 中为第二个参数定型并返回 `Unit`。因此 `check` 在 `Unit` 下成功、在 `B` 下失败，而 `normalize_checked` 在 `Unit` 下返回 `NormalForm(x, 2)`：一个类型为 $B$ 的变量被当作类型为 `Unit` 的范式给出。`normalize_eta_long` 在两个类型下都以 `TypeMismatch` 拒绝该项，因为其求值器在原始上下文中检查参数；它在这里是不完备的，但并非不可靠。"
+
+#~ msgid "[!WARNING] This is a soundness bug of `infer` and `check`, recorded in the correctness checklist and not yet fixed. Renaming the parameter apart from the free variables of $a_2, \\dots, a_n$ before extending the context, or typing $a_2, \\dots, a_n$ in $\\Gamma$ itself, would restore the theorem without its proviso."
+#~ msgstr "[!WARNING] 这是 `infer` 和 `check` 的一个可靠性缺陷，已记录在正确性检查清单中，尚未修复。在扩展上下文之前将形参重命名，使其与 $a_2, \\dots, a_n$ 的自由变量相区别，或者直接在 $\\Gamma$ 中为 $a_2, \\dots, a_n$ 定型，都可以恢复该定理而无需其前提。"
+
+#~ msgid "`check` and `infer` terminate; on success, the term is declaratively typable at the reported type, *provided* no redex parameter occurs free in a later argument of its spine. Otherwise `check` can accept a wrong type (known issue above), and so can `normalize_checked`."
+#~ msgstr "`check` 与 `infer` 必然终止；成功时，该项在所报告的类型下是声明式可定型的，*前提是*没有可约式的形参在其脊的后续参数中自由出现。否则 `check` 可能接受错误的类型（见上文的已知问题），`normalize_checked` 也是如此。"
+
+#~ msgid "The $\\textsc{Redex}$ rule does not rename its parameter apart from later arguments, so `check` is unsound on redexes whose parameter occurs free in a later argument (known issue)."
+#~ msgstr "$\\textsc{Redex}$ 规则不会把其形参重命名以区别于后续参数，因此对于形参在后续参数中自由出现的可约式，`check` 是不可靠的（已知问题）。"
+
+#~ msgid "An empty application `Apply(h, [])` is not a beta redex and hides any redex in its head position (see the [eval design](../eval.md)); build applications with `application` or with at least one argument."
+#~ msgstr "空应用 `Apply(h, [])` 不是 β 可约式，并且会隐藏其头部位置中的任何可约式（见 [eval 设计](../eval.md)）；请用 `application` 或至少带一个参数来构建应用。"
+
+#~ msgid "[!WARNING] `@stlc.check` can accept a term at a wrong type when a lambda applied to several arguments has a parameter that occurs free in a later argument. The [stlc API](api/stlc.md) describes the case and how to avoid it."
+#~ msgstr "[!WARNING] 当一个应用于多个参数的 lambda 的形参在后面某个实参中自由出现时，`@stlc.check` 可能以错误的类型接受项。[stlc API](api/stlc.md) 描述了这种情形及其规避方法。"
+
+#~ msgid "Known issue: `@stlc.infer` and `@stlc.check` type the later arguments of a redex $(\\lambda x.\\,b)\\,a_1\\,a_2 \\cdots$ with $x$ in scope, so they can accept a wrong type when $x$ occurs free in $a_2, \\dots$ ([stlc design](design/stlc.md))."
+#~ msgstr "已知问题：`@stlc.infer` 和 `@stlc.check` 在 $x$ 处于作用域内的情况下为可约式 $(\\lambda x.\\,b)\\,a_1\\,a_2 \\cdots$ 的后续参数定型，因此当 $x$ 在 $a_2, \\dots$ 中自由出现时，它们可能接受错误的类型（[stlc 设计](design/stlc.md)）。"
+
+#~ msgid "**Parameter names in redexes with several arguments.** In $(\\lambda x.\\,b)\\,a_1\\,a_2$, if $a_2$ mentions a free variable also called $x$, `infer` types it with the parameter's type (known issue), and `check` may then accept the term at a type it does not have. Use a parameter name that does not occur free in the later arguments."
+#~ msgstr "**多参数可约式中的参数名。** 在 $(\\lambda x.\\,b)\\,a_1\\,a_2$ 中，如果 $a_2$ 提及一个同样叫 $x$ 的自由变量，`infer` 会用参数的类型为它定型（已知问题），于是 `check` 可能以该项实际并不具有的类型接受它。请使用不在后续参数中自由出现的参数名。"
 
 #~ msgid "Import it in `moon.pkg`:"
 #~ msgstr "在 `moon.pkg` 中导入它："
