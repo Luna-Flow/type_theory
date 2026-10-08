@@ -49,12 +49,20 @@ the rewrite layer. Two faster implementations are checked against it.
 
 They agree in the following sense. Conversion to De Bruijn form commutes with
 beta steps up to alpha-equivalence ([debruijn design](design/debruijn.md)), so
-the named and nameless reducers take corresponding steps. NbE is sound for
-beta and realizes the same normalizing strategy
+the named beta-only reducer (`@eval.evaluate` with `@lambda.beta_rule` and
+`NormalOrder`) and the nameless reducer take corresponding steps. NbE is sound
+for beta and realizes the same normalizing strategy
 ([utlc/nbe design](design/utlc/nbe.md)). Because beta reduction is confluent,
-whenever two of them return a beta normal form for the same term, the results
-coincide after conversion and after flattening application spines. Eta is
-only part of the named reducer.
+the beta normal forms of these three coincide after conversion and after
+flattening application spines.
+
+`@lambda.normalize` also contracts eta redexes, so its result is the eta
+normal form of that common beta normal form, not the beta normal form itself:
+$\lambda x.\,f\,x$ normalizes to $f$ there and to $\lambda.\,f\,0$ in the
+other two ([utlc/lambda design](design/utlc/lambda.md)). All of this assumes
+terms without empty applications `Apply(h, [])`: the small-step reducers
+treat such a node as stuck, while NbE reads it as $h$
+([eval design](design/eval.md)).
 
 For typed terms, [stlc](design/stlc.md) adds a fourth normalizer:
 type-directed NbE, which needs no bound and returns beta-normal, eta-long
@@ -87,6 +95,10 @@ the corresponding design page.
   are expected for divergent terms.
 - The simply typed calculus has base types, `Unit` and arrows only, and no
   eta law for `Unit`.
+- Known issue: `@stlc.infer` and `@stlc.check` type the later arguments of a
+  redex $(\lambda x.\,b)\,a_1\,a_2 \cdots$ with $x$ in scope, so they can
+  accept a wrong type when $x$ occurs free in $a_2, \dots$
+  ([stlc design](design/stlc.md)).
 
 The [correctness checklist](../../CORRECTNESS_CHECKLIST.md) lists the audited
 invariants, their evidence and the known issues.

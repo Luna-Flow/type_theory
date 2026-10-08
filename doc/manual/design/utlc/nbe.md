@@ -11,6 +11,15 @@ fast, but bounded by fuel, because untyped terms need not normalize. The
 operational reducers remain the reference semantics; NbE is checked against
 them.
 
+## Constraints
+
+- **Divergence.** Untyped terms need not normalize, so every phase must be
+  bounded.
+- **Reproducibility.** The outcome must not depend on anything but the input
+  and the budget, and the reported cost must be exact.
+- **Encapsulation.** Callers must not be able to build semantic values that
+  break the evaluator's scope invariant.
+
 ## Mathematical background
 
 ### The semantic domain
@@ -94,8 +103,15 @@ reading back under binders, which may evaluate closure bodies, is included.
 **Determinism in the budget.** The computation does not inspect the fuel
 except to stop, so a run with fuel $f$ that ends with a normal form after
 consuming $c \le f$ units performs exactly the same computation with any fuel
-$f' \ge c$. Results are therefore reproducible, and `consumed` is the exact
-minimum budget for that result.
+$f' \ge c$. The fuel is only tested by `fuel <= 0`, and every test that
+passes is followed by spending one unit. If $s$ units have been spent before
+some test of the original run, that test is followed by at least one more
+unit, so $s + 1 \le c$; with fuel $f'$ the test sees
+$f' - s \ge c - s \ge 1$ and passes as well. Every test of the original run
+therefore passes again, the run takes the same path, and it stops with the
+same result. With $f' = c - 1$ the last test sees $0$ and fails. Results are
+therefore reproducible, and `consumed` is the exact minimum budget for that
+result.
 
 ### Laziness without sharing
 
@@ -126,7 +142,7 @@ The small-step reducer keeps the n-ary `Apply(f, [a, b])` of its input. Both
 denote the same curried application; comparisons between the two normalizers
 must flatten spines first.
 
-## Correctness / invariants
+## Correctness and invariants
 
 **Theorem (soundness).** If `normalize(t, fuel)` returns `NormalForm(u, _)`,
 then $u$ is beta-normal and $t =_\beta u$ (up to spine flattening).
@@ -164,18 +180,23 @@ form, and by confluence the normal form is unique.[^nbe]
 
 **Agreement with small-step reduction.** By soundness and confluence,
 whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form
-for the same term, the two normal forms are equal after spine flattening. The
+for the same well-scoped term without empty applications, the two normal
+forms are equal after spine flattening. Evaluation reads `Apply(h, [])` as
+$h$, while the small-step reducer treats it as a stuck node (see the
+[eval design](../eval.md)), so on such terms NbE may reduce a redex that the
+small-step reducer never sees. The
 tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on
 $(\lambda.\,7)\,\Omega$, fuel exhaustion on $\Omega$, and that quote turns
 levels back into indices.
 
 Other invariants:
 
-- `eval` and `normalize` reject ill-scoped input with `ScopeFailure` and
-  `consumed=0` before doing any work.
-- `quote(value, n, _)` returns `ScopeFailure` only when a level variable is not
-  below $n$, which cannot happen for values produced by `eval` and quoted at
-  level 0.
+- With positive fuel, `eval` and `normalize` reject ill-scoped input with
+  `ScopeFailure` and `consumed=0` before doing any work; with fuel `<= 0`
+  they return `FuelExhausted(consumed=0)` without looking at the term.
+- `quote(value, n, _)` returns `ScopeFailure` only when $n < 0$ or a level
+  variable is not below $n$. Values produced by `eval` contain no level
+  variables, so quoting them at any level $n \ge 0$ never fails this way.
 - Fuel: `consumed` never exceeds the fuel given; the determinism property
   above holds.
 

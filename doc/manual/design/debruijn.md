@@ -9,6 +9,15 @@ exact translations to and from named syntax. It is the kernel representation
 of the untyped NbE in [utlc/nbe](utlc/nbe.md) and a reference reducer against
 which the named calculus in [utlc/lambda](utlc/lambda.md) is tested.
 
+## Constraints
+
+- **Exact translations.** Converting to indices and back must lose nothing
+  but binder names.
+- **Errors are values.** An ill-scoped index is reported as a `ScopeError`,
+  never by an abort or a silently wrong term where the operation can detect it.
+- **Open terms.** Free variables come from users and downstream ASTs, so they
+  stay names instead of needing a global numbering.
+
 ## Mathematical background
 
 ### Indices
@@ -100,12 +109,19 @@ body are shifted down. This is `instantiate(t, s)`.[^tapl]
 **Problem.** A negative shift on an ill-formed term yields a negative index,
 which silently refers to nothing.
 
-**Choice.** `shift` returns `Err(NegativeShift)` instead, and every operation
-reports `NegativeIndex` on negative input. The lemmas below show that the
-error cases are unreachable from well-scoped input, so the `Result` costs
+**Choice.** `shift` returns `Err(NegativeShift)` instead, and `shift`,
+`substitute_bound`, `instantiate`, `validate` and `to_named` report
+`NegativeIndex` for any negative index they meet. The lemmas below show that
+the error cases are unreachable from well-scoped input, so the `Result` costs
 nothing for correct callers and turns a silent corruption into data for
 incorrect ones. This follows the library rule that expected failures at
 public boundaries are structured values.
+
+The reducers check less. `reduce_once` looks at indices only inside the redex
+it contracts, through `instantiate`: a negative index elsewhere is passed over
+like a variable, and no operation except `validate` and `to_named` detects a
+dangling (too large) index, which `instantiate` shifts like a free one. Scope
+is checked once, by `validate`, not on every step.
 
 ### Instantiation never fails on well-scoped input
 
@@ -144,7 +160,8 @@ $\{1, \dots, n\} \to \{0, \dots, n - 1\}$ without a negative result. $\square$
 Hence `instantiate` and `reduce_once` return no `ScopeError` on well-scoped
 input, and a reduct of a well-scoped term is well scoped (subject reduction
 for scope). A `ScopeFailure` from `normalize` therefore always means that the
-input was ill scoped.
+input was ill scoped. The converse fails: `normalize(Bind(Bound(-1)), k)`
+returns `NormalForm`, and `(λ. 5) 1` reduces to `Bound(4)` without an error.
 
 The detailed proofs, including the commutation of shifts with different
 cutoffs and the De Bruijn substitution lemma, are in the attachment:
@@ -187,11 +204,15 @@ $$
 
 by induction on $b$: an occurrence of $x$ under $k$ inner binders has index
 $k$ and receives $\uparrow^{k}_{0}\ulcorner a \urcorner$, which is the
-translation of $a$ placed under those $k$ binders; renaming of binders by the
-named substitution is invisible after translation by (3). Since the
-translation also preserves the shape of terms, the two reducers choose the
-same leftmost-outermost redex, and one step commutes with translation up to
-$=_\alpha$. The test "named and debruijn beta reduction agree modulo alpha"
+translation of $a$ placed under those $k$ binders; at the root $\ulcorner a \urcorner$ has
+no free indices, so the shift changes nothing. Renaming of binders by the
+named substitution is invisible after translation by (3), and the translation
+lemma of the [substitution design](substitution.md) makes this induction
+precise. Since the translation also preserves the shape of terms, the
+beta-only named reducer (`@eval.evaluate` with `@lambda.beta_rule` and
+`NormalOrder`) and `reduce_once` choose the same leftmost-outermost redex, and
+one step commutes with translation up to $=_\alpha$. (`@lambda.normalize`
+also contracts eta redexes, so its normal forms can be eta-shorter.) The test "named and debruijn beta reduction agree modulo alpha"
 checks an instance that needs renaming on the named side.
 
 ### Spines and reduction order
@@ -202,7 +223,7 @@ argument. `reduce_once` searches root, head, arguments, and enters binders: it
 is the normal-order strategy of the [eval design](eval.md) on nameless terms,
 so the normalization theorem applies to `normalize`.
 
-## Correctness / invariants
+## Correctness and invariants
 
 - `validate(from_named(t)) == Ok(())` for every named $t$.
 - Round trips (1)–(3) above; `==` on well-scoped `DbTerm` is alpha-equivalence.
@@ -210,7 +231,8 @@ so the normalization theorem applies to `normalize`.
   `reduce_once` never returns `ScopeFailure`, and every reduct is well scoped.
 - `reduce_once` satisfies the one-redex contract of
   [rewrite](rewrite.md), with rule name `"beta"`.
-- `shift(t, 0, c) == Ok(t)` and shifts with one cutoff compose (Lemma 1).
+- `shift(t, 0, c) == Ok(t)` for every `t` without negative indices, and
+  shifts with one cutoff compose (Lemma 1).
 
 Cost: `shift` and `validate` are linear in the term size. `substitute_bound`
 costs $O(|t| + m \cdot |s|)$ for $m$ occurrences of the index, because each
@@ -232,7 +254,12 @@ inserted copy is shifted. A `reduce_once` step costs one search plus one
 ## Boundaries
 
 - Binder names are not preserved: `to_named` chooses `x`, `x_1`, ….
-- `substitute_bound` and `reduce_once` do not detect unbound indices; call
-  `validate` on untrusted input.
+- `substitute_bound`, `instantiate`, `reduce_once` and `normalize` do not
+  detect unbound indices, and the reducers ignore negative indices outside
+  the redex they contract; call `validate` on untrusted input.
+- An empty application `Apply(h, [])` is not a redex and blocks any redex in
+  its head position (`Apply(Apply(Bind(b), []), [a])` is in normal form for
+  `reduce_once`), while [utlc/nbe](utlc/nbe.md) erases it. Build applications
+  with at least one argument.
 - Only beta is implemented; there is no eta rule for De Bruijn terms.
 - Values are opaque; their contents are never shifted.

@@ -10,6 +10,14 @@ strategies, the [lambda](utlc/lambda.md) calculus, the De Bruijn reducer of
 [debruijn](debruijn.md)) are defined as single-step functions of this shape,
 so that every normalizer can be explained step by step.
 
+## Constraints
+
+- **Auditability.** Every step must be observable: the term before and
+  after, the rule and the position.
+- **Arbitrary rules.** A rule is any MoonBit function, so termination and
+  confluence cannot be decided; repetition must be bounded.
+- **Immutable terms.** Steps build new terms and never update in place.
+
 ## Mathematical background
 
 ### Abstract rewriting systems
@@ -130,7 +138,8 @@ $$
 
 The extra call at $n = k$ distinguishes "normal after exactly $k$ steps" from
 "limit reached", so the result never claims a normal form that it has not
-checked. A step limit is necessary because termination is not decidable for
+checked. A limit $k \le 0$ behaves like $k = 0$: no step is taken and $t$ is
+only classified. A step limit is necessary because termination is not decidable for
 arbitrary rules (and fails for the untyped lambda calculus); it is a
 parameter, not a global setting.
 
@@ -159,7 +168,7 @@ numeric-expression AST gets positions and traces for free. Only the top-down
 strategy is provided generically, because it is the one downstream
 simplifiers use and because it makes the normal-form lemma available.
 
-## Correctness / invariants
+## Correctness and invariants
 
 - One step rewrites at most one position, and the reported `path` addresses
   it in `before` (contract above). Tested by "structured step records rule and
@@ -168,9 +177,12 @@ simplifiers use and because it makes the normal-form lemma available.
   means the term is normal for the rule (normal-form lemma).
 - `normalize` and `trace` perform at most `max_steps` steps and call `step`
   at most `max_steps + 1` times; `NormalForm(t, n)` implies `step(t) = NoStep`.
-- In a `ReductionTrace`, `steps[0].before = initial`,
-  `steps[i].after = steps[i+1].before`, and the final term of `result` is the
-  last `after` (or `initial` when there are no steps).
+- In a `ReductionTrace` the final term of `result` is the last `after` (or
+  `initial` when there are no steps), and the number of recorded steps is the
+  count in `result`. If the step function reports its input as `before`, as
+  every traversal of this package and of [eval](eval.md) does, then also
+  `steps[0].before = initial` and `steps[i].after = steps[i+1].before`.
+  `trace` records what the step function returns and does not check this.
 
 **What is not checked.** The package does not decide termination or
 confluence of a rule. When the rule is confluent, every terminating strategy

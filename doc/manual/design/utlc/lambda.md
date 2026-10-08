@@ -10,6 +10,14 @@ than fast, so that faster normalizers ([debruijn](../debruijn.md),
 [utlc/nbe](nbe.md)) and the typed calculus [stlc](../stlc.md) can be checked
 against it.
 
+## Constraints
+
+- **Obviously right.** The calculus is the reference that faster normalizers
+  are tested against, so it reuses the shared substitution and strategies
+  instead of reimplementing them.
+- **Shared syntax.** Terms are `Term[T]`, so domain values ride along and
+  every analysis of [syntax](../syntax.md) applies.
+
 ## Mathematical background
 
 Lambda terms are $t ::= v \mid x \mid t\,u \mid \lambda x.\,t$, encoded as
@@ -73,9 +81,11 @@ $$
 \end{aligned}
 $$
 
-The substitution lemma (Barendregt 2.1.16, derived in the substitution
-design) is what makes beta well defined on alpha classes and compatible with
-contexts.
+Alpha-invariance of substitution (Lemma 3 of the substitution design) is
+what makes beta well defined on alpha classes. The substitution lemma
+(Barendregt 2.1.16, derived there as well) makes beta commute with
+substitution, $M \to_\beta N \Rightarrow M\sigma \to_\beta N\sigma$, which
+the confluence proofs rely on.
 
 ### Spines are contracted one argument at a time
 
@@ -103,7 +113,7 @@ one name, `"beta_eta"`; traces show positions but not which of the two rules
 fired. Because beta and eta redexes have different root constructors, the
 priority inside `beta_eta_rule` never changes the outcome of a step.
 
-## Correctness / invariants
+## Correctness and invariants
 
 - `beta_rule(t) = Some(u)` implies $t \to_\beta u$ at the root; `eta_rule`
   likewise for $\eta$, with the side condition checked by
@@ -111,11 +121,19 @@ priority inside `beta_eta_rule` never changes the outcome of a step.
 - `normalize` returns `NormalForm(u, n)` only for $u$ with no (unary)
   $\beta$ or $\eta$ redex anywhere ([rewrite](../rewrite.md) normal-form
   lemma).
-- By confluence, any two terminating runs of this package, of
-  [debruijn](../debruijn.md) (beta only) or of [utlc/nbe](nbe.md) (beta only)
-  on the same term give beta normal forms that are alpha-equivalent after
-  conversion and spine flattening. The test "named and debruijn beta
-  reduction agree modulo alpha" checks a step that requires renaming.
+- By confluence of beta, the beta normal forms computed by
+  `@eval.evaluate` with `beta_rule`, by [debruijn](../debruijn.md) and by
+  [utlc/nbe](nbe.md) coincide after conversion and spine flattening. The test
+  "named and debruijn beta reduction agree modulo alpha" checks a step that
+  requires renaming.
+- `normalize` returns a beta-eta normal form, which is in general *not* the
+  beta normal form of the other normalizers: $\lambda x.\,f\,x$ is beta-normal
+  and normalizes to $f$ here. The two are related by eta alone. If $N$ is
+  beta-normal, eta steps keep it beta-normal (a new beta redex would need
+  $(\lambda x.\,f\,x)\,a$ or $\lambda x.\,(\lambda y.\,b)\,x$ in $N$, both
+  beta redexes already), so its eta normal form is beta-eta normal and, by
+  confluence of $\to_{\beta\eta}$, alpha-equivalent to the result of
+  `normalize`, up to the unary-spine restriction of `eta_rule`.
 - With beta and eta combined, normal order is used as the strategy; that it
   reaches the $\beta\eta$ normal form of every normalizing term rests on the
   normalization theorem for beta and eta postponement, and is checked by tests
@@ -139,5 +157,8 @@ priority inside `beta_eta_rule` never changes the outcome of a step.
 - No sharing: a duplicated argument is reduced once per copy. Use
   [utlc/nbe](nbe.md) for efficient normalization.
 - Eta recognises unary applications only.
+- An empty application `Apply(h, [])` is not a beta redex and hides any
+  redex in its head position (see the [eval design](../eval.md)); build
+  applications with `application` or with at least one argument.
 - Constants (`Value`) have no reduction rules here; add domain rules with
   [rewrite](../rewrite.md) or [eval](../eval.md).

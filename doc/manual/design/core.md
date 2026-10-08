@@ -8,6 +8,16 @@ downstream repositories, agree on one notion of name. It
 also provides the one piece of name generation that every capture-avoiding
 algorithm needs, and the finite renamings that those algorithms manipulate.
 
+## Constraints
+
+- **Determinism.** No hidden global state: every result, fresh names
+  included, is a function of the arguments, so normal forms are reproducible
+  across runs and printable as they are.
+- **Adoption cost.** A downstream AST must be able to use these names without
+  changing its own representation of variables.
+- **Sharing.** Values are passed between packages and kept in traces, so they
+  must be immutable.
+
 ## Mathematical background
 
 ### Names as atoms
@@ -49,8 +59,9 @@ $$
 \end{aligned}
 $$
 
-Each test is a hash-set lookup, so the expected cost is $O(|U|)$ lookups in
-the worst case and one lookup when the hint is already fresh.
+Each candidate costs one hash-set lookup, plus building its string, so the
+search makes at most $|U| + 1$ lookups, and exactly one when the hint is
+already fresh.
 
 ### Renamings
 
@@ -69,7 +80,10 @@ $$
 `set` keeps at most one entry per source, so the denotation is well defined.
 Renamings with composition form a monoid. `Renaming::then` implements
 $\rho \mathbin{;} \sigma = \sigma \circ \rho$, and the identity is
-`Renaming::empty`.
+`Renaming::empty`. The monoid laws are laws of the denoted functions, which is what the
+composition lemma below establishes; `==` compares entry lists, and two
+lists that denote the same function (such as `empty()` and
+`singleton(x, x)`) are not `==`.
 
 **Lemma (composition).** For every name $n$,
 `r.then(s).apply(n) == s.apply(r.apply(n))`.
@@ -86,9 +100,11 @@ n \notin \operatorname{dom}\rho,\ n \text{ a source of } \sigma:&\quad (\rho;\si
 \end{aligned}
 $$
 
-The second loop skips sources of $\rho$, so it never overrides an entry of
-the first loop; the only overlap is an explicit identity entry $(a, a)$ of
-$\rho$, for which both loops write the same value $\sigma(a)$.
+The second loop skips every name that $\rho$ moves, so it never overrides
+an entry of the first loop with a different value; the only overlap is an
+explicit identity entry $(a, a)$ of $\rho$, for which both loops write the
+same value $\sigma(a)$. The case "$n$ is a source of $\rho$" includes such
+identity entries, which is why it is listed first.
 
 Two further operations serve binders. $\rho \setminus x$ (`without`) is
 $\rho$ with $x$ removed from the domain; under a binder for $x$ the free
@@ -149,7 +165,7 @@ variables) and is allowed. The capture-avoiding operations therefore do not
 rely on injectivity: they freshen a binder whenever it is a target, see the
 [syntax design](syntax.md).
 
-## Correctness / invariants
+## Correctness and invariants
 
 - `fresh_name(h, U) ∉ U`, and `fresh_name(h, U) = h` when `h ∉ U` (freshness lemma).
 - `Renaming::set` keeps at most one entry per source; `apply` therefore

@@ -8,6 +8,13 @@ single-step machinery of [rewrite](rewrite.md). Choosing a strategy should be
 a value that can be stored, compared and printed, not a different function
 to call.
 
+## Constraints
+
+- **Strategies are data.** A strategy must be a value that can be stored,
+  compared and printed.
+- **No new semantics.** Every strategy is a traversal of [rewrite](rewrite.md),
+  so it inherits the one-redex contract, the step-count contract and traces.
+
 ## Mathematical background
 
 The strategies are defined for any rule $r$; the classical results are
@@ -38,6 +45,14 @@ $$
 A term on which weak head reduction finds no beta redex is in *weak head
 normal form*: an abstraction $\lambda x.\,t$, or a spine
 $h\,u_1 \cdots u_n$ whose head $h$ is a variable or a value.
+
+The n-ary encoding adds one degenerate case. The beta rule matches
+`Apply(Bind(x, b), [a, ..])` literally, so an application with an empty
+argument array, `Apply(h, [])`, is never a redex, and every strategy treats
+it as a stuck node: `Apply(Apply(Bind(x, b), []), [a])` is normal for all of
+them, although its curried reading $(\lambda x.\,b)\,a$ is a redex. The
+characterizations of this page hold for terms without empty applications,
+which is what the constructors of [utlc/lambda](utlc/lambda.md) build.
 
 ### Classical results for beta
 
@@ -115,7 +130,7 @@ distinction is one of intent: `NormalOrder` promises the order of steps
 two names lets a faster full normalizer replace `FullNormal` later without
 changing the meaning of `NormalOrder`.
 
-## Correctness / invariants
+## Correctness and invariants
 
 - `reduce_once` satisfies the one-redex contract of
   [rewrite](rewrite.md) for every strategy; the reported path of a

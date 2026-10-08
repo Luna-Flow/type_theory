@@ -9,6 +9,14 @@ an AST connects to the shared algorithms through `@syntax.BindingSyntax`, what
 an implementation must guarantee, and how that guarantee is tested. The
 `adapter` package holds the reference contract test; it has no public API.
 
+## Constraints
+
+- **No conversion.** Downstream ASTs keep their own types and invariants.
+- **No higher-kinded types.** MoonBit cannot abstract over a functor, so the
+  interface must be a concrete view type.
+- **Laws are not checked by the compiler.** The contract must be stated
+  precisely enough to be tested.
+
 ## Mathematical background
 
 ### Views
@@ -66,7 +74,7 @@ induction. Hence, for a lawful adapter:
   $\mathrm{names}$ of the node read as binding syntax;
 - `generic_alpha_rename_bound` satisfies the alpha step;
 - `GenericSubstitution::apply_once` is simultaneous and capture-avoiding
-  (Lemmas 1–3 of the substitution design);
+  (Lemmas 0–4 of the substitution design);
 - `generic_top_down_once` satisfies the one-redex contract and the normal-form
   lemma of the [rewrite design](rewrite.md).
 
@@ -121,7 +129,7 @@ A downstream variable type converts to `@core.Name` by an injective map
 equality agree with variable identity, so that freshness and capture checks
 are correct for the downstream variables.
 
-## Correctness / invariants
+## Correctness and invariants
 
 The contract test `src/adapter/poly_adapter_wbtest.mbt` checks a lawful
 adapter for a four-kind AST:

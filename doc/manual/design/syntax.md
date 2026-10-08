@@ -9,6 +9,16 @@ audiences: the lambda calculus packages, which use the concrete `Term[T]`,
 and downstream ASTs, which keep their own types and reach the same
 algorithms through `BindingSyntax`.
 
+## Constraints
+
+- **One trait.** A downstream AST should reach every binding algorithm by
+  implementing a single trait. MoonBit has no higher-kinded types, so the
+  trait cannot be a generic traversal over an arbitrary functor.
+- **Opaque constants.** The constant type `T` is arbitrary and must not need
+  a trait of its own.
+- **No conventions.** Inputs come from users and other algorithms, so no
+  operation may assume that bound names are distinct from free ones.
+
 ## Mathematical background
 
 ### Terms
@@ -150,8 +160,9 @@ iff $\ulcorner t \urcorner = \ulcorner u \urcorner$. The classical theorem
 that two named terms are alpha-equivalent iff their De Bruijn translations are
 identical[^debruijn] completes the proof. $\square$
 
-The algorithm runs in time linear in the size of the terms, plus the cost of
-the environment lookups (linear in the binder depth).
+Each node is visited once. A variable lookup scans the environment, and
+each binder copies it, both in $O(d)$ for binder depth $d$, so the comparison
+costs $O(n \cdot d)$ for terms of size $n$.
 
 [^debruijn]: N. G. de Bruijn, "Lambda calculus notation with nameless dummies", Indagationes Mathematicae 34, 1972.
 
@@ -200,7 +211,10 @@ says exactly that no free variable was captured.
 
 The test $x \notin \operatorname{tgt}(\rho \setminus x)$ is conservative: it
 also renames the binder when the offending entry's source does not occur in
-$t$. The result is still alpha-equivalent to the minimal one.
+$t$. The result is still alpha-equivalent to the minimal one. The lemma shows
+that no variable is captured; that the result is the intended term up to
+$=_\alpha$ follows from the translation lemma of the
+[substitution design](substitution.md), which covers renamings as well.
 
 ### Checked bound renaming
 
@@ -217,7 +231,7 @@ binder for $y$ would be harmless), but it is cheap and it is all the
 substitution algorithms need, because they always call it with a name chosen
 fresh for the body.
 
-## Correctness / invariants
+## Correctness and invariants
 
 - $\mathrm{FV}(t) \subseteq \mathrm{names}(t)$; `map_values` preserves both.
 - `alpha_equal` is reflexive, symmetric and transitive, and coincides with
@@ -230,9 +244,12 @@ fresh for the body.
   $\beta x.\,t =_\alpha \beta y.\,t'$.
 - On `Term[T]` every `generic_*` function equals its specialised counterpart.
 
-Cost: `free_variables` and `all_names` are linear in the term size (in
-hash-set operations). `rename_free` and `alpha_rename_bound` are linear when
-no binder is renamed; each freshened binder adds a traversal of its body.
+Cost: `free_variables` and `all_names` make $O(n)$ hash-set operations for
+a term of size $n$; each union costs up to the size of the sets involved.
+`alpha_rename_bound` adds one traversal to `all_names`. `rename_free` removes
+one entry and computes the targets of the renaming at every binder, so it
+costs $O(n \cdot |\rho|)$ when no binder is renamed; each freshened binder
+adds `all_names` and one renaming traversal of its body.
 
 ## Alternatives rejected
 

@@ -10,6 +10,16 @@ capture-avoiding, simultaneous substitution for `Term[T]` and the same
 algorithm for any `BindingSyntax` AST, with laws that hold up to
 alpha-equivalence.
 
+## Constraints
+
+- **Arbitrary input.** Terms come from users and from other algorithms, so
+  substitution must be correct without assuming that bound and free names are
+  distinct.
+- **Determinism and readability.** Fresh names are reproducible and stay
+  close to the original names; binders are renamed only when necessary.
+- **One algorithm.** `Term[T]` and every `BindingSyntax` AST use the same
+  definition, so one proof covers both.
+
 ## Mathematical background
 
 Terms, $\mathrm{FV}$, $\mathrm{names}$ and $=_\alpha$ are those of the
@@ -117,32 +127,106 @@ $$
 so that sequential application can be expressed as one simultaneous
 substitution, which is cheaper (one traversal) and has the laws below.
 
-## Correctness / invariants
+## Correctness and invariants
+
+The laws below are proved through the nameless reading of terms. The direct
+argument by induction on named terms is the classical one, but its binder
+case has to compare results whose fresh names differ, and that comparison is
+exactly what the nameless reading makes trivial.
+
+### The nameless reading
+
+Let $\ulcorner t \urcorner$ be `@debruijn.from_named(t)`, the translation of
+the [debruijn design](debruijn.md): bound occurrences become indices, free
+names stay names. It is computed by *closing* each binder's variable. For a
+nameless term $d$, let $\kappa^k_x\,d$ replace every free name $x$ under $j$
+inner binders by the index $k + j$; then
+
+$$
+\ulcorner v \urcorner = v, \qquad
+\ulcorner x \urcorner = x, \qquad
+\ulcorner t(u_1, \dots, u_n) \urcorner = \ulcorner t \urcorner(\ulcorner u_1 \urcorner, \dots, \ulcorner u_n \urcorner), \qquad
+\ulcorner \beta x.\, t \urcorner = \beta.\, \kappa^0_x \ulcorner t \urcorner .
+$$
+
+This is the same as the environment-based definition of `from_named`: the
+occurrences of $x$ that are still free in $\ulcorner t \urcorner$ are exactly
+those whose nearest binder is this one. Translations are *locally closed*:
+every index points at a binder inside the term. Two facts are used below.
+
+- **(T1)** $t =_\alpha u \iff \ulcorner t \urcorner = \ulcorner u \urcorner$
+  (de Bruijn's theorem, see the [syntax design](syntax.md)).
+- **(T2)** If $y \notin \mathrm{names}(t)$, then
+  $\kappa^0_y \ulcorner t\{x \mapsto y\} \urcorner = \kappa^0_x \ulcorner t \urcorner$.
+  The free name $y$ occurs in $\ulcorner t\{x \mapsto y\} \urcorner$ exactly
+  where $x$ occurs free in $\ulcorner t \urcorner$, because $y$ occurs nowhere
+  in $t$, so closing $y$ in the one gives the same indices as closing $x$ in
+  the other.
+
+On nameless terms, substitution for free names is plain replacement. For a
+substitution $\sigma$ write $d\langle\sigma\rangle$ for $d$ with every free
+name $z$ replaced by $\ulcorner \sigma(z) \urcorner$. No binder is renamed and
+no index is shifted: the inserted terms are locally closed, so they mean the
+same under any number of binders.
+
+### The translation lemma
+
+**Lemma 0.** $\ulcorner t\sigma \urcorner = \ulcorner t \urcorner\langle\sigma\rangle$
+for every term $t$ and substitution $\sigma$.
+
+By induction on the size of $t$, for all $\sigma$ at once. Values, variables
+and applications are immediate. For $\beta x.\,t$ let
+$\sigma' = \sigma \setminus x$. Closing commutes with replacement under two
+conditions, checked occurrence by occurrence:
+
+$$
+\kappa^k_x\big(d\langle\sigma'\rangle\big) = \big(\kappa^k_x d\big)\langle\sigma'\rangle
+\quad\text{if } x \notin \operatorname{dom}\sigma' \text{ and }
+x \notin \mathrm{FV}(\sigma'(z)) \text{ for every free name } z \in \operatorname{dom}\sigma' \text{ of } d .
+\tag{C}
+$$
+
+The first condition holds because $x$ was removed. The free names of
+$\ulcorner t \urcorner$ are $\mathrm{FV}(t)$, so the second is exactly
+$x \notin R_{\sigma'}(\mathrm{FV}(t))$. Hence, without renaming,
+
+$$
+\begin{aligned}
+\ulcorner (\beta x.\,t)\sigma \urcorner
+  &= \beta.\, \kappa^0_x \ulcorner t\sigma' \urcorner
+   = \beta.\, \kappa^0_x \big(\ulcorner t \urcorner\langle\sigma'\rangle\big) && \text{induction} \\
+  &= \beta.\, \big(\kappa^0_x \ulcorner t \urcorner\big)\langle\sigma'\rangle && \text{(C)} \\
+  &= \beta.\, \big(\kappa^0_x \ulcorner t \urcorner\big)\langle\sigma\rangle
+   = \ulcorner \beta x.\,t \urcorner\langle\sigma\rangle , && x \text{ is not free in } \kappa^0_x \ulcorner t \urcorner
+\end{aligned}
+$$
+
+and with renaming to $x'$, which lies outside
+$\operatorname{supp}\sigma' \cup \mathrm{names}(t)$,
+
+$$
+\begin{aligned}
+\ulcorner (\beta x.\,t)\sigma \urcorner
+  &= \beta.\, \kappa^0_{x'} \big(\ulcorner t\{x \mapsto x'\} \urcorner\langle\sigma'\rangle\big) && \text{induction, same size} \\
+  &= \beta.\, \big(\kappa^0_{x'} \ulcorner t\{x \mapsto x'\} \urcorner\big)\langle\sigma'\rangle && \text{(C) for } x' \notin \operatorname{supp}\sigma' \\
+  &= \beta.\, \big(\kappa^0_{x} \ulcorner t \urcorner\big)\langle\sigma'\rangle
+   = \ulcorner \beta x.\,t \urcorner\langle\sigma\rangle . && \text{(T2)}
+\end{aligned}
+$$
+
+$\square$
+
+Everything else follows from Lemma 0, because replacement on locally closed
+nameless terms is a homomorphism with no side conditions.
 
 ### Free variables
 
 **Lemma 1.** $\mathrm{FV}(t\sigma) = \bigcup_{z \in \mathrm{FV}(t)} \mathrm{FV}(\sigma(z))$.
 
-By induction on $t$. The variable, value and application cases are
-immediate. For $\beta x.\,t$ without renaming, let $\sigma' = \sigma \setminus x$
-and assume $x \notin R_{\sigma'}(\mathrm{FV}(t))$:
-
-$$
-\begin{aligned}
-\mathrm{FV}\big((\beta x.\,t)\sigma\big)
-  &= \mathrm{FV}(t\sigma') \setminus \{x\} \\
-  &= \Big(\textstyle\bigcup_{z \in \mathrm{FV}(t)} \mathrm{FV}(\sigma'(z))\Big) \setminus \{x\} && \text{induction} \\
-  &= \textstyle\bigcup_{z \in \mathrm{FV}(t),\, z \ne x} \mathrm{FV}(\sigma(z)) && (*) \\
-  &= \textstyle\bigcup_{z \in \mathrm{FV}(\beta x.\,t)} \mathrm{FV}(\sigma(z)).
-\end{aligned}
-$$
-
-Step $(*)$: for $z = x$, $\sigma'(x) = x$ contributes $\{x\}$, which is
-removed. For $z \ne x$, $\sigma'(z) = \sigma(z)$, and $x \notin \mathrm{FV}(\sigma(z))$:
-either $z \in \operatorname{dom}\sigma'$ and $\mathrm{FV}(\sigma(z)) \subseteq R_{\sigma'}(\mathrm{FV}(t)) \not\ni x$,
-or $\sigma(z) = z \ne x$. With renaming, the same computation applies to
-$x'$ and $t\{x \mapsto x'\}$, where $x' \notin \operatorname{supp}\sigma'$
-makes the side condition hold. $\square$
+The free names of $\ulcorner t \urcorner\langle\sigma\rangle$ are those of the
+inserted $\ulcorner \sigma(z) \urcorner$ for the free names $z$ of
+$\ulcorner t \urcorner$, that is for $z \in \mathrm{FV}(t)$ (with
+$\sigma(z) = z$ outside the domain). $\square$
 
 **Corollary (no capture).** A variable free in an inserted replacement
 $\sigma(z)$, $z \in \mathrm{FV}(t)$, is free in $t\sigma$.
@@ -150,43 +234,46 @@ $\sigma(z)$, $z \in \mathrm{FV}(t)$, is free in $t\sigma$.
 ### Only the free variables matter
 
 **Lemma 2.** $t\sigma =_\alpha t\,(\sigma|_{\mathrm{FV}(t)})$, where
-$\sigma|_S$ is `restrict(S)`.
+$\sigma|_S$ is `restrict(S)`. More generally, if $\sigma(z) =_\alpha \tau(z)$
+for every $z \in \mathrm{FV}(t)$, then $t\sigma =_\alpha t\tau$.
 
-The variable case is the definition. In the binder case, the renaming test
-already restricts to $R_{\sigma'}(\mathrm{FV}(t))$, so both sides rename the
-same binders, and only the variables in $\mathrm{FV}(t) \setminus \{x\}$ are
-looked up. The fresh names may differ, because they avoid the support of
-different substitutions, hence equality up to $=_\alpha$.
+$\ulcorner t \urcorner\langle\sigma\rangle$ consults $\sigma$ only at the free
+names of $\ulcorner t \urcorner$, and only through
+$\ulcorner \sigma(z) \urcorner$, which (T1) makes invariant under
+$=_\alpha$. Equal translations mean alpha-equivalent terms by (T1). The two
+sides need not be equal as values, because the fresh binder names avoid the
+support of different substitutions. $\square$
 
 ### Alpha-invariance
 
 **Lemma 3.** If $t =_\alpha t'$ then $t\sigma =_\alpha t'\sigma$.
 
-It suffices to check one alpha step $\beta x.\,t =_\alpha \beta y.\,t\{x \mapsto y\}$
-with $y \notin \mathrm{names}(t)$. Both sides become binders over the same
-body up to the bound name, and by Lemma 1 their bodies have the same free
-variables outside the binder, so they are alpha-equivalent. As a consequence
-substitution is well defined on alpha-equivalence classes, and the choice of
-fresh names never matters semantically.
+By (T1), $\ulcorner t \urcorner = \ulcorner t' \urcorner$, so
+$\ulcorner t\sigma \urcorner = \ulcorner t \urcorner\langle\sigma\rangle = \ulcorner t'\sigma \urcorner$
+by Lemma 0, and (T1) again gives the claim. $\square$
+
+Substitution is therefore well defined on alpha-equivalence classes, and the
+choice of fresh names never matters semantically.
 
 ### Composition
 
 **Lemma 4.** $t(\sigma \mathbin{;} \tau) =_\alpha (t\sigma)\tau$.
 
-By Lemma 3 we may choose a representative of $t$ in which no binder lies in
-$\operatorname{supp}\sigma \cup \operatorname{supp}\tau$; then no binder is
-renamed on either side and both substitutions pass under binders unchanged.
-The variable case splits as in the definition of $\sigma \mathbin{;} \tau$:
+By Lemma 0 on both sides it suffices to show
+$d\langle\sigma\rangle\langle\tau\rangle = d\langle\sigma \mathbin{;} \tau\rangle$
+for a nameless $d$. Replacement is homomorphic, so only a free name $z$
+needs checking, and it splits as in the definition of
+$\sigma \mathbin{;} \tau$:
 
 $$
 \begin{aligned}
-x \in \operatorname{dom}\sigma:&\quad x(\sigma;\tau) = \sigma(x)\tau = (x\sigma)\tau,\\
-x \in \operatorname{dom}\tau \setminus \operatorname{dom}\sigma:&\quad x(\sigma;\tau) = \tau(x) = x\tau = (x\sigma)\tau,\\
-\text{otherwise}:&\quad x(\sigma;\tau) = x = (x\sigma)\tau .
+z \in \operatorname{dom}\sigma:&\quad z\langle\sigma\rangle\langle\tau\rangle = \ulcorner \sigma(z) \urcorner\langle\tau\rangle = \ulcorner \sigma(z)\,\tau \urcorner = z\langle\sigma \mathbin{;} \tau\rangle && \text{Lemma 0},\\
+z \in \operatorname{dom}\tau \setminus \operatorname{dom}\sigma:&\quad z\langle\sigma\rangle\langle\tau\rangle = z\langle\tau\rangle = \ulcorner \tau(z) \urcorner = z\langle\sigma \mathbin{;} \tau\rangle,\\
+\text{otherwise}:&\quad z\langle\sigma\rangle\langle\tau\rangle = z = z\langle\sigma \mathbin{;} \tau\rangle .
 \end{aligned}
 $$
 
-The application and value cases follow by induction. $\square$
+$\square$
 
 **Corollary (substitution lemma).** For $x \ne y$ and $x \notin \mathrm{FV}(r)$,
 
@@ -194,36 +281,49 @@ $$
 t[x := s][y := r] \;=_\alpha\; t[y := r]\big[x := s[y := r]\big].
 $$
 
-Both sides are single simultaneous substitutions by Lemma 4. The left is
-$\{x \mapsto s[y := r],\ y \mapsto r\}$. The right is
+By Lemma 4 each side is one simultaneous substitution applied to $t$. The
+left is $\{x \mapsto s[y := r],\ y \mapsto r\}$. The right is
 $\{y \mapsto r[x := s[y := r]],\ x \mapsto s[y := r]\}$, and
-$r[x := \dots] = r$ because $x \notin \mathrm{FV}(r)$ (Lemma 1). The two maps
-are equal, so the results are alpha-equivalent.[^substlemma] This is the
-lemma that makes beta reduction compatible with substitution in the lambda
-calculus packages.
+$r[x := s[y := r]] =_\alpha r$ by Lemma 2, because $x \notin \mathrm{FV}(r)$
+and the empty substitution is the identity. The two substitutions agree up
+to $=_\alpha$ at every name, so Lemma 2 makes the results
+alpha-equivalent.[^substlemma] This is the lemma that makes beta reduction
+commute with substitution in the lambda calculus packages:
+$M \to_\beta N$ implies $M\sigma \to_\beta N\sigma$ up to $=_\alpha$.
 
 [^substlemma]: Barendregt, *The Lambda Calculus*, Lemma 2.1.16.
 
 ### Renamings embed into substitutions
 
-For a renaming $\rho$ and a list of names $L \supseteq \mathrm{FV}(t)$,
-`from_renaming(L, ρ)` is $\sigma_\rho = \{x \mapsto \rho(x) \mid x \in L,\ \rho(x) \ne x\}$
-(as variables), and $t\sigma_\rho =_\alpha t\rho$: both replace each free $x$
-by the variable $\rho(x)$, and both freshen a binder exactly when it would
-capture.
+`Term::rename_free` obeys the analogue of Lemma 0,
+$\ulcorner t\rho \urcorner = \ulcorner t \urcorner\langle\rho\rangle$, with the
+same proof: its test $x \notin \operatorname{tgt}(\rho \setminus x)$ implies
+the second condition of (C), and its fresh name avoids
+$\operatorname{supp}(\rho \setminus x) \cup \mathrm{names}(t)$. For a list of
+names $L \supseteq \mathrm{FV}(t)$, `from_renaming(L, ρ)` is
+$\sigma_\rho = \{x \mapsto \rho(x) \mid x \in L,\ \rho(x) \ne x\}$ (as
+variables). It agrees with $\rho$ on $\mathrm{FV}(t)$, so
+$t\sigma_\rho =_\alpha t\rho$. The two results may still differ as values:
+`rename_free` freshens a binder whenever it is a target of the renaming,
+while `apply` freshens it only when an inserted variable would be captured.
 
 ### Cost
 
-Each binder computes the free variables of its body, so `apply` costs
-$O(n \cdot d)$ hash-set operations for a term of size $n$ and binder depth
-$d$, plus one extra body traversal per renamed binder. `then` costs one
-`apply` per entry of `self`.
+At each binder, `apply` computes the free variables of the body and of the
+replacements that are inserted into it, and removes one entry from the
+substitution. For a term of size $n$ and binder depth $d$ this is
+$O(n \cdot d)$ hash-set operations, plus $O(|\sigma|)$ work and the free
+variables of the relevant replacements per binder, plus one traversal of the
+body for each renamed binder. `then` costs one `apply` and one `set` per
+entry of `self`, so $O(k^2)$ entry copies for $k$ entries besides the
+applications.
 
 ### Generic substitution
 
 `GenericSubstitution::apply_once` is the same definition with every
-constructor replaced by its `BindingSyntax` counterpart, so Lemmas 1–3 hold
-for any implementation that satisfies the view laws of the
+constructor replaced by its `BindingSyntax` counterpart. Reading a node
+through its view gives a named term, so Lemmas 0–3 hold for any
+implementation that satisfies the view laws of the
 [adapter design](adapter.md). On `Term[T]` the two algorithms coincide.
 
 ## Alternatives rejected

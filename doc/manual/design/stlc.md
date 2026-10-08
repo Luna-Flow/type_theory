@@ -9,6 +9,14 @@ and a normalizer that needs no step limit and returns canonical
 (beta-normal, eta-long) forms. It is the model for richer typed cores built on
 `type_theory`.
 
+## Constraints
+
+- **Shared syntax.** Terms are the unannotated `Term[Atom]`, so the shared
+  analyses, substitution and rewriting apply unchanged.
+- **Decidability.** Type checking must terminate on every input, and
+  normalization of well-typed terms must need no step limit.
+- **Errors are values.** Every rejection is a `TypeError`.
+
 ## Mathematical background
 
 ### Types and terms
@@ -116,9 +124,11 @@ without annotations.
 
 ### Soundness of the checker
 
-**Theorem.** If `check(Σ, Γ, t, τ)` succeeds, then $\Gamma \vdash t : \tau$;
-if `infer(Σ, Γ, t)` returns $\tau$, then $\Gamma \vdash t : \tau$ — provided
-every use of $\textsc{Redex}$ satisfies $x \notin \mathrm{FV}(a_2, \dots, a_n)$.
+**Theorem (conditional soundness).** If `check(Σ, Γ, t, τ)` succeeds, then
+$\Gamma \vdash t : \tau$; if `infer(Σ, Γ, t)` returns $\tau$, then
+$\Gamma \vdash t : \tau$ — provided every use of $\textsc{Redex}$ satisfies
+$x \notin \mathrm{FV}(a_2, \dots, a_n)$. Without that proviso the checker is
+unsound, as the example below shows.
 
 *Proof sketch.* Induction on the algorithmic derivation. $\textsc{Lam}$ and the
 axioms map to their declarative counterparts; $\textsc{Sub}$ is immediate;
@@ -144,13 +154,20 @@ $$
 (\lambda x.\,\lambda y.\,y)\;()\;x
 $$
 
-has declarative type $B$ (the outer $x$ has type $B$), but `infer` types the
-second argument in $\Gamma, x{:}\mathsf{Unit}$ and returns `Unit`.
-`normalize_eta_long` then rejects the term at either type, because its
-evaluator checks the arguments in the original context. This is a known issue
-of the current implementation (recorded in the correctness checklist);
-renaming the parameter apart from the free variables of the remaining
-arguments avoids it.
+has declarative type $B$ and no other (the outer $x$ has type $B$), but
+`infer` types the second argument in $\Gamma, x{:}\mathsf{Unit}$ and returns
+`Unit`. Hence `check` succeeds at `Unit` and fails at `B`, and
+`normalize_checked` at `Unit` returns `NormalForm(x, 2)`: a variable of type
+$B$ presented as a normal form of type `Unit`. `normalize_eta_long` rejects
+the term at both types with `TypeMismatch`, because its evaluator checks the
+arguments in the original context; it is incomplete here but not unsound.
+
+> [!WARNING]
+> This is a soundness bug of `infer` and `check`, recorded in the correctness
+> checklist and not yet fixed. Renaming the parameter apart from the free
+> variables of $a_2, \dots, a_n$ before extending the context, or typing
+> $a_2, \dots, a_n$ in $\Gamma$ itself, would restore the theorem without
+> its proviso.
 
 **Completeness for normal forms.** If $t$ is beta-normal and
 $\Gamma \vdash t : \tau$, then `check(Σ, Γ, t, τ)` succeeds. A beta-normal
@@ -161,9 +178,11 @@ Terms with redexes are accepted when each redex's first argument is
 inferable; $(\lambda f.\,f\,())\,(\lambda y.\,y)$ is rejected with
 `CannotInferLambda` although it is typable.
 
-The checker terminates: every recursive call is on a strictly smaller term
-($\textsc{Redex}$ recurses on $b\,a_2 \cdots a_n$, which is smaller than the
-redex).
+The checker terminates. Measure a call by the size of its term, and break
+ties by counting a `check` call above an `infer` call. $\textsc{Sub}$ goes
+from `check` to `infer` on the same term, which lowers the measure; every
+other recursive call is on a strictly smaller term ($\textsc{Redex}$ recurses
+on $b\,a_2 \cdots a_n$, which lacks the binder and $a_1$).
 
 ### Two normalizers with different jobs
 
@@ -266,11 +285,15 @@ $t[\gamma] \mathrel{R_\tau} \llbracket t \rrbracket \rho$; it is proved by
 induction on the typing derivation, the lambda case using that beta-reduction
 is in $=_{\beta\eta}$. With $\gamma$ the identity and $\rho_\Gamma$ (related by
 reflection), reification gives $t =_{\beta\eta} \mathrm{nf}(t)$ (soundness).
-Since evaluation identifies $\beta\eta$-equal terms (beta is function
-application in the model, eta holds because reification always expands), equal
-terms have equal normal forms (completeness). The same relation, read as a
-computability predicate, shows that evaluation terminates on well-typed
-terms, which is why no fuel is needed.
+Completeness, that $\beta\eta$-equal terms have alpha-equivalent normal
+forms, needs a second argument: a partial equivalence relation on values,
+defined by induction on types like $R$, under which $\llbracket t \rrbracket$
+and $\llbracket t' \rrbracket$ are related whenever $t =_{\beta\eta} t'$
+(beta is function application in the model, and eta holds because
+reification always expands), and related values reify to the same normal
+form; Abel's thesis, cited above, gives the details. The relation $R$, read
+as a computability predicate, also shows that evaluation terminates on
+well-typed terms, which is why no fuel is needed.
 
 ### Fresh names in readback
 
@@ -280,14 +303,15 @@ environments, and the names already introduced on the path. Generated names
 are therefore distinct from each other along a path and from all names of the
 input, and a neutral variable is never captured by a binder introduced later.
 
-## Correctness / invariants
+## Correctness and invariants
 
 - `check` and `infer` terminate; on success, the term is declaratively typable
-  at the reported type, subject to the side condition of $\textsc{Redex}$ (see
-  the known issue above).
+  at the reported type, *provided* no redex parameter occurs free in a later
+  argument of its spine. Otherwise `check` can accept a wrong type (known
+  issue above), and so can `normalize_checked`.
 - `check` accepts every well-typed beta-normal term.
 - `normalize_eta_long` returns `Ok` exactly for terms that `check` accepts,
-  except for the known issue; its result is in
+  except for terms hit by the known issue, which it rejects; its result is in
   $\mathit{Nf}^\tau$, is $\beta\eta$-equal to the input, and is the same (up to
   $=_\alpha$) for $\beta\eta$-equal inputs.
 - `normalize_checked` returns `Err` before any reduction for ill-typed input.
@@ -319,6 +343,7 @@ small terms.
 - No unit eta; normal forms are eta-long for arrow types only.
 - Constants are opaque: there are no delta rules.
 - The $\textsc{Redex}$ rule does not rename its parameter apart from later
-  arguments (known issue).
+  arguments, so `check` is unsound on redexes whose parameter occurs free in
+  a later argument (known issue).
 - `normalize_checked` is bounded by a step limit because it reuses the untyped
   reducer.
