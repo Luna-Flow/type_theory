@@ -6,16 +6,17 @@ pub struct Context {
 
 ///|
 pub fn Context::empty() -> Context {
-  { names: [] }
+  { names: [], }
 }
 
 ///|
 pub fn Context::from_array(names : Array[Name]) -> Context {
-  { names: names.copy() }
+  { names: names.copy(), }
 }
 
 ///|
-pub fn Context::extend(self : Context, name : Name) -> Context {
+#alias(extend, deprecated="Use `Context::extend_with` instead")
+pub fn Context::extend_with(self : Context, name : Name) -> Context {
   let names = self.names.copy()
   names.push(name)
   { names, }
@@ -44,11 +45,12 @@ pub struct Telescope[T] {
 
 ///|
 pub fn[T] Telescope::empty() -> Telescope[T] {
-  { entries: [] }
+  { entries: [], }
 }
 
 ///|
-pub fn[T] Telescope::extend(
+#alias(extend, deprecated="Use `Telescope::extend_with` instead")
+pub fn[T] Telescope::extend_with(
   self : Telescope[T],
   name : Name,
   annotation : T,

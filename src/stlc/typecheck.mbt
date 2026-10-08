@@ -45,7 +45,7 @@ fn infer_lambda_application(
   }
   match infer(sig, ctx, arguments[0]) {
     Ok(argument_type) => {
-      let next_ctx = ctx.extend(parameter, argument_type)
+      let next_ctx = ctx.extend_with(parameter, argument_type)
       if arguments.length() == 1 {
         infer(sig, next_ctx, body)
       } else {
@@ -102,7 +102,7 @@ pub fn check(
 ) -> Result[Unit, TypeError] {
   match (term, expected) {
     (@syntax.Bind(name, body), Ty::Arrow(domain, codomain)) =>
-      check(sig, ctx.extend(name, domain), body, codomain)
+      check(sig, ctx.extend_with(name, domain), body, codomain)
     (_, _) =>
       match infer(sig, ctx, term) {
         Ok(actual) =>

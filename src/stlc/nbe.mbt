@@ -69,7 +69,7 @@ fn apply_value_typed(
       next_environment.push((closure.parameter, argument))
       eval_typed(
         closure.sig,
-        closure.ctx.extend(closure.parameter, closure.domain),
+        closure.ctx.extend_with(closure.parameter, closure.domain),
         closure.body,
         closure.codomain,
         next_environment,
@@ -107,7 +107,7 @@ fn head_type_for_application(
             match
               head_type_for_application(
                 sig,
-                ctx.extend(parameter, domain),
+                ctx.extend_with(parameter, domain),
                 body,
                 arguments[1:].to_owned(),
                 expected,
@@ -142,7 +142,9 @@ fn eval_typed(
     @syntax.Bind(parameter, body) =>
       match ty {
         Ty::Arrow(domain, codomain) =>
-          Ok(VLam({ sig, ctx, environment, parameter, domain, codomain, body }))
+          Ok(
+            VLam({ sig, ctx, environment, parameter, domain, codomain, body, }),
+          )
         _ =>
           Err(
             TypeError::NormalizationError(
@@ -238,7 +240,7 @@ fn reify_with_name(
       let argument = reflect(domain, NFree(fresh))
       match apply_value_typed(value, domain, argument) {
         Ok(body_value) =>
-          match reify(codomain, body_value, @hashset.from_array([fresh])) {
+          match reify(codomain, body_value, @hashset.HashSet([fresh])) {
             Ok(body) => Ok(@syntax.Bind(fresh, body))
             Err(error) => Err(error)
           }

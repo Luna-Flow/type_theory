@@ -25,12 +25,15 @@ pub(all) enum Atom {
   UnitLit
   Const(@core.Name)
 } derive(Eq, @debug.Debug)
+pub fn Atom::equal(Self, Self) -> Bool
 
 pub struct Signature {
   entries : Array[(@core.Name, Ty)]
 } derive(Eq, @debug.Debug)
 pub fn Signature::empty() -> Self
-pub fn Signature::extend(Self, @core.Name, Ty) -> Self
+pub fn Signature::equal(Self, Self) -> Bool
+#alias(extend, deprecated)
+pub fn Signature::extend_with(Self, @core.Name, Ty) -> Self
 pub fn Signature::lookup(Self, @core.Name) -> Ty?
 pub fn Signature::to_array(Self) -> Array[(@core.Name, Ty)]
 
@@ -39,12 +42,15 @@ pub(all) enum Ty {
   Unit
   Arrow(Ty, Ty)
 } derive(Eq, @debug.Debug)
+pub fn Ty::equal(Self, Self) -> Bool
 
 pub struct TypeContext {
   entries : Array[(@core.Name, Ty)]
 } derive(Eq, @debug.Debug)
 pub fn TypeContext::empty() -> Self
-pub fn TypeContext::extend(Self, @core.Name, Ty) -> Self
+pub fn TypeContext::equal(Self, Self) -> Bool
+#alias(extend, deprecated)
+pub fn TypeContext::extend_with(Self, @core.Name, Ty) -> Self
 pub fn TypeContext::lookup(Self, @core.Name) -> Ty?
 pub fn TypeContext::to_array(Self) -> Array[(@core.Name, Ty)]
 
@@ -58,9 +64,9 @@ pub(all) enum TypeError {
   ScopeError(@debruijn.ScopeError)
   NormalizationError(message~ : String)
 } derive(Eq, @debug.Debug)
+pub fn TypeError::equal(Self, Self) -> Bool
 
 // Type aliases
 pub type Term = @syntax.Term[Atom]
 
 // Traits
-

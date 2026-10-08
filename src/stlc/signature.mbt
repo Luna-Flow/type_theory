@@ -5,11 +5,12 @@ pub struct Signature {
 
 ///|
 pub fn Signature::empty() -> Signature {
-  { entries: [] }
+  { entries: [], }
 }
 
 ///|
-pub fn Signature::extend(
+#alias(extend, deprecated="Use `Signature::extend_with` instead")
+pub fn Signature::extend_with(
   self : Signature,
   name : @core.Name,
   ty : Ty,

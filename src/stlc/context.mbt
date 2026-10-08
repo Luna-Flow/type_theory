@@ -5,11 +5,12 @@ pub struct TypeContext {
 
 ///|
 pub fn TypeContext::empty() -> TypeContext {
-  { entries: [] }
+  { entries: [], }
 }
 
 ///|
-pub fn TypeContext::extend(
+#alias(extend, deprecated="Use `TypeContext::extend_with` instead")
+pub fn TypeContext::extend_with(
   self : TypeContext,
   name : @core.Name,
   ty : Ty,
