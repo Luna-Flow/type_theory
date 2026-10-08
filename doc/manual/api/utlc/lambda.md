@@ -1,11 +1,22 @@
 # utlc/lambda API
 
+## Purpose
+
 The `utlc/lambda` package is the untyped lambda calculus over the shared named
 syntax `@syntax.Term[T]`: constructors for abstraction and application, the
 beta and eta rules, and a bounded normal-order normalizer. It is the
 reference operational semantics of the library.
 
-```text
+In a lambda term, `Bind(x, b)` is $\lambda x.\,b$, `Apply(f, [a])` is
+$f\,a$, and `Value(v)` is an opaque constant. The rules are explained in the
+[utlc/lambda design](../../design/utlc/lambda.md).
+
+## Importing
+
+Add the package, and the packages whose types appear in its signatures, to
+your `moon.pkg`:
+
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",
@@ -14,10 +25,10 @@ import {
 }
 ```
 
-The default alias is `@lambda`. In a lambda term, `Bind(x, b)` is
-$\lambda x.\,b$, `Apply(f, [a])` is $f\,a$, and `Value(v)` is an opaque
-constant. The rules are explained in the
-[utlc/lambda design](../../design/utlc/lambda.md).
+The examples on this page refer to every name through its package alias,
+for example `@core.Name`.
+
+The default alias of the package is `@lambda`.
 
 ## Constructors
 
@@ -63,8 +74,10 @@ pub fn[T] beta_rule(@syntax.Term[T]) -> @syntax.Term[T]?
 
 For `Apply(Bind(x, body), [a, ..rest])` it returns the capture-avoiding
 substitution `body[x := a]`, applied to `rest` when `rest` is not empty. For
-every other term it returns `None`. It works for any domain type `T`, because
-values are never inspected.
+every other term it returns `None`; in particular an empty application
+`Apply(Bind(x, body), [])` is not a redex, and neither is
+`Apply(Apply(Bind(x, body), []), [a])`, whose head is not literally a `Bind`.
+It works for any domain type `T`, because values are never inspected.
 
 ### `eta_rule`
 
@@ -133,3 +146,9 @@ test "normalize (λx. λy. x y) y" {
 ```
 
 The first step is beta and produces $\lambda y_1.\,y\,y_1$; the second is eta.
+
+Because `normalize` also contracts eta redexes, its result can differ from
+the beta normal form that `@debruijn.normalize` and `@nbe.normalize` return:
+$\lambda x.\,f\,x$ normalizes to $f$ here and stays $\lambda.\,f\,0$ there.
+Use `@eval.evaluate` with `beta_rule` and `NormalOrder` when you need the
+beta normal form.

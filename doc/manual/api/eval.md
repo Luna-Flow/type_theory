@@ -1,11 +1,20 @@
 # eval API
 
+## Purpose
+
 The `eval` package names the usual reduction strategies and runs any rewrite
 rule with one of them: one step, bounded normalization, or a full trace. It
 is a thin layer over [rewrite](rewrite.md); the rule itself (beta, eta, a
 domain simplification) is supplied by the caller.
 
-```text
+The strategies are defined precisely in the [eval design](../design/eval.md).
+
+## Importing
+
+Add the package, and the packages whose types appear in its signatures, to
+your `moon.pkg`:
+
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/syntax",
   "Luna-Flow/type_theory/rewrite",
@@ -13,11 +22,15 @@ import {
 }
 ```
 
-The examples use the beta rule of `Luna-Flow/type_theory/utlc/lambda`
-(alias `@lambda`). The strategies are defined precisely in the
-[eval design](../design/eval.md).
+The examples on this page refer to every name through its package alias,
+for example `@core.Name`.
 
-## `Strategy`
+The examples use the beta rule of `Luna-Flow/type_theory/utlc/lambda`
+(alias `@lambda`), which you import as well.
+
+## Strategies
+
+### `Strategy`
 
 `Strategy` selects where the next step is taken.
 
@@ -41,7 +54,7 @@ pub(all) enum Strategy {
 the intent "reduce to full normal form" and may diverge from `NormalOrder` if
 another full-normalization traversal is added.
 
-## `Strategy::equal`
+### `Strategy::equal`
 
 `Strategy::equal` compares two strategies.
 
@@ -51,7 +64,9 @@ pub fn Strategy::equal(Self, Self) -> Bool
 
 It is the promoted `Eq` implementation; use `==` in new code.
 
-## `reduce_once`
+## Running a strategy
+
+### `reduce_once`
 
 `reduce_once` performs at most one reduction step with a strategy.
 
@@ -65,6 +80,13 @@ one rewritten position and its path. For `NormalOrder`, `FullNormal` and
 `NoStep` means the rule applies neither at the root nor at any head position
 of the application spine; the term is then in weak head normal form for the
 rule, but may contain redexes under binders or in arguments.
+
+With `@lambda.beta_rule`, a redex is an `Apply` whose head is literally a
+`Bind` and whose argument array is not empty. An empty application
+`Apply(h, [])` is never a redex and hides any redex in its position: in
+`Apply(Apply(Bind(x, b), []), [a])` no strategy contracts $(\lambda x.\,b)\,a$.
+Build applications with at least one argument (for example with
+`@lambda.application`).
 
 ```moonbit
 test "weak head stops at a binder" {
@@ -85,7 +107,7 @@ test "weak head stops at a binder" {
 }
 ```
 
-## `evaluate`
+### `evaluate`
 
 `evaluate` normalizes a term by repeating `reduce_once` with one strategy.
 
@@ -118,7 +140,7 @@ test "normal order finds a normal form that applicative order misses" {
 }
 ```
 
-## `trace`
+### `trace`
 
 `trace` normalizes like `evaluate` and records every step.
 
@@ -126,8 +148,9 @@ test "normal order finds a normal form that applicative order misses" {
 pub fn[T] trace(@syntax.Term[T], @rewrite.RuleName, (@syntax.Term[T]) -> @syntax.Term[T]?, Strategy, Int) -> @rewrite.ReductionTrace[T]
 ```
 
-It is `@rewrite.trace` with the step function of the strategy. The trace
-satisfies the chaining invariants of `@rewrite.ReductionTrace`.
+It is `@rewrite.trace` with the step function of the strategy. Every
+strategy reports its own input as `before`, so the trace satisfies the
+chaining invariants of `@rewrite.ReductionTrace`.
 
 ```moonbit
 test "trace a two-step reduction" {

@@ -1,11 +1,23 @@
 # stlc API
 
+## Purpose
+
 The `stlc` package is the simply typed lambda calculus over the shared named
 syntax: types, signatures of typed constants, typing contexts, bidirectional
 type inference and checking, step-bounded operational normalization, and
 typed normalization by evaluation to beta-normal, eta-long form.
 
-```text
+Terms are `@syntax.Term[Atom]`: `Bind(x, b)` is $\lambda x.\,b$ (without a
+type annotation), `Apply` is application, `Variable` a variable, and `Value`
+holds an `Atom`. The typing rules and the NbE algorithm are given in the
+[stlc design](../design/stlc.md).
+
+## Importing
+
+Add the package, and the packages whose types appear in its signatures, to
+your `moon.pkg`:
+
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",
@@ -14,14 +26,12 @@ import {
 }
 ```
 
-Terms are `@syntax.Term[Atom]`: `Bind(x, b)` is $\lambda x.\,b$ (without a
-type annotation), `Apply` is application, `Variable` a variable, and `Value`
-holds an `Atom`. The typing rules and the NbE algorithm are given in the
-[stlc design](../design/stlc.md).
+The examples on this page refer to every name through its package alias,
+for example `@core.Name`.
 
 ## Syntax
 
-### `Atom`
+### `Atom`, `Atom::equal`
 
 `Atom` is a constant of the calculus.
 
@@ -47,7 +57,7 @@ pub type Term = @syntax.Term[Atom]
 It is an alias, so all of [syntax](syntax.md), [substitution](substitution.md)
 and [rewrite](rewrite.md) apply to STLC terms.
 
-### `Ty`
+### `Ty`, `Ty::equal`
 
 `Ty` is a simple type.
 
@@ -61,11 +71,13 @@ pub fn Ty::equal(Self, Self) -> Bool
 ```
 
 `Base(b)` is an uninterpreted base type, `Unit` the unit type, and
-`Arrow(a, b)` the function type $a \to b$. Types are compared structurally.
+`Arrow(a, b)` the function type $a \to b$. Types are compared structurally
+(`Ty::equal`, the promoted `Eq` implementation); for simple types this is
+exactly type equality. `Atom::equal` likewise compares constants by name.
 
 ## Signatures and contexts
 
-### `Signature`
+### `Signature`, `Signature::empty`, `Signature::extend_with`, `Signature::lookup`, `Signature::to_array`, `Signature::equal`
 
 `Signature` assigns types to constants.
 
@@ -81,11 +93,12 @@ pub fn Signature::to_array(Self) -> Array[(@core.Name, Ty)]
 pub fn Signature::equal(Self, Self) -> Bool
 ```
 
-`extend_with(c, ty)` returns a new signature with `c : ty` added; a later
-entry for the same name shadows an earlier one, and `lookup` returns the
-latest. `to_array` returns a copy of the entries in insertion order.
+`empty()` has no constants. `extend_with(c, ty)` returns a new signature
+with `c : ty` added; a later entry for the same name shadows an earlier one,
+and `lookup` returns the latest, or `None`. `to_array` returns a copy of the
+entries in insertion order, and `equal` compares the entry lists.
 
-### `TypeContext`
+### `TypeContext`, `TypeContext::empty`, `TypeContext::extend_with`, `TypeContext::lookup`, `TypeContext::to_array`, `TypeContext::equal`
 
 `TypeContext` assigns types to free variables.
 
@@ -101,8 +114,9 @@ pub fn TypeContext::to_array(Self) -> Array[(@core.Name, Ty)]
 pub fn TypeContext::equal(Self, Self) -> Bool
 ```
 
-The same shadowing rule applies: the type checker extends the context when it
-enters a lambda, so the nearest binder of a name wins.
+The functions behave as those of `Signature`, with the same shadowing rule:
+the type checker extends the context when it enters a lambda, so the nearest
+binder of a name wins.
 
 ```moonbit
 test "signatures and contexts" {
@@ -119,7 +133,7 @@ test "signatures and contexts" {
 
 ## Errors
 
-### `TypeError`
+### `TypeError`, `TypeError::equal`
 
 `TypeError` reports why a term is rejected.
 
@@ -200,8 +214,14 @@ test "infer and check" {
 > When a lambda is applied to two or more arguments, `infer` types the
 > remaining arguments in a context that already contains the lambda's
 > parameter. If one of those arguments mentions a free variable with the same
-> name as the parameter, it is typed with the parameter's type. Rename the
-> parameter, or apply the arguments one at a time, until this is fixed.
+> name as the parameter, it is typed with the parameter's type, and the
+> checker can then *accept a wrong type*. With `x : B` in the context,
+> `check` accepts $(\lambda x.\,\lambda y.\,y)\;()\;x$ at `Unit` and rejects
+> it at its real type `B`; `normalize_checked` then returns `x`, a term of
+> type `B`, as a normal form "of type `Unit`". `normalize_eta_long` rejects
+> the term at both types. Until this is fixed, make sure the parameter of
+> such a redex does not occur free in the later arguments (rename it, or
+> apply the arguments one at a time).
 
 ## Normalization
 
@@ -216,7 +236,11 @@ pub fn normalize_checked(Signature, TypeContext, @syntax.Term[Atom], Ty, Int) ->
 
 On a type error it returns `Err` without reducing. Otherwise it returns
 `Ok(@lambda.normalize(term, max_steps))`: normal-order beta-eta reduction with
-a step limit. Its normal forms are beta-normal and eta-*short*.
+a step limit. Its normal forms are beta-normal and eta-*short* (for unary
+applications, see [`@lambda.eta_rule`](utlc/lambda.md)). Because every
+well-typed term is strongly normalizing, a large enough `max_steps` always
+gives `NormalForm`. The result is only as trustworthy as `check`; see the
+warning above.
 
 ### `normalize_eta_long`
 

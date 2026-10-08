@@ -1,9 +1,12 @@
 # adapter API
 
+## Purpose
+
 The `adapter` package has no public items. It is a contract-test package: its
 white-box tests define a small downstream-style AST, implement
 `@syntax.BindingSyntax` for it, and check that generic substitution and
-generic rewriting behave as documented on an AST that is not `Term[T]`.
+generic rewriting behave as documented on an AST that is not `Term[T]`. Its
+generated interface is empty:
 
 ```mbti
 package "Luna-Flow/type_theory/adapter"
@@ -26,6 +29,20 @@ are [`@syntax.generic_free_variables`](syntax.md),
 [`@rewrite.generic_top_down_once`](rewrite.md). The
 contract is explained in the [adapter design](../design/adapter.md), and the
 [adapter tutorial](../tutorial/adapter.md) builds an adapter step by step.
+
+## Importing
+
+There is nothing to import from `adapter`. To adapt your own AST, import the
+packages that hold the trait and the generic algorithms:
+
+```moonbit nocheck
+import {
+  "Luna-Flow/type_theory/core",
+  "Luna-Flow/type_theory/syntax",
+  "Luna-Flow/type_theory/substitution",
+  "Luna-Flow/type_theory/rewrite",
+}
+```
 
 ## What the tests check
 

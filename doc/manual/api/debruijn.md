@@ -1,12 +1,22 @@
 # debruijn API
 
+## Purpose
+
 The `debruijn` package represents bound variables by De Bruijn indices:
 `Bound(i)` refers to the binder `i` levels up. It converts from and to named
 syntax, checks scope, shifts and substitutes indices, and implements
 leftmost-outermost beta reduction without any renaming. Free variables stay
 named.
 
-```text
+The definitions of shifting and instantiation, with derivations of their
+properties, are in the [debruijn design](../design/debruijn.md).
+
+## Importing
+
+Add the package, and the packages whose types appear in its signatures, to
+your `moon.pkg`:
+
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",
@@ -15,8 +25,8 @@ import {
 }
 ```
 
-The definitions of shifting and instantiation, with derivations of their
-properties, are in the [debruijn design](../design/debruijn.md).
+The examples on this page refer to every name through its package alias,
+for example `@core.Name`.
 
 ## Terms and errors
 
@@ -53,7 +63,7 @@ well-scoped terms is alpha-equivalence.
 pub fn[T : Eq] DbTerm::equal(Self[T], Self[T]) -> Bool
 ```
 
-### `ScopeError`
+### `ScopeError`, `ScopeError::equal`
 
 `ScopeError` describes an index that does not refer to a binder.
 
@@ -208,7 +218,7 @@ test "instantiate a binder body" {
 
 ## Reduction
 
-### `DbStepResult`
+### `DbStepResult`, `DbStepResult::equal`
 
 `DbStepResult[T]` is the outcome of one De Bruijn reduction attempt.
 
@@ -236,10 +246,16 @@ pub fn[T] reduce_once(DbTerm[T]) -> DbStepResult[T]
 A redex is `Apply(Bind(body), [a, ..rest])`; it becomes
 `instantiate(body, a)`, applied to `rest` if `rest` is not empty. The search
 order is the root, then the head, then the arguments from left to right, and
-binder bodies are entered. `reduce_once` does not validate its input: call
-`validate` first if the term may be ill scoped.
+binder bodies are entered. An empty application `Apply(h, [])` is not a
+redex, even when `h` is a `Bind`.
 
-### `DbNormalizationResult`
+`reduce_once` does not validate its input. It returns `ScopeFailure` only
+when the redex it contracts contains a negative index; a negative index
+elsewhere is skipped like any other variable, and a dangling index is
+shifted like a free one (`(λ. 5) 1` reduces to `Bound(4)`). Call `validate`
+first if the term may be ill scoped.
+
+### `DbNormalizationResult`, `DbNormalizationResult::equal`
 
 `DbNormalizationResult[T]` is the outcome of bounded De Bruijn normalization.
 
@@ -265,7 +281,10 @@ pub fn[T] normalize(DbTerm[T], Int) -> DbNormalizationResult[T]
 ```
 
 It has the step-count contract of `@rewrite.normalize`: at most `max_steps`
-steps, and one extra `reduce_once` call to classify the final term.
+steps, and one extra `reduce_once` call to classify the final term. Like
+`reduce_once` it does not validate: on an ill-scoped input it may return
+`NormalForm` (for `Bind(Bound(-1))`, say), so `ScopeFailure` proves the input
+ill scoped but its absence proves nothing.
 
 ```moonbit
 test "nameless beta reduction" {

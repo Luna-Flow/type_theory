@@ -1,12 +1,22 @@
 # utlc/nbe API
 
+## Purpose
+
 The `utlc/nbe` package normalizes untyped De Bruijn terms by evaluation:
 `eval` interprets a term in a lazy semantic domain, `quote` reads a semantic
 value back as a beta-normal term, and `normalize` does both. Every phase
 consumes *fuel*, so divergent terms end with `FuelExhausted` instead of
 running forever.
 
-```text
+The semantic domain and the correctness argument are described in the
+[utlc/nbe design](../../design/utlc/nbe.md).
+
+## Importing
+
+Add the package, and the packages whose types appear in its signatures, to
+your `moon.pkg`:
+
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/debruijn",
@@ -14,8 +24,10 @@ import {
 }
 ```
 
-The default alias is `@nbe`. The semantic domain and the correctness argument
-are described in the [utlc/nbe design](../../design/utlc/nbe.md).
+The examples on this page refer to every name through its package alias,
+for example `@core.Name`.
+
+The default alias of the package is `@nbe`.
 
 ## Fuel
 
@@ -157,7 +169,7 @@ test "eval then quote" {
 
 ## Normalization
 
-### `NbeResult`
+### `NbeResult`, `NbeResult::equal`
 
 `NbeResult[T]` is the outcome of `normalize`.
 
@@ -183,12 +195,16 @@ It validates the term, evaluates it and quotes the result at level 0, with
 one shared budget. `NormalForm(t, c)`: `t` is the beta normal form, reached
 with `c` units. `FuelExhausted(c)`: the budget ran out; the term may diverge
 or may need more fuel. `ScopeFailure`: the input has a dangling or negative
-index.
+index. The fuel test comes first, so an ill-scoped term with fuel `<= 0`
+gives `FuelExhausted(consumed=0)`, not `ScopeFailure`.
 
 Applications in the result are unary: a normal form $f\,a\,b$ is returned as
 `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary
-spine `Apply(f, [a, b])` of the input. The two agree after spines are
-flattened.
+spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])`
+evaluates to the value of `h`, so it disappears from the result, while the
+small-step reducers keep it and do not reduce through it. The two
+normalizers agree after spines are flattened, for terms without empty
+applications.
 
 ```moonbit
 test "lazy evaluation skips an unused divergent argument" {

@@ -1,20 +1,28 @@
 # core API
 
+## Purpose
+
 The `core` package defines the vocabulary that every other package of
 `type_theory` shares: variable names, fresh-name generation, ordered scopes,
 telescopes and finite renamings. All values are immutable: every operation
 that "changes" a value returns a new one and leaves its argument untouched.
+The mathematics behind these definitions is in the [core design](../design/core.md).
 
-Import it in `moon.pkg`:
+## Importing
 
-```text
+Add the package, and the packages whose types appear in its signatures, to
+your `moon.pkg`:
+
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
+  "moonbitlang/core/immut/hashset",
 }
 ```
 
-The examples below also use `moonbitlang/core/immut/hashset` for name sets.
-The mathematics behind these definitions is in the [core design](../design/core.md).
+`hashset` is needed for the name sets that `fresh_name`, `Renaming::support`
+and `Renaming::targets` take or return. The examples on this page refer to
+every name through its package alias, for example `@core.Name`.
 
 ## Names
 

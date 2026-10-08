@@ -1,11 +1,21 @@
 # substitution API
 
+## Purpose
+
 The `substitution` package replaces free variables by terms without capturing
 variables. `Substitution[T]` works on `@syntax.Term[T]`;
 `GenericSubstitution[N]` works on any AST that implements
 `@syntax.BindingSyntax`. Both are finite, simultaneous and immutable.
 
-```text
+The definition of capture-avoiding substitution and the proofs of its laws
+are in the [substitution design](../design/substitution.md).
+
+## Importing
+
+Add the package, and the packages whose types appear in its signatures, to
+your `moon.pkg`:
+
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",
@@ -13,8 +23,8 @@ import {
 }
 ```
 
-The definition of capture-avoiding substitution and the proofs of its laws
-are in the [substitution design](../design/substitution.md).
+The examples on this page refer to every name through its package alias,
+for example `@core.Name`.
 
 ## Substitutions on `Term`
 
@@ -175,7 +185,7 @@ pub struct GenericSubstitution[N] {
 }
 ```
 
-### `GenericSubstitution::empty`, `singleton`, `set`, `get`, `without`
+### `GenericSubstitution::empty`, `GenericSubstitution::singleton`, `GenericSubstitution::set`, `GenericSubstitution::get`, `GenericSubstitution::without`
 
 These functions build and query generic substitutions; they behave exactly
 like their `Substitution` counterparts.

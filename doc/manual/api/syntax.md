@@ -1,20 +1,30 @@
 # syntax API
 
+## Purpose
+
 The `syntax` package defines named syntax with binders: the generic term type
 `Term[T]`, the analyses on it (free variables, all names, alpha-equivalence),
 renaming, and the open trait `BindingSyntax` through which a downstream AST
 gets the same analyses and the generic substitution and rewriting of the
 other packages.
 
-```text
+The definitions behind these functions, and the proofs of their laws, are in
+the [syntax design](../design/syntax.md).
+
+## Importing
+
+Add the package, and the packages whose types appear in its signatures, to
+your `moon.pkg`:
+
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",
 }
 ```
 
-The definitions behind these functions, and the proofs of their laws, are in
-the [syntax design](../design/syntax.md).
+The examples on this page refer to every name through its package alias,
+for example `@core.Name`.
 
 ## Terms
 

@@ -1,5 +1,7 @@
 # rewrite API
 
+## Purpose
+
 The `rewrite` package applies a rewrite rule at one position of a term and
 reports exactly what happened: the term before and after, the rule's name
 and the path from the root to the rewritten position. Bounded
@@ -7,17 +9,25 @@ normalization and traces are built by repeating such single steps. Every
 function has a `Term[T]` version and, where noted, a version for any
 `@syntax.BindingSyntax` AST.
 
-```text
+A *rule* is a function `(Term[T]) -> Term[T]?` that returns `Some(result)`
+when it applies to a term as a whole and `None` otherwise. The traversal
+functions decide *where* the rule is tried. The theory is in the
+[rewrite design](../design/rewrite.md).
+
+## Importing
+
+Add the package, and the packages whose types appear in its signatures, to
+your `moon.pkg`:
+
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/syntax",
   "Luna-Flow/type_theory/rewrite",
 }
 ```
 
-A *rule* is a function `(Term[T]) -> Term[T]?` that returns `Some(result)`
-when it applies to a term as a whole and `None` otherwise. The traversal
-functions decide *where* the rule is tried. The theory is in the
-[rewrite design](../design/rewrite.md).
+The examples on this page refer to every name through its package alias,
+for example `@core.Name`.
 
 ## Rule names
 
@@ -89,7 +99,7 @@ test "rule names" {
 }
 ```
 
-### `RuleNameError`
+### `RuleNameError`, `RuleNameError::equal`
 
 `RuleNameError` lists the reasons a rule name is invalid.
 
@@ -104,7 +114,7 @@ pub fn RuleNameError::equal(Self, Self) -> Bool
 
 ## Positions
 
-### `ReductionFrame`
+### `ReductionFrame`, `ReductionFrame::equal`
 
 `ReductionFrame` is one step from a node to one of its children.
 
@@ -166,7 +176,7 @@ test "paths are built from the redex up" {
 
 ## Single steps on `Term`
 
-### `StepResult`
+### `StepResult`, `StepResult::equal`
 
 `StepResult[T]` is the outcome of one reduction attempt.
 
@@ -182,7 +192,8 @@ pub fn[T : Eq] StepResult::equal(Self[T], Self[T]) -> Bool
 `Reduced` records the whole term `before`, the whole term `after`, the rule
 and the path of the rewritten position. Exactly one position was rewritten:
 the subterm of `before` at `path` is a redex of the rule, and `after` is
-`before` with that subterm replaced by the rule's result.
+`before` with that subterm replaced by the rule's result. `equal` is the
+promoted `Eq` implementation, which compares terms structurally.
 
 ### `top_down_once`
 
@@ -242,7 +253,7 @@ test "outermost versus innermost" {
 
 ## Repeating steps on `Term`
 
-### `NormalizationResult`
+### `NormalizationResult`, `NormalizationResult::equal`
 
 `NormalizationResult[T]` is the outcome of bounded repetition of a step
 function.
@@ -275,7 +286,7 @@ step it calls `step` once more to decide between `NormalForm` and
 classifies `term`. The step function decides the strategy; see
 [eval](eval.md) for ready-made ones.
 
-### `ReductionTrace`
+### `ReductionTrace`, `ReductionTrace::initial`, `ReductionTrace::steps`, `ReductionTrace::result`, `ReductionTrace::equal`
 
 `ReductionTrace[T]` records a bounded run: the initial term, every successful
 step and the final result.
@@ -292,9 +303,15 @@ pub fn[T] ReductionTrace::result(Self[T]) -> NormalizationResult[T]
 pub fn[T : Eq] ReductionTrace::equal(Self[T], Self[T]) -> Bool
 ```
 
-Every element of `steps` is a `Reduced` value; consecutive steps chain, the
-`after` of one being the `before` of the next. `steps().length()` equals the
-`steps` count of `result`. `steps()` returns a copy.
+`initial()`, `steps()` and `result()` read the three fields; `steps()`
+returns a copy, and `equal` is the promoted `Eq` implementation. Every
+element of `steps` is a `Reduced` value, and `steps().length()` equals the
+`steps` count of `result`. When the step function keeps the contract of
+`StepResult` (it reports its own input as `before`, as every traversal of
+this package and of [eval](eval.md) does), consecutive steps chain: the first
+`before` is `initial`, and the `after` of one step is the `before` of the
+next. `trace` stores whatever the step function returns, so a hand-written
+step that reports another `before` breaks the chain.
 
 ### `trace`
 
@@ -328,7 +345,7 @@ test "normalize and trace" {
 
 ## Binding-aware ASTs
 
-### `GenericStepResult`
+### `GenericStepResult`, `GenericStepResult::equal`
 
 `GenericStepResult[N]` is `StepResult` for a downstream AST `N`.
 
@@ -352,7 +369,7 @@ The traversal uses `BindingSyntax::project` to find children and the trait
 constructors to rebuild the parents of the rewritten node. `Opaque` and
 variable nodes have no children; the rule is still tried on them.
 
-### `GenericNormalizationResult`
+### `GenericNormalizationResult`, `GenericNormalizationResult::equal`
 
 `GenericNormalizationResult[N]` is `NormalizationResult` for a downstream
 AST.
