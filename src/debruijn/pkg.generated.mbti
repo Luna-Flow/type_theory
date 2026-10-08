@@ -33,12 +33,14 @@ pub(all) enum DbNormalizationResult[T] {
   StepLimitReached(term~ : DbTerm[T], steps~ : Int)
   ScopeFailure(term~ : DbTerm[T], error~ : ScopeError, steps~ : Int)
 } derive(Eq, @debug.Debug)
+pub fn[T : Eq] DbNormalizationResult::equal(Self[T], Self[T]) -> Bool
 
 pub(all) enum DbStepResult[T] {
   NoStep
   Reduced(before~ : DbTerm[T], after~ : DbTerm[T], rule~ : @rewrite.RuleName, path~ : @rewrite.ReductionPath)
   ScopeFailure(ScopeError)
 } derive(Eq, @debug.Debug)
+pub fn[T : Eq] DbStepResult::equal(Self[T], Self[T]) -> Bool
 
 pub(all) enum DbTerm[T] {
   Value(T)
@@ -47,14 +49,15 @@ pub(all) enum DbTerm[T] {
   Apply(DbTerm[T], Array[DbTerm[T]])
   Bind(DbTerm[T])
 } derive(Eq, @debug.Debug)
+pub fn[T : Eq] DbTerm::equal(Self[T], Self[T]) -> Bool
 
 pub(all) enum ScopeError {
   UnboundIndex(index~ : Int, depth~ : Int)
   NegativeIndex(index~ : Int)
   NegativeShift(index~ : Int, delta~ : Int, cutoff~ : Int)
 } derive(Eq, @debug.Debug)
+pub fn ScopeError::equal(Self, Self) -> Bool
 
 // Type aliases
 
 // Traits
-

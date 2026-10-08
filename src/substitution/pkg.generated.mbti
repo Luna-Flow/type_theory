@@ -38,4 +38,3 @@ pub fn[T] Substitution::without(Self[T], @core.Name) -> Self[T]
 // Type aliases
 
 // Traits
-

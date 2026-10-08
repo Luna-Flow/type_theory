@@ -27,4 +27,3 @@ pub fn[T] normalize(@syntax.Term[T], Int) -> @rewrite.NormalizationResult[T]
 // Type aliases
 
 // Traits
-

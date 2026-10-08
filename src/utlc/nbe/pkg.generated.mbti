@@ -32,6 +32,7 @@ pub(all) enum NbeResult[T] {
   FuelExhausted(consumed~ : Int)
   ScopeFailure(error~ : @debruijn.ScopeError, consumed~ : Int)
 } derive(Eq, @debug.Debug)
+pub fn[T : Eq] NbeResult::equal(Self[T], Self[T]) -> Bool
 
 pub(all) enum QuoteResult[T] {
   Quoted(term~ : @debruijn.DbTerm[T], consumed~ : Int)
@@ -48,4 +49,3 @@ type SemanticInner[T]
 // Type aliases
 
 // Traits
-
