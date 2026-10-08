@@ -6,6 +6,9 @@
 2. Add regression tests for every binding, scope, or reduction bug.
 3. Run `./ready_to_pr.sh` before review.
 4. Review generated `pkg.generated.mbti` changes as public API changes.
+5. Update the English manual in `doc/manual/` (the `api/`, `tutorial/` and
+   `design/` page of each affected package), then run `lunadoc update` and
+   commit the regenerated catalogs in `doc/locale/` with the pages.
 
 ## Style
 

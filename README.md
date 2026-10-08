@@ -1,53 +1,77 @@
-# TYPE_THEORY
+# type_theory
 
-`Luna-Flow/type_theory` is the binding, substitution, rewriting, and evaluation
-substrate for Luna-Flow symbolic computation.
+`Luna-Flow/type_theory` is the binding, substitution, rewriting and evaluation
+substrate for Luna Flow symbolic computation. It gives every AST with
+variables one definition of names, alpha-equivalence and capture-avoiding
+substitution, and ships reference implementations of the untyped and simply
+typed lambda calculi, from small-step reduction to normalization by
+evaluation.
+
+## Install
+
+```bash
+moon add Luna-Flow/type_theory@0.2.0
+```
+
+Requires MoonBit `moonc` 0.10 or newer. All targets are supported (`wasm-gc`,
+`wasm`, `js`, `native`).
+
+## Example
+
+Substituting $y$ for $x$ in $\lambda y.\,x\,y$ renames the binder instead of
+capturing the inserted $y$:
+
+```moonbit
+test "capture-avoiding substitution" {
+  let x = @core.Name::new("x")
+  let y = @core.Name::new("y")
+  let term : @syntax.Term[Int] = Bind(y, Apply(Variable(x), [Variable(y)]))
+  let result = @substitution.Substitution::singleton(x, @syntax.Term::Variable(y))
+    .apply(term)
+  let y1 = @core.Name::new("y_1")
+  let expected : @syntax.Term[Int] = Bind(y1, Apply(Variable(y), [Variable(y1)]))
+  assert_eq(result, expected)
+}
+```
+
+with `moon.pkg`:
+
+```text
+import {
+  "Luna-Flow/type_theory/core",
+  "Luna-Flow/type_theory/syntax",
+  "Luna-Flow/type_theory/substitution",
+}
+```
 
 ## Packages
 
-- `core`: names, contexts, telescopes, freshness, and finite renamings.
-- `syntax`: generic named `Term[T]` plus the open `BindingSyntax` trait.
-- `substitution`: capture-avoiding named and downstream-AST substitution.
-- `rewrite`: structured single-step reduction, paths, traces, and bounded loops.
-- `eval`: normal-order, applicative-order, weak-head, and full traversal facades.
-- `debruijn`: De Bruijn syntax, conversion, scope checking, shifting, and beta.
-- `utlc/lambda`: untyped named beta/eta reference calculus.
-- `utlc/nbe`: lazy, fuel-bounded untyped normalization by evaluation and quote.
-- `stlc`: simply typed lambda calculus over the shared substrate, with
-  bidirectional typechecking, checked operational normalization, and typed
-  eta-long normalization by evaluation.
+| Package | Contents |
+| --- | --- |
+| `core` | names, fresh names, contexts, telescopes, finite renamings |
+| `syntax` | generic named `Term[T]`, free variables, alpha-equivalence, the open `BindingSyntax` trait |
+| `substitution` | simultaneous capture-avoiding substitution for `Term[T]` and any `BindingSyntax` AST |
+| `rewrite` | structured single-step rewriting with rule names and paths, bounded normalization, traces |
+| `eval` | normal-order, applicative-order and weak-head strategies |
+| `debruijn` | De Bruijn terms, conversion, scope checking, shifting, nameless beta reduction |
+| `utlc/lambda` | untyped lambda calculus: beta, eta, normal-order normalization |
+| `utlc/nbe` | fuel-bounded untyped normalization by evaluation |
+| `stlc` | simply typed lambda calculus: bidirectional type checking, eta-long typed NbE |
+| `adapter` | contract tests for downstream `BindingSyntax` implementations |
 
-## Semantic Boundaries
-
-`Term[T]` treats `T` as a closed atom with respect to `type_theory` names. A
-domain AST whose own nodes contain variables should implement `BindingSyntax`
-and use `GenericSubstitution` and generic rewrite traversal directly.
-
-Generic substitution is simultaneous and one pass. A replacement inserted for
-`x` is not recursively substituted again in the same operation. Generic rewrite
-traversal accepts arbitrary domain rules; domain-specific evaluation,
-canonicalization, and fixed-point policies remain owned by the downstream AST.
-
-UTLC NbE is intentionally bounded because untyped lambda terms may diverge. It
-returns `NormalForm`, `FuelExhausted`, or `ScopeFailure`. The UTLC operational
-small-step reducer remains the public reference semantics and is tested for
-normal-form agreement with NbE on terminating examples.
-
-The `stlc` package adds type-directed normalization for well-typed simply typed
-lambda terms over the shared named syntax. Its typed NbE is eta-long and total
-for well-typed STLC terms modulo implementation safeguards, while the existing
-untyped NbE remains fuel-bounded by design.
-
-Public APIs report expected validation and scope failures as structured data.
-For example, `RuleName::new` returns `Result[RuleName, RuleNameError]`; use
-`RuleName::unsafe_new` only when a non-empty name is guaranteed by an internal
-invariant, such as a static rule-name literal.
+Downstream ASTs implement `BindingSyntax` to get free variables, generic
+substitution and generic rewriting without converting to `Term[T]`; domain
+evaluation and canonicalization stay in the downstream package.
 
 ## Documentation
 
-The manual is published at <https://luna-flow.github.io/en/type_theory/>, with
-Chinese and Japanese translations. Its English source lives in
-[`doc/manual/`](./doc/manual/index.md).
+The manual is published at <https://lunaflow.cn/en/type_theory/>, with Chinese
+and Japanese translations. Its English source is
+[`doc/manual/index.md`](doc/manual/index.md): an API reference, a tutorial and
+a design note (definitions, typing rules and correctness arguments) for every
+package. Audited invariants and known issues are listed in
+[`CORRECTNESS_CHECKLIST.md`](CORRECTNESS_CHECKLIST.md); release notes are in
+[`CHANGELOG.md`](CHANGELOG.md).
 
 ## Development
 
@@ -58,4 +82,8 @@ moon check --target all
 moon info
 ```
 
-See `CORRECTNESS_CHECKLIST.md` for audited invariants and known boundaries.
+`./ready_to_pr.sh` runs all of these. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+Apache-2.0. See [LICENSE](LICENSE).
