@@ -16,6 +16,4 @@ keywords = [ "type-theory", "substitution", "rewriting", "semantics" ]
 
 description = "A formal semantic substrate for Luna-Flow symbolic computation, with binding, substitution, rewriting, evaluation strategies, and lambda/type-theoretic cores."
 
-options(
-  source: "src",
-)
+source = "src"
