@@ -61,7 +61,7 @@ pub fn[T] from_named(term : @syntax.Term[T]) -> DbTerm[T] {
 fn[T] collect_free_names(term : DbTerm[T]) -> @hashset.HashSet[@core.Name] {
   match term {
     Value(_) | Bound(_) => @hashset.new()
-    Free(name) => @hashset.from_array([name])
+    Free(name) => @hashset.HashSet([name])
     Apply(head, arguments) => {
       let mut result = collect_free_names(head)
       for argument in arguments {

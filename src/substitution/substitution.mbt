@@ -6,7 +6,7 @@ pub struct Substitution[T] {
 
 ///|
 pub fn[T] Substitution::empty() -> Substitution[T] {
-  { entries: [] }
+  { entries: [], }
 }
 
 ///|
@@ -14,7 +14,7 @@ pub fn[T] Substitution::singleton(
   name : @core.Name,
   replacement : @syntax.Term[T],
 ) -> Substitution[T] {
-  { entries: [(name, replacement)] }
+  { entries: [(name, replacement)], }
 }
 
 ///|
@@ -58,7 +58,7 @@ pub fn[T] Substitution::without(
   self : Substitution[T],
   name : @core.Name,
 ) -> Substitution[T] {
-  { entries: self.entries.filter(fn(entry) { entry.0 != name }) }
+  { entries: self.entries.filter(fn(entry) { entry.0 != name }), }
 }
 
 ///|
@@ -67,7 +67,7 @@ pub fn[T] Substitution::restrict(
   self : Substitution[T],
   names : @hashset.HashSet[@core.Name],
 ) -> Substitution[T] {
-  { entries: self.entries.filter(fn(entry) { names.contains(entry.0) }) }
+  { entries: self.entries.filter(fn(entry) { names.contains(entry.0) }), }
 }
 
 ///|

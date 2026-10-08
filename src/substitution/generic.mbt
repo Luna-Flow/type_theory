@@ -6,7 +6,7 @@ pub struct GenericSubstitution[N] {
 
 ///|
 pub fn[N] GenericSubstitution::empty() -> GenericSubstitution[N] {
-  { entries: [] }
+  { entries: [], }
 }
 
 ///|
@@ -14,7 +14,7 @@ pub fn[N] GenericSubstitution::singleton(
   name : @core.Name,
   replacement : N,
 ) -> GenericSubstitution[N] {
-  { entries: [(name, replacement)] }
+  { entries: [(name, replacement)], }
 }
 
 ///|
@@ -57,7 +57,7 @@ pub fn[N] GenericSubstitution::without(
   self : GenericSubstitution[N],
   name : @core.Name,
 ) -> GenericSubstitution[N] {
-  { entries: self.entries.filter(fn(entry) { entry.0 != name }) }
+  { entries: self.entries.filter(fn(entry) { entry.0 != name }), }
 }
 
 ///|

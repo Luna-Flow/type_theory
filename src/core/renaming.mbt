@@ -6,12 +6,12 @@ pub struct Renaming {
 
 ///|
 pub fn Renaming::empty() -> Renaming {
-  { entries: [] }
+  { entries: [], }
 }
 
 ///|
 pub fn Renaming::singleton(from : Name, to_ : Name) -> Renaming {
-  { entries: [(from, to_)] }
+  { entries: [(from, to_)], }
 }
 
 ///|
@@ -46,7 +46,7 @@ pub fn Renaming::apply(self : Renaming, name : Name) -> Name {
 ///|
 /// Removes a source name from the renaming domain.
 pub fn Renaming::without(self : Renaming, name : Name) -> Renaming {
-  { entries: self.entries.filter(fn(entry) { entry.0 != name }) }
+  { entries: self.entries.filter(fn(entry) { entry.0 != name }), }
 }
 
 ///|

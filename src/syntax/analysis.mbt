@@ -9,7 +9,7 @@ fn[T] free_variables_visit(
       if bound.contains(name) {
         @hashset.new()
       } else {
-        @hashset.from_array([name])
+        @hashset.HashSet([name])
       }
     Apply(head, arguments) => {
       let mut result = free_variables_visit(head, bound)
@@ -33,7 +33,7 @@ pub fn[T] free_variables(term : Term[T]) -> @hashset.HashSet[@core.Name] {
 pub fn[T] all_names(term : Term[T]) -> @hashset.HashSet[@core.Name] {
   match term {
     Value(_) => @hashset.new()
-    Variable(name) => @hashset.from_array([name])
+    Variable(name) => @hashset.HashSet([name])
     Apply(head, arguments) => {
       let mut result = all_names(head)
       for argument in arguments {

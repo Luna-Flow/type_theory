@@ -52,7 +52,7 @@ fn[N : BindingSyntax] generic_free_variables_visit(
       if bound.contains(name) {
         @hashset.new()
       } else {
-        @hashset.from_array([name])
+        @hashset.HashSet([name])
       }
     BindingView::Apply(head, arguments) => {
       let mut result = generic_free_variables_visit(head, bound)
@@ -81,7 +81,7 @@ pub fn[N : BindingSyntax] generic_all_names(
 ) -> @hashset.HashSet[@core.Name] {
   match BindingSyntax::project(node) {
     BindingView::Opaque => @hashset.new()
-    BindingView::Variable(name) => @hashset.from_array([name])
+    BindingView::Variable(name) => @hashset.HashSet([name])
     BindingView::Apply(head, arguments) => {
       let mut result = generic_all_names(head)
       for argument in arguments {

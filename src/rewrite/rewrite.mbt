@@ -48,7 +48,7 @@ pub struct ReductionPath {
 
 ///|
 pub fn ReductionPath::root() -> ReductionPath {
-  { frames: [] }
+  { frames: [], }
 }
 
 ///|
@@ -330,5 +330,5 @@ pub fn[T] trace(
     Reduced(_) =>
       NormalizationResult::StepLimitReached(term=current, steps=count)
   }
-  { initial, steps, result }
+  { initial, steps, result, }
 }

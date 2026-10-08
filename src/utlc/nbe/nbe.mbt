@@ -78,7 +78,7 @@ fn[T] apply_semantic(
           next_environment.append(environment)
           eval_semantic(body, next_environment, remaining)
         }
-        _ => Done({ inner: NeutralApply(forced, argument) }, remaining)
+        _ => Done({ inner: NeutralApply(forced, argument), }, remaining)
       }
   }
 }
@@ -94,8 +94,8 @@ fn[T] eval_semantic(
   }
   let remaining = fuel - 1
   match term {
-    Value(value) => Done({ inner: Atom(value) }, remaining)
-    Free(name) => Done({ inner: NeutralFree(name) }, remaining)
+    Value(value) => Done({ inner: Atom(value), }, remaining)
+    Free(name) => Done({ inner: NeutralFree(name), }, remaining)
     Bound(index) =>
       if index < 0 {
         ScopeFailed(@debruijn.NegativeIndex(index~), remaining)
@@ -107,7 +107,7 @@ fn[T] eval_semantic(
       } else {
         force(environment[index], remaining)
       }
-    Bind(body) => Done({ inner: Closure(body, environment) }, remaining)
+    Bind(body) => Done({ inner: Closure(body, environment), }, remaining)
     Apply(head, arguments) =>
       match eval_semantic(head, environment, remaining) {
         Exhausted(rest) => Exhausted(rest)
@@ -145,7 +145,7 @@ priv enum QuoteRun[T] {
 ///|
 /// Reflects a named free variable into the neutral semantic domain.
 pub fn[T] reflect_free(name : @core.Name) -> Semantic[T] {
-  { inner: NeutralFree(name) }
+  { inner: NeutralFree(name), }
 }
 
 ///|
@@ -154,7 +154,7 @@ pub fn[T] reflect_level(level : Int) -> Semantic[T]? {
   if level < 0 {
     None
   } else {
-    Some({ inner: NeutralLevel(level) })
+    Some({ inner: NeutralLevel(level), })
   }
 }
 
@@ -229,7 +229,7 @@ fn[T] quote_semantic(
         }
         Closure(body, environment) => {
           let next_environment : Array[Semantic[T]] = [
-            { inner: NeutralLevel(level) },
+            { inner: NeutralLevel(level), },
           ]
           next_environment.append(environment)
           match eval_semantic(body, next_environment, remaining) {
