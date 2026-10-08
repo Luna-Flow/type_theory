@@ -55,3 +55,29 @@ test "single step records the beta redex path" {
     _ => assert_false(true)
   }
 }
+
+///|
+test "empty applications are read as their head" {
+  // issue #2
+  let a = @core.Name::new("a")
+  let hidden : @debruijn.DbTerm[Int] = Apply(Apply(Bind(Bound(0)), []), [
+    Free(a),
+  ])
+  match @debruijn.reduce_once(hidden) {
+    Reduced(after~, path~, ..) => {
+      assert_true(after == Free(a))
+      assert_true(path.to_array() == [])
+    }
+    _ => assert_false(true)
+  }
+  let spine : @debruijn.DbTerm[Int] = Apply(
+    Apply(Apply(Bind(Bind(Bound(1))), []), []),
+    [Value(1), Value(2)],
+  )
+  assert_true(
+    @debruijn.normalize(spine, 10) == NormalForm(term=Value(1), steps=2),
+  )
+  // an empty application of a binder alone is not a redex
+  let lone : @debruijn.DbTerm[Int] = Apply(Bind(Bound(0)), [])
+  assert_true(@debruijn.reduce_once(lone) == NoStep)
+}

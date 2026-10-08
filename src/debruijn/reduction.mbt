@@ -40,10 +40,34 @@ fn[T] lift_db_step(
 }
 
 ///|
+/// Removes empty applications `Apply(h, [])` around a term; an application
+/// with no arguments is read as its head.
+fn[T] strip_empty_applications(term : DbTerm[T]) -> DbTerm[T] {
+  match term {
+    Apply(head, []) => strip_empty_applications(head)
+    _ => term
+  }
+}
+
+///|
+/// Returns the binder body of a beta redex `Apply(h, [a, ..])` whose head is
+/// a `Bind`, possibly wrapped in empty applications.
+fn[T] redex_body(term : DbTerm[T]) -> DbTerm[T]? {
+  match term {
+    Apply(head, arguments) if arguments.length() > 0 =>
+      match strip_empty_applications(head) {
+        Bind(body) => Some(body)
+        _ => None
+      }
+    _ => None
+  }
+}
+
+///|
 /// Performs one leftmost-outermost beta reduction.
 pub fn[T] reduce_once(term : DbTerm[T]) -> DbStepResult[T] {
-  match term {
-    Apply(Bind(body), arguments) if arguments.length() > 0 =>
+  match (term, redex_body(term)) {
+    (Apply(_, arguments), Some(body)) =>
       match instantiate(body, arguments[0]) {
         Err(error) => ScopeFailure(error)
         Ok(reduced) => {
@@ -60,10 +84,10 @@ pub fn[T] reduce_once(term : DbTerm[T]) -> DbStepResult[T] {
           )
         }
       }
-    Value(_) | Free(_) | Bound(_) => NoStep
-    Bind(body) =>
+    (Value(_) | Free(_) | Bound(_), _) => NoStep
+    (Bind(body), _) =>
       lift_db_step(term, reduce_once(body), BinderBody, fn(next) { Bind(next) })
-    Apply(head, arguments) => {
+    (Apply(head, arguments), None) => {
       let head_step = reduce_once(head)
       match head_step {
         Reduced(_) =>

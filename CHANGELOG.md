@@ -37,6 +37,13 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   in those arguments was captured and the checker could accept a wrong type.
   The parameter is now renamed apart from the trailing arguments, in the
   checker and in the typed NbE evaluator (#1).
+- `utlc/lambda`, `debruijn`: an empty application `Apply(h, [])` is now read
+  as `h` by `beta_rule`, `eta_rule` and `@debruijn.reduce_once`, as `utlc/nbe`
+  already did. Before, it hid a redex in its head position, so the small-step
+  and NbE normalizers disagreed on terms such as
+  `Apply(Apply(Bind(Bound(0)), []), [Free(a)])`. `stlc` now rejects empty
+  applications nested in the head of a spine with `EmptyApplication`, as it
+  already did at the root (#2).
 
 ### Documentation
 

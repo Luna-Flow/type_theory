@@ -17,34 +17,64 @@ pub fn[T] application(
 }
 
 ///|
+/// Removes empty applications `Apply(h, [])` around a term.
+///
+/// An application with no arguments is read as its head, so it never hides a
+/// redex or an eta-reducible argument.
+fn[T] strip_empty_applications(term : @syntax.Term[T]) -> @syntax.Term[T] {
+  match term {
+    Apply(head, []) => strip_empty_applications(head)
+    _ => term
+  }
+}
+
+///|
 /// One beta rule, independent of the domain value type.
+///
+/// Empty applications in the head are read as their head, so
+/// `Apply(Apply(Bind(x, b), []), [a])` is a redex.
 pub fn[T] beta_rule(term : @syntax.Term[T]) -> @syntax.Term[T]? {
   match term {
-    Apply(Bind(parameter, body), arguments) if arguments.length() > 0 => {
-      let reduced = @substitution.Substitution::singleton(
-        parameter,
-        arguments[0],
-      ).apply(body)
-      if arguments.length() == 1 {
-        Some(reduced)
-      } else {
-        Some(Apply(reduced, arguments[1:].to_owned()))
+    Apply(head, arguments) if arguments.length() > 0 =>
+      match strip_empty_applications(head) {
+        Bind(parameter, body) => {
+          let reduced = @substitution.Substitution::singleton(
+            parameter,
+            arguments[0],
+          ).apply(body)
+          if arguments.length() == 1 {
+            Some(reduced)
+          } else {
+            Some(Apply(reduced, arguments[1:].to_owned()))
+          }
+        }
+        _ => None
       }
-    }
     _ => None
   }
 }
 
 ///|
 /// One eta rule. The bound variable must not occur free in the function.
+///
+/// Empty applications are read as their head, both around the body and around
+/// the argument.
 pub fn[T] eta_rule(term : @syntax.Term[T]) -> @syntax.Term[T]? {
   match term {
-    Bind(parameter, Apply(function, [Variable(argument)])) =>
-      if parameter == argument &&
-        !@syntax.free_variables(function).contains(parameter) {
-        Some(function)
-      } else {
-        None
+    Bind(parameter, body) =>
+      match strip_empty_applications(body) {
+        Apply(function, [argument]) =>
+          match strip_empty_applications(argument) {
+            Variable(name) =>
+              if name == parameter &&
+                !@syntax.free_variables(function).contains(parameter) {
+                Some(function)
+              } else {
+                None
+              }
+            _ => None
+          }
+        _ => None
       }
     _ => None
   }

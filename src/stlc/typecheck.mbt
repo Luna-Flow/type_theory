@@ -67,6 +67,17 @@ fn rename_parameter_apart(
 }
 
 ///|
+/// Reports whether an application spine contains an `Apply` node with no
+/// arguments, at the root or nested in the head.
+fn spine_has_empty_application(term : Term) -> Bool {
+  match term {
+    @syntax.Apply(head, arguments) =>
+      arguments.length() == 0 || spine_has_empty_application(head)
+    _ => false
+  }
+}
+
+///|
 fn infer_lambda_application(
   sig : Signature,
   ctx : TypeContext,
@@ -114,8 +125,8 @@ pub fn infer(
         Some(ty) => Ok(ty)
         None => Err(TypeError::UnboundVariable(name))
       }
-    @syntax.Apply(_, arguments) => {
-      if arguments.length() == 0 {
+    @syntax.Apply(_, _) => {
+      if spine_has_empty_application(term) {
         return Err(TypeError::EmptyApplication)
       }
       let (base_head, spine_arguments) = flatten_application(term)
