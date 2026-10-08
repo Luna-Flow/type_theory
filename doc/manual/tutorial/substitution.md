@@ -6,13 +6,21 @@ substitutions and evaluating partially. The examples encode arithmetic as
 `Term[String]`, with operators as values: $x + 1$ is
 `Apply(Value("+"), [Variable(x), Value("1")])`.
 
+| I want to | Use |
+| --- | --- |
+| replace one variable by a term | `Substitution::singleton(x, t).apply(term)` |
+| replace several variables at once | `Substitution::set`, `apply` |
+| substitute one substitution after another in one pass | `Substitution::then` |
+| keep only the entries that matter | `restrict`, `without` |
+| substitute in my own AST | `GenericSubstitution::apply_once` |
+
 ## Quick start
 
 ```bash
 moon add Luna-Flow/type_theory@0.2.0
 ```
 
-```text
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",

@@ -5,13 +5,22 @@ normalizes well-typed terms, and decides whether two terms are equal up to
 beta and eta. Terms are the shared `@syntax.Term[@stlc.Atom]`, so everything
 you know from [syntax](syntax.md) applies.
 
+| I want to | Use |
+| --- | --- |
+| declare typed constants and variables | `Signature`, `TypeContext`, `extend_with` |
+| find the type of a term | `infer` |
+| check a function against its type | `check` |
+| get the canonical normal form | `normalize_eta_long` |
+| decide whether two terms are beta-eta equal | compare their eta-long forms with `@syntax.alpha_equal` |
+| normalize step by step with a count | `normalize_checked` |
+
 ## Quick start
 
 ```bash
 moon add Luna-Flow/type_theory@0.2.0
 ```
 
-```text
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",
@@ -237,8 +246,9 @@ calculi), so you can instantiate a typed template with
   is not replaced by `()`. `f u` and `f ()` have different normal forms.
 - **Parameter names in redexes with several arguments.** In
   $(\lambda x.\,b)\,a_1\,a_2$, if $a_2$ mentions a free variable also called
-  $x$, `infer` types it with the parameter's type (known issue). Use a
-  parameter name that does not occur free in the later arguments.
+  $x$, `infer` types it with the parameter's type (known issue), and `check`
+  may then accept the term at a type it does not have. Use a parameter name
+  that does not occur free in the later arguments.
 - **Comparing normal forms with `==`.** Generated binders are `x`, `x_1`, …;
   compare with `@syntax.alpha_equal`.
 

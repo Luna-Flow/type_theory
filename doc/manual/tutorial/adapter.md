@@ -5,13 +5,21 @@ implement `@syntax.BindingSyntax` for a small AST and then use generic free
 variables, capture-avoiding substitution and rewriting on it, without
 converting to `Term[T]`. Finally you test the adapter laws.
 
+| I want to | Use |
+| --- | --- |
+| connect my AST to the library | `impl @syntax.BindingSyntax for MyAst` |
+| find free variables in my AST | `@syntax.generic_free_variables` |
+| substitute without capture | `@substitution.GenericSubstitution::apply_once` |
+| simplify with my own rules | `@rewrite.generic_top_down_once`, `generic_normalize` |
+| test that my adapter is lawful | the view-law tests under "Going further" |
+
 ## Quick start
 
 ```bash
 moon add Luna-Flow/type_theory@0.2.0
 ```
 
-```text
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",

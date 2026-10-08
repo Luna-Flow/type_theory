@@ -4,13 +4,20 @@ This tutorial computes with the untyped lambda calculus: it builds terms,
 normalizes them with beta and eta, encodes booleans and numbers as functions,
 and deals with terms that never stop reducing.
 
+| I want to | Use |
+| --- | --- |
+| build $\lambda x.\,b$ and $f\,a$ | `abstraction`, `application` |
+| compute a beta-eta normal form | `@lambda.normalize(term, max_steps)` |
+| use beta or eta alone, or another strategy | `beta_rule`, `eta_rule` with `@eval.evaluate` |
+| stop on terms that do not terminate | the step limit and `StepLimitReached` |
+
 ## Quick start
 
 ```bash
 moon add Luna-Flow/type_theory@0.2.0
 ```
 
-```text
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",

@@ -5,6 +5,14 @@ track of the names in scope and rename variables with the `core` package. By
 the end you can give your own syntax a name type that the rest of
 `type_theory` understands.
 
+| I want to | Use |
+| --- | --- |
+| make a variable name | `@core.Name::new("x")` |
+| pick a name that clashes with nothing in use | `@core.fresh_name(hint, used)` |
+| record the names in scope | `Context`, `extend_with` |
+| record binders with annotations in order | `Telescope` |
+| rename several variables at once | `Renaming`, `apply`, `then`, `without` |
+
 ## Quick start
 
 Add the module and import the package:
@@ -13,7 +21,7 @@ Add the module and import the package:
 moon add Luna-Flow/type_theory@0.2.0
 ```
 
-```text
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "moonbitlang/core/immut/hashset",

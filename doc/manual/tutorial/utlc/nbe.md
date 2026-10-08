@@ -5,13 +5,21 @@ evaluation: fast normal forms of De Bruijn terms within a fuel budget. You will
 normalize terms written with names, pick a budget, read the `consumed`
 counter, and compare results with the small-step reducer.
 
+| I want to | Use |
+| --- | --- |
+| normalize a De Bruijn term quickly | `@nbe.normalize(term, fuel)` |
+| normalize a named term | `@debruijn.from_named`, then `normalize`, then `@debruijn.to_named` |
+| bound the work on a term that may diverge | the fuel argument and `FuelExhausted` |
+| evaluate once and read back later | `eval`, then `quote` |
+| read back a free variable | `reflect_free` |
+
 ## Quick start
 
 ```bash
 moon add Luna-Flow/type_theory@0.2.0
 ```
 
-```text
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",

@@ -6,13 +6,22 @@ the trace to see which rule fired where. Terms are `Term[String]` with
 operators as values: $x \cdot 1$ is
 `Apply(Value("*"), [Variable(x), Value("1")])`.
 
+| I want to | Use |
+| --- | --- |
+| apply a rule once, outermost first | `top_down_once` |
+| apply a rule once, innermost first | `bottom_up_once` |
+| repeat steps with a limit | `normalize` |
+| keep every step for inspection | `trace` |
+| name a rule | `RuleName::new` or, for literals, `RuleName::unsafe_new` |
+| rewrite my own AST | `generic_top_down_once`, `generic_normalize` |
+
 ## Quick start
 
 ```bash
 moon add Luna-Flow/type_theory@0.2.0
 ```
 
-```text
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",

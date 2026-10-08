@@ -5,13 +5,22 @@ normal order, applicative order and weak head. You will see where they agree,
 where they differ, and how to write a strategy of your own. The examples use
 the beta rule of the untyped lambda calculus from `utlc/lambda`.
 
+| I want to | Use |
+| --- | --- |
+| reduce to a normal form whenever one exists | `evaluate(..., NormalOrder, ...)` |
+| reduce arguments first | `ApplicativeOrder` |
+| stop at weak head normal form | `WeakHead` |
+| take a single step | `reduce_once` |
+| see every step | `@eval.trace` |
+| use a strategy that is not in the enum | a step function for `@rewrite.normalize` |
+
 ## Quick start
 
 ```bash
 moon add Luna-Flow/type_theory@0.2.0
 ```
 
-```text
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",

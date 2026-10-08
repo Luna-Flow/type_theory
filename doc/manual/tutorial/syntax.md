@@ -5,13 +5,22 @@ which variables are free, compares terms up to the names of bound variables
 and renames variables without capture. At the end you write an analysis that
 works for any AST implementing `BindingSyntax`.
 
+| I want to | Use |
+| --- | --- |
+| build a term with binders | the constructors of `@syntax.Term` |
+| list the free variables, or every name | `free_variables`, `all_names` |
+| compare terms up to bound names | `alpha_equal` |
+| rename free variables without capture | `Term::rename_free` |
+| change the type of the constants | `Term::map_values` |
+| write one analysis for every binding-aware AST | functions bounded by `BindingSyntax` |
+
 ## Quick start
 
 ```bash
 moon add Luna-Flow/type_theory@0.2.0
 ```
 
-```text
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",

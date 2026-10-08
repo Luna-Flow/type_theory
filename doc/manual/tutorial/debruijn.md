@@ -4,13 +4,22 @@ This tutorial converts named lambda terms to De Bruijn form, uses that form
 to compare terms and to reduce them without renaming, validates untrusted
 nameless input, and converts results back to names for display.
 
+| I want to | Use |
+| --- | --- |
+| convert a named term to indices | `from_named` |
+| convert back with readable names | `to_named` |
+| check that every index has a binder | `validate` |
+| reduce without renaming | `reduce_once`, `normalize` |
+| open a binder with an argument | `instantiate` |
+| move a term under binders | `shift` |
+
 ## Quick start
 
 ```bash
 moon add Luna-Flow/type_theory@0.2.0
 ```
 
-```text
+```moonbit nocheck
 import {
   "Luna-Flow/type_theory/core",
   "Luna-Flow/type_theory/syntax",
