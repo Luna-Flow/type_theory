@@ -28,3 +28,16 @@ Last audited: 2026-06-16
   reuses the UTLC named lambda reducer as the reference semantics.
 - STLC v1 covers only simply typed lambda calculus with `Unit`, base types,
   arrows, and typed constants from a signature.
+- UTLC NbE reads applications back as unary `Apply` nodes, while the De Bruijn
+  small-step reducer keeps n-ary spines; agreement holds after spine
+  flattening.
+- STLC typed NbE is eta-long for arrow types only; the eta law for `Unit` is
+  not implemented.
+
+## Known Issues
+
+- STLC redex inference (`(λx. b) a1 a2 ... an` with `n >= 2`) types the
+  arguments `a2 ... an` in a context that already binds the parameter `x`. If
+  such an argument has a free variable named `x`, `infer` uses the parameter's
+  type, and `normalize_eta_long` rejects the term. Found while documenting
+  (2026-10-08); not yet fixed.
