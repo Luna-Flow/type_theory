@@ -46,6 +46,15 @@ the heap, so the call stack does not grow with the fuel spent: a divergent
 term ends with `FuelExhausted` on every backend, however large the budget.
 The pending work is bounded by the budget.
 
+Nor does the host call stack grow with the nesting depth of the input:
+validation (by `@debruijn.validate`), evaluation and readback handle terms
+of any depth, such as long application chains or long chains of binders, on
+every backend. A term of size $n$ needs a few units of fuel per node to be
+evaluated and read back, so a deep term needs a budget that grows with its
+size, not a larger stack. The derived `Debug` of `NbeResult` recurses over
+the term it contains; compare deep results with `==` instead of printing
+them.
+
 ```moonbit
 test "a large budget ends with FuelExhausted" {
   let w : @debruijn.DbTerm[Int] = Bind(Apply(Bound(0), [Bound(0)]))

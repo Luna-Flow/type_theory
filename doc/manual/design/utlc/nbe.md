@@ -257,6 +257,50 @@ $\mathsf{rb}$ step run the evaluation machine to its end and return to the
 readback loop, so the host stack holds at most the two loops, and $Q$, like
 $K$, is bounded by the units spent.
 
+*Deep input terms.* The same machines make the host stack independent of
+the nesting depth of the input. The rule for $\mathsf{ev}(t\,\vec u, \rho)$
+pushes a frame and continues with the head, so a long chain of applications
+in head position grows $K$, not the host stack; arguments are delayed, and
+a chain nested in argument position is evaluated one level per
+$\mathsf{fo}$ step, when readback forces the argument. A binder is a
+closure, and readback opens it with one $\mathsf{bind}$ frame. Every frame
+is paid for by a unit, so the bound $|K| \le f_0 + 1$ above covers deep
+input as well. Before evaluating, `eval` and `normalize` validate the input
+with `@debruijn.validate`, which keeps its pending subterms on a heap stack
+(see the [debruijn design](../debruijn.md)). On every backend, the depth of
+the input therefore costs fuel and heap, not host stack.
+
+*Shared environments.* Opening a binder extends an environment:
+$\mathrm{app}(\mathsf{clo}(t, \rho), e)$ evaluates $t$ in $e \cdot \rho$, and
+readback of $\mathsf{clo}(t, \rho)$ under $n$ binders evaluates $t$ in
+$\mathsf{lvl}(n) \cdot \rho$. Copying $\rho$ for each extension makes a term
+with $n$ nested binders cost
+
+$$
+\sum_{k=0}^{n-1} k \;=\; \frac{n(n-1)}{2}
+$$
+
+element copies, tens of seconds for $n = 100\,000$. Environments are
+therefore persistent lists stored in shared arrays: an environment is a pair
+$(a, \ell)$ of an array and a length, with
+$\rho_i = a[\ell - 1 - i]$, outermost entry first. No environment ever
+changes $a[0..\ell)$, so
+
+$$
+e \cdot (a, \ell) \;=\;
+\begin{cases}
+(a \mathbin{+\!\!+} [e],\ \ell + 1) & \text{if } |a| = \ell \ \text{(push in place)}, \\
+(a[0..\ell) \mathbin{+\!\!+} [e],\ \ell + 1) & \text{otherwise (copy)}
+\end{cases}
+$$
+
+leaves every other environment that shares $a$ unchanged: they read only
+their own prefixes, which the push does not touch. A chain of binders
+extends each environment once, at the end of its array, so it costs $O(n)$;
+lookup stays $O(1)$; an environment extended twice, as when one closure is
+applied to two arguments, copies as before. Values, the order of the steps
+and the fuel spent are the same as with copied environments.
+
 [^machines]: M. Felleisen and D. P. Friedman, "Control operators, the SECD-machine, and the λ-calculus", 1986, for the CEK machine; M. S. Ager, D. Biernacki, O. Danvy and J. Midtgaard, "A functional correspondence between evaluators and abstract machines", PPDP 2003, for deriving it from an evaluator by CPS transformation and defunctionalization.
 
 ### Laziness without sharing
@@ -337,7 +381,9 @@ levels back into indices. Further tests run $\Omega$, a divergent term whose
 head grows, and two terms with infinite normal forms with budgets of thirty
 million units on every backend, and pin the exact cost of Church numeral
 arithmetic together with its reproducibility at `consumed` and
-`consumed - 1`.
+`consumed - 1`. The tests in `src/utlc/nbe/deep_test.mbt` evaluate, read
+back and normalize terms nested to depth 100 000, normal and with redexes,
+on every backend.
 
 Other invariants:
 
@@ -349,8 +395,10 @@ Other invariants:
   variables, so quoting them at any level $n \ge 0$ never fails this way.
 - Fuel: `consumed` never exceeds the fuel given; the determinism property
   above holds.
-- Stack: evaluation and readback use a constant depth of host stack; their
-  frame stacks live in the heap and are bounded by the budget.
+- Stack: validation, evaluation and readback use a constant depth of host
+  stack, whatever the budget and the nesting depth of the input; their frame
+  stacks live in the heap and are bounded by the budget (validation's by the
+  size of the input).
 
 ## Alternatives rejected
 
@@ -377,10 +425,9 @@ Other invariants:
 - Not total: `FuelExhausted` is the expected outcome for divergent terms and
   does not prove divergence.
 - No sharing of delayed arguments.
-- Only evaluation and readback have a bounded host stack. `eval` and
-  `normalize` first validate their input with `@debruijn.validate`, which
-  recurses over the term, so the stack depth they need still grows with the
-  nesting depth of the input term.
+- The derived `Debug` of `NbeResult` recurses over the term it contains, so
+  printing a deeply nested normal form can overflow the host stack on js,
+  wasm and wasm-gc; `==` handles any depth.
 - Normal forms use unary applications.
 - Input must be De Bruijn syntax; convert named terms with
   `@debruijn.from_named` and results back with `@debruijn.to_named`.
