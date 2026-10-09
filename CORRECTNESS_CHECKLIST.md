@@ -11,7 +11,7 @@ Last audited: 2026-10-09
 | Structured reduction | Correct | path and trace tests; n-ary versus curried spine regression and lockstep property test for every strategy (#11) | one call contracts at most one redex; `ApplicativeOrder` reads spines curried |
 | Named/De Bruijn conversion | Correct | both round-trip laws | named round trip is alpha-equivalent |
 | De Bruijn scope | Correct | dangling and negative index tests, reducer scope regressions (#3, #16) | invalid indices return `ScopeError`; `reduce_once` and `normalize` validate their input before any step |
-| Shift and instantiation | Correct | nested binder beta tests, downward-shift capture regressions (#9) | standard cutoff-based shifting; a free index that would fall below the cutoff returns `NegativeShift` |
+| Shift and instantiation | Correct | nested binder beta tests, downward-shift capture regressions (#9), negative cutoff regressions (#10) | standard cutoff-based shifting; a free index that would fall below the cutoff returns `NegativeShift`; a negative cutoff returns `NegativeCutoff` |
 | De Bruijn small-step | Correct | path, normalization and empty-application tests (#2) | leftmost-outermost beta; `Apply(h, [])` is read as `h` |
 | UTLC untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests, 30M-unit divergence tests on every backend and exact-cost tests (#12) | beta-normalization may exhaust fuel; evaluation and readback use a constant host stack |
 | STLC bidirectional typechecking | Correct | typing, rejection, shadowing and trailing-argument capture tests (#1) | inference is syntax-directed and lambdas check against arrows; a redex parameter is renamed apart from trailing arguments |
@@ -46,7 +46,6 @@ Open:
 
 - `check` has no checking-mode redex rule, so it rejects well-typed redexes
   whose result is a lambda in checking position (#8).
-- `@debruijn.shift` accepts a negative cutoff (#10).
 - Deeply nested input terms overflow the host stack on js, wasm and wasm-gc
   (#13).
 - Public array fields let callers mutate values documented as immutable (#14).
@@ -65,6 +64,10 @@ Fixed on 2026-10-09:
 - `@debruijn.shift` with a negative `delta` moved a free index below the
   cutoff, where an enclosing binder captured it: `shift(Bind(Bound(1)), -1, 0)`
   returned `Ok(Bind(Bound(0)))` (#9). It now returns `NegativeShift`.
+- `@debruijn.shift` accepted a negative cutoff, so indices bound inside the
+  term were shifted as if free: `shift(Bind(Bound(0)), 1, -1)` returned
+  `Ok(Bind(Bound(1)))` (#10). It now returns `NegativeCutoff` for any
+  negative cutoff.
 - STLC typed NbE typed a redex head without flattening the spine, so
   `normalize_eta_long` rejected `((λx. λy. y) ()) x` and
   `(λx. (λy. λz. z) x) () v`, which `check` accepts, with `CannotInferLambda`
