@@ -62,7 +62,7 @@ when quoting.
 ### Shifting
 
 $\uparrow^{d}_{c}\,t$ adds $d$ to every index of $t$ that is free relative to
-cutoff $c$:
+cutoff $c \ge 0$:
 
 $$
 \begin{aligned}
@@ -79,7 +79,9 @@ an index would be captured by an enclosing binder, or become negative. A
 shift with $d \ge 0$ is always defined.
 
 `shift(t, d, c)` implements it by carrying the binder depth $k$ and testing
-$i \ge c + k$, which unfolds the recursion on $c$.
+$i \ge c + k$, which unfolds the recursion on $c$. A negative $c$ is outside
+the domain: it would count indices bound inside $t$ as free, so `shift`
+rejects it with `NegativeCutoff` before looking at $t$.
 
 ### Substitution of an index
 
@@ -116,7 +118,7 @@ zero the index refers to nothing; between zero and the cutoff it is captured
 by an enclosing binder. Either way the result is a silently wrong term.
 
 **Choice.** `shift` returns `Err(NegativeShift)` when a free index would cross
-its cutoff, and `shift`,
+its cutoff and `Err(NegativeCutoff)` for a negative cutoff, and `shift`,
 `substitute_bound`, `instantiate`, `validate` and `to_named` report
 `NegativeIndex` for any negative index they meet. The lemmas below show that
 the error cases are unreachable from well-scoped input, so the `Result` costs
@@ -250,7 +252,8 @@ so the normalization theorem applies to `normalize`.
 - `shift(t, 0, c) == Ok(t)` for every `t` without negative indices, and
   shifts with one cutoff compose (Lemma 1).
 - `shift` never turns a free index into a bound one: if a free index would
-  fall below its cutoff, it returns `Err(NegativeShift)`.
+  fall below its cutoff, it returns `Err(NegativeShift)`, and it rejects a
+  negative cutoff, which would free bound indices, with `Err(NegativeCutoff)`.
 
 Cost: `shift` and `validate` are linear in the term size. `substitute_bound`
 costs $O(|t| + m \cdot |s|)$ for $m$ occurrences of the index, because each

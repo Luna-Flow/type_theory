@@ -17,6 +17,9 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   is `priv`, and blackbox tests qualify package names.
 - `@hashset.from_array` calls were replaced by the `@hashset.HashSet([..])`
   constructor.
+- `debruijn`: `ScopeError` has a new case `NegativeCutoff(cutoff~ : Int)`,
+  returned by `shift` for a negative cutoff. Downstream exhaustive matches on
+  `ScopeError` need a new arm (#10).
 
 ### Deprecated
 
@@ -54,6 +57,11 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   rejected, so a free index could be captured by an enclosing binder:
   `shift(Bind(Bound(1)), -1, 0)` returned `Ok(Bind(Bound(0)))`, the identity.
   `instantiate` and the reducers never produced such a shift (#9).
+- `debruijn`: `shift` now rejects a negative `cutoff` with
+  `NegativeCutoff(cutoff~)`, whatever the term. Before, it was accepted, so
+  indices bound inside the term were shifted as if free:
+  `shift(Bind(Bound(0)), 1, -1)` returned `Ok(Bind(Bound(1)))`. `instantiate`
+  and the reducers only use cutoff `0` (#10).
 - `stlc`: `normalize_eta_long` rejected with `CannotInferLambda` some terms
   that `check` accepts: a redex with a curried head such as
   `((λx. λy. y) ()) x`, and a redex whose body is itself a redex consuming the
@@ -102,6 +110,8 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   the design page and the Typst note: no free index `i >= c` with `i + d < c`,
   instead of "no index becomes negative". The cancellation and safe
   instantiation proofs check the cutoff accordingly (#9).
+- `debruijn`: the API page, the design page and the Typst note state that
+  `shift` requires `cutoff >= 0` and document `NegativeCutoff` (#10).
 - `syntax`: the manual no longer states that `alpha_equal` is always an
   equivalence. It compares payloads with `T`'s `==`, so it is an equivalence
   exactly when that `==` is one, and it is alpha-equivalence when `==` is the

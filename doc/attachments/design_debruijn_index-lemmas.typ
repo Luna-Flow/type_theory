@@ -37,7 +37,8 @@ unaffected by every operation below; we omit their cases.
   would be captured by an enclosing binder (or become negative). For $d >= 0$
   the shift is always defined. The implementation carries the binder depth $k$
   instead of increasing $c$, tests $i >= c + k$, and reports the crossing
-  $i + d < c + k$ as `NegativeShift`.
+  $i + d < c + k$ as `NegativeShift`. A negative cutoff is outside the domain
+  $c in NN$; the implementation rejects it as `NegativeCutoff`.
 ]
 
 #definition[
