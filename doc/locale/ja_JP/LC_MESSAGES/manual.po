@@ -330,115 +330,119 @@ msgstr "`DbTerm::equal` は 2 つの項を構造的に比較する。"
 msgid "`ScopeError` describes an index that does not refer to a binder."
 msgstr "`ScopeError` は束縛子を指さないインデックスを表す。"
 
-#: manual/api/debruijn.md:79
+#: manual/api/debruijn.md:80
 msgid "`UnboundIndex(index, depth)`: `Bound(index)` occurs under only `depth` binders."
 msgstr "`UnboundIndex(index, depth)`：`Bound(index)` が `depth` 個の束縛子の下にしか出現しない。"
 
-#: manual/api/debruijn.md:81
+#: manual/api/debruijn.md:82
 msgid "`NegativeIndex(index)`: a negative index."
 msgstr "`NegativeIndex(index)`：負のインデックス。"
 
-#: manual/api/debruijn.md:82
+#: manual/api/debruijn.md:83
 msgid "`NegativeShift(index, delta, cutoff)`: shifting the free `Bound(index)` by `delta` would move it below `cutoff`, the effective cutoff at the occurrence, where it would be captured by an enclosing binder or become negative."
 msgstr "`NegativeShift(index, delta, cutoff)`：自由な `Bound(index)` を `delta` だけシフトすると、その出現位置での実効カットオフ `cutoff` を下回り、外側の束縛子に捕獲されるか負になる。"
 
 #: manual/api/debruijn.md:87
+msgid "`NegativeCutoff(cutoff)`: `shift` was called with a negative `cutoff`."
+msgstr "`NegativeCutoff(cutoff)`：`shift` が負の `cutoff` で呼び出された。"
+
+#: manual/api/debruijn.md:89
 msgid "Conversion and validation"
 msgstr "変換と検証"
 
-#: manual/api/debruijn.md:91
+#: manual/api/debruijn.md:93
 msgid "`from_named` converts named syntax to De Bruijn syntax."
 msgstr "`from_named` は名前付き構文を De Bruijn 構文に変換する。"
 
-#: manual/api/debruijn.md:97
+#: manual/api/debruijn.md:99
 msgid "A variable bound by an enclosing `Bind` becomes `Bound(i)`, where `i` counts the binders between the occurrence and its binder (the nearest binder of that name wins). Free variables become `Free`. The result is always well scoped, and alpha-equivalent named terms give equal results."
 msgstr "外側の `Bind` によって束縛された変数は `Bound(i)` になる。ここで `i` は出現とその束縛子の間にある束縛子の数である（同名の場合は最も近い束縛子が優先される）。自由変数は `Free` になる。結果は常にスコープが正しく、α同値な名前付き項からは等しい結果が得られる。"
 
-#: manual/api/debruijn.md:104
+#: manual/api/debruijn.md:106
 msgid "`to_named` converts De Bruijn syntax back to named syntax with deterministic binder names."
 msgstr "`to_named` は De Bruijn 構文を、決定的な束縛子名を用いて名前付き構文に戻す。"
 
-#: manual/api/debruijn.md:111
+#: manual/api/debruijn.md:113
 msgid "Binders are named `x`, `x_1`, `x_2`, …: each one gets the first name of that sequence that is neither a free name of the term nor the name of an enclosing binder. Returns `Err(NegativeIndex)` or `Err(UnboundIndex)` for an ill-scoped term. For a well-scoped `d`, `from_named(to_named(d))` is `d`; for a named `t`, `to_named(from_named(t))` is alpha-equivalent to `t`."
 msgstr "束縛子には `x`、`x_1`、`x_2`、… と名前が付けられる：各束縛子には、この列のうち項の自由な名前でも外側の束縛子の名前でもない最初の名前が割り当てられる。スコープが正しくない項に対しては `Err(NegativeIndex)` または `Err(UnboundIndex)` を返す。スコープが正しい `d` について `from_named(to_named(d))` は `d` であり、名前付きの `t` について `to_named(from_named(t))` は `t` と α同値である。"
 
-#: manual/api/debruijn.md:134
+#: manual/api/debruijn.md:136
 msgid "The binder becomes `x_1` because `x` is a free name of the term."
 msgstr "`x` は項の自由な名前なので、束縛子は `x_1` になる。"
 
-#: manual/api/debruijn.md:138
+#: manual/api/debruijn.md:140
 msgid "`validate` checks that every bound index refers to an enclosing binder."
 msgstr "`validate` はすべての束縛インデックスが外側の束縛子を指していることを検査する。"
 
-#: manual/api/debruijn.md:144
+#: manual/api/debruijn.md:146
 msgid "Returns `Ok(())` for a well-scoped term and otherwise the first error found in pre-order."
 msgstr "スコープが正しい項に対しては `Ok(())` を返し、そうでなければ前順で最初に見つかったエラーを返す。"
 
-#: manual/api/debruijn.md:156
+#: manual/api/debruijn.md:158
 msgid "Index operations"
 msgstr "インデックス操作"
 
-#: manual/api/debruijn.md:160
+#: manual/api/debruijn.md:162
 msgid "`shift` adds `delta` to every index that is free relative to a cutoff."
 msgstr "`shift` はカットオフに関して自由なすべてのインデックスに `delta` を加える。"
 
-#: manual/api/debruijn.md:166
-msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. The shift is defined when no such index falls below the cutoff, that is, there is no `i >= cutoff + k` with `i + delta < cutoff + k`. Returns `Err(NegativeShift)` if an index would fall below the cutoff, where it would be captured by an enclosing binder or become negative, and `Err(NegativeIndex)` if the input contains a negative index."
-msgstr "`shift(t, delta, cutoff)` は操作 $\\uparrow^{delta}_{cutoff}$ である：`k` 個の束縛子の下で、インデックス `i >= cutoff + k` は `i + delta` になり、それより小さいインデックスはそのままである。シフトが定義されるのは、そのようなインデックスがカットオフを下回らないとき、すなわち `i + delta < cutoff + k` となる `i >= cutoff + k` が存在しないときである。インデックスがカットオフを下回る（外側の束縛子に捕獲されるか負になる）場合は `Err(NegativeShift)` を、入力に負のインデックスが含まれる場合は `Err(NegativeIndex)` を返す。"
+#: manual/api/debruijn.md:168
+msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. It requires `cutoff >= 0`: a negative cutoff would treat indices bound inside `t` as free, so `shift` returns `Err(NegativeCutoff(cutoff~))` for it before looking at `t`, even when `t` has no index at all. The shift is defined when no index falls below the cutoff, that is, there is no `i >= cutoff + k` with `i + delta < cutoff + k`. Returns `Err(NegativeShift)` if an index would fall below the cutoff, where it would be captured by an enclosing binder or become negative, and `Err(NegativeIndex)` if the input contains a negative index."
+msgstr "`shift(t, delta, cutoff)` は操作 $\\uparrow^{delta}_{cutoff}$ である：`k` 個の束縛子の下で、インデックス `i >= cutoff + k` は `i + delta` になり、それより小さいインデックスはそのままである。`cutoff >= 0` を要求する：負のカットオフは `t` の内部で束縛されたインデックスを自由とみなしてしまうので、`shift` は `t` を調べる前に `Err(NegativeCutoff(cutoff~))` を返す。`t` にインデックスがまったくなくても同様である。シフトが定義されるのは、どのインデックスもカットオフを下回らないとき、すなわち `i + delta < cutoff + k` となる `i >= cutoff + k` が存在しないときである。インデックスがカットオフを下回る（外側の束縛子に捕獲されるか負になる）場合は `Err(NegativeShift)` を、入力に負のインデックスが含まれる場合は `Err(NegativeIndex)` を返す。"
 
-#: manual/api/debruijn.md:176
+#: manual/api/debruijn.md:181
 msgid "`substitute_bound` replaces a free index by a term."
 msgstr "`substitute_bound` は自由なインデックスを項で置き換える。"
 
-#: manual/api/debruijn.md:182
+#: manual/api/debruijn.md:187
 msgid "`substitute_bound(t, j, s)` is $[j \\mapsto s]\\,t$: under `k` binders, `Bound(j + k)` is replaced by `s` shifted up by `k`, so that the free indices of `s` keep pointing at the same binders. Other indices are unchanged; the binder count of the result is not adjusted. Returns `Err(NegativeIndex)` for a negative `j` or a negative index in `t`. It does not check for unbound indices; use `validate` for that."
 msgstr "`substitute_bound(t, j, s)` は $[j \\mapsto s]\\,t$ である：`k` 個の束縛子の下で、`Bound(j + k)` は `k` だけ上にシフトした `s` で置き換えられ、`s` の自由なインデックスが同じ束縛子を指し続けるようにする。他のインデックスは変わらず、結果の束縛子の数は調整されない。負の `j` や `t` 内の負のインデックスに対しては `Err(NegativeIndex)` を返す。未束縛のインデックスは検査しないので、それには `validate` を使うこと。"
 
-#: manual/api/debruijn.md:191
+#: manual/api/debruijn.md:196
 msgid "`instantiate` opens a binder body with an argument."
 msgstr "`instantiate` は束縛子の本体を引数で開く。"
 
-#: manual/api/debruijn.md:197
+#: manual/api/debruijn.md:202
 msgid "`instantiate(body, arg)` computes $\\uparrow^{-1}_0\\big([0 \\mapsto \\uparrow^{1}_0 arg]\\,body\\big)$, the result of the beta step $(\\lambda.\\,body)\\,arg$. On well-scoped input it never returns an error."
 msgstr "`instantiate(body, arg)` は $\\uparrow^{-1}_0\\big([0 \\mapsto \\uparrow^{1}_0 arg]\\,body\\big)$、すなわち β ステップ $(\\lambda.\\,body)\\,arg$ の結果を計算する。スコープが正しい入力に対してはエラーを返さない。"
 
-#: manual/api/debruijn.md:230
+#: manual/api/debruijn.md:238
 msgid "Reduction"
 msgstr "簡約"
 
-#: manual/api/debruijn.md:234
+#: manual/api/debruijn.md:242
 msgid "`DbStepResult[T]` is the outcome of one De Bruijn reduction attempt."
 msgstr "`DbStepResult[T]` は De Bruijn 簡約を 1 回試みた結果である。"
 
-#: manual/api/debruijn.md:245
+#: manual/api/debruijn.md:253
 msgid "`NoStep` and `Reduced` have the meaning of `@rewrite.StepResult`; the rule name is always `\"beta\"`. `ScopeFailure` reports that the input is ill scoped: `reduce_once` validates the whole term before searching for a redex, and the error is the first one `validate` finds. No step is taken in that case."
 msgstr "`NoStep` と `Reduced` の意味は `@rewrite.StepResult` と同じであり、規則名は常に `\"beta\"` である。`ScopeFailure` は入力のスコープが正しくないことを報告する：`reduce_once` は簡約基を探す前に項全体を検証し、エラーは `validate` が最初に見つけるものである。この場合ステップは一つも行われない。"
 
-#: manual/api/debruijn.md:253
+#: manual/api/debruijn.md:261
 msgid "`reduce_once` performs one leftmost-outermost beta step."
 msgstr "`reduce_once` は最左最外の β ステップを 1 回行う。"
 
-#: manual/api/debruijn.md:259
+#: manual/api/debruijn.md:267
 msgid "A redex is `Apply(Bind(body), [a, ..rest])`; it becomes `instantiate(body, a)`, applied to `rest` if `rest` is not empty. An empty application `Apply(h, [])` is read as `h`, so a head wrapped in empty applications, as in `Apply(Apply(Bind(body), []), [a])`, still forms a redex; `Apply(Bind(body), [])` alone has no argument and is not one. The search order is the root, then the head, then the arguments from left to right, and binder bodies are entered."
 msgstr "簡約基は `Apply(Bind(body), [a, ..rest])` であり、`instantiate(body, a)` になる。`rest` が空でなければそれを `rest` に適用する。空の適用 `Apply(h, [])` は `h` と読まれるので、`Apply(Apply(Bind(body), []), [a])` のように空の適用に包まれた先頭も簡約基をなす。`Apply(Bind(body), [])` だけでは引数がなく、簡約基ではない。探索順序は根、次に先頭、次に引数を左から右へであり、束縛子の本体にも入る。"
 
-#: manual/api/debruijn.md:267
+#: manual/api/debruijn.md:275
 msgid "`reduce_once` validates the whole term first, as `validate` does: an ill-scoped term gives `ScopeFailure` with the first error in pre-order, wherever the bad index is, for example `ScopeFailure(NegativeIndex(index=-1))` for `Bind(Bound(-1))` and `ScopeFailure(UnboundIndex(index=5, depth=1))` for `(λ. 5) 1`. A well-scoped term never gives `ScopeFailure`."
 msgstr "`reduce_once` は `validate` と同じように、まず項全体を検証する：スコープの正しくない項は、悪いインデックスがどこにあっても、前順序で最初のエラーを持つ `ScopeFailure` になる。たとえば `Bind(Bound(-1))` では `ScopeFailure(NegativeIndex(index=-1))`、`(λ. 5) 1` では `ScopeFailure(UnboundIndex(index=5, depth=1))` である。スコープの正しい項が `ScopeFailure` になることはない。"
 
-#: manual/api/debruijn.md:275
+#: manual/api/debruijn.md:283
 msgid "`DbNormalizationResult[T]` is the outcome of bounded De Bruijn normalization."
 msgstr "`DbNormalizationResult[T]` は上限付き De Bruijn 正規化の結果である。"
 
-#: manual/api/debruijn.md:286
+#: manual/api/debruijn.md:294
 msgid "`ScopeFailure` carries the term that was found ill scoped, the error and the number of steps taken before it; `normalize` reports it only for its input, with `steps=0`."
 msgstr "`ScopeFailure` は、スコープが正しくないと判明した項、エラー、それまでに行ったステップ数を持つ。`normalize` はこれを入力についてのみ、`steps=0` で報告する。"
 
-#: manual/api/debruijn.md:292
+#: manual/api/debruijn.md:300
 msgid "`normalize` repeats `reduce_once` until no step applies, a step fails, or a step limit is reached."
 msgstr "`normalize` は、適用できるステップがなくなるか、ステップが失敗するか、ステップ数の上限に達するまで `reduce_once` を繰り返す。"
 
-#: manual/api/debruijn.md:299
+#: manual/api/debruijn.md:307
 msgid "It has the step-count contract of `@rewrite.normalize`: at most `max_steps` steps, and one extra step attempt to classify the final term. It validates the input once: an ill-scoped term gives `ScopeFailure(term, error, steps=0)` without any step. Reducts of a well-scoped term are well scoped (see the [debruijn design](../design/debruijn.md)), so the later steps are not validated again, and the result is `ScopeFailure` exactly when the input is ill scoped."
 msgstr "`@rewrite.normalize` のステップ数の契約を持つ：最大 `max_steps` ステップと、最終項を分類するための追加のステップの試み 1 回である。入力は一度だけ検証される：スコープの正しくない項は、ステップを行わずに `ScopeFailure(term, error, steps=0)` になる。スコープの正しい項の簡約結果はスコープが正しい（[debruijn の設計](../design/debruijn.md)を参照）ので、後のステップは再検証されず、結果が `ScopeFailure` になるのはちょうど入力のスコープが正しくないときである。"
 
@@ -1451,7 +1455,7 @@ msgstr "`generic_top_down_once` は [rewrite の設計](rewrite.md)の単一簡�
 
 #: manual/design/adapter.md:81
 #: manual/design/core.md:125
-#: manual/design/debruijn.md:110
+#: manual/design/debruijn.md:112
 #: manual/design/eval.md:134
 #: manual/design/rewrite.md:78
 #: manual/design/stlc.md:67
@@ -1512,7 +1516,7 @@ msgstr "下流の変数型は単射（異なる変数を異なる名前へ写す
 
 #: manual/design/adapter.md:132
 #: manual/design/core.md:168
-#: manual/design/debruijn.md:240
+#: manual/design/debruijn.md:242
 #: manual/design/eval.md:203
 #: manual/design/rewrite.md:182
 #: manual/design/stlc.md:332
@@ -1565,7 +1569,7 @@ msgstr "下流の adapter は自身のノード種別について (V1)–(V5) �
 
 #: manual/design/adapter.md:147
 #: manual/design/core.md:182
-#: manual/design/debruijn.md:260
+#: manual/design/debruijn.md:263
 #: manual/design/eval.md:226
 #: manual/design/rewrite.md:207
 #: manual/design/stlc.md:353
@@ -1590,7 +1594,7 @@ msgstr "**実行時に法則を検査する。** 法則はすべてのノード�
 
 #: manual/design/adapter.md:158
 #: manual/design/core.md:195
-#: manual/design/debruijn.md:272
+#: manual/design/debruijn.md:275
 #: manual/design/eval.md:240
 #: manual/design/rewrite.md:219
 #: manual/design/stlc.md:366
@@ -1863,198 +1867,198 @@ msgid "Shifting"
 msgstr "シフト"
 
 #: manual/design/debruijn.md:64
-msgid "$\\uparrow^{d}_{c}\\,t$ adds $d$ to every index of $t$ that is free relative to cutoff $c$:"
-msgstr "$\\uparrow^{d}_{c}\\,t$ は、カットオフ $c$ に関して自由な $t$ のすべてのインデックスに $d$ を加える。"
+msgid "$\\uparrow^{d}_{c}\\,t$ adds $d$ to every index of $t$ that is free relative to cutoff $c \\ge 0$:"
+msgstr "$\\uparrow^{d}_{c}\\,t$ は、カットオフ $c \\ge 0$ に関して自由な $t$ のすべてのインデックスに $d$ を加える。"
 
 #: manual/design/debruijn.md:76
 msgid "The shift is defined when no index crosses its cutoff: there is no index $i \\ge c$ with $i + d < c$, where $c$ is the cutoff at that occurrence. Such an index would be captured by an enclosing binder, or become negative. A shift with $d \\ge 0$ is always defined."
 msgstr "シフトが定義されるのは、どのインデックスもカットオフをまたがないとき、すなわち $i + d < c$ となるインデックス $i \\ge c$ が存在しないときである。ここで $c$ はその出現位置でのカットオフである。そのようなインデックスは外側の束縛子に捕獲されるか、負になる。$d \\ge 0$ のシフトは常に定義される。"
 
 #: manual/design/debruijn.md:81
-msgid "`shift(t, d, c)` implements it by carrying the binder depth $k$ and testing $i \\ge c + k$, which unfolds the recursion on $c$."
-msgstr "`shift(t, d, c)` は束縛子の深さ $k$ を持ち回り $i \\ge c + k$ を判定することでこれを実装する。これは $c$ に関する再帰を展開したものである。"
+msgid "`shift(t, d, c)` implements it by carrying the binder depth $k$ and testing $i \\ge c + k$, which unfolds the recursion on $c$. A negative $c$ is outside the domain: it would count indices bound inside $t$ as free, so `shift` rejects it with `NegativeCutoff` before looking at $t$."
+msgstr "`shift(t, d, c)` は束縛子の深さ $k$ を持ち回り $i \\ge c + k$ を判定することでこれを実装する。これは $c$ に関する再帰を展開したものである。負の $c$ は定義域の外にある：$t$ の内部で束縛されたインデックスを自由と数えてしまうので、`shift` は $t$ を調べる前に `NegativeCutoff` でこれを拒否する。"
 
-#: manual/design/debruijn.md:84
+#: manual/design/debruijn.md:86
 msgid "Substitution of an index"
 msgstr "インデックスの代入"
 
-#: manual/design/debruijn.md:86
+#: manual/design/debruijn.md:88
 msgid "$[j \\mapsto s]\\,t$ replaces the free index $j$ by $s$:"
 msgstr "$[j \\mapsto s]\\,t$ は自由インデックス $j$ を $s$ で置き換える。"
 
-#: manual/design/debruijn.md:93
+#: manual/design/debruijn.md:95
 msgid "`substitute_bound` unfolds the binder case: under $k$ binders it replaces index $j + k$ by $\\uparrow^{k}_{0} s$. The two agree because shifts with the same cutoff compose (Lemma 1 below): $\\uparrow^{1}_{0}\\cdots\\uparrow^{1}_{0} s = \\uparrow^{k}_{0} s$."
 msgstr "`substitute_bound` は束縛子の場合を展開する。$k$ 個の束縛子の下では、インデックス $j + k$ を $\\uparrow^{k}_{0} s$ で置き換える。カットオフが同じシフトは合成できる（後述の補題 1）ので、両者は一致する：$\\uparrow^{1}_{0}\\cdots\\uparrow^{1}_{0} s = \\uparrow^{k}_{0} s$。"
 
-#: manual/design/debruijn.md:98
+#: manual/design/debruijn.md:100
 msgid "Beta reduction"
 msgstr "Beta 簡約"
 
-#: manual/design/debruijn.md:104
+#: manual/design/debruijn.md:106
 msgid "The argument is shifted up because it moves under the binder of $t$; after the substitution the binder is removed, so all remaining free indices of the body are shifted down. This is `instantiate(t, s)`.[^tapl]"
 msgstr "引数は $t$ の束縛子の下に移るので上方にシフトされる。代入の後でその束縛子は取り除かれるので、本体に残るすべての自由インデックスは下方にシフトされる。これが `instantiate(t, s)` である。[^tapl]"
 
-#: manual/design/debruijn.md:108
+#: manual/design/debruijn.md:110
 msgid "B. C. Pierce, *Types and Programming Languages*, MIT Press 2002, §6.2–6.3."
 msgstr "B. C. Pierce, *Types and Programming Languages*, MIT Press 2002, §6.2–6.3."
 
-#: manual/design/debruijn.md:112
+#: manual/design/debruijn.md:114
 msgid "Shifting is checked, not assumed"
 msgstr "シフトは仮定せず検査する"
 
-#: manual/design/debruijn.md:114
+#: manual/design/debruijn.md:116
 msgid "**Problem.** A downward shift can move a free index below its cutoff. Below zero the index refers to nothing; between zero and the cutoff it is captured by an enclosing binder. Either way the result is a silently wrong term."
 msgstr "**問題。** 下向きのシフトは自由インデックスをカットオフの下へ移しうる。零を下回るとそのインデックスは何も参照せず、零とカットオフの間では外側の束縛子に捕獲される。いずれの場合も結果は黙って誤った項になる。"
 
-#: manual/design/debruijn.md:118
-msgid "**Choice.** `shift` returns `Err(NegativeShift)` when a free index would cross its cutoff, and `shift`, `substitute_bound`, `instantiate`, `validate` and `to_named` report `NegativeIndex` for any negative index they meet. The lemmas below show that the error cases are unreachable from well-scoped input, so the `Result` costs nothing for correct callers and turns a silent corruption into data for incorrect ones. This follows the library rule that expected failures at public boundaries are structured values."
-msgstr "**選択。** 自由インデックスがカットオフをまたぐ場合 `shift` は `Err(NegativeShift)` を返し、`shift`、`substitute_bound`、`instantiate`、`validate`、`to_named` は出会った負のインデックスに対して `NegativeIndex` を報告する。以下の補題は、スコープの正しい入力からはエラーの場合に到達しないことを示すので、`Result` は正しい呼び出し側には何のコストもなく、誤った呼び出し側に対しては黙った破損をデータに変える。これは、公開境界で想定される失敗は構造化された値であるというライブラリの規則に従う。"
+#: manual/design/debruijn.md:120
+msgid "**Choice.** `shift` returns `Err(NegativeShift)` when a free index would cross its cutoff and `Err(NegativeCutoff)` for a negative cutoff, and `shift`, `substitute_bound`, `instantiate`, `validate` and `to_named` report `NegativeIndex` for any negative index they meet. The lemmas below show that the error cases are unreachable from well-scoped input, so the `Result` costs nothing for correct callers and turns a silent corruption into data for incorrect ones. This follows the library rule that expected failures at public boundaries are structured values."
+msgstr "**選択。** 自由インデックスがカットオフをまたぐ場合 `shift` は `Err(NegativeShift)` を返し、負のカットオフには `Err(NegativeCutoff)` を返す。また `shift`、`substitute_bound`、`instantiate`、`validate`、`to_named` は出会った負のインデックスに対して `NegativeIndex` を報告する。以下の補題は、スコープの正しい入力からはエラーの場合に到達しないことを示すので、`Result` は正しい呼び出し側には何のコストもなく、誤った呼び出し側に対しては黙った破損をデータに変える。これは、公開境界で想定される失敗は構造化された値であるというライブラリの規則に従う。"
 
-#: manual/design/debruijn.md:127
+#: manual/design/debruijn.md:129
 msgid "The index operations work on open terms, so they cannot tell a dangling (too large) index from one that points at a binder outside the term: `instantiate` shifts it like a free index. The reducers work on whole terms and validate them. `reduce_once` runs `validate` before searching and returns its error as `ScopeFailure`; `normalize` validates its input once, and Lemma 2 below shows that the later terms need no check. The search itself is a private function that is also applied to binder bodies, whose indices may point at enclosing binders."
 msgstr "インデックス操作は開いた項を扱うので、ぶら下がった（大きすぎる）インデックスと項の外の束縛子を指すインデックスを区別できない：`instantiate` はそれを自由なインデックスと同様にシフトする。簡約器は項全体を扱い、それを検証する。`reduce_once` は探索の前に `validate` を実行し、そのエラーを `ScopeFailure` として返す。`normalize` は入力を一度だけ検証し、後の項に検査が不要であることは下の補題 2 が示す。探索そのものは非公開の関数であり、束縛子の本体にも適用される。本体のインデックスは外側の束縛子を指しうるからである。"
 
-#: manual/design/debruijn.md:136
+#: manual/design/debruijn.md:138
 msgid "Instantiation never fails on well-scoped input"
 msgstr "スコープの正しい入力では具体化は失敗しない"
 
-#: manual/design/debruijn.md:138
+#: manual/design/debruijn.md:140
 msgid "**Lemma 1 (shift composition).** For $a, b \\ge 0$: $\\uparrow^{a}_{c}\\uparrow^{b}_{c} t = \\uparrow^{a+b}_{c} t$, and $\\uparrow^{0}_{c} t = t$."
 msgstr "**補題 1（シフトの合成）。** $a, b \\ge 0$ について $\\uparrow^{a}_{c}\\uparrow^{b}_{c} t = \\uparrow^{a+b}_{c} t$ であり、$\\uparrow^{0}_{c} t = t$ である。"
 
-#: manual/design/debruijn.md:142
+#: manual/design/debruijn.md:144
 msgid "On an index $i$ relative to the current cutoff: if $i < c$ both sides leave it; if $i \\ge c$ then $i + b \\ge c$, so"
 msgstr "現在のカットオフに対する添字 $i$ について：$i < c$ ならば両辺ともそのまま残し、$i \\ge c$ ならば $i + b \\ge c$ であるので"
 
-#: manual/design/debruijn.md:149
+#: manual/design/debruijn.md:151
 msgid "The binder case raises the cutoff on both sides alike. $\\square$"
 msgstr "束縛子の場合は両辺で同様にカットオフを引き上げる。$\\square$"
 
-#: manual/design/debruijn.md:151
+#: manual/design/debruijn.md:153
 msgid "**Lemma 2 (safety of the downward shift).** Let $\\lambda.\\,t$ and $s$ be well scoped at depth $n$. Then every free index of $u = [\\,0 \\mapsto \\uparrow^{1}_{0} s\\,]\\,t$ lies in $\\{1, \\dots, n\\}$, so $\\uparrow^{-1}_{0} u$ succeeds and is well scoped at depth $n$."
 msgstr "**補題 2（下方向シフトの安全性）。** $\\lambda.\\,t$ と $s$ が深さ $n$ でスコープ整合であるとする。このとき $u = [\\,0 \\mapsto \\uparrow^{1}_{0} s\\,]\\,t$ のすべての自由添字は $\\{1, \\dots, n\\}$ に属するので、$\\uparrow^{-1}_{0} u$ は成功し、深さ $n$ でスコープ整合である。"
 
-#: manual/design/debruijn.md:156
+#: manual/design/debruijn.md:158
 msgid "The body $t$ is well scoped at depth $n + 1$, so its free indices lie in $\\{0, \\dots, n\\}$. Follow a free occurrence in $t$ under $k$ inner binders:"
 msgstr "本体 $t$ は深さ $n + 1$ でスコープ整合であるので、その自由添字は $\\{0, \\dots, n\\}$ に属する。$t$ 内で $k$ 個の内側の束縛子の下にある自由な出現を追う："
 
-#: manual/design/debruijn.md:167
+#: manual/design/debruijn.md:169
 msgid "No free index $0$ remains. Under $k$ binders the shift by $-1$ has cutoff $k$ and moves the index $k + m$ with $m \\ge 1$ to $k + m - 1 \\ge k$, so no index crosses its cutoff, and the root-relative free indices are mapped $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$. $\\square$"
 msgstr "自由添字 $0$ はもはや残らない。$k$ 個の束縛子の下で $-1$ によるシフトのカットオフは $k$ であり、$m \\ge 1$ である添字 $k + m$ を $k + m - 1 \\ge k$ に移す。したがってどの添字もカットオフをまたがず、根から見た自由添字は $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$ と写される。$\\square$"
 
-#: manual/design/debruijn.md:172
+#: manual/design/debruijn.md:174
 msgid "Hence `instantiate` and `reduce_once` return no `ScopeError` on well-scoped input, and a reduct of a well-scoped term is well scoped (subject reduction for scope). Together with the validation of the input, `normalize` returns `ScopeFailure` exactly when its input is ill scoped, and then with `steps=0`: `Bind(Bound(-1))` gives `NegativeIndex(index=-1)` and `(λ. 5) 1` gives `UnboundIndex(index=5, depth=1)`."
 msgstr "したがって `instantiate` と `reduce_once` はスコープ整合な入力に対して `ScopeError` を返さず、スコープ整合な項の簡約結果はスコープ整合である（スコープに関する主部簡約性）。入力の検証と合わせると、`normalize` が `ScopeFailure` を返すのはちょうど入力がスコープ不整合であるときであり、そのとき `steps=0` である：`Bind(Bound(-1))` は `NegativeIndex(index=-1)` を、`(λ. 5) 1` は `UnboundIndex(index=5, depth=1)` を与える。"
 
-#: manual/design/debruijn.md:179
+#: manual/design/debruijn.md:181
 msgid "The detailed proofs, including the commutation of shifts with different cutoffs and the De Bruijn substitution lemma, are in the attachment:"
 msgstr "異なるカットオフをもつシフトの可換性や De Bruijn 代入補題を含む詳細な証明は、添付資料にある："
 
-#: manual/design/debruijn.md:182
+#: manual/design/debruijn.md:184
 msgid "[Index lemmas for De Bruijn terms](../../attachments/design_debruijn_index-lemmas.typ)"
 msgstr "[De Bruijn 項の添字に関する補題](../../attachments/design_debruijn_index-lemmas.typ)"
 
-#: manual/design/debruijn.md:184
+#: manual/design/debruijn.md:186
 msgid "Exact translations"
 msgstr "厳密な相互変換"
 
-#: manual/design/debruijn.md:186
+#: manual/design/debruijn.md:188
 msgid "`from_named` keeps a stack of binder names and translates an occurrence of $x$ to the distance to the nearest binder of $x$, or to `Free(x)` if there is none. `to_named` invents a binder name with `fresh_name(\"x\", U)`, where $U$ contains the free names of the term and the names of the enclosing binders."
 msgstr "`from_named` は束縛子名のスタックを保持し、$x$ の出現を最も近い $x$ の束縛子までの距離に変換する。そのような束縛子がなければ `Free(x)` に変換する。`to_named` は `fresh_name(\"x\", U)` で束縛子名を生成する。ここで $U$ は項の自由な名前と外側の束縛子の名前を含む。"
 
-#: manual/design/debruijn.md:191
+#: manual/design/debruijn.md:193
 msgid "**Theorem (round trips).**"
 msgstr "**定理（往復変換）。**"
 
-#: manual/design/debruijn.md:193
+#: manual/design/debruijn.md:195
 msgid "$\\texttt{to\\_named}(\\texttt{from\\_named}(t)) =_\\alpha t$ for every named $t$."
 msgstr "すべての名前付き項 $t$ について $\\texttt{to\\_named}(\\texttt{from\\_named}(t)) =_\\alpha t$。"
 
-#: manual/design/debruijn.md:194
+#: manual/design/debruijn.md:196
 msgid "$\\texttt{from\\_named}(\\texttt{to\\_named}(d)) = d$ for every well-scoped $d$."
 msgstr "すべてのスコープ整合な $d$ について $\\texttt{from\\_named}(\\texttt{to\\_named}(d)) = d$。"
 
-#: manual/design/debruijn.md:197
+#: manual/design/debruijn.md:199
 msgid "For (2): along any path from the root, the names chosen by `to_named` are pairwise distinct and distinct from all free names, because each is chosen fresh for a set that contains the free names and every enclosing binder name. An occurrence of index $i$ under $n$ binders becomes the name of the binder at level $n - 1 - i$; translating back, the nearest binder with that name is that same binder (no other enclosing binder has the name), at distance $i$. A `Free(x)` becomes $x$, which is not the name of any binder on the path, so it translates back to `Free(x)`. (3) is de Bruijn's theorem; (1) follows from (2) and (3), since $\\texttt{from\\_named}(\\texttt{to\\_named}(\\texttt{from\\_named}(t))) = \\texttt{from\\_named}(t)$."
 msgstr "(2) について：根からの任意の経路に沿って、`to_named` が選ぶ名前は互いに異なり、かつすべての自由な名前とも異なる。各名前は、自由な名前と外側のすべての束縛子名を含む集合に対して新しく選ばれるからである。$n$ 個の束縛子の下にある添字 $i$ の出現は、レベル $n - 1 - i$ の束縛子の名前になる。逆変換すると、その名前をもつ最も近い束縛子はまさにその束縛子であり（外側の他の束縛子はその名前をもたない）、距離は $i$ である。`Free(x)` は $x$ になり、これは経路上のどの束縛子の名前でもないので、`Free(x)` に戻る。(3) は de Bruijn の定理であり、(1) は (2) と (3) から従う。$\\texttt{from\\_named}(\\texttt{to\\_named}(\\texttt{from\\_named}(t))) = \\texttt{from\\_named}(t)$ だからである。"
 
-#: manual/design/debruijn.md:207
+#: manual/design/debruijn.md:209
 msgid "Named and nameless beta agree"
 msgstr "名前付きと名前なしの β 簡約の一致"
 
-#: manual/design/debruijn.md:209
+#: manual/design/debruijn.md:211
 msgid "For named terms, beta is $(\\lambda x.\\,b)\\,a \\to b[x := a]$ with the capture-avoiding substitution of [substitution](substitution.md). Write $\\ulcorner b \\urcorner_{x}$ for the translation of $b$ with $x$ as the innermost binder. Then"
 msgstr "名前付き項に対して、β 簡約は $(\\lambda x.\\,b)\\,a \\to b[x := a]$ であり、[代入](substitution.md) の捕獲回避代入を用いる。$x$ を最も内側の束縛子としたときの $b$ の変換を $\\ulcorner b \\urcorner_{x}$ と書く。このとき"
 
-#: manual/design/debruijn.md:218
+#: manual/design/debruijn.md:220
 msgid "by induction on $b$: an occurrence of $x$ under $k$ inner binders has index $k$ and receives $\\uparrow^{k}_{0}\\ulcorner a \\urcorner$, which is the translation of $a$ placed under those $k$ binders; at the root $\\ulcorner a \\urcorner$ has no free indices, so the shift changes nothing. Renaming of binders by the named substitution is invisible after translation by (3), and the translation lemma of the [substitution design](substitution.md) makes this induction precise. Since the translation also preserves the shape of terms, the beta-only named reducer (`@eval.evaluate` with `@lambda.beta_rule` and `NormalOrder`) and `reduce_once` choose the same leftmost-outermost redex, and one step commutes with translation up to $=_\\alpha$. (`@lambda.normalize` also contracts eta redexes, so its normal forms can be eta-shorter.) The test \"named and debruijn beta reduction agree modulo alpha\" checks an instance that needs renaming on the named side."
 msgstr "$b$ に関する帰納法による：$k$ 個の内側の束縛子の下にある $x$ の出現は添字 $k$ をもち、$\\uparrow^{k}_{0}\\ulcorner a \\urcorner$ を受け取る。これはそれら $k$ 個の束縛子の下に置かれた $a$ の変換である。根では $\\ulcorner a \\urcorner$ は自由な添字を持たないので、シフトは何も変えない。名前付き代入による束縛子の名前替えは、(3) により変換後には見えず、[substitution の設計](substitution.md)の変換補題がこの帰納法を厳密にする。変換は項の形も保つので、β のみの名前付き簡約器（`@lambda.beta_rule` と `NormalOrder` を指定した `@eval.evaluate`）と `reduce_once` は同じ最左最外の簡約基を選び、1 ステップは $=_\\alpha$ を除いて変換と可換である。（`@lambda.normalize` は η 簡約基も縮約するので、その正規形は η についてより短くなりうる。）テスト \"named and debruijn beta reduction agree modulo alpha\" は、名前付き側で名前替えが必要となる例を検査する。"
 
-#: manual/design/debruijn.md:231
+#: manual/design/debruijn.md:233
 msgid "Spines and reduction order"
 msgstr "スパインと簡約順序"
 
-#: manual/design/debruijn.md:233
+#: manual/design/debruijn.md:235
 msgid "`Apply(head, args)` is a curried spine: `Apply(Bind(t), [a, ..rest])` is the redex $(\\lambda.\\,t)\\,a$ applied to `rest`, and a step contracts only the first argument. An empty spine `Apply(h, [])` stands for $h$ itself, so empty applications around the `Bind` are looked through when a redex is matched. `reduce_once` searches root, head, arguments, and enters binders: it is the normal-order strategy of the [eval design](eval.md) on nameless terms, so the normalization theorem applies to `normalize`."
 msgstr "`Apply(head, args)` はカリー化されたスパインである：`Apply(Bind(t), [a, ..rest])` は `rest` に適用された簡約基 $(\\lambda.\\,t)\\,a$ であり、1 ステップは最初の引数のみを縮約する。空のスパイン `Apply(h, [])` は $h$ そのものを表すので、簡約基を照合するときは `Bind` を包む空の適用を透過して見る。`reduce_once` は根、ヘッド、引数を探索し、束縛子の中にも入る：これは名前なし項上の [eval の設計](eval.md) の正規順序戦略であり、したがって正規化定理が `normalize` に適用される。"
 
-#: manual/design/debruijn.md:242
+#: manual/design/debruijn.md:244
 msgid "`validate(from_named(t)) == Ok(())` for every named $t$."
 msgstr "すべての名前付き項 $t$ について `validate(from_named(t)) == Ok(())`。"
 
-#: manual/design/debruijn.md:243
+#: manual/design/debruijn.md:245
 msgid "Round trips (1)–(3) above; `==` on well-scoped `DbTerm` is alpha-equivalence."
 msgstr "上記の往復変換 (1)–(3)。スコープ整合な `DbTerm` 上の `==` は α同値である。"
 
-#: manual/design/debruijn.md:244
+#: manual/design/debruijn.md:246
 msgid "Lemma 2: on well-scoped input `instantiate` succeeds and preserves scope; `reduce_once` never returns `ScopeFailure`, and every reduct is well scoped. On ill-scoped input `reduce_once` and `normalize` return `ScopeFailure` with the error `validate` reports."
 msgstr "補題 2：スコープ整合な入力に対して `instantiate` は成功しスコープを保つ。`reduce_once` は決して `ScopeFailure` を返さず、すべての簡約結果はスコープ整合である。スコープ不整合な入力に対しては、`reduce_once` と `normalize` は `validate` が報告するエラーとともに `ScopeFailure` を返す。"
 
-#: manual/design/debruijn.md:248
+#: manual/design/debruijn.md:250
 msgid "`reduce_once` satisfies the one-redex contract of [rewrite](rewrite.md), with rule name `\"beta\"`."
 msgstr "`reduce_once` は [rewrite](rewrite.md) の単一簡約基契約を満たし、規則名は `\"beta\"` である。"
 
-#: manual/design/debruijn.md:250
+#: manual/design/debruijn.md:252
 msgid "`shift(t, 0, c) == Ok(t)` for every `t` without negative indices, and shifts with one cutoff compose (Lemma 1)."
 msgstr "負の添字を含まないすべての `t` について `shift(t, 0, c) == Ok(t)` であり、同じカットオフのシフトは合成できる（補題 1）。"
 
-#: manual/design/debruijn.md:252
-msgid "`shift` never turns a free index into a bound one: if a free index would fall below its cutoff, it returns `Err(NegativeShift)`."
-msgstr "`shift` は自由インデックスを束縛されたインデックスに変えることはない：自由インデックスがカットオフを下回る場合は `Err(NegativeShift)` を返す。"
+#: manual/design/debruijn.md:254
+msgid "`shift` never turns a free index into a bound one: if a free index would fall below its cutoff, it returns `Err(NegativeShift)`, and it rejects a negative cutoff, which would free bound indices, with `Err(NegativeCutoff)`."
+msgstr "`shift` は自由インデックスを束縛されたインデックスに変えることはない：自由インデックスがカットオフを下回る場合は `Err(NegativeShift)` を返し、束縛されたインデックスを自由にしてしまう負のカットオフは `Err(NegativeCutoff)` で拒否する。"
 
-#: manual/design/debruijn.md:255
+#: manual/design/debruijn.md:258
 msgid "Cost: `shift` and `validate` are linear in the term size. `substitute_bound` costs $O(|t| + m \\cdot |s|)$ for $m$ occurrences of the index, because each inserted copy is shifted. A `reduce_once` step costs one search plus one `instantiate`."
 msgstr "コスト：`shift` と `validate` は項のサイズに対して線形である。添字が $m$ 回出現する場合、挿入される各コピーがシフトされるため、`substitute_bound` のコストは $O(|t| + m \\cdot |s|)$ である。`reduce_once` の 1 ステップのコストは探索 1 回と `instantiate` 1 回である。"
 
-#: manual/design/debruijn.md:262
+#: manual/design/debruijn.md:265
 msgid "**Levels instead of indices in syntax.** Levels make weakening free but substitution under binders more complex; indices are the standard for syntax, and levels are used where they help (NbE)."
 msgstr "**構文で添字の代わりにレベルを使う。** レベルを使うと弱化はコストなしになるが、束縛子の下での代入が複雑になる。構文には添字が標準であり、レベルは役立つ場面（NbE）で用いる。"
 
-#: manual/design/debruijn.md:265
+#: manual/design/debruijn.md:268
 msgid "**Fully nameless free variables.** Free variables are kept as names so that open terms from users and downstream ASTs need no global variable numbering, and so that `to_named` can restore them exactly."
 msgstr "**完全に名前なしの自由変数。** 自由変数は名前のまま保持される。これにより、ユーザーや下流の AST からの開いた項に大域的な変数番号付けが不要となり、`to_named` がそれらを正確に復元できる。"
 
-#: manual/design/debruijn.md:268
+#: manual/design/debruijn.md:271
 msgid "**Explicit substitutions.** A calculus with suspended substitutions avoids repeated shifting but complicates every consumer; the NbE package provides the efficient path instead."
 msgstr "**明示的代入。** 保留された代入をもつ計算体系は繰り返しのシフトを避けられるが、すべての利用側を複雑にする。代わりに効率的な経路は NbE パッケージが提供する。"
 
-#: manual/design/debruijn.md:274
+#: manual/design/debruijn.md:277
 msgid "Binder names are not preserved: `to_named` chooses `x`, `x_1`, …."
 msgstr "束縛子名は保存されない：`to_named` は `x`、`x_1`、… を選ぶ。"
 
-#: manual/design/debruijn.md:275
+#: manual/design/debruijn.md:278
 msgid "`shift`, `substitute_bound` and `instantiate` operate on open terms and do not detect dangling indices; the reducers and `validate` do."
 msgstr "`shift`、`substitute_bound`、`instantiate` は開いた項を扱い、ぶら下がったインデックスを検出しない。簡約器と `validate` は検出する。"
 
-#: manual/design/debruijn.md:277
+#: manual/design/debruijn.md:280
 msgid "An empty application `Apply(h, [])` is read as `h` when a redex is matched, so it never hides a redex, but `reduce_once` leaves the node in place, whereas [utlc/nbe](utlc/nbe.md) drops it from its normal forms."
 msgstr "空の適用 `Apply(h, [])` は簡約基の照合で `h` と読まれるので、決して簡約基を隠さない。ただし `reduce_once` はそのノードを残し、[utlc/nbe](utlc/nbe.md) は正規形からそれを取り除く。"
 
-#: manual/design/debruijn.md:280
+#: manual/design/debruijn.md:283
 msgid "Only beta is implemented; there is no eta rule for De Bruijn terms."
 msgstr "実装されているのは β のみであり、De Bruijn 項に対する η 規則はない。"
 
-#: manual/design/debruijn.md:281
+#: manual/design/debruijn.md:284
 msgid "Values are opaque; their contents are never shifted."
 msgstr "値は不透明であり、その内容がシフトされることはない。"
 

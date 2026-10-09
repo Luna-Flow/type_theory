@@ -330,115 +330,119 @@ msgstr "`DbTerm::equal` 按结构比较两个项。"
 msgid "`ScopeError` describes an index that does not refer to a binder."
 msgstr "`ScopeError` 描述一个不指向任何绑定子的索引。"
 
-#: manual/api/debruijn.md:79
+#: manual/api/debruijn.md:80
 msgid "`UnboundIndex(index, depth)`: `Bound(index)` occurs under only `depth` binders."
 msgstr "`UnboundIndex(index, depth)`：`Bound(index)` 仅出现在 `depth` 个绑定子之下。"
 
-#: manual/api/debruijn.md:81
+#: manual/api/debruijn.md:82
 msgid "`NegativeIndex(index)`: a negative index."
 msgstr "`NegativeIndex(index)`：负索引。"
 
-#: manual/api/debruijn.md:82
+#: manual/api/debruijn.md:83
 msgid "`NegativeShift(index, delta, cutoff)`: shifting the free `Bound(index)` by `delta` would move it below `cutoff`, the effective cutoff at the occurrence, where it would be captured by an enclosing binder or become negative."
 msgstr "`NegativeShift(index, delta, cutoff)`：将自由的 `Bound(index)` 移位 `delta` 会使其低于 `cutoff`（该出现处的有效截断值），从而被外围绑定子捕获或变为负数。"
 
 #: manual/api/debruijn.md:87
+msgid "`NegativeCutoff(cutoff)`: `shift` was called with a negative `cutoff`."
+msgstr "`NegativeCutoff(cutoff)`：调用 `shift` 时给出了负的 `cutoff`。"
+
+#: manual/api/debruijn.md:89
 msgid "Conversion and validation"
 msgstr "转换与验证"
 
-#: manual/api/debruijn.md:91
+#: manual/api/debruijn.md:93
 msgid "`from_named` converts named syntax to De Bruijn syntax."
 msgstr "`from_named` 将具名语法转换为 De Bruijn 语法。"
 
-#: manual/api/debruijn.md:97
+#: manual/api/debruijn.md:99
 msgid "A variable bound by an enclosing `Bind` becomes `Bound(i)`, where `i` counts the binders between the occurrence and its binder (the nearest binder of that name wins). Free variables become `Free`. The result is always well scoped, and alpha-equivalent named terms give equal results."
 msgstr "由外围 `Bind` 绑定的变量变为 `Bound(i)`，其中 `i` 计数该出现与其绑定子之间的绑定子个数（同名时最近的绑定子胜出）。自由变量变为 `Free`。结果总是良作用域的，且 α-等价的具名项给出相等的结果。"
 
-#: manual/api/debruijn.md:104
+#: manual/api/debruijn.md:106
 msgid "`to_named` converts De Bruijn syntax back to named syntax with deterministic binder names."
 msgstr "`to_named` 将 De Bruijn 语法转换回具名语法，并使用确定性的绑定子名字。"
 
-#: manual/api/debruijn.md:111
+#: manual/api/debruijn.md:113
 msgid "Binders are named `x`, `x_1`, `x_2`, …: each one gets the first name of that sequence that is neither a free name of the term nor the name of an enclosing binder. Returns `Err(NegativeIndex)` or `Err(UnboundIndex)` for an ill-scoped term. For a well-scoped `d`, `from_named(to_named(d))` is `d`; for a named `t`, `to_named(from_named(t))` is alpha-equivalent to `t`."
 msgstr "绑定子依次命名为 `x`、`x_1`、`x_2`、…：每个绑定子取该序列中第一个既不是项的自由名字、也不是外围绑定子名字的名字。对作用域不良的项返回 `Err(NegativeIndex)` 或 `Err(UnboundIndex)`。对良作用域的 `d`，`from_named(to_named(d))` 就是 `d`；对具名项 `t`，`to_named(from_named(t))` 与 `t` α-等价。"
 
-#: manual/api/debruijn.md:134
+#: manual/api/debruijn.md:136
 msgid "The binder becomes `x_1` because `x` is a free name of the term."
 msgstr "绑定子变为 `x_1`，因为 `x` 是该项的自由名字。"
 
-#: manual/api/debruijn.md:138
+#: manual/api/debruijn.md:140
 msgid "`validate` checks that every bound index refers to an enclosing binder."
 msgstr "`validate` 检查每个约束索引都指向某个外围绑定子。"
 
-#: manual/api/debruijn.md:144
+#: manual/api/debruijn.md:146
 msgid "Returns `Ok(())` for a well-scoped term and otherwise the first error found in pre-order."
 msgstr "对良作用域项返回 `Ok(())`，否则返回按前序遍历找到的第一个错误。"
 
-#: manual/api/debruijn.md:156
+#: manual/api/debruijn.md:158
 msgid "Index operations"
 msgstr "索引操作"
 
-#: manual/api/debruijn.md:160
+#: manual/api/debruijn.md:162
 msgid "`shift` adds `delta` to every index that is free relative to a cutoff."
 msgstr "`shift` 将 `delta` 加到每个相对于截断值为自由的索引上。"
 
-#: manual/api/debruijn.md:166
-msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. The shift is defined when no such index falls below the cutoff, that is, there is no `i >= cutoff + k` with `i + delta < cutoff + k`. Returns `Err(NegativeShift)` if an index would fall below the cutoff, where it would be captured by an enclosing binder or become negative, and `Err(NegativeIndex)` if the input contains a negative index."
-msgstr "`shift(t, delta, cutoff)` 即操作 $\\uparrow^{delta}_{cutoff}$：在 `k` 个绑定子之下，索引 `i >= cutoff + k` 变为 `i + delta`，较小的索引保持不变。当没有这样的索引落到截断值之下时，即不存在满足 `i + delta < cutoff + k` 的 `i >= cutoff + k` 时，移位才有定义。若某索引会落到截断值之下（从而被外围绑定子捕获或变为负数）则返回 `Err(NegativeShift)`，若输入包含负索引则返回 `Err(NegativeIndex)`。"
+#: manual/api/debruijn.md:168
+msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. It requires `cutoff >= 0`: a negative cutoff would treat indices bound inside `t` as free, so `shift` returns `Err(NegativeCutoff(cutoff~))` for it before looking at `t`, even when `t` has no index at all. The shift is defined when no index falls below the cutoff, that is, there is no `i >= cutoff + k` with `i + delta < cutoff + k`. Returns `Err(NegativeShift)` if an index would fall below the cutoff, where it would be captured by an enclosing binder or become negative, and `Err(NegativeIndex)` if the input contains a negative index."
+msgstr "`shift(t, delta, cutoff)` 即操作 $\\uparrow^{delta}_{cutoff}$：在 `k` 个绑定子之下，索引 `i >= cutoff + k` 变为 `i + delta`，较小的索引保持不变。它要求 `cutoff >= 0`：负的截断值会把 `t` 内部约束的索引当作自由索引，因此 `shift` 在查看 `t` 之前就对其返回 `Err(NegativeCutoff(cutoff~))`，即使 `t` 中根本没有索引。当没有索引落到截断值之下时，即不存在满足 `i + delta < cutoff + k` 的 `i >= cutoff + k` 时，移位才有定义。若某索引会落到截断值之下（从而被外围绑定子捕获或变为负数）则返回 `Err(NegativeShift)`，若输入包含负索引则返回 `Err(NegativeIndex)`。"
 
-#: manual/api/debruijn.md:176
+#: manual/api/debruijn.md:181
 msgid "`substitute_bound` replaces a free index by a term."
 msgstr "`substitute_bound` 用一个项替换一个自由索引。"
 
-#: manual/api/debruijn.md:182
+#: manual/api/debruijn.md:187
 msgid "`substitute_bound(t, j, s)` is $[j \\mapsto s]\\,t$: under `k` binders, `Bound(j + k)` is replaced by `s` shifted up by `k`, so that the free indices of `s` keep pointing at the same binders. Other indices are unchanged; the binder count of the result is not adjusted. Returns `Err(NegativeIndex)` for a negative `j` or a negative index in `t`. It does not check for unbound indices; use `validate` for that."
 msgstr "`substitute_bound(t, j, s)` 即 $[j \\mapsto s]\\,t$：在 `k` 个绑定子之下，`Bound(j + k)` 被替换为向上移位 `k` 的 `s`，使 `s` 的自由索引仍指向相同的绑定子。其他索引不变；结果的绑定子计数不作调整。对负的 `j` 或 `t` 中的负索引返回 `Err(NegativeIndex)`。它不检查未绑定的索引；请使用 `validate` 进行检查。"
 
-#: manual/api/debruijn.md:191
+#: manual/api/debruijn.md:196
 msgid "`instantiate` opens a binder body with an argument."
 msgstr "`instantiate` 用一个实参打开绑定子的体。"
 
-#: manual/api/debruijn.md:197
+#: manual/api/debruijn.md:202
 msgid "`instantiate(body, arg)` computes $\\uparrow^{-1}_0\\big([0 \\mapsto \\uparrow^{1}_0 arg]\\,body\\big)$, the result of the beta step $(\\lambda.\\,body)\\,arg$. On well-scoped input it never returns an error."
 msgstr "`instantiate(body, arg)` 计算 $\\uparrow^{-1}_0\\big([0 \\mapsto \\uparrow^{1}_0 arg]\\,body\\big)$，即 β 步 $(\\lambda.\\,body)\\,arg$ 的结果。在良作用域输入上它从不返回错误。"
 
-#: manual/api/debruijn.md:230
+#: manual/api/debruijn.md:238
 msgid "Reduction"
 msgstr "归约"
 
-#: manual/api/debruijn.md:234
+#: manual/api/debruijn.md:242
 msgid "`DbStepResult[T]` is the outcome of one De Bruijn reduction attempt."
 msgstr "`DbStepResult[T]` 是一次 De Bruijn 归约尝试的结果。"
 
-#: manual/api/debruijn.md:245
+#: manual/api/debruijn.md:253
 msgid "`NoStep` and `Reduced` have the meaning of `@rewrite.StepResult`; the rule name is always `\"beta\"`. `ScopeFailure` reports that the input is ill scoped: `reduce_once` validates the whole term before searching for a redex, and the error is the first one `validate` finds. No step is taken in that case."
 msgstr "`NoStep` 和 `Reduced` 的含义与 `@rewrite.StepResult` 相同；规则名总是 `\"beta\"`。`ScopeFailure` 报告输入的作用域不良：`reduce_once` 在搜索可约式之前先校验整个项，错误是 `validate` 找到的第一个错误。此时不进行任何一步归约。"
 
-#: manual/api/debruijn.md:253
+#: manual/api/debruijn.md:261
 msgid "`reduce_once` performs one leftmost-outermost beta step."
 msgstr "`reduce_once` 执行一步最左最外 β 归约。"
 
-#: manual/api/debruijn.md:259
+#: manual/api/debruijn.md:267
 msgid "A redex is `Apply(Bind(body), [a, ..rest])`; it becomes `instantiate(body, a)`, applied to `rest` if `rest` is not empty. An empty application `Apply(h, [])` is read as `h`, so a head wrapped in empty applications, as in `Apply(Apply(Bind(body), []), [a])`, still forms a redex; `Apply(Bind(body), [])` alone has no argument and is not one. The search order is the root, then the head, then the arguments from left to right, and binder bodies are entered."
 msgstr "可约式是 `Apply(Bind(body), [a, ..rest])`；它变为 `instantiate(body, a)`，若 `rest` 非空则再应用于 `rest`。空应用 `Apply(h, [])` 被读作 `h`，因此被空应用包裹的头部，如 `Apply(Apply(Bind(body), []), [a])`，仍然构成可约式；单独的 `Apply(Bind(body), [])` 没有参数，不是可约式。搜索顺序是根，然后是头部，然后从左到右是各参数，并且会进入绑定子的体。"
 
-#: manual/api/debruijn.md:267
+#: manual/api/debruijn.md:275
 msgid "`reduce_once` validates the whole term first, as `validate` does: an ill-scoped term gives `ScopeFailure` with the first error in pre-order, wherever the bad index is, for example `ScopeFailure(NegativeIndex(index=-1))` for `Bind(Bound(-1))` and `ScopeFailure(UnboundIndex(index=5, depth=1))` for `(λ. 5) 1`. A well-scoped term never gives `ScopeFailure`."
 msgstr "`reduce_once` 先像 `validate` 一样验证整个项：作用域不良的项无论坏索引在何处，都会得到带有先序中第一个错误的 `ScopeFailure`，例如 `Bind(Bound(-1))` 得到 `ScopeFailure(NegativeIndex(index=-1))`，`(λ. 5) 1` 得到 `ScopeFailure(UnboundIndex(index=5, depth=1))`。良作用域的项永远不会得到 `ScopeFailure`。"
 
-#: manual/api/debruijn.md:275
+#: manual/api/debruijn.md:283
 msgid "`DbNormalizationResult[T]` is the outcome of bounded De Bruijn normalization."
 msgstr "`DbNormalizationResult[T]` 是有界 De Bruijn 范式化的结果。"
 
-#: manual/api/debruijn.md:286
+#: manual/api/debruijn.md:294
 msgid "`ScopeFailure` carries the term that was found ill scoped, the error and the number of steps taken before it; `normalize` reports it only for its input, with `steps=0`."
 msgstr "`ScopeFailure` 携带被发现作用域不良的项、错误以及在此之前已执行的步数；`normalize` 只对其输入报告它，此时 `steps=0`。"
 
-#: manual/api/debruijn.md:292
+#: manual/api/debruijn.md:300
 msgid "`normalize` repeats `reduce_once` until no step applies, a step fails, or a step limit is reached."
 msgstr "`normalize` 重复执行 `reduce_once`，直到没有可执行的步骤、某一步失败或达到步数上限。"
 
-#: manual/api/debruijn.md:299
+#: manual/api/debruijn.md:307
 msgid "It has the step-count contract of `@rewrite.normalize`: at most `max_steps` steps, and one extra step attempt to classify the final term. It validates the input once: an ill-scoped term gives `ScopeFailure(term, error, steps=0)` without any step. Reducts of a well-scoped term are well scoped (see the [debruijn design](../design/debruijn.md)), so the later steps are not validated again, and the result is `ScopeFailure` exactly when the input is ill scoped."
 msgstr "它遵循 `@rewrite.normalize` 的步数契约：至多 `max_steps` 步，再加一次额外的步进尝试来判定最终项。输入只验证一次：作用域不良的项不执行任何步骤，直接得到 `ScopeFailure(term, error, steps=0)`。良作用域项的归约结果仍是良作用域的（见 [debruijn 设计](../design/debruijn.md)），因此后续步骤不再重新验证，且结果为 `ScopeFailure` 当且仅当输入作用域不良。"
 
@@ -1451,7 +1455,7 @@ msgstr "`generic_top_down_once` 满足 [rewrite 设计](rewrite.md)中的单可�
 
 #: manual/design/adapter.md:81
 #: manual/design/core.md:125
-#: manual/design/debruijn.md:110
+#: manual/design/debruijn.md:112
 #: manual/design/eval.md:134
 #: manual/design/rewrite.md:78
 #: manual/design/stlc.md:67
@@ -1512,7 +1516,7 @@ msgstr "下游变量类型通过单射（不同变量映射到不同名）转换
 
 #: manual/design/adapter.md:132
 #: manual/design/core.md:168
-#: manual/design/debruijn.md:240
+#: manual/design/debruijn.md:242
 #: manual/design/eval.md:203
 #: manual/design/rewrite.md:182
 #: manual/design/stlc.md:332
@@ -1565,7 +1569,7 @@ msgstr "下游 adapter 应为自己的节点种类添加 (V1)–(V5) 的测试�
 
 #: manual/design/adapter.md:147
 #: manual/design/core.md:182
-#: manual/design/debruijn.md:260
+#: manual/design/debruijn.md:263
 #: manual/design/eval.md:226
 #: manual/design/rewrite.md:207
 #: manual/design/stlc.md:353
@@ -1590,7 +1594,7 @@ msgstr "**在运行时检查定律。** 这些定律是关于所有节点的等�
 
 #: manual/design/adapter.md:158
 #: manual/design/core.md:195
-#: manual/design/debruijn.md:272
+#: manual/design/debruijn.md:275
 #: manual/design/eval.md:240
 #: manual/design/rewrite.md:219
 #: manual/design/stlc.md:366
@@ -1863,198 +1867,198 @@ msgid "Shifting"
 msgstr "移位"
 
 #: manual/design/debruijn.md:64
-msgid "$\\uparrow^{d}_{c}\\,t$ adds $d$ to every index of $t$ that is free relative to cutoff $c$:"
-msgstr "$\\uparrow^{d}_{c}\\,t$ 给 $t$ 中相对于截断点 $c$ 自由的每个索引加上 $d$："
+msgid "$\\uparrow^{d}_{c}\\,t$ adds $d$ to every index of $t$ that is free relative to cutoff $c \\ge 0$:"
+msgstr "$\\uparrow^{d}_{c}\\,t$ 给 $t$ 中相对于截断点 $c \\ge 0$ 自由的每个索引加上 $d$："
 
 #: manual/design/debruijn.md:76
 msgid "The shift is defined when no index crosses its cutoff: there is no index $i \\ge c$ with $i + d < c$, where $c$ is the cutoff at that occurrence. Such an index would be captured by an enclosing binder, or become negative. A shift with $d \\ge 0$ is always defined."
 msgstr "当没有索引越过其截断点时移位才有定义：不存在满足 $i + d < c$ 的索引 $i \\ge c$，其中 $c$ 是该出现处的截断点。这样的索引会被外围绑定子捕获，或变为负数。$d \\ge 0$ 的移位总是有定义的。"
 
 #: manual/design/debruijn.md:81
-msgid "`shift(t, d, c)` implements it by carrying the binder depth $k$ and testing $i \\ge c + k$, which unfolds the recursion on $c$."
-msgstr "`shift(t, d, c)` 通过携带绑定子深度 $k$ 并检验 $i \\ge c + k$ 来实现它，这展开了对 $c$ 的递归。"
+msgid "`shift(t, d, c)` implements it by carrying the binder depth $k$ and testing $i \\ge c + k$, which unfolds the recursion on $c$. A negative $c$ is outside the domain: it would count indices bound inside $t$ as free, so `shift` rejects it with `NegativeCutoff` before looking at $t$."
+msgstr "`shift(t, d, c)` 通过携带绑定子深度 $k$ 并检验 $i \\ge c + k$ 来实现它，这展开了对 $c$ 的递归。负的 $c$ 不在定义域内：它会把 $t$ 内部约束的索引算作自由索引，因此 `shift` 在查看 $t$ 之前就以 `NegativeCutoff` 拒绝它。"
 
-#: manual/design/debruijn.md:84
+#: manual/design/debruijn.md:86
 msgid "Substitution of an index"
 msgstr "索引的代换"
 
-#: manual/design/debruijn.md:86
+#: manual/design/debruijn.md:88
 msgid "$[j \\mapsto s]\\,t$ replaces the free index $j$ by $s$:"
 msgstr "$[j \\mapsto s]\\,t$ 用 $s$ 替换自由索引 $j$："
 
-#: manual/design/debruijn.md:93
+#: manual/design/debruijn.md:95
 msgid "`substitute_bound` unfolds the binder case: under $k$ binders it replaces index $j + k$ by $\\uparrow^{k}_{0} s$. The two agree because shifts with the same cutoff compose (Lemma 1 below): $\\uparrow^{1}_{0}\\cdots\\uparrow^{1}_{0} s = \\uparrow^{k}_{0} s$."
 msgstr "`substitute_bound` 展开了绑定子情形：在 $k$ 个绑定子之下，它把索引 $j + k$ 替换为 $\\uparrow^{k}_{0} s$。两者一致，因为截断点相同的移位可以复合（下文引理 1）：$\\uparrow^{1}_{0}\\cdots\\uparrow^{1}_{0} s = \\uparrow^{k}_{0} s$。"
 
-#: manual/design/debruijn.md:98
+#: manual/design/debruijn.md:100
 msgid "Beta reduction"
 msgstr "Beta 归约"
 
-#: manual/design/debruijn.md:104
+#: manual/design/debruijn.md:106
 msgid "The argument is shifted up because it moves under the binder of $t$; after the substitution the binder is removed, so all remaining free indices of the body are shifted down. This is `instantiate(t, s)`.[^tapl]"
 msgstr "参数被向上移位，因为它移到了 $t$ 的绑定子之下；代换之后该绑定子被移除，因此体中剩余的所有自由索引都向下移位。这就是 `instantiate(t, s)`。[^tapl]"
 
-#: manual/design/debruijn.md:108
+#: manual/design/debruijn.md:110
 msgid "B. C. Pierce, *Types and Programming Languages*, MIT Press 2002, §6.2–6.3."
 msgstr "B. C. Pierce, *Types and Programming Languages*, MIT Press 2002, §6.2–6.3."
 
-#: manual/design/debruijn.md:112
+#: manual/design/debruijn.md:114
 msgid "Shifting is checked, not assumed"
 msgstr "移位是被检查的，而非被假定的"
 
-#: manual/design/debruijn.md:114
+#: manual/design/debruijn.md:116
 msgid "**Problem.** A downward shift can move a free index below its cutoff. Below zero the index refers to nothing; between zero and the cutoff it is captured by an enclosing binder. Either way the result is a silently wrong term."
 msgstr "**问题。** 向下移位可能把自由索引移到其截断点之下。低于零时，该索引不指向任何东西；介于零与截断点之间时，它被外围绑定子捕获。两种情况下结果都是悄无声息的错误项。"
 
-#: manual/design/debruijn.md:118
-msgid "**Choice.** `shift` returns `Err(NegativeShift)` when a free index would cross its cutoff, and `shift`, `substitute_bound`, `instantiate`, `validate` and `to_named` report `NegativeIndex` for any negative index they meet. The lemmas below show that the error cases are unreachable from well-scoped input, so the `Result` costs nothing for correct callers and turns a silent corruption into data for incorrect ones. This follows the library rule that expected failures at public boundaries are structured values."
-msgstr "**选择。** 当某个自由索引会越过其截断点时，`shift` 返回 `Err(NegativeShift)`，并且 `shift`、`substitute_bound`、`instantiate`、`validate` 和 `to_named` 在遇到任何负索引时都报告 `NegativeIndex`。下面的引理表明，从良作用域的输入出发不可能到达错误情形，因此 `Result` 对正确的调用者没有代价，而对错误的调用者则把无声的损坏变成数据。这遵循本库的规则：公共边界上预期的失败是结构化的值。"
+#: manual/design/debruijn.md:120
+msgid "**Choice.** `shift` returns `Err(NegativeShift)` when a free index would cross its cutoff and `Err(NegativeCutoff)` for a negative cutoff, and `shift`, `substitute_bound`, `instantiate`, `validate` and `to_named` report `NegativeIndex` for any negative index they meet. The lemmas below show that the error cases are unreachable from well-scoped input, so the `Result` costs nothing for correct callers and turns a silent corruption into data for incorrect ones. This follows the library rule that expected failures at public boundaries are structured values."
+msgstr "**选择。** 当某个自由索引会越过其截断点时，`shift` 返回 `Err(NegativeShift)`，对负的截断点返回 `Err(NegativeCutoff)`；并且 `shift`、`substitute_bound`、`instantiate`、`validate` 和 `to_named` 在遇到任何负索引时都报告 `NegativeIndex`。下面的引理表明，从良作用域的输入出发不可能到达错误情形，因此 `Result` 对正确的调用者没有代价，而对错误的调用者则把无声的损坏变成数据。这遵循本库的规则：公共边界上预期的失败是结构化的值。"
 
-#: manual/design/debruijn.md:127
+#: manual/design/debruijn.md:129
 msgid "The index operations work on open terms, so they cannot tell a dangling (too large) index from one that points at a binder outside the term: `instantiate` shifts it like a free index. The reducers work on whole terms and validate them. `reduce_once` runs `validate` before searching and returns its error as `ScopeFailure`; `normalize` validates its input once, and Lemma 2 below shows that the later terms need no check. The search itself is a private function that is also applied to binder bodies, whose indices may point at enclosing binders."
 msgstr "索引操作作用于开放项，因此无法区分悬空（过大）索引与指向项外绑定子的索引：`instantiate` 把它当作自由索引来移位。归约器作用于整个项并对其进行验证。`reduce_once` 在搜索前运行 `validate`，并把其错误作为 `ScopeFailure` 返回；`normalize` 只验证一次输入，下面的引理 2 说明后续的项无需检查。搜索本身是一个私有函数，也会应用于绑定子的体，因为体中的索引可能指向外层绑定子。"
 
-#: manual/design/debruijn.md:136
+#: manual/design/debruijn.md:138
 msgid "Instantiation never fails on well-scoped input"
 msgstr "实例化在良作用域输入上从不失败"
 
-#: manual/design/debruijn.md:138
+#: manual/design/debruijn.md:140
 msgid "**Lemma 1 (shift composition).** For $a, b \\ge 0$: $\\uparrow^{a}_{c}\\uparrow^{b}_{c} t = \\uparrow^{a+b}_{c} t$, and $\\uparrow^{0}_{c} t = t$."
 msgstr "**引理 1（移位复合）。** 对 $a, b \\ge 0$：$\\uparrow^{a}_{c}\\uparrow^{b}_{c} t = \\uparrow^{a+b}_{c} t$，且 $\\uparrow^{0}_{c} t = t$。"
 
-#: manual/design/debruijn.md:142
+#: manual/design/debruijn.md:144
 msgid "On an index $i$ relative to the current cutoff: if $i < c$ both sides leave it; if $i \\ge c$ then $i + b \\ge c$, so"
 msgstr "对相对于当前截断值的索引 $i$：若 $i < c$，两边都保持不变；若 $i \\ge c$，则 $i + b \\ge c$，因此"
 
-#: manual/design/debruijn.md:149
+#: manual/design/debruijn.md:151
 msgid "The binder case raises the cutoff on both sides alike. $\\square$"
 msgstr "绑定子情形在两边同样地提升截断值。$\\square$"
 
-#: manual/design/debruijn.md:151
+#: manual/design/debruijn.md:153
 msgid "**Lemma 2 (safety of the downward shift).** Let $\\lambda.\\,t$ and $s$ be well scoped at depth $n$. Then every free index of $u = [\\,0 \\mapsto \\uparrow^{1}_{0} s\\,]\\,t$ lies in $\\{1, \\dots, n\\}$, so $\\uparrow^{-1}_{0} u$ succeeds and is well scoped at depth $n$."
 msgstr "**引理 2（向下移位的安全性）。** 设 $\\lambda.\\,t$ 与 $s$ 在深度 $n$ 下良作用域。则 $u = [\\,0 \\mapsto \\uparrow^{1}_{0} s\\,]\\,t$ 的每个自由索引都位于 $\\{1, \\dots, n\\}$ 中，因此 $\\uparrow^{-1}_{0} u$ 成功，且在深度 $n$ 下良作用域。"
 
-#: manual/design/debruijn.md:156
+#: manual/design/debruijn.md:158
 msgid "The body $t$ is well scoped at depth $n + 1$, so its free indices lie in $\\{0, \\dots, n\\}$. Follow a free occurrence in $t$ under $k$ inner binders:"
 msgstr "体 $t$ 在深度 $n + 1$ 下良作用域，因此其自由索引位于 $\\{0, \\dots, n\\}$ 中。考察 $t$ 中位于 $k$ 个内层绑定子之下的一个自由出现："
 
-#: manual/design/debruijn.md:167
+#: manual/design/debruijn.md:169
 msgid "No free index $0$ remains. Under $k$ binders the shift by $-1$ has cutoff $k$ and moves the index $k + m$ with $m \\ge 1$ to $k + m - 1 \\ge k$, so no index crosses its cutoff, and the root-relative free indices are mapped $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$. $\\square$"
 msgstr "不再有自由索引 $0$。在 $k$ 个绑定子之下，按 $-1$ 的移位的截断点为 $k$，它把满足 $m \\ge 1$ 的索引 $k + m$ 移到 $k + m - 1 \\ge k$，因此没有索引越过其截断点，且相对于根的自由索引按 $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$ 映射。$\\square$"
 
-#: manual/design/debruijn.md:172
+#: manual/design/debruijn.md:174
 msgid "Hence `instantiate` and `reduce_once` return no `ScopeError` on well-scoped input, and a reduct of a well-scoped term is well scoped (subject reduction for scope). Together with the validation of the input, `normalize` returns `ScopeFailure` exactly when its input is ill scoped, and then with `steps=0`: `Bind(Bound(-1))` gives `NegativeIndex(index=-1)` and `(λ. 5) 1` gives `UnboundIndex(index=5, depth=1)`."
 msgstr "因此，`instantiate` 与 `reduce_once` 在良作用域输入上不会返回 `ScopeError`，且良作用域项的归约结果仍是良作用域的（作用域的主体归约性）。结合对输入的验证，`normalize` 返回 `ScopeFailure` 当且仅当其输入作用域不良，此时 `steps=0`：`Bind(Bound(-1))` 给出 `NegativeIndex(index=-1)`，`(λ. 5) 1` 给出 `UnboundIndex(index=5, depth=1)`。"
 
-#: manual/design/debruijn.md:179
+#: manual/design/debruijn.md:181
 msgid "The detailed proofs, including the commutation of shifts with different cutoffs and the De Bruijn substitution lemma, are in the attachment:"
 msgstr "详细证明，包括不同截断值下移位的交换性以及 De Bruijn 代换引理，见附件："
 
-#: manual/design/debruijn.md:182
+#: manual/design/debruijn.md:184
 msgid "[Index lemmas for De Bruijn terms](../../attachments/design_debruijn_index-lemmas.typ)"
 msgstr "[De Bruijn 项的索引引理](../../attachments/design_debruijn_index-lemmas.typ)"
 
-#: manual/design/debruijn.md:184
+#: manual/design/debruijn.md:186
 msgid "Exact translations"
 msgstr "精确的互译"
 
-#: manual/design/debruijn.md:186
+#: manual/design/debruijn.md:188
 msgid "`from_named` keeps a stack of binder names and translates an occurrence of $x$ to the distance to the nearest binder of $x$, or to `Free(x)` if there is none. `to_named` invents a binder name with `fresh_name(\"x\", U)`, where $U$ contains the free names of the term and the names of the enclosing binders."
 msgstr "`from_named` 维护一个绑定子名称栈，把 $x$ 的一次出现翻译为到最近的 $x$ 绑定子的距离；若不存在这样的绑定子，则翻译为 `Free(x)`。`to_named` 用 `fresh_name(\"x\", U)` 生成绑定子名称，其中 $U$ 包含项的自由名称和外围绑定子的名称。"
 
-#: manual/design/debruijn.md:191
+#: manual/design/debruijn.md:193
 msgid "**Theorem (round trips).**"
 msgstr "**定理（往返）。**"
 
-#: manual/design/debruijn.md:193
+#: manual/design/debruijn.md:195
 msgid "$\\texttt{to\\_named}(\\texttt{from\\_named}(t)) =_\\alpha t$ for every named $t$."
 msgstr "对每个具名项 $t$，$\\texttt{to\\_named}(\\texttt{from\\_named}(t)) =_\\alpha t$。"
 
-#: manual/design/debruijn.md:194
+#: manual/design/debruijn.md:196
 msgid "$\\texttt{from\\_named}(\\texttt{to\\_named}(d)) = d$ for every well-scoped $d$."
 msgstr "对每个良作用域的 $d$，$\\texttt{from\\_named}(\\texttt{to\\_named}(d)) = d$。"
 
-#: manual/design/debruijn.md:197
+#: manual/design/debruijn.md:199
 msgid "For (2): along any path from the root, the names chosen by `to_named` are pairwise distinct and distinct from all free names, because each is chosen fresh for a set that contains the free names and every enclosing binder name. An occurrence of index $i$ under $n$ binders becomes the name of the binder at level $n - 1 - i$; translating back, the nearest binder with that name is that same binder (no other enclosing binder has the name), at distance $i$. A `Free(x)` becomes $x$, which is not the name of any binder on the path, so it translates back to `Free(x)`. (3) is de Bruijn's theorem; (1) follows from (2) and (3), since $\\texttt{from\\_named}(\\texttt{to\\_named}(\\texttt{from\\_named}(t))) = \\texttt{from\\_named}(t)$."
 msgstr "对于 (2)：沿从根出发的任一路径，`to_named` 选择的名称两两不同，且与所有自由名称不同，因为每个名称都是针对一个包含自由名称和每个外围绑定子名称的集合新选取的。位于 $n$ 个绑定子之下的索引 $i$ 的出现变为第 $n - 1 - i$ 层绑定子的名称；翻译回来时，具有该名称的最近绑定子正是同一个绑定子（其他外围绑定子都不具有该名称），距离为 $i$。`Free(x)` 变为 $x$，它不是路径上任何绑定子的名称，因此翻译回 `Free(x)`。(3) 是 de Bruijn 定理；(1) 由 (2) 和 (3) 得出，因为 $\\texttt{from\\_named}(\\texttt{to\\_named}(\\texttt{from\\_named}(t))) = \\texttt{from\\_named}(t)$。"
 
-#: manual/design/debruijn.md:207
+#: manual/design/debruijn.md:209
 msgid "Named and nameless beta agree"
 msgstr "具名与无名的 beta 归约一致"
 
-#: manual/design/debruijn.md:209
+#: manual/design/debruijn.md:211
 msgid "For named terms, beta is $(\\lambda x.\\,b)\\,a \\to b[x := a]$ with the capture-avoiding substitution of [substitution](substitution.md). Write $\\ulcorner b \\urcorner_{x}$ for the translation of $b$ with $x$ as the innermost binder. Then"
 msgstr "对于具名项，beta 归约为 $(\\lambda x.\\,b)\\,a \\to b[x := a]$，其中使用 [代换](substitution.md) 中避免捕获的代换。记 $\\ulcorner b \\urcorner_{x}$ 为以 $x$ 为最内层绑定子时 $b$ 的翻译。于是"
 
-#: manual/design/debruijn.md:218
+#: manual/design/debruijn.md:220
 msgid "by induction on $b$: an occurrence of $x$ under $k$ inner binders has index $k$ and receives $\\uparrow^{k}_{0}\\ulcorner a \\urcorner$, which is the translation of $a$ placed under those $k$ binders; at the root $\\ulcorner a \\urcorner$ has no free indices, so the shift changes nothing. Renaming of binders by the named substitution is invisible after translation by (3), and the translation lemma of the [substitution design](substitution.md) makes this induction precise. Since the translation also preserves the shape of terms, the beta-only named reducer (`@eval.evaluate` with `@lambda.beta_rule` and `NormalOrder`) and `reduce_once` choose the same leftmost-outermost redex, and one step commutes with translation up to $=_\\alpha$. (`@lambda.normalize` also contracts eta redexes, so its normal forms can be eta-shorter.) The test \"named and debruijn beta reduction agree modulo alpha\" checks an instance that needs renaming on the named side."
 msgstr "对 $b$ 归纳：位于 $k$ 个内层绑定子之下的 $x$ 的出现具有索引 $k$，并接收 $\\uparrow^{k}_{0}\\ulcorner a \\urcorner$，即置于这 $k$ 个绑定子之下的 $a$ 的翻译；在根处 $\\ulcorner a \\urcorner$ 没有自由索引，因此移位不改变任何东西。由 (3)，具名代换对绑定子的重命名在翻译后不可见，而 [substitution 设计](substitution.md)中的翻译引理使这一归纳变得严格。由于翻译还保持项的形状，仅含 β 的具名归约器（使用 `@lambda.beta_rule` 和 `NormalOrder` 的 `@eval.evaluate`）与 `reduce_once` 选择同一个最左最外的可约式，因此一步归约与翻译在 $=_\\alpha$ 意义下可交换。（`@lambda.normalize` 还会收缩 η 可约式，因此其范式可能更 η-短。）测试 \"named and debruijn beta reduction agree modulo alpha\" 检查了一个在具名一侧需要重命名的实例。"
 
-#: manual/design/debruijn.md:231
+#: manual/design/debruijn.md:233
 msgid "Spines and reduction order"
 msgstr "脊柱与归约顺序"
 
-#: manual/design/debruijn.md:233
+#: manual/design/debruijn.md:235
 msgid "`Apply(head, args)` is a curried spine: `Apply(Bind(t), [a, ..rest])` is the redex $(\\lambda.\\,t)\\,a$ applied to `rest`, and a step contracts only the first argument. An empty spine `Apply(h, [])` stands for $h$ itself, so empty applications around the `Bind` are looked through when a redex is matched. `reduce_once` searches root, head, arguments, and enters binders: it is the normal-order strategy of the [eval design](eval.md) on nameless terms, so the normalization theorem applies to `normalize`."
 msgstr "`Apply(head, args)` 是柯里化的脊：`Apply(Bind(t), [a, ..rest])` 是应用于 `rest` 的可约式 $(\\lambda.\\,t)\\,a$，一步只收缩第一个参数。空脊 `Apply(h, [])` 表示 $h$ 本身，因此匹配可约式时会透过包裹 `Bind` 的空应用。`reduce_once` 依次搜索根、头部、参数，并进入绑定子：这正是 [eval 设计](eval.md) 中的正规序策略在无名项上的版本，因此范式化定理适用于 `normalize`。"
 
-#: manual/design/debruijn.md:242
+#: manual/design/debruijn.md:244
 msgid "`validate(from_named(t)) == Ok(())` for every named $t$."
 msgstr "对每个具名项 $t$，`validate(from_named(t)) == Ok(())`。"
 
-#: manual/design/debruijn.md:243
+#: manual/design/debruijn.md:245
 msgid "Round trips (1)–(3) above; `==` on well-scoped `DbTerm` is alpha-equivalence."
 msgstr "上文的往返 (1)–(3)；良作用域的 `DbTerm` 上的 `==` 即 alpha 等价。"
 
-#: manual/design/debruijn.md:244
+#: manual/design/debruijn.md:246
 msgid "Lemma 2: on well-scoped input `instantiate` succeeds and preserves scope; `reduce_once` never returns `ScopeFailure`, and every reduct is well scoped. On ill-scoped input `reduce_once` and `normalize` return `ScopeFailure` with the error `validate` reports."
 msgstr "引理 2：在良作用域输入上，`instantiate` 成功并保持作用域；`reduce_once` 从不返回 `ScopeFailure`，且每个归约结果都是良作用域的。在作用域不良的输入上，`reduce_once` 与 `normalize` 返回带有 `validate` 所报告错误的 `ScopeFailure`。"
 
-#: manual/design/debruijn.md:248
+#: manual/design/debruijn.md:250
 msgid "`reduce_once` satisfies the one-redex contract of [rewrite](rewrite.md), with rule name `\"beta\"`."
 msgstr "`reduce_once` 满足 [rewrite](rewrite.md) 的单可约式契约，规则名为 `\"beta\"`。"
 
-#: manual/design/debruijn.md:250
+#: manual/design/debruijn.md:252
 msgid "`shift(t, 0, c) == Ok(t)` for every `t` without negative indices, and shifts with one cutoff compose (Lemma 1)."
 msgstr "对每个不含负索引的 `t`，`shift(t, 0, c) == Ok(t)`，且同一截断值下的移位可以复合（引理 1）。"
 
-#: manual/design/debruijn.md:252
-msgid "`shift` never turns a free index into a bound one: if a free index would fall below its cutoff, it returns `Err(NegativeShift)`."
-msgstr "`shift` 从不把自由索引变成约束索引：若某个自由索引会落到其截断点之下，它返回 `Err(NegativeShift)`。"
+#: manual/design/debruijn.md:254
+msgid "`shift` never turns a free index into a bound one: if a free index would fall below its cutoff, it returns `Err(NegativeShift)`, and it rejects a negative cutoff, which would free bound indices, with `Err(NegativeCutoff)`."
+msgstr "`shift` 从不把自由索引变成约束索引：若某个自由索引会落到其截断点之下，它返回 `Err(NegativeShift)`；负的截断点会使约束索引变为自由，它以 `Err(NegativeCutoff)` 拒绝之。"
 
-#: manual/design/debruijn.md:255
+#: manual/design/debruijn.md:258
 msgid "Cost: `shift` and `validate` are linear in the term size. `substitute_bound` costs $O(|t| + m \\cdot |s|)$ for $m$ occurrences of the index, because each inserted copy is shifted. A `reduce_once` step costs one search plus one `instantiate`."
 msgstr "代价：`shift` 与 `validate` 与项的大小成线性关系。对于索引的 $m$ 次出现，`substitute_bound` 的代价为 $O(|t| + m \\cdot |s|)$，因为每个插入的副本都要移位。一次 `reduce_once` 步骤的代价为一次搜索加一次 `instantiate`。"
 
-#: manual/design/debruijn.md:262
+#: manual/design/debruijn.md:265
 msgid "**Levels instead of indices in syntax.** Levels make weakening free but substitution under binders more complex; indices are the standard for syntax, and levels are used where they help (NbE)."
 msgstr "**在语法中使用层级而非索引。** 层级使弱化无需代价，但使绑定子下的代换更复杂；索引是语法表示的标准做法，层级则用在有帮助的地方（NbE）。"
 
-#: manual/design/debruijn.md:265
+#: manual/design/debruijn.md:268
 msgid "**Fully nameless free variables.** Free variables are kept as names so that open terms from users and downstream ASTs need no global variable numbering, and so that `to_named` can restore them exactly."
 msgstr "**完全无名的自由变量。** 自由变量保留为名称，这样来自用户和下游 AST 的开项无需全局变量编号，并且 `to_named` 可以精确地还原它们。"
 
-#: manual/design/debruijn.md:268
+#: manual/design/debruijn.md:271
 msgid "**Explicit substitutions.** A calculus with suspended substitutions avoids repeated shifting but complicates every consumer; the NbE package provides the efficient path instead."
 msgstr "**显式代换。** 带有挂起代换的演算可以避免重复移位，但会使每个使用者都变得复杂；高效路径改由 NbE 包提供。"
 
-#: manual/design/debruijn.md:274
+#: manual/design/debruijn.md:277
 msgid "Binder names are not preserved: `to_named` chooses `x`, `x_1`, …."
 msgstr "绑定子名称不会被保留：`to_named` 选择 `x`、`x_1`、…。"
 
-#: manual/design/debruijn.md:275
+#: manual/design/debruijn.md:278
 msgid "`shift`, `substitute_bound` and `instantiate` operate on open terms and do not detect dangling indices; the reducers and `validate` do."
 msgstr "`shift`、`substitute_bound` 与 `instantiate` 作用于开放项，不检测悬空索引；归约器和 `validate` 会检测。"
 
-#: manual/design/debruijn.md:277
+#: manual/design/debruijn.md:280
 msgid "An empty application `Apply(h, [])` is read as `h` when a redex is matched, so it never hides a redex, but `reduce_once` leaves the node in place, whereas [utlc/nbe](utlc/nbe.md) drops it from its normal forms."
 msgstr "空应用 `Apply(h, [])` 在匹配可约式时被读作 `h`，因此从不隐藏可约式；但 `reduce_once` 保留该节点，而 [utlc/nbe](utlc/nbe.md) 会把它从范式中去掉。"
 
-#: manual/design/debruijn.md:280
+#: manual/design/debruijn.md:283
 msgid "Only beta is implemented; there is no eta rule for De Bruijn terms."
 msgstr "只实现了 beta；De Bruijn 项没有 eta 规则。"
 
-#: manual/design/debruijn.md:281
+#: manual/design/debruijn.md:284
 msgid "Values are opaque; their contents are never shifted."
 msgstr "值是不透明的；其内容从不被移位。"
 
