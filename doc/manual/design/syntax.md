@@ -127,11 +127,12 @@ searching for renamings.
 environments $E_L, E_R$ that map each bound name to the *level* (binder
 depth, counting from the root) at which it was bound; a later binding of the
 same name shadows an earlier one. Writing $E(x)$ for the level of the last
-binding of $x$ in $E$, and $d$ for the current depth:
+binding of $x$ in $E$, $d$ for the current depth, and $\approx_T$ for the
+relation on $V$ computed by `T`'s `==`:
 
 $$
 \begin{aligned}
-E_L, E_R \vdash_d v \sim v' &\iff v = v', \\
+E_L, E_R \vdash_d v \sim v' &\iff v \approx_T v', \\
 E_L, E_R \vdash_d x \sim y &\iff
   \begin{cases}
     E_L(x) = E_R(y) & \text{if both are bound},\\
@@ -143,28 +144,79 @@ E_L, E_R \vdash_d \beta x.\,t \sim \beta y.\,t' &\iff E_L[x \mapsto d], E_R[y \m
 \end{aligned}
 $$
 
-**Theorem.** `alpha_equal(t, u)` holds iff $t =_\alpha u$.
-
-*Proof sketch.* Let $\ulcorner t \urcorner$ be the De Bruijn translation of
-the [debruijn design](debruijn.md), which replaces a bound occurrence at depth
+The relation $\approx_T$ is whatever `T`'s `==` computes; nothing forces
+it to be an equivalence. To state exactly what `alpha_equal` decides, let
+$\ulcorner t \urcorner$ be the De Bruijn translation of the
+[debruijn design](debruijn.md), which replaces a bound occurrence at depth
 $d$ whose binder sits at level $\ell$ by the index $i = d - 1 - \ell$, and
-keeps free names. Both traversals visit the same positions at the same depth
+keeps free names and values. For a relation $R$ on $V$, its *lifting*
+$\widehat{R}$ relates two nameless terms when they have the same shape, the
+same index or free name at each variable position, and payloads related by
+$R$ at each value position:
+
+$$
+\begin{aligned}
+v \mathrel{\widehat{R}} v' &\iff v \mathrel{R} v', \qquad
+i \mathrel{\widehat{R}} j \iff i = j, \qquad
+x \mathrel{\widehat{R}} y \iff x = y, \\
+s(\bar a) \mathrel{\widehat{R}} s'(\bar a') &\iff |\bar a| = |\bar a'| \wedge s \mathrel{\widehat{R}} s' \wedge \textstyle\bigwedge_i a_i \mathrel{\widehat{R}} a'_i, \qquad
+\lambda.\,s \mathrel{\widehat{R}} \lambda.\,s' \iff s \mathrel{\widehat{R}} s',
+\end{aligned}
+$$
+
+and no other pairs are related.
+
+**Theorem.** `alpha_equal(t, u)` holds iff
+$\ulcorner t \urcorner \mathrel{\widehat{\approx_T}} \ulcorner u \urcorner$.
+In particular, if $\approx_T$ is the identity of $V$, then
+`alpha_equal(t, u)` holds iff $t =_\alpha u$.
+
+*Proof sketch.* Both traversals visit the same positions at the same depth
 $d$, so for bound occurrences
 
 $$
 \ell_L = \ell_R \iff d - 1 - \ell_L = d - 1 - \ell_R \iff i_L = i_R ,
 $$
 
-and free occurrences are compared by name in both. Hence `alpha_equal(t, u)`
+free occurrences are compared by name in both, and values by $\approx_T$ in
+both. This is the first claim. If $\approx_T$ is the identity, then
+$\widehat{\approx_T}$ is the identity of nameless terms, so `alpha_equal(t, u)`
 iff $\ulcorner t \urcorner = \ulcorner u \urcorner$. The classical theorem
 that two named terms are alpha-equivalent iff their De Bruijn translations are
 identical[^debruijn] completes the proof. $\square$
+
+**Corollary.** Each of reflexivity, symmetry and transitivity holds for
+`alpha_equal` on `Term[T]` iff it holds for $\approx_T$. Hence `alpha_equal`
+is an equivalence relation iff `T`'s `==` is one.
+
+*Proof.* ($\Leftarrow$) Two terms related by $\widehat{R}$ have the same
+shape, so a chain $a \mathrel{\widehat{R}} b \mathrel{\widehat{R}} c$
+compares the payloads $a_p, b_p, c_p$ at each value position $p$ through
+$a_p \mathrel{R} b_p \mathrel{R} c_p$, and identities at every other
+position. Reflexivity, symmetry and transitivity of $R$ therefore give the
+same property of $\widehat{R}$ position by position. The theorem pulls each
+property back along the function $t \mapsto \ulcorner t \urcorner$.
+($\Rightarrow$) With empty environments the first rule gives
+`alpha_equal(Value(a), Value(b))` $= (a \approx_T b)$, so a counterexample
+$a, b, c$ for $\approx_T$ is a counterexample `Value(a)`, `Value(b)`,
+`Value(c)` for `alpha_equal`. $\square$
+
+For `Int` or `String`, `==` is the identity and `alpha_equal` is exactly
+$=_\alpha$. When `==` is an equivalence coarser than the identity,
+`alpha_equal` is alpha-equivalence modulo $\approx_T$: the least congruence
+containing $=_\alpha$ and $v \sim v'$ for $v \approx_T v'$. For `Double`,
+`==` is IEEE 754 equality,[^ieee754] which is symmetric and transitive but
+not reflexive: $\mathrm{NaN} \not\approx_T \mathrm{NaN}$. So `alpha_equal` on
+`Term[Double]` is symmetric and transitive, reflexive exactly on the terms
+without a `NaN` payload, and it identifies `Value(0.0)` with `Value(-0.0)`.
 
 Each node is visited once. A variable lookup scans the environment, and
 each binder copies it, both in $O(d)$ for binder depth $d$, so the comparison
 costs $O(n \cdot d)$ for terms of size $n$.
 
 [^debruijn]: N. G. de Bruijn, "Lambda calculus notation with nameless dummies", Indagationes Mathematicae 34, 1972.
+
+[^ieee754]: IEEE Std 754-2019, *IEEE Standard for Floating-Point Arithmetic*, §5.11: every NaN compares unordered with everything, itself included, and $+0 = -0$.
 
 ### Capture-avoiding renaming of free variables
 
@@ -234,9 +286,12 @@ fresh for the body.
 ## Correctness and invariants
 
 - $\mathrm{FV}(t) \subseteq \mathrm{names}(t)$; `map_values` preserves both.
-- `alpha_equal` is reflexive, symmetric and transitive, and coincides with
-  $=_\alpha$ (theorem above). Reflexivity is also checked by a QuickCheck
-  property in `src/syntax/syntax_wbtest.mbt`.
+- `alpha_equal` decides the lifting of `T`'s `==` to nameless terms, and
+  coincides with $=_\alpha$ when that `==` is the identity (theorem above).
+  It is reflexive, symmetric and transitive exactly when `==` is (corollary
+  above). Reflexivity for `Int` payloads is checked by a QuickCheck property
+  in `src/syntax/syntax_wbtest.mbt`, and a test there records that a `NaN`
+  payload is not alpha-equal to itself.
 - `rename_free` satisfies $\mathrm{FV}(t\rho) = \rho(\mathrm{FV}(t))$ and is
   invariant under $=_\alpha$: alpha-equivalent inputs give alpha-equivalent
   outputs.
@@ -270,6 +325,9 @@ adds `all_names` and one renaming traversal of its body.
 - `Value` payloads are never inspected. A payload that contains variables is
   outside the contract.
 - `==` on terms is structural, not alpha-equivalence.
+- `alpha_equal` compares payloads with `T`'s `==` and adds no reflexivity of
+  its own: with a non-reflexive `==` (such as `Double` and `NaN`) a term can
+  fail to be alpha-equal to itself.
 - No sorts, scopes or types: every name is a term variable of the same kind.
 - The package does not check that a `BindingSyntax` implementation obeys its
   laws; [adapter](adapter.md) describes how to test them.

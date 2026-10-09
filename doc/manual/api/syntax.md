@@ -146,9 +146,17 @@ variables.
 pub fn[T : Eq] alpha_equal(Term[T], Term[T]) -> Bool
 ```
 
-Values are compared with `==`, free variables by name, and bound variables by
-the binder they refer to. The relation is an equivalence and is decided in
-one simultaneous traversal of both terms.
+Values are compared with `T`'s `==`, free variables by name, and bound
+variables by the binder they refer to, in one simultaneous traversal of both
+terms.
+
+`alpha_equal` is the payload equality lifted through binders, so it inherits
+the properties of `T`'s `==`: each of reflexivity, symmetry and transitivity
+holds for `alpha_equal` exactly when it holds for that `==`, so
+`alpha_equal` is an equivalence relation exactly when `==` is one. When `==` is the identity of `T` (as for `Int` or `String`), it is
+alpha-equivalence. `Double` follows IEEE 754: `NaN` is not equal to itself,
+so a term with a `NaN` payload is not alpha-equal to itself, while `0.0` and
+`-0.0` are equal payloads.
 
 ```moonbit
 test "alpha-equivalence ignores binder names" {
@@ -161,6 +169,15 @@ test "alpha-equivalence ignores binder names" {
   assert_false(left == right)
   let other : @syntax.Term[Int] = Bind(y, Apply(Variable(y), [Variable(y)]))
   assert_false(@syntax.alpha_equal(left, other))
+}
+```
+
+```moonbit
+test "alpha_equal uses the payload equality" {
+  let nan : @syntax.Term[Double] = Value(0.0 / 0.0)
+  assert_false(@syntax.alpha_equal(nan, nan))
+  let zero : @syntax.Term[Double] = Value(0.0)
+  assert_true(@syntax.alpha_equal(zero, Value(-0.0)))
 }
 ```
 
