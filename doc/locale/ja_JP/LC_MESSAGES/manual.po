@@ -251,15 +251,15 @@ msgstr "これは昇格された `Eq` 実装である。新しいコードでは
 #: manual/api/core.md:334
 #: manual/api/stlc.md:296
 #: manual/api/stlc.md:298
-#: manual/api/syntax.md:329
-#: manual/api/syntax.md:331
+#: manual/api/syntax.md:346
+#: manual/api/syntax.md:348
 #: manual/index.md:103
 msgid "Deprecated"
 msgstr "非推奨"
 
 #: manual/api/core.md:334
 #: manual/api/stlc.md:298
-#: manual/api/syntax.md:331
+#: manual/api/syntax.md:348
 msgid "Replacement"
 msgstr "代替"
 
@@ -695,7 +695,7 @@ msgid "`trace` runs the same loop as `normalize` and records every step."
 msgstr "`trace` は `normalize` と同じループを実行し、各ステップを記録する。"
 
 #: manual/api/rewrite.md:346
-#: manual/api/syntax.md:222
+#: manual/api/syntax.md:239
 msgid "Binding-aware ASTs"
 msgstr "束縛を扱う AST"
 
@@ -1059,98 +1059,102 @@ msgid "`alpha_equal` decides whether two terms are equal up to the names of boun
 msgstr "`alpha_equal` は二つの項が束縛変数の名前を除いて等しいかどうかを判定する。"
 
 #: manual/api/syntax.md:149
-msgid "Values are compared with `==`, free variables by name, and bound variables by the binder they refer to. The relation is an equivalence and is decided in one simultaneous traversal of both terms."
-msgstr "値は `==` で、自由変数は名前で、束縛変数は参照する束縛子で比較される。この関係は同値関係であり、二つの項を同時に一度走査することで判定される。"
+msgid "Values are compared with `T`'s `==`, free variables by name, and bound variables by the binder they refer to, in one simultaneous traversal of both terms."
+msgstr "値は `T` の `==` で、自由変数は名前で、束縛変数は参照する束縛子で比較され、二つの項を同時に一度走査して判定される。"
 
-#: manual/api/syntax.md:167
+#: manual/api/syntax.md:153
+msgid "`alpha_equal` is the payload equality lifted through binders, so it inherits the properties of `T`'s `==`: each of reflexivity, symmetry and transitivity holds for `alpha_equal` exactly when it holds for that `==`, so `alpha_equal` is an equivalence relation exactly when `==` is one. When `==` is the identity of `T` (as for `Int` or `String`), it is alpha-equivalence. `Double` follows IEEE 754: `NaN` is not equal to itself, so a term with a `NaN` payload is not alpha-equal to itself, while `0.0` and `-0.0` are equal payloads."
+msgstr "`alpha_equal` はペイロードの等価性を束縛子を通して持ち上げたものであり、`T` の `==` の性質を受け継ぐ。反射性・対称性・推移性のそれぞれは、その `==` について成り立つときに限り `alpha_equal` について成り立つ。したがって `alpha_equal` が同値関係であるのは `==` が同値関係であるときに限る。`==` が `T` の恒等関係であるとき（`Int` や `String` など）、これは α同値そのものである。`Double` は IEEE 754 に従う。`NaN` は自分自身と等しくないので、`NaN` ペイロードを含む項は自分自身と α同値にならず、一方 `0.0` と `-0.0` は等しいペイロードである。"
+
+#: manual/api/syntax.md:184
 msgid "Renaming"
 msgstr "名前の付け替え"
 
-#: manual/api/syntax.md:171
+#: manual/api/syntax.md:188
 msgid "`Term::rename_free` applies a renaming to the free variables of a term, renaming binders where necessary to avoid capture."
 msgstr "`Term::rename_free` は項の自由変数に名前の付け替えを適用し、捕獲を避けるために必要に応じて束縛子の名前を変える。"
 
-#: manual/api/syntax.md:178
+#: manual/api/syntax.md:195
 msgid "Under `Bind(x, body)` the renaming loses its entry for `x`, because the bound `x` is a different variable. If a remaining target of the renaming equals `x`, the binder is renamed to a fresh name first. The result is alpha-equivalent to the textbook capture-avoiding renaming."
 msgstr "`Bind(x, body)` の下では、束縛された `x` は別の変数なので、名前の付け替えから `x` の項目が失われる。付け替えの残りの対象のいずれかが `x` に等しい場合は、まず束縛子を新しい名前に変える。結果は教科書的な捕獲回避の名前の付け替えと α同値である。"
 
-#: manual/api/syntax.md:196
+#: manual/api/syntax.md:213
 msgid "`Term::alpha_rename_bound` renames the occurrences of a variable that are bound by an enclosing binder, refusing a target name that could be captured."
 msgstr "`Term::alpha_rename_bound` は外側の束縛子によって束縛された変数の出現の名前を変え、捕獲されうる対象名は拒否する。"
 
-#: manual/api/syntax.md:203
+#: manual/api/syntax.md:220
 msgid "Call it on the *body* of a binder: `body.alpha_rename_bound(from, to_)` replaces the occurrences of `from` that are free in `body` (and therefore bound by the enclosing `Bind(from, body)`) with `to_`. Inner binders named `from` stop the renaming. The result is `None` when `to_` occurs anywhere in `body`, and `Some(body)` when `from == to_`. On success, `Bind(from, body)` and `Bind(to_, result)` are alpha-equivalent."
 msgstr "束縛子の*本体*に対して呼び出す。`body.alpha_rename_bound(from, to_)` は、`body` の中で自由な（したがって外側の `Bind(from, body)` に束縛された）`from` の出現を `to_` で置き換える。`from` という名前の内側の束縛子があると、そこで名前の付け替えは止まる。`to_` が `body` のどこかに出現する場合、結果は `None` であり、`from == to_` の場合は `Some(body)` である。成功した場合、`Bind(from, body)` と `Bind(to_, result)` は α同値である。"
 
-#: manual/api/syntax.md:226
+#: manual/api/syntax.md:243
 msgid "`BindingView[N]` is the one-layer view of a node that generic algorithms inspect."
 msgstr "`BindingView[N]` は、汎用アルゴリズムが調べるノードの一層分のビューである。"
 
-#: manual/api/syntax.md:238
+#: manual/api/syntax.md:255
 msgid "`Opaque` marks a node with no variables inside, such as a literal. The other cases mirror the constructors of `Term`, with the children left in the downstream type `N`."
 msgstr "`Opaque` はリテラルのように内部に変数を含まないノードを表す。他のケースは `Term` のコンストラクタに対応し、子は下流の型 `N` のまま残される。"
 
-#: manual/api/syntax.md:244
+#: manual/api/syntax.md:261
 msgid "`BindingSyntax` is the open trait that a downstream AST implements to use the generic binding algorithms."
 msgstr "`BindingSyntax` はオープンなトレイトであり、下流の AST はこれを実装することで汎用の束縛アルゴリズムを利用できる。"
 
-#: manual/api/syntax.md:256
+#: manual/api/syntax.md:273
 msgid "`project(node)` tells the algorithms what the node is."
 msgstr "`project(node)` はノードが何であるかをアルゴリズムに伝える。"
 
-#: manual/api/syntax.md:257
+#: manual/api/syntax.md:274
 msgid "`variable`, `apply` and `bind` rebuild nodes of each kind."
 msgstr "`variable`、`apply`、`bind` はそれぞれの種類のノードを再構築する。"
 
-#: manual/api/syntax.md:259
+#: manual/api/syntax.md:276
 msgid "An implementation must make `project` and the three constructors agree: `project(variable(x))` is `Variable(x)`, `project(apply(h, args))` is `Apply(h, args)`, `project(bind(x, b))` is `Bind(x, b)`, and rebuilding a projected `Apply` or `Bind` node gives back an equivalent node. An `Opaque` node must not contain variables. The [adapter design](../design/adapter.md) explains these laws; the [adapter tutorial](../tutorial/adapter.md) implements them for a small AST."
 msgstr "実装は `project` と三つのコンストラクタを整合させなければならない。`project(variable(x))` は `Variable(x)`、`project(apply(h, args))` は `Apply(h, args)`、`project(bind(x, b))` は `Bind(x, b)` であり、射影した `Apply` または `Bind` ノードを再構築すると同等のノードが得られる。`Opaque` ノードは変数を含んではならない。[アダプタの設計](../design/adapter.md)がこれらの法則を説明し、[アダプタのチュートリアル](../tutorial/adapter.md)が小さな AST に対してそれらを実装している。"
 
-#: manual/api/syntax.md:267
+#: manual/api/syntax.md:284
 msgid "Call the trait methods through the trait, for example `@syntax.BindingSyntax::project(node)`."
 msgstr "トレイトのメソッドはトレイト経由で呼び出す。例えば `@syntax.BindingSyntax::project(node)` のようにする。"
 
-#: manual/api/syntax.md:272
+#: manual/api/syntax.md:289
 msgid "`Term[T]` implements `BindingSyntax` with the obvious projection."
 msgstr "`Term[T]` は自明な射影で `BindingSyntax` を実装している。"
 
-#: manual/api/syntax.md:278
+#: manual/api/syntax.md:295
 msgid "`Value` projects to `Opaque` and every other constructor to the case of the same name, so the generic functions below agree with their `Term` versions on `Term` values."
 msgstr "`Value` は `Opaque` に射影され、他のコンストラクタはすべて同名のケースに射影される。そのため、以下の汎用関数は `Term` 値に対して `Term` 版と一致する。"
 
-#: manual/api/syntax.md:295
+#: manual/api/syntax.md:312
 msgid "These functions compute free variables and all names for any `BindingSyntax` type."
 msgstr "以下の関数は任意の `BindingSyntax` 型について自由変数と全名前を計算する。"
 
-#: manual/api/syntax.md:303
+#: manual/api/syntax.md:320
 msgid "On `Term[T]` they return the same sets as `free_variables` and `all_names`."
 msgstr "`Term[T]` 上では、これらは `free_variables` および `all_names` と同じ集合を返す。"
 
-#: manual/api/syntax.md:307
+#: manual/api/syntax.md:324
 msgid "`generic_alpha_rename_bound` is `Term::alpha_rename_bound` for any `BindingSyntax` type."
 msgstr "`generic_alpha_rename_bound` は任意の `BindingSyntax` 型向けの `Term::alpha_rename_bound` である。"
 
-#: manual/api/syntax.md:314
+#: manual/api/syntax.md:331
 msgid "It returns `None` when the target name occurs in the node, and rebuilds the renamed node through `variable`, `apply` and `bind`."
 msgstr "対象名がノードに出現する場合は `None` を返す。名前を付け替えたノードは `variable`、`apply`、`bind` を通じて再構築される。"
 
-#: manual/api/syntax.md:334
+#: manual/api/syntax.md:351
 msgid "`Term::variable(name)` method form"
 msgstr "`Term::variable(name)` メソッド形式"
 
-#: manual/api/syntax.md:335
+#: manual/api/syntax.md:352
 msgid "`Term::apply(head, args)` method form"
 msgstr "`Term::apply(head, args)` メソッド形式"
 
-#: manual/api/syntax.md:336
+#: manual/api/syntax.md:353
 msgid "`Term::bind(name, body)` method form"
 msgstr "`Term::bind(name, body)` メソッド形式"
 
-#: manual/api/syntax.md:338
+#: manual/api/syntax.md:355
 msgid "`Repr(term)` or `@debug.to_string(term)`"
 msgstr "`Repr(term)` または `@debug.to_string(term)`"
 
-#: manual/api/syntax.md:340
+#: manual/api/syntax.md:357
 msgid "These method forms were implicit promotions of trait methods. They are kept hidden and deprecated so that old callers still compile."
 msgstr "これらのメソッド形式はトレイトメソッドの暗黙の昇格であった。古い呼び出し側が引き続きコンパイルできるよう、隠された非推奨のものとして残されている。"
 
@@ -1505,7 +1509,7 @@ msgstr "下流の変数型は単射（異なる変数を異なる名前へ写す
 #: manual/design/rewrite.md:171
 #: manual/design/stlc.md:332
 #: manual/design/substitution.md:130
-#: manual/design/syntax.md:234
+#: manual/design/syntax.md:286
 #: manual/design/utlc/lambda.md:116
 #: manual/design/utlc/nbe.md:145
 msgid "Correctness and invariants"
@@ -1558,7 +1562,7 @@ msgstr "下流の adapter は自身のノード種別について (V1)–(V5) �
 #: manual/design/rewrite.md:196
 #: manual/design/stlc.md:353
 #: manual/design/substitution.md:329
-#: manual/design/syntax.md:254
+#: manual/design/syntax.md:309
 #: manual/design/utlc/lambda.md:142
 #: manual/design/utlc/nbe.md:203
 msgid "Alternatives rejected"
@@ -1583,7 +1587,7 @@ msgstr "**実行時に法則を検査する。** 法則はすべてのノード�
 #: manual/design/rewrite.md:208
 #: manual/design/stlc.md:366
 #: manual/design/substitution.md:343
-#: manual/design/syntax.md:268
+#: manual/design/syntax.md:323
 #: manual/design/utlc/lambda.md:153
 #: manual/design/utlc/nbe.md:215
 msgid "Boundaries"
@@ -1830,7 +1834,7 @@ msgid "A term is *well scoped at depth $n$* when every index under $k$ binders i
 msgstr "$k$ 個の束縛子の下にあるすべてのインデックスが $n + k$ より小さいとき、項は*深さ $n$ でスコープが正しい*という。深さ $0$ でスコープが正しいとき、単にスコープが正しいという。`validate` はこれを判定する。"
 
 #: manual/design/debruijn.md:44
-#: manual/design/syntax.md:167
+#: manual/design/syntax.md:217
 msgid "N. G. de Bruijn, \"Lambda calculus notation with nameless dummies\", Indagationes Mathematicae 34, 1972."
 msgstr "N. G. de Bruijn, \"Lambda calculus notation with nameless dummies\", Indagationes Mathematicae 34, 1972."
 
@@ -3063,46 +3067,74 @@ msgid "**Problem.** Deciding $=_\\alpha$ directly from the definition requires s
 msgstr "**問題。** 定義から直接 $=_\\alpha$ を判定するには名前替えの探索が必要になる。"
 
 #: manual/design/syntax.md:126
-msgid "**Choice.** `alpha_equal` walks both terms in lockstep with two binder environments $E_L, E_R$ that map each bound name to the *level* (binder depth, counting from the root) at which it was bound; a later binding of the same name shadows an earlier one. Writing $E(x)$ for the level of the last binding of $x$ in $E$, and $d$ for the current depth:"
-msgstr "**選択。** `alpha_equal` は二つの項を歩調を合わせて走査し、二つの束縛環境 $E_L, E_R$ を保持する。これは各束縛名を、それが束縛された*レベル*（根から数えた束縛の深さ）に写す。同じ名前の後の束縛は前の束縛をシャドーイングする。$E$ における $x$ の最後の束縛のレベルを $E(x)$、現在の深さを $d$ と書くと、"
+msgid "**Choice.** `alpha_equal` walks both terms in lockstep with two binder environments $E_L, E_R$ that map each bound name to the *level* (binder depth, counting from the root) at which it was bound; a later binding of the same name shadows an earlier one. Writing $E(x)$ for the level of the last binding of $x$ in $E$, $d$ for the current depth, and $\\approx_T$ for the relation on $V$ computed by `T`'s `==`:"
+msgstr "**選択。** `alpha_equal` は二つの項を歩調を合わせて走査し、二つの束縛環境 $E_L, E_R$ を保持する。これは各束縛名を、それが束縛された*レベル*（根から数えた束縛の深さ）に写す。同じ名前の後の束縛は前の束縛をシャドーイングする。$E$ における $x$ の最後の束縛のレベルを $E(x)$、現在の深さを $d$、`T` の `==` が $V$ 上で計算する関係を $\\approx_T$ と書くと："
 
-#: manual/design/syntax.md:146
-msgid "**Theorem.** `alpha_equal(t, u)` holds iff $t =_\\alpha u$."
-msgstr "**定理.** `alpha_equal(t, u)` が成り立つのは $t =_\\alpha u$ のとき、かつそのときに限る。"
+#: manual/design/syntax.md:147
+msgid "The relation $\\approx_T$ is whatever `T`'s `==` computes; nothing forces it to be an equivalence. To state exactly what `alpha_equal` decides, let $\\ulcorner t \\urcorner$ be the De Bruijn translation of the [debruijn design](debruijn.md), which replaces a bound occurrence at depth $d$ whose binder sits at level $\\ell$ by the index $i = d - 1 - \\ell$, and keeps free names and values. For a relation $R$ on $V$, its *lifting* $\\widehat{R}$ relates two nameless terms when they have the same shape, the same index or free name at each variable position, and payloads related by $R$ at each value position:"
+msgstr "関係 $\\approx_T$ は `T` の `==` が計算するものそのものであり、同値関係である保証はない。`alpha_equal` が判定するものを正確に述べるため、$\\ulcorner t \\urcorner$ を [debruijn の設計](debruijn.md) の De Bruijn 変換とする。これは深さ $d$ にあり束縛子がレベル $\\ell$ にある束縛された出現をインデックス $i = d - 1 - \\ell$ で置き換え、自由な名前と値はそのまま残す。$V$ 上の関係 $R$ に対し、その*持ち上げ* $\\widehat{R}$ は、二つの名前なしの項が同じ形をもち、各変数位置で同じインデックスまたは自由な名前をもち、各値位置のペイロードが $R$ で関係づけられるときに、それらを関係づける："
 
-#: manual/design/syntax.md:148
-msgid "*Proof sketch.* Let $\\ulcorner t \\urcorner$ be the De Bruijn translation of the [debruijn design](debruijn.md), which replaces a bound occurrence at depth $d$ whose binder sits at level $\\ell$ by the index $i = d - 1 - \\ell$, and keeps free names. Both traversals visit the same positions at the same depth $d$, so for bound occurrences"
-msgstr "*証明の概略。* $\\ulcorner t \\urcorner$ を [debruijn の設計](debruijn.md) の De Bruijn 変換とする。これは深さ $d$ にあり束縛子がレベル $\\ell$ にある束縛された出現をインデックス $i = d - 1 - \\ell$ で置き換え、自由な名前はそのまま残す。二つの走査は同じ深さ $d$ で同じ位置を訪れるので、束縛された出現について"
+#: manual/design/syntax.md:167
+msgid "and no other pairs are related."
+msgstr "これ以外の組は関係づけられない。"
 
-#: manual/design/syntax.md:158
-msgid "and free occurrences are compared by name in both. Hence `alpha_equal(t, u)` iff $\\ulcorner t \\urcorner = \\ulcorner u \\urcorner$. The classical theorem that two named terms are alpha-equivalent iff their De Bruijn translations are identical[^debruijn] completes the proof. $\\square$"
-msgstr "であり、自由な出現はどちらでも名前で比較される。したがって `alpha_equal(t, u)` であることと $\\ulcorner t \\urcorner = \\ulcorner u \\urcorner$ であることは同値である。二つの名前付き項が α同値であるのはその De Bruijn 変換が一致するとき、かつそのときに限るという古典的定理[^debruijn]により証明が完了する。$\\square$"
+#: manual/design/syntax.md:169
+msgid "**Theorem.** `alpha_equal(t, u)` holds iff $\\ulcorner t \\urcorner \\mathrel{\\widehat{\\approx_T}} \\ulcorner u \\urcorner$. In particular, if $\\approx_T$ is the identity of $V$, then `alpha_equal(t, u)` holds iff $t =_\\alpha u$."
+msgstr "**定理。** `alpha_equal(t, u)` が成り立つのは $\\ulcorner t \\urcorner \\mathrel{\\widehat{\\approx_T}} \\ulcorner u \\urcorner$ のときに限る。特に $\\approx_T$ が $V$ の恒等関係ならば、`alpha_equal(t, u)` が成り立つのは $t =_\\alpha u$ のときに限る。"
 
-#: manual/design/syntax.md:163
+#: manual/design/syntax.md:174
+msgid "*Proof sketch.* Both traversals visit the same positions at the same depth $d$, so for bound occurrences"
+msgstr "*証明の概略。* 二つの走査は同じ深さ $d$ で同じ位置を訪れるので、束縛された出現については"
+
+#: manual/design/syntax.md:181
+msgid "free occurrences are compared by name in both, and values by $\\approx_T$ in both. This is the first claim. If $\\approx_T$ is the identity, then $\\widehat{\\approx_T}$ is the identity of nameless terms, so `alpha_equal(t, u)` iff $\\ulcorner t \\urcorner = \\ulcorner u \\urcorner$. The classical theorem that two named terms are alpha-equivalent iff their De Bruijn translations are identical[^debruijn] completes the proof. $\\square$"
+msgstr "であり、自由な出現はどちらでも名前で、値はどちらでも $\\approx_T$ で比較される。これが第一の主張である。$\\approx_T$ が恒等関係ならば $\\widehat{\\approx_T}$ は名前なしの項の恒等関係であるので、`alpha_equal(t, u)` は $\\ulcorner t \\urcorner = \\ulcorner u \\urcorner$ と同値である。二つの名前付きの項が α同値であるのはその De Bruijn 変換が一致するときに限るという古典的な定理[^debruijn]により証明が完了する。$\\square$"
+
+#: manual/design/syntax.md:188
+msgid "**Corollary.** Each of reflexivity, symmetry and transitivity holds for `alpha_equal` on `Term[T]` iff it holds for $\\approx_T$. Hence `alpha_equal` is an equivalence relation iff `T`'s `==` is one."
+msgstr "**系。** 反射性・対称性・推移性のそれぞれは、$\\approx_T$ について成り立つときに限り `Term[T]` 上の `alpha_equal` について成り立つ。したがって `alpha_equal` が同値関係であるのは `T` の `==` が同値関係であるときに限る。"
+
+#: manual/design/syntax.md:192
+msgid "*Proof.* ($\\Leftarrow$) Two terms related by $\\widehat{R}$ have the same shape, so a chain $a \\mathrel{\\widehat{R}} b \\mathrel{\\widehat{R}} c$ compares the payloads $a_p, b_p, c_p$ at each value position $p$ through $a_p \\mathrel{R} b_p \\mathrel{R} c_p$, and identities at every other position. Reflexivity, symmetry and transitivity of $R$ therefore give the same property of $\\widehat{R}$ position by position. The theorem pulls each property back along the function $t \\mapsto \\ulcorner t \\urcorner$. ($\\Rightarrow$) With empty environments the first rule gives `alpha_equal(Value(a), Value(b))` $= (a \\approx_T b)$, so a counterexample $a, b, c$ for $\\approx_T$ is a counterexample `Value(a)`, `Value(b)`, `Value(c)` for `alpha_equal`. $\\square$"
+msgstr "*証明。* （$\\Leftarrow$）$\\widehat{R}$ で関係づけられる二つの項は同じ形をもつので、連鎖 $a \\mathrel{\\widehat{R}} b \\mathrel{\\widehat{R}} c$ は各値位置 $p$ でペイロード $a_p, b_p, c_p$ を $a_p \\mathrel{R} b_p \\mathrel{R} c_p$ によって比較し、それ以外のすべての位置では恒等関係で比較する。したがって $R$ の反射性・対称性・推移性は、位置ごとに $\\widehat{R}$ の同じ性質を与える。定理によって各性質は関数 $t \\mapsto \\ulcorner t \\urcorner$ に沿って引き戻される。（$\\Rightarrow$）空の環境では最初の規則により `alpha_equal(Value(a), Value(b))` $= (a \\approx_T b)$ となるので、$\\approx_T$ の反例 $a, b, c$ は `alpha_equal` の反例 `Value(a)`、`Value(b)`、`Value(c)` になる。$\\square$"
+
+#: manual/design/syntax.md:204
+msgid ""
+"For `Int` or `String`, `==` is the identity and `alpha_equal` is exactly $=_\\alpha$. When `==` is an equivalence coarser than the identity, `alpha_equal` is alpha-equivalence modulo $\\approx_T$: the least congruence containing $=_\\alpha$ and $v \\sim v'$ for $v \\approx_T v'$. For `Double`, `==` is IEEE 754 equality,[^ieee754] which is symmetric and transitive but not reflexive: $\\mathrm{NaN} \\n"
+"ot\\approx_T \\mathrm{NaN}$. So `alpha_equal` on `Term[Double]` is symmetric and transitive, reflexive exactly on the terms without a `NaN` payload, and it identifies `Value(0.0)` with `Value(-0.0)`."
+msgstr ""
+"`Int` や `String` では `==` は恒等関係であり、`alpha_equal` はちょうど $=_\\alpha$ である。`==` が恒等関係より粗い同値関係であるとき、`alpha_equal` は $\\approx_T$ を法とする α同値、すなわち $=_\\alpha$ と $v \\approx_T v'$ なるすべての $v \\sim v'$ を含む最小の合同関係である。`Double` では `==` は IEEE 754 の等価性[^ieee754]であり、対称的かつ推移的だが反射的ではない：$\\mathrm{NaN} \\n"
+"ot\\approx_T \\mathrm{NaN}$。したがって `Term[Double]` 上の `alpha_equal` は対称的かつ推移的であり、`NaN` ペイロードを含まない項でちょうど反射的であり、`Value(0.0)` と `Value(-0.0)` を同一視する。"
+
+#: manual/design/syntax.md:213
 msgid "Each node is visited once. A variable lookup scans the environment, and each binder copies it, both in $O(d)$ for binder depth $d$, so the comparison costs $O(n \\cdot d)$ for terms of size $n$."
 msgstr "各ノードは一度だけ訪問される。変数の検索は環境を走査し、各束縛子は環境をコピーする。どちらも束縛の深さ $d$ に対して $O(d)$ であるので、比較のコストはサイズ $n$ の項に対して $O(n \\cdot d)$ である。"
 
-#: manual/design/syntax.md:169
+#: manual/design/syntax.md:219
+msgid "IEEE Std 754-2019, *IEEE Standard for Floating-Point Arithmetic*, §5.11: every NaN compares unordered with everything, itself included, and $+0 = -0$."
+msgstr "IEEE Std 754-2019, *IEEE Standard for Floating-Point Arithmetic*, §5.11：すべての NaN は自分自身を含むあらゆる値と順序なし（unordered）と比較され、また $+0 = -0$ である。"
+
+#: manual/design/syntax.md:221
 msgid "Capture-avoiding renaming of free variables"
 msgstr "自由変数の捕獲回避的な名前替え"
 
-#: manual/design/syntax.md:171
+#: manual/design/syntax.md:223
 msgid "**Problem.** Applying a renaming $\\rho$ under a binder can capture: renaming $x \\mapsto y$ in $\\beta y.\\,x$ naively gives $\\beta y.\\,y$."
 msgstr "**問題。** 束縛子の下で名前替え $\\rho$ を適用すると捕獲が起こりうる。$\\beta y.\\,x$ で素朴に $x \\mapsto y$ と名前替えすると $\\beta y.\\,y$ になる。"
 
-#: manual/design/syntax.md:174
+#: manual/design/syntax.md:226
 msgid "**Choice.** `rename_free` implements"
 msgstr "**選択。** `rename_free` は次を実装する。"
 
-#: manual/design/syntax.md:187
+#: manual/design/syntax.md:239
 msgid "with $x' = \\operatorname{fresh}(x,\\ \\mathrm{names}(t) \\cup \\operatorname{supp}(\\rho \\setminus x) \\cup \\{x\\})$."
 msgstr "ここで $x' = \\operatorname{fresh}(x,\\ \\mathrm{names}(t) \\cup \\operatorname{supp}(\\rho \\setminus x) \\cup \\{x\\})$ である。"
 
-#: manual/design/syntax.md:189
+#: manual/design/syntax.md:241
 msgid "**Lemma (free variables of a renaming).** $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$."
 msgstr "**補題（名前替えの自由変数）。** $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$。"
 
-#: manual/design/syntax.md:192
+#: manual/design/syntax.md:244
 msgid ""
 "The only interesting case is the binder without freshening. Let $\\rho' = \\rho \\setminus x$ with $x \\n"
 "otin \\operatorname{tgt}\\rho'$. By induction $\\mathrm{FV}(t\\rho') = \\rho'(\\mathrm{FV}(t))$, so"
@@ -3110,7 +3142,7 @@ msgstr ""
 "興味深いのは新しい名前にしない束縛子の場合だけである。$\\rho' = \\rho \\setminus x$ とし、$x \\n"
 "otin \\operatorname{tgt}\\rho'$ とする。帰納法により $\\mathrm{FV}(t\\rho') = \\rho'(\\mathrm{FV}(t))$ なので、"
 
-#: manual/design/syntax.md:205
+#: manual/design/syntax.md:257
 msgid ""
 "The second step uses $\\rho(n) \\n"
 "e x$ for $n \\n"
@@ -3122,7 +3154,7 @@ msgstr ""
 "e x$ であることを用いる。実際、$n \\in \\operatorname{dom}\\rho'$ かつ $\\rho(n) \\in \\operatorname{tgt}\\rho'$ であって $x$ は除外されるか、または $\\rho(n) = n \\n"
 "e x$ である。新しい名前にする場合も同じ計算が $t\\{x \\mapsto x'\\}$ と $x'$ に適用できる。$x'$ は $\\operatorname{supp}\\rho'$ の外にあり、したがって写す元でも写す先でもないからである。この補題はまさに、どの自由変数も捕獲されなかったことを述べている。"
 
-#: manual/design/syntax.md:212
+#: manual/design/syntax.md:264
 msgid ""
 "The test $x \\n"
 "otin \\operatorname{tgt}(\\rho \\setminus x)$ is conservative: it also renames the binder when the offending entry's source does not occur in $t$. The result is still alpha-equivalent to the minimal one. The lemma shows that no variable is captured; that the result is the intended term up to $=_\\alpha$ follows from the translation lemma of the [substitution design](substitution.md), which covers renamings as well."
@@ -3130,11 +3162,11 @@ msgstr ""
 "判定 $x \\n"
 "otin \\operatorname{tgt}(\\rho \\setminus x)$ は保守的である。問題となるエントリの元が $t$ に現れない場合にも束縛子を名前替えする。それでも結果は最小のものと α同値である。この補題は変数が捕獲されないことを示す。結果が $=_\\alpha$ を除いて意図した項であることは、リネーミングも扱う [substitution の設計](substitution.md)の変換補題から従う。"
 
-#: manual/design/syntax.md:219
+#: manual/design/syntax.md:271
 msgid "Checked bound renaming"
 msgstr "検査付きの束縛名の名前替え"
 
-#: manual/design/syntax.md:221
+#: manual/design/syntax.md:273
 msgid ""
 "`alpha_rename_bound(t, x, y)` computes $t\\{x \\mapsto y\\}$, the body of the alpha step above, and returns `None` unless $y \\n"
 "otin \\mathrm{names}(t)$ (or $x = y$). Under that side condition the alpha axiom gives directly"
@@ -3142,67 +3174,71 @@ msgstr ""
 "`alpha_rename_bound(t, x, y)` は上記の α ステップの本体である $t\\{x \\mapsto y\\}$ を計算し、$y \\n"
 "otin \\mathrm{names}(t)$（または $x = y$）でない限り `None` を返す。この付帯条件のもとで、α公理から直接次が得られる。"
 
-#: manual/design/syntax.md:229
+#: manual/design/syntax.md:281
 msgid "The check is stronger than necessary (an occurrence of $y$ under an inner binder for $y$ would be harmless), but it is cheap and it is all the substitution algorithms need, because they always call it with a name chosen fresh for the body."
 msgstr "この検査は必要以上に強い（内側の $y$ の束縛子の下にある $y$ の出現は無害である）が、安価であり、代入アルゴリズムが必要とするのはこれだけである。代入アルゴリズムは常に本体に対して新しく選んだ名前でこれを呼び出すからである。"
 
-#: manual/design/syntax.md:236
+#: manual/design/syntax.md:288
 msgid "$\\mathrm{FV}(t) \\subseteq \\mathrm{names}(t)$; `map_values` preserves both."
 msgstr "$\\mathrm{FV}(t) \\subseteq \\mathrm{names}(t)$ であり、`map_values` は両者を保存する。"
 
-#: manual/design/syntax.md:237
-msgid "`alpha_equal` is reflexive, symmetric and transitive, and coincides with $=_\\alpha$ (theorem above). Reflexivity is also checked by a QuickCheck property in `src/syntax/syntax_wbtest.mbt`."
-msgstr "`alpha_equal` は反射的、対称的、推移的であり、$=_\\alpha$ と一致する（上記の定理）。反射性は `src/syntax/syntax_wbtest.mbt` の QuickCheck プロパティでも検査されている。"
+#: manual/design/syntax.md:289
+msgid "`alpha_equal` decides the lifting of `T`'s `==` to nameless terms, and coincides with $=_\\alpha$ when that `==` is the identity (theorem above). It is reflexive, symmetric and transitive exactly when `==` is (corollary above). Reflexivity for `Int` payloads is checked by a QuickCheck property in `src/syntax/syntax_wbtest.mbt`, and a test there records that a `NaN` payload is not alpha-equal to itself."
+msgstr "`alpha_equal` は `T` の `==` を名前なしの項へ持ち上げたものを判定し、その `==` が恒等関係であるときに $=_\\alpha$ と一致する（上の定理）。それが反射的・対称的・推移的であるのは `==` がそうであるときに限る（上の系）。`Int` ペイロードについての反射性は `src/syntax/syntax_wbtest.mbt` の QuickCheck 性質で検査され、同じファイルのテストは `NaN` ペイロードが自分自身と α同値にならないことを記録している。"
 
-#: manual/design/syntax.md:240
+#: manual/design/syntax.md:295
 msgid "`rename_free` satisfies $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$ and is invariant under $=_\\alpha$: alpha-equivalent inputs give alpha-equivalent outputs."
 msgstr "`rename_free` は $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$ を満たし、$=_\\alpha$ のもとで不変である。α同値な入力は α同値な出力を与える。"
 
-#: manual/design/syntax.md:243
+#: manual/design/syntax.md:298
 msgid "`alpha_rename_bound(t, x, y) = Some(t')` implies $\\beta x.\\,t =_\\alpha \\beta y.\\,t'$."
 msgstr "`alpha_rename_bound(t, x, y) = Some(t')` ならば $\\beta x.\\,t =_\\alpha \\beta y.\\,t'$ である。"
 
-#: manual/design/syntax.md:245
+#: manual/design/syntax.md:300
 msgid "On `Term[T]` every `generic_*` function equals its specialised counterpart."
 msgstr "`Term[T]` 上では、各 `generic_*` 関数はその特殊化版と等しい。"
 
-#: manual/design/syntax.md:247
+#: manual/design/syntax.md:302
 msgid "Cost: `free_variables` and `all_names` make $O(n)$ hash-set operations for a term of size $n$; each union costs up to the size of the sets involved. `alpha_rename_bound` adds one traversal to `all_names`. `rename_free` removes one entry and computes the targets of the renaming at every binder, so it costs $O(n \\cdot |\\rho|)$ when no binder is renamed; each freshened binder adds `all_names` and one renaming traversal of its body."
 msgstr "コスト：`free_variables` と `all_names` はサイズ $n$ の項に対して $O(n)$ 回のハッシュ集合操作を行い、各和集合のコストは関係する集合の大きさまでである。`alpha_rename_bound` は `all_names` に走査を 1 回加える。`rename_free` は各束縛子でエントリを 1 つ取り除き、リネーミングの像を計算するので、束縛子が名前替えされない場合のコストは $O(n \\cdot |\\rho|)$ である。新しい名前にされる束縛子ごとに、`all_names` とその本体の名前替えの走査が 1 回加わる。"
 
-#: manual/design/syntax.md:256
+#: manual/design/syntax.md:311
 msgid "**Variables inside values.** Letting `T` contain names would require a traversal trait on `T` as well. Such ASTs implement `BindingSyntax` directly, which covers the same need with one trait."
 msgstr "**値の内部の変数。** `T` に名前を含めることを許すと、`T` にも走査用のトレイトが必要になる。そのような AST は `BindingSyntax` を直接実装すればよく、一つのトレイトで同じ要求を満たせる。"
 
-#: manual/design/syntax.md:259
+#: manual/design/syntax.md:314
 msgid "**Multi-variable binders.** A binder for several names at once is expressed as nested `Bind` nodes. This keeps the view small and the proofs per binder."
 msgstr "**多変数の束縛子。** 複数の名前を一度に束縛する束縛子は、入れ子の `Bind` ノードとして表現する。これによりビューは小さく保たれ、証明も束縛子ごとに行える。"
 
-#: manual/design/syntax.md:261
+#: manual/design/syntax.md:316
 msgid "**Unchecked bound renaming.** A version without the `None` case would make a capture silent. The checked form makes the precondition visible in the type."
 msgstr "**検査なしの束縛名の名前替え。** `None` の場合をなくした版では捕獲が黙って起こる。検査付きの形にすると事前条件が型に現れる。"
 
-#: manual/design/syntax.md:264
+#: manual/design/syntax.md:319
 msgid "**Alpha-equivalence by conversion.** Converting both terms to De Bruijn form and comparing would allocate two new terms; the lockstep algorithm is the same comparison without the allocation."
 msgstr "**変換による α同値。** 両方の項を De Bruijn 形式に変換して比較すると新しい項を二つ割り当てることになる。歩調を合わせるアルゴリズムは割り当てなしで同じ比較を行う。"
 
-#: manual/design/syntax.md:270
+#: manual/design/syntax.md:325
 msgid "`Value` payloads are never inspected. A payload that contains variables is outside the contract."
 msgstr "`Value` ペイロードは決して調べられない。変数を含むペイロードは契約の範囲外である。"
 
-#: manual/design/syntax.md:272
+#: manual/design/syntax.md:327
 msgid "`==` on terms is structural, not alpha-equivalence."
 msgstr "項に対する `==` は構造的な等価性であり、α同値ではない。"
 
-#: manual/design/syntax.md:273
+#: manual/design/syntax.md:328
+msgid "`alpha_equal` compares payloads with `T`'s `==` and adds no reflexivity of its own: with a non-reflexive `==` (such as `Double` and `NaN`) a term can fail to be alpha-equal to itself."
+msgstr "`alpha_equal` はペイロードを `T` の `==` で比較し、独自の反射性を付け加えない。反射的でない `==`（`Double` と `NaN` など）では、項が自分自身と α同値にならないことがある。"
+
+#: manual/design/syntax.md:331
 msgid "No sorts, scopes or types: every name is a term variable of the same kind."
 msgstr "ソート、スコープ、型はない。すべての名前は同じ種類の項変数である。"
 
-#: manual/design/syntax.md:274
+#: manual/design/syntax.md:332
 msgid "The package does not check that a `BindingSyntax` implementation obeys its laws; [adapter](adapter.md) describes how to test them."
 msgstr "このパッケージは `BindingSyntax` の実装がその法則に従っているかを検査しない。その検査方法は [adapter](adapter.md) で説明されている。"
 
-#: manual/design/syntax.md:276
+#: manual/design/syntax.md:334
 msgid "Substitution lives in [substitution](substitution.md), traversal and rewriting in [rewrite](rewrite.md)."
 msgstr "代入は [substitution](substitution.md) に、走査と書き換えは [rewrite](rewrite.md) にある。"
 
@@ -4177,7 +4213,7 @@ msgstr "**繰り返しの代入を期待する。** `apply_once` は一度だけ
 #: manual/tutorial/rewrite.md:225
 #: manual/tutorial/stlc.md:253
 #: manual/tutorial/substitution.md:209
-#: manual/tutorial/syntax.md:211
+#: manual/tutorial/syntax.md:214
 #: manual/tutorial/utlc/lambda.md:191
 #: manual/tutorial/utlc/nbe.md:198
 msgid "Next steps"
@@ -5109,26 +5145,30 @@ msgid "**`==` is not alpha-equivalence.** Results of substitution and normalizat
 msgstr "**`==` は α同値ではない。** 代入や正規化の結果には `y_1` のようにリネームされた束縛子が含まれうる。`alpha_equal` で比較すること。"
 
 #: manual/tutorial/syntax.md:202
+msgid "**Payloads are compared with their own `==`.** `alpha_equal` inherits it: with `Term[Double]`, a term containing `Value(0.0 / 0.0)` (NaN) is not alpha-equal to itself, and `Value(0.0)` equals `Value(-0.0)`."
+msgstr "**ペイロードはそれ自身の `==` で比較される。** `alpha_equal` はそれを受け継ぐ。`Term[Double]` では `Value(0.0 / 0.0)`（NaN）を含む項は自分自身と α同値にならず、`Value(0.0)` は `Value(-0.0)` と等しい。"
+
+#: manual/tutorial/syntax.md:205
 msgid "**Variables inside values.** `Value(T)` is never inspected. If your constants contain variables, implement `BindingSyntax` for your AST instead of wrapping it in `Term`."
 msgstr "**値の内部の変数。** `Value(T)` の中身は決して調べられない。定数が変数を含むなら、`Term` で包むのではなく、独自の AST に `BindingSyntax` を実装すること。"
 
-#: manual/tutorial/syntax.md:205
+#: manual/tutorial/syntax.md:208
 msgid "**Calling `alpha_rename_bound` on the binder.** It expects the *body*: `body.alpha_rename_bound(x, z)`, not `Bind(x, body).alpha_rename_bound(...)`, which would find no free `x` to rename."
 msgstr "**束縛子に対して `alpha_rename_bound` を呼ぶ。** これは*本体*を期待する。`Bind(x, body).alpha_rename_bound(...)` ではなく `body.alpha_rename_bound(x, z)` と書く。前者ではリネームすべき自由な `x` が見つからない。"
 
-#: manual/tutorial/syntax.md:208
+#: manual/tutorial/syntax.md:211
 msgid "**Method-style trait calls.** `term.project()` is deprecated; write `@syntax.BindingSyntax::project(term)`."
 msgstr "**メソッド形式のトレイト呼び出し。** `term.project()` は非推奨である。`@syntax.BindingSyntax::project(term)` と書くこと。"
 
-#: manual/tutorial/syntax.md:213
+#: manual/tutorial/syntax.md:216
 msgid "[syntax API](../api/syntax.md): every function and its contract."
 msgstr "[syntax API](../api/syntax.md)：すべての関数とその契約。"
 
-#: manual/tutorial/syntax.md:214
+#: manual/tutorial/syntax.md:217
 msgid "[syntax design](../design/syntax.md): the definitions and the proofs behind alpha-equivalence and capture-avoiding renaming."
 msgstr "[syntax の設計](../design/syntax.md)：α同値と捕獲回避リネームの背後にある定義と証明。"
 
-#: manual/tutorial/syntax.md:216
+#: manual/tutorial/syntax.md:219
 msgid "[substitution tutorial](substitution.md): replacing variables by terms."
 msgstr "[substitution チュートリアル](substitution.md)：変数を項で置き換える。"
 
@@ -5380,11 +5420,44 @@ msgstr "[utlc/nbe の設計](../../design/utlc/nbe.md)：意味領域と健全�
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc チュートリアル](../stlc.md)：型付きの η 長形式 NbE。"
 
+#~ msgid "Values are compared with `==`, free variables by name, and bound variables by the binder they refer to. The relation is an equivalence and is decided in one simultaneous traversal of both terms."
+#~ msgstr "値は `==` で、自由変数は名前で、束縛変数は参照する束縛子で比較される。この関係は同値関係であり、二つの項を同時に一度走査することで判定される。"
+
+#~ msgid "**Choice.** `alpha_equal` walks both terms in lockstep with two binder environments $E_L, E_R$ that map each bound name to the *level* (binder depth, counting from the root) at which it was bound; a later binding of the same name shadows an earlier one. Writing $E(x)$ for the level of the last binding of $x$ in $E$, and $d$ for the current depth:"
+#~ msgstr "**選択。** `alpha_equal` は二つの項を歩調を合わせて走査し、二つの束縛環境 $E_L, E_R$ を保持する。これは各束縛名を、それが束縛された*レベル*（根から数えた束縛の深さ）に写す。同じ名前の後の束縛は前の束縛をシャドーイングする。$E$ における $x$ の最後の束縛のレベルを $E(x)$、現在の深さを $d$ と書くと、"
+
+#~ msgid "**Theorem.** `alpha_equal(t, u)` holds iff $t =_\\alpha u$."
+#~ msgstr "**定理.** `alpha_equal(t, u)` が成り立つのは $t =_\\alpha u$ のとき、かつそのときに限る。"
+
+#~ msgid "*Proof sketch.* Let $\\ulcorner t \\urcorner$ be the De Bruijn translation of the [debruijn design](debruijn.md), which replaces a bound occurrence at depth $d$ whose binder sits at level $\\ell$ by the index $i = d - 1 - \\ell$, and keeps free names. Both traversals visit the same positions at the same depth $d$, so for bound occurrences"
+#~ msgstr "*証明の概略。* $\\ulcorner t \\urcorner$ を [debruijn の設計](debruijn.md) の De Bruijn 変換とする。これは深さ $d$ にあり束縛子がレベル $\\ell$ にある束縛された出現をインデックス $i = d - 1 - \\ell$ で置き換え、自由な名前はそのまま残す。二つの走査は同じ深さ $d$ で同じ位置を訪れるので、束縛された出現について"
+
+#~ msgid "and free occurrences are compared by name in both. Hence `alpha_equal(t, u)` iff $\\ulcorner t \\urcorner = \\ulcorner u \\urcorner$. The classical theorem that two named terms are alpha-equivalent iff their De Bruijn translations are identical[^debruijn] completes the proof. $\\square$"
+#~ msgstr "であり、自由な出現はどちらでも名前で比較される。したがって `alpha_equal(t, u)` であることと $\\ulcorner t \\urcorner = \\ulcorner u \\urcorner$ であることは同値である。二つの名前付き項が α同値であるのはその De Bruijn 変換が一致するとき、かつそのときに限るという古典的定理[^debruijn]により証明が完了する。$\\square$"
+
+#~ msgid "`alpha_equal` is reflexive, symmetric and transitive, and coincides with $=_\\alpha$ (theorem above). Reflexivity is also checked by a QuickCheck property in `src/syntax/syntax_wbtest.mbt`."
+#~ msgstr "`alpha_equal` は反射的、対称的、推移的であり、$=_\\alpha$ と一致する（上記の定理）。反射性は `src/syntax/syntax_wbtest.mbt` の QuickCheck プロパティでも検査されている。"
+
+#~ msgid "`NegativeShift(index, delta, cutoff)`: shifting `Bound(index)` by `delta` would make it negative; `cutoff` is the effective cutoff at the occurrence."
+#~ msgstr "`NegativeShift(index, delta, cutoff)`：`Bound(index)` を `delta` だけシフトすると負になる。`cutoff` はその出現位置での実効カットオフである。"
+
+#~ msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. Returns `Err(NegativeShift)` if an index would become negative and `Err(NegativeIndex)` if the input contains a negative index."
+#~ msgstr "`shift(t, delta, cutoff)` は操作 $\\uparrow^{delta}_{cutoff}$ である：`k` 個の束縛子の下で、インデックス `i >= cutoff + k` は `i + delta` になり、それより小さいインデックスはそのままである。インデックスが負になる場合は `Err(NegativeShift)` を、入力に負のインデックスが含まれる場合は `Err(NegativeIndex)` を返す。"
+
 #~ msgid "**Problem.** A negative shift on an ill-formed term yields a negative index, which silently refers to nothing."
 #~ msgstr "**問題。** 不正な項に負のシフトを行うと負のインデックスが生じ、それは黙って何も参照しない。"
 
+#~ msgid "**Choice.** `shift` returns `Err(NegativeShift)` instead, and `shift`, `substitute_bound`, `instantiate`, `validate` and `to_named` report `NegativeIndex` for any negative index they meet. The lemmas below show that the error cases are unreachable from well-scoped input, so the `Result` costs nothing for correct callers and turns a silent corruption into data for incorrect ones. This follows the library rule that expected failures at public boundaries are structured values."
+#~ msgstr "**選択。** 代わりに `shift` は `Err(NegativeShift)` を返し、`shift`、`substitute_bound`、`instantiate`、`validate`、`to_named` は出会った負のインデックスに対して `NegativeIndex` を報告する。以下の補題は、スコープの正しい入力からはエラーの場合に到達しないことを示すので、`Result` は正しい呼び出し側には何のコストもなく、誤った呼び出し側に対しては黙った破損をデータに変える。これは、公開境界で想定される失敗は構造化された値であるというライブラリの規則に従う。"
+
 #~ msgid "No free index $0$ remains, so the shift by $-1$ maps $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$ without a negative result. $\\square$"
 #~ msgstr "自由添字 $0$ はもはや残らないので、$-1$ によるシフトは負の結果を生じることなく $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$ と写す。$\\square$"
+
+#~ msgid "has declarative type $B$ and no other. Without the renaming, the trailing $x$ would be typed in $\\Gamma, x{:}\\mathsf{Unit}$ and the checker would answer `Unit`; versions before the fix did exactly that, and `check` accepted the term at `Unit`. With $x' = x_1$ the trailing $x$ keeps its type $B$, and `infer` returns $B$. The typed evaluator computes the type of a redex head with the same rule, so `normalize_eta_long` accepts the same terms as `check`."
+#~ msgstr "は宣言的な型 $B$ を持ち、それ以外の型は持たない。名前替えがなければ、後続の $x$ は $\\Gamma, x{:}\\mathsf{Unit}$ で型付けされ、検査器は `Unit` と答えてしまう。修正前の版はまさにそうしており、`check` はこの項を `Unit` で受理していた。$x' = x_1$ とすれば後続の $x$ は型 $B$ を保ち、`infer` は $B$ を返す。型付き評価器は簡約基の先頭の型を同じ規則で計算するので、`normalize_eta_long` は `check` と同じ項を受理する。"
+
+#~ msgid "The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing, eta expansion of open variables and of constants (including nested arrow types and higher-order arguments), and agreement of the two normalizers on small terms."
+#~ msgstr "`src/stlc/stlc_test.mbt` のテストは、型付けと拒否、シャドーイング、開いた変数および定数の η展開（入れ子の矢印型や高階の引数を含む）、そして小さな項における二つの正規化器の一致を扱う。"
 
 #~ msgid "`reduce_once` does not validate its input. It returns `ScopeFailure` only when the redex it contracts contains a negative index; a negative index elsewhere is skipped like any other variable, and a dangling index is shifted like a free one (`(λ. 5) 1` reduces to `Bound(4)`). Call `validate` first if the term may be ill scoped."
 #~ msgstr "`reduce_once` は入力を検証しない。`ScopeFailure` を返すのは、縮約する簡約基が負のインデックスを含む場合だけである。それ以外の場所にある負のインデックスは他の変数と同様に読み飛ばされ、ぶら下がったインデックスは自由なインデックスと同様にシフトされる（`(λ. 5) 1` は `Bound(4)` に簡約される）。項のスコープが正しくない可能性がある場合は、先に `validate` を呼ぶこと。"
