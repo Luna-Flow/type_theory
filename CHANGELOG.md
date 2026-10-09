@@ -87,3 +87,8 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   the design page and the Typst note: no free index `i >= c` with `i + d < c`,
   instead of "no index becomes negative". The cancellation and safe
   instantiation proofs check the cutoff accordingly (#9).
+- `syntax`: the manual no longer states that `alpha_equal` is always an
+  equivalence. It compares payloads with `T`'s `==`, so it is an equivalence
+  exactly when that `==` is one, and it is alpha-equivalence when `==` is the
+  identity; with `Double`, a `NaN` payload is not alpha-equal to itself
+  (#15).

@@ -5,7 +5,7 @@ Last audited: 2026-10-09
 | Area | Status | Evidence | Contract |
 | --- | --- | --- | --- |
 | Named free variables | Correct | nested binder tests | bound occurrences are excluded |
-| Alpha-equivalence | Correct | shadowing and QuickCheck reflexivity | binder names are irrelevant |
+| Alpha-equivalence | Correct | shadowing, QuickCheck reflexivity on `Int` payloads, `NaN` payload test (#15) | binder names are irrelevant; payloads are compared with `T`'s `==`, so the relation is an equivalence exactly when that `==` is |
 | Named substitution | Correct | nested binder, range, domain collision regressions | simultaneous and capture-avoiding |
 | Generic AST substitution | Correct | downstream adapter tests | inserted replacements are not revisited |
 | Structured reduction | Correct | path and trace tests | one call contracts at most one redex |
@@ -21,6 +21,9 @@ Last audited: 2026-10-09
 ## Known Boundaries
 
 - `Term[T]` assumes `T` is closed with respect to shared names.
+- `alpha_equal` is the payload equality lifted through binders. With a
+  non-reflexive `==`, such as `Double` with `NaN`, a term is not alpha-equal
+  to itself.
 - UTLC NbE is not total; `FuelExhausted` is expected for divergent terms.
 - Generic rewrite traversal currently provides pre-order single-step semantics;
   additional strategies must preserve the one-redex contract.
