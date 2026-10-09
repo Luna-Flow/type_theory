@@ -11,7 +11,7 @@ Last audited: 2026-10-09
 | Structured reduction | Correct | path and trace tests | one call contracts at most one redex |
 | Named/De Bruijn conversion | Correct | both round-trip laws | named round trip is alpha-equivalent |
 | De Bruijn scope | Correct | dangling and negative index tests, reducer scope regressions (#3) | invalid indices return `ScopeError`; `reduce_once` and `normalize` validate their input |
-| Shift and instantiation | Correct | nested binder beta tests | standard cutoff-based shifting |
+| Shift and instantiation | Correct | nested binder beta tests, downward-shift capture regressions (#9) | standard cutoff-based shifting; a free index that would fall below the cutoff returns `NegativeShift` |
 | De Bruijn small-step | Correct | path, normalization and empty-application tests (#2) | leftmost-outermost beta; `Apply(h, [])` is read as `h` |
 | UTLC untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests | beta-normalization may exhaust fuel |
 | STLC bidirectional typechecking | Correct | typing, rejection, shadowing and trailing-argument capture tests (#1) | inference is syntax-directed and lambdas check against arrows; a redex parameter is renamed apart from trailing arguments |
@@ -47,3 +47,6 @@ None open. Fixed on 2026-10-09:
   `stlc` rejects them anywhere in a spine.
 - `@debruijn.reduce_once` and `@debruijn.normalize` did not validate scope
   (#3). Both now return `ScopeFailure` for ill-scoped input.
+- `@debruijn.shift` with a negative `delta` moved a free index below the
+  cutoff, where an enclosing binder captured it: `shift(Bind(Bound(1)), -1, 0)`
+  returned `Ok(Bind(Bound(0)))` (#9). It now returns `NegativeShift`.

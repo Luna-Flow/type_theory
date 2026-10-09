@@ -79,8 +79,10 @@ pub fn ScopeError::equal(Self, Self) -> Bool
 - `UnboundIndex(index, depth)`: `Bound(index)` occurs under only `depth`
   binders.
 - `NegativeIndex(index)`: a negative index.
-- `NegativeShift(index, delta, cutoff)`: shifting `Bound(index)` by `delta`
-  would make it negative; `cutoff` is the effective cutoff at the occurrence.
+- `NegativeShift(index, delta, cutoff)`: shifting the free `Bound(index)` by
+  `delta` would move it below `cutoff`, the effective cutoff at the
+  occurrence, where it would be captured by an enclosing binder or become
+  negative.
 
 ## Conversion and validation
 
@@ -163,8 +165,11 @@ pub fn[T] shift(DbTerm[T], Int, Int) -> Result[DbTerm[T], ScopeError]
 
 `shift(t, delta, cutoff)` is the operation $\uparrow^{delta}_{cutoff}$:
 under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller
-indices are left alone. Returns `Err(NegativeShift)` if an index would become
-negative and `Err(NegativeIndex)` if the input contains a negative index.
+indices are left alone. The shift is defined when no such index falls below
+the cutoff, that is, there is no `i >= cutoff + k` with
+`i + delta < cutoff + k`. Returns `Err(NegativeShift)` if an index would fall
+below the cutoff, where it would be captured by an enclosing binder or become
+negative, and `Err(NegativeIndex)` if the input contains a negative index.
 
 ### `substitute_bound`
 
@@ -207,6 +212,12 @@ test "instantiate a binder body" {
   assert_eq(
     @debruijn.shift(open_term, 2, 0),
     Ok(Bind(Apply(Bound(0), [Bound(3)]))),
+  )
+  // shifting λ. (free 0) down would capture the free index
+  let captured : @debruijn.DbTerm[Int] = Bind(Bound(1))
+  assert_eq(
+    @debruijn.shift(captured, -1, 0),
+    Err(NegativeShift(index=1, delta=-1, cutoff=1)),
   )
   let under_binder : @debruijn.DbTerm[Int] = Bind(Bound(1))
   assert_eq(

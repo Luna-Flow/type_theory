@@ -49,6 +49,11 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   negative index outside the contracted redex was skipped (`Bind(Bound(-1))`
   was a normal form) and a dangling index was shifted silently
   (`(λ. 5) 1` reduced to `Bound(4)`) (#3).
+- `debruijn`: `shift` with a negative `delta` now returns `NegativeShift` when
+  a free index would fall below the cutoff. Before, only a negative result was
+  rejected, so a free index could be captured by an enclosing binder:
+  `shift(Bind(Bound(1)), -1, 0)` returned `Ok(Bind(Bound(0)))`, the identity.
+  `instantiate` and the reducers never produced such a shift (#9).
 
 ### Documentation
 
@@ -71,3 +76,7 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   spelled out.
 - The manual describes the fixed behaviour of the three bugs above, and the
   STLC soundness theorem is now unconditional.
+- The precondition of a De Bruijn shift is stated correctly in the API page,
+  the design page and the Typst note: no free index `i >= c` with `i + d < c`,
+  instead of "no index becomes negative". The cancellation and safe
+  instantiation proofs check the cutoff accordingly (#9).
