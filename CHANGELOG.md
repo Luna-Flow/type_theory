@@ -61,6 +61,15 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   now flattens the application spine before typing its head and follows redex
   bodies the same way `infer` does, so it accepts exactly the terms `check`
   accepts (#7).
+- `eval`: `ApplicativeOrder` now reads application spines curried, so it
+  takes the same steps on `Apply(f, [a1, a2])` and on
+  `Apply(Apply(f, [a1]), [a2])`. Before, it was `@rewrite.bottom_up_once`,
+  which tries every argument before the application: for
+  `Apply(λx. b, [a1, a2])` it reduced inside `a2` before the redex
+  `(λx. b) a1`, which the nested encoding contracts first. After argument
+  `ai` it now tries the rule on the whole application if the rule applies to
+  the prefix `Apply(h, [a1 .. ai])`; only real positions are rewritten, and
+  `@rewrite.bottom_up_once` keeps its n-ary post-order (#11).
 
 ### Documentation
 

@@ -8,7 +8,7 @@ Last audited: 2026-10-09
 | Alpha-equivalence | Correct | shadowing, QuickCheck reflexivity on `Int` payloads, `NaN` payload test (#15) | binder names are irrelevant; payloads are compared with `T`'s `==`, so the relation is an equivalence exactly when that `==` is |
 | Named substitution | Correct | nested binder, range, domain collision regressions | simultaneous and capture-avoiding |
 | Generic AST substitution | Correct | downstream adapter tests | inserted replacements are not revisited |
-| Structured reduction | Correct | path and trace tests | one call contracts at most one redex |
+| Structured reduction | Correct | path and trace tests; n-ary versus curried spine regression and lockstep property test for every strategy (#11) | one call contracts at most one redex; `ApplicativeOrder` reads spines curried |
 | Named/De Bruijn conversion | Correct | both round-trip laws | named round trip is alpha-equivalent |
 | De Bruijn scope | Correct | dangling and negative index tests, reducer scope regressions (#3) | invalid indices return `ScopeError`; `reduce_once` and `normalize` validate their input |
 | Shift and instantiation | Correct | nested binder beta tests, downward-shift capture regressions (#9) | standard cutoff-based shifting; a free index that would fall below the cutoff returns `NegativeShift` |
@@ -63,3 +63,7 @@ None open. Fixed on 2026-10-09:
   `(λx. (λy. λz. z) x) () v`, which `check` accepts, with `CannotInferLambda`
   (#7). The evaluator now flattens the spine and follows redex bodies as
   `infer` does.
+- `ApplicativeOrder` tried every argument of an n-ary spine before the
+  application, so `Apply(λx. b, [a1, a2])` reduced inside `a2` before the
+  redex `(λx. b) a1` that the nested encoding contracts first (#11). It now
+  follows the curried reading and takes the same steps on both encodings.

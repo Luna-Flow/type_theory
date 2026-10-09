@@ -46,13 +46,25 @@ pub(all) enum Strategy {
 | Strategy | Next position | Enters binders and arguments |
 | --- | --- | --- |
 | `NormalOrder` | leftmost-outermost redex (`@rewrite.top_down_once`) | yes |
-| `ApplicativeOrder` | leftmost-innermost redex (`@rewrite.bottom_up_once`) | yes |
+| `ApplicativeOrder` | leftmost-innermost redex, spines read curried | yes |
 | `WeakHead` | the root, else the head of an application, recursively | no |
 | `FullNormal` | same as `NormalOrder` | yes |
 
 `FullNormal` currently selects the same traversal as `NormalOrder`; it names
 the intent "reduce to full normal form" and may diverge from `NormalOrder` if
 another full-normalization traversal is added.
+
+Positions are compared on the curried reading of application spines:
+`Apply(f, [a1, a2])` is $(f\,a_1)\,a_2$. `ApplicativeOrder` therefore differs
+from `@rewrite.bottom_up_once`, which is post-order on the n-ary tree. It
+visits the head of `Apply(h, [a1, …, an])`, then the arguments from left to
+right; after argument `ai` with `i < n` it tries the rule on the whole
+application if the rule applies to the prefix `Apply(h, [a1, …, ai])`, and
+after `an` in any case. A prefix is never rewritten on its own, since it is
+not a position of the term. With `@lambda.beta_rule` every strategy takes
+the same steps on `Apply(f, [a1, a2])` and on `Apply(Apply(f, [a1]), [a2])`;
+a rule that matches applications of one arity only sees the n-ary post-order
+of `bottom_up_once`.
 
 ### `Strategy::equal`
 
@@ -101,6 +113,35 @@ test "weak head stops at a binder" {
       assert_eq(path.to_array(), [@rewrite.BinderBody])
     }
     NoStep => fail("expected a step under the binder")
+  }
+}
+```
+
+```moonbit
+test "applicative order reads spines curried" {
+  let x = @core.Name::new("x")
+  let y = @core.Name::new("y")
+  let v = @core.Name::new("v")
+  let k : @syntax.Term[Int] = Bind(x, Bind(y, Variable(y)))
+  let inner : @syntax.Term[Int] = Apply(Bind(y, Variable(y)), [Variable(v)])
+  let nary : @syntax.Term[Int] = Apply(k, [Value(0), inner])
+  let nested : @syntax.Term[Int] = Apply(Apply(k, [Value(0)]), [inner])
+  let beta = @rewrite.RuleName::unsafe_new("beta")
+  // (λx. λy. y) 0 is contracted first in both encodings
+  let expected : @syntax.Term[Int] = Apply(Bind(y, Variable(y)), [inner])
+  match @eval.reduce_once(nary, beta, @lambda.beta_rule, ApplicativeOrder) {
+    Reduced(after~, path~, ..) => {
+      assert_eq(after, expected)
+      assert_eq(path.to_array(), [])
+    }
+    NoStep => fail("expected a step")
+  }
+  match @eval.reduce_once(nested, beta, @lambda.beta_rule, ApplicativeOrder) {
+    Reduced(after~, path~, ..) => {
+      assert_eq(after, expected)
+      assert_eq(path.to_array(), [@rewrite.ApplyHead])
+    }
+    NoStep => fail("expected a step")
   }
 }
 ```

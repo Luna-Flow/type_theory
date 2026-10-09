@@ -12,8 +12,13 @@ to call.
 
 - **Strategies are data.** A strategy must be a value that can be stored,
   compared and printed.
-- **No new semantics.** Every strategy is a traversal of [rewrite](rewrite.md),
-  so it inherits the one-redex contract, the step-count contract and traces.
+- **No new semantics.** Every strategy is a single-step function in the
+  sense of [rewrite](rewrite.md): it rewrites one position of the term with
+  the rule, so it inherits the one-redex contract, the step-count contract
+  and traces.
+- **One meaning per term.** An n-ary spine `Apply(f, [a1, a2])` and the
+  nested `Apply(Apply(f, [a1]), [a2])` both denote $f\,a_1\,a_2$; a named
+  strategy must take the same steps on both.
 
 ## Mathematical background
 
@@ -54,6 +59,46 @@ redex $(\lambda x.\,b)\,a$ for every strategy. The node itself is not
 removed, so the characterization above holds up to empty applications: a
 weak head normal form is, after dropping them, an abstraction or a spine
 with a variable or a value at its head.
+
+"Leftmost", "outermost" and "innermost" refer to the curried reading of the
+term, in which $t(u_1, \dots, u_n)$ stands for
+$(\cdots((t\,u_1)\,u_2)\cdots)\,u_n$ and the partial applications
+$t\,u_1 \cdots u_i$ are subterms as well. For beta this matters: in
+$(\lambda x.\,b)\,a_1\,a_2$ the redex is the prefix
+$(\lambda x.\,b)\,a_1$, which does not contain $a_2$, so applicative order
+contracts it before any redex inside $a_2$.
+
+### Curried prefixes and n-ary positions
+
+A prefix $t\,u_1 \cdots u_i$ with $i < n$ is not a position of the n-ary
+tree, so a step cannot be reported there. The beta rule does not need one:
+it contracts a spine with its first argument and keeps the rest, so that
+for $n \ge 2$
+
+$$
+\beta\big(t(u_1, \dots, u_n)\big) = \beta\big(t(u_1)\big)(u_2, \dots, u_n),
+$$
+
+and the left side is defined exactly when the right side is. A beta step at
+the prefix $t\,u_1$ is therefore the step at the whole spine, reported at the
+spine's position. The strategies use this in one direction only: a prefix
+decides *when* the whole application is tried, never *what* is rewritten.
+
+- Normal order and weak head try the whole application before its head and
+  arguments. The prefixes lie between the two, and a beta redex at a prefix
+  is a redex at the whole application, so the n-ary order already agrees
+  with the curried one.
+- Applicative order tries the head, then the arguments from left to right.
+  After argument $u_i$ with $i < n$, it tries the rule on the whole
+  application if the rule applies to the prefix $t(u_1, \dots, u_i)$, and
+  after $u_n$ in any case. For beta this is post-order on the curried
+  reading.
+
+A rule that matches applications of one arity only, such as
+`Apply(Value("+"), [Value("0"), x])`, never applies to a shorter prefix, so
+for it applicative order is post-order on the n-ary tree. A rule that
+applies to a prefix but not to the whole application rewrites nothing
+there: the prefix is not a position.
 
 ### Classical results for beta
 
@@ -100,12 +145,12 @@ example in a test that checks two strategies against each other.
 given to `@rewrite.normalize` and `@rewrite.trace` directly. The enum covers
 the named strategies only.
 
-### Each strategy is one traversal of rewrite
+### Each strategy is one traversal
 
 $$
 \begin{aligned}
 \texttt{NormalOrder},\ \texttt{FullNormal} &\;\mapsto\; \texttt{top\_down\_once} && \text{(pre-order: leftmost-outermost)},\\
-\texttt{ApplicativeOrder} &\;\mapsto\; \texttt{bottom\_up\_once} && \text{(post-order: leftmost-innermost)},\\
+\texttt{ApplicativeOrder} &\;\mapsto\; \text{post-order on curried spines} && \text{(leftmost-innermost)},\\
 \texttt{WeakHead} &\;\mapsto\; \text{root, then head of } \texttt{Apply}, \text{ recursively}.
 \end{aligned}
 $$
@@ -114,9 +159,33 @@ Pre-order search returns the first redex that no other redex contains, scanning
 head before arguments and arguments left to right; this is the
 leftmost-outermost redex, and the normal-form lemma of the
 [rewrite design](rewrite.md) shows that `NoStep` means "normal". Post-order
-search returns a redex that contains no other redex, the leftmost-innermost
-one. Weak head search follows only the spine, so its `NoStep` means "weak head
-normal" and nothing more.
+search on the curried reading returns, for beta and for rules of one arity, a
+redex that contains no other redex, the leftmost-innermost one; it tries the
+rule at every position, so its `NoStep` also means "normal". Weak head search follows only the spine, so its
+`NoStep` means "weak head normal" and nothing more.
+
+### Applicative order reads spines curried
+
+**Problem.** `@rewrite.bottom_up_once` is post-order on the n-ary tree: it
+tries every argument of `Apply(h, [a1, …, an])` before the application. For
+beta it reduces inside $a_2$ before the redex $(\lambda x.\,b)\,a_1$, while
+the nested encoding contracts that redex first. The normal form is the same,
+but the steps, paths and traces depend on how the term was built.
+
+**Options.** Keep `bottom_up_once` and document the dependence; rewrite the
+prefix `Apply(h, [a1, …, ai])` on its own; let the prefix only decide when
+the whole application is tried.
+
+**Choice.** The last. Rewriting a prefix would report a step at a position
+that does not exist, against the path contract of
+[rewrite](rewrite.md). Trying the whole application early keeps every step
+a rule application at a real position, and for beta it yields exactly the
+curried order (previous section). The traversal lives in `eval`, next to
+the weak head one; `@rewrite.bottom_up_once` stays post-order on the n-ary
+tree, because for the symbolic ASTs that `rewrite` serves, an n-ary
+operator application is one node, not a curried spine. The cost is one
+extra rule attempt per argument of a spine, on a prefix built for the
+attempt.
 
 `evaluate` and `trace` add no reduction logic of their own: they pass the
 strategy's step function to `@rewrite.normalize` and `@rewrite.trace`. As a
@@ -136,6 +205,10 @@ changing the meaning of `NormalOrder`.
 - `reduce_once` satisfies the one-redex contract of
   [rewrite](rewrite.md) for every strategy; the reported path of a
   `WeakHead` step consists of `ApplyHead` frames only.
+- With the beta rule, every strategy takes the same steps on a term and on
+  its curried form, in which every `Apply(f, [a1, …, an])` with $n > 0$ is
+  nested into unary applications: after each step the two terms are again a
+  term and its curried form, up to alpha-equivalence.
 - For `NormalOrder`, `FullNormal` and `ApplicativeOrder`, `NoStep` means the
   rule applies nowhere; for `WeakHead`, nowhere on the head spine.
 - With the beta rule, `evaluate(t, _, beta, NormalOrder, k)` returns
@@ -145,7 +218,9 @@ changing the meaning of `NormalOrder`.
   are alpha-equivalent (Church–Rosser).
 
 The library's tests check named and De Bruijn beta steps against each other
-(`src/utlc/lambda/lambda_test.mbt`), and normal order against the NbE
+and every strategy on random terms against their curried forms
+(`src/utlc/lambda/lambda_test.mbt`), applicative order with rules of fixed
+arity (`src/eval/eval_test.mbt`), and normal order against the NbE
 normalizer (`src/utlc/nbe/nbe_test.mbt`).
 
 ## Alternatives rejected
