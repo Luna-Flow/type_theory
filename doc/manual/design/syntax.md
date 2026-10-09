@@ -210,9 +210,10 @@ not reflexive: $\mathrm{NaN} \not\approx_T \mathrm{NaN}$. So `alpha_equal` on
 `Term[Double]` is symmetric and transitive, reflexive exactly on the terms
 without a `NaN` payload, and it identifies `Value(0.0)` with `Value(-0.0)`.
 
-Each node is visited once. A variable lookup scans the environment, and
-each binder copies it, both in $O(d)$ for binder depth $d$, so the comparison
-costs $O(n \cdot d)$ for terms of size $n$.
+Each node is visited once. The environments are persistent hash maps, so a
+variable lookup and the extension at a binder are one map operation each,
+the extension shares the outer environment instead of copying it, and the
+comparison costs $O(n)$ map operations for terms of size $n$.
 
 [^debruijn]: N. G. de Bruijn, "Lambda calculus notation with nameless dummies", Indagationes Mathematicae 34, 1972.
 
@@ -283,6 +284,93 @@ binder for $y$ would be harmless), but it is cheap and it is all the
 substitution algorithms need, because they always call it with a name chosen
 fresh for the body.
 
+### Traversal with an explicit work stack
+
+**Problem.** Every definition above is a structural recursion. Run as host
+recursion, a term nested $n$ levels deep (a chain of `Apply` heads, of
+`Apply` arguments, or of binders) needs $n$ host frames. The js, wasm and
+wasm-gc stacks overflow after a few thousand levels, native at $10^5$ levels
+in the tests, and nothing in the definitions bounds the nesting depth of an input.
+
+**Choice.** Every operation of the package is a loop over a heap `Array` of
+pending work. The host stack depth is constant in the nesting depth, and the
+heap holds $O(n)$ pending items for a term of size $n$. There are two
+schemes, one for folds and one for rebuilds.
+
+*Folds.* `free_variables`, `all_names`, `==` and `alpha_equal` have the form
+
+$$
+F(t, c) \;=\; \ell(t, c) \;\oplus\; \bigoplus_{(t', c') \in \operatorname{ch}(t, c)} F(t', c'),
+$$
+
+where $\operatorname{ch}(t, c)$ lists the children of $t$ with the context
+the recursive call receives (the bound set $B$, extended to $B \cup \{x\}$
+under $\beta x$; for `alpha_equal`, the environments and the depth), $\ell$
+is the contribution of the node itself, and $\oplus$ is $\cup$ for the name
+sets and $\wedge$ for the comparisons; for a comparison a node is a pair of
+subterms, and a mismatch of constructors, names or arities makes $\ell$
+false. Both operations are associative and commutative with a unit
+($\varnothing$, true). The loop keeps an accumulator $A$ and a multiset $W$
+of pending pairs, with the invariant
+
+$$
+F(t_0, c_0) \;=\; A \;\oplus\; \bigoplus_{(t, c) \in W} F(t, c).
+$$
+
+It holds initially with $A$ the unit and $W = \{(t_0, c_0)\}$. Taking
+$(t, c)$ out of $W$, adding $\ell(t, c)$ to $A$ and putting
+$\operatorname{ch}(t, c)$ into $W$ unfolds one equation of $F$, so the
+invariant is preserved; every pair is put into $W$ once, so the loop stops,
+and then $A = F(t_0, c_0)$. For $\wedge$ the loop returns as soon as
+$A$ is false, because $\text{false} \wedge b = \text{false}$. The contexts
+are persistent values (`HashSet`, `HashMap`), so pushing the children of a
+node shares the context instead of copying it.
+
+*Rebuilds.* `map_values`, `rename_free`, `alpha_rename_bound` and the
+substitutions of the [substitution design](substitution.md) have the form
+
+$$
+\begin{aligned}
+R(t(u_1, \dots, u_n), c) &= R(t, c)\big(R(u_1, c), \dots, R(u_n, c)\big), \\
+R(\beta x.\, t, c) &= \beta x'.\, R(t', c') \quad\text{where } (x', t', c') = \operatorname{binder}(x, t, c),
+\end{aligned}
+$$
+
+with $R$ given directly on values and variables. A private `rebuild` runs it
+with a stack of tasks and a stack of results. `Visit(t, c)` of a leaf pushes
+its result. `Visit` of an application pushes `BuildApply(n)`, then `Visit` of
+the arguments from last to first, then `Visit` of the head; `Visit` of a
+binder calls $\operatorname{binder}$ and pushes `BuildBind(x')` and
+`Visit(t', c')`. `BuildApply(n)` pops $n + 1$ results and pushes their
+application, and `BuildBind(x')` wraps the top result in a binder.
+
+**Lemma (rebuild).** Started on a result stack $S$, the tasks that a
+`Visit(t, c)` puts on the task stack leave $S \cdot R(t, c)$ when they are
+done, and leave the task stack below them unchanged.
+
+*Proof.* By induction on $t$. A leaf pushes $R(t, c)$. For an application,
+the tasks run in the order `Visit(t)`, `Visit(u_1)`, …, `Visit(u_n)`,
+`BuildApply(n)`; by induction they leave
+$S \cdot R(t, c) \cdot R(u_1, c) \cdots R(u_n, c)$ before `BuildApply(n)`,
+which turns the top $n + 1$ results into $R(t, c)(R(u_1, c), \dots)$. A
+binder is the same with one child. $\square$
+
+Applied to the root, the lemma gives the result stack $[R(t_0, c_0)]$. The
+callbacks run in the order of the recursive definition: `project`, the
+`binder` step and `map_values`'s function in pre-order, head first and then
+the arguments from left to right, and the constructors of `BindingSyntax` in
+post-order. So the result is the recursive one, even for an impure function
+passed to `map_values`.
+
+**Equality.** A derived `Eq` is itself a structural recursion, so `Term`
+implements `Eq` by hand as a fold with $\wedge$: the same constructors, the
+same names, the same arities, and payloads related by `T`'s `==`. It has no
+shortcut for physically equal subterms, because the derived `==` has none: a
+term with a `NaN` payload is not `==` to itself in either.
+
+The tests in `src/syntax/stack_safety_wbtest.mbt` run every operation on the
+three chains and a mixture of them, 100 000 levels deep, on every backend.
+
 ## Correctness and invariants
 
 - $\mathrm{FV}(t) \subseteq \mathrm{names}(t)$; `map_values` preserves both.
@@ -298,9 +386,11 @@ fresh for the body.
 - `alpha_rename_bound(t, x, y) = Some(t')` implies
   $\beta x.\,t =_\alpha \beta y.\,t'$.
 - On `Term[T]` every `generic_*` function equals its specialised counterpart.
+- Every operation, `==` included, uses a constant amount of host stack in the
+  nesting depth of its input (traversal with an explicit work stack, above).
 
-Cost: `free_variables` and `all_names` make $O(n)$ hash-set operations for
-a term of size $n$; each union costs up to the size of the sets involved.
+Cost: `free_variables` and `all_names` make $O(n)$ hash-set insertions for
+a term of size $n$.
 `alpha_rename_bound` adds one traversal to `all_names`. `rename_free` removes
 one entry and computes the targets of the renaming at every binder, so it
 costs $O(n \cdot |\rho|)$ when no binder is renamed; each freshened binder
@@ -325,6 +415,12 @@ adds `all_names` and one renaming traversal of its body.
 - `Value` payloads are never inspected. A payload that contains variables is
   outside the contract.
 - `==` on terms is structural, not alpha-equivalence.
+- `Debug` on terms (`@debug.to_string`, `Repr`, the messages of `assert_eq`
+  and `inspect`) is derived and recursive, so formatting a term nested
+  tens of thousands of levels deep can still overflow the host stack.
+- The generic algorithms are stack-safe when the `BindingSyntax` methods of
+  the downstream type are: `project` and the three constructors should look
+  at one layer of a node and not recurse into it.
 - `alpha_equal` compares payloads with `T`'s `==` and adds no reflexivity of
   its own: with a non-reflexive `==` (such as `Double` and `NaN`) a term can
   fail to be alpha-equal to itself.

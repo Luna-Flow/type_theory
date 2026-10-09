@@ -8,6 +8,15 @@ renaming, and the open trait `BindingSyntax` through which a downstream AST
 gets the same analyses and the generic substitution and rewriting of the
 other packages.
 
+Every operation of the package, `==` included, is stack-safe in the nesting
+depth of its input: it keeps pending work in a heap array and uses a constant
+amount of host stack, so a term nested 100 000 levels deep (a chain of
+applications or of binders) is handled on every backend. The exception is
+`Debug`: `@debug.to_string`, `Repr` and the messages of `assert_eq` and
+`inspect` recurse and can overflow the stack on such a term. The generic
+functions are stack-safe when the `BindingSyntax` methods of the downstream
+type are, that is, when they look at one layer of a node.
+
 The definitions behind these functions, and the proofs of their laws, are in
 the [syntax design](../design/syntax.md).
 
@@ -39,7 +48,8 @@ pub(all) enum Term[T] {
   Variable(@core.Name)
   Apply(Term[T], Array[Term[T]])
   Bind(@core.Name, Term[T])
-} derive(Eq, @debug.Debug)
+} derive(@debug.Debug)
+pub impl[T : Eq] Eq for Term[T]
 ```
 
 - `Value(v)` is a domain constant. Its payload `T` is opaque: it is treated as
@@ -83,7 +93,11 @@ test "build the term λx. f x 1" {
 pub fn[T : Eq] Term::equal(Self[T], Self[T]) -> Bool
 ```
 
-It is the promoted `Eq` implementation. `λx.x` and `λy.y` are not `equal`.
+It is the promoted `Eq` implementation: the same constructors, the same
+names and arities, and payloads compared with `T`'s `==`. `λx.x` and `λy.y`
+are not `equal`. The implementation is written by hand rather than derived so
+that it is stack-safe; it has the semantics of the derived one, including a
+`Double` `NaN` payload making a term unequal to itself.
 
 ### `Term::map_values`
 
