@@ -73,6 +73,11 @@ $$
 \end{aligned}
 $$
 
+The shift is defined when no index crosses its cutoff: there is no index
+$i \ge c$ with $i + d < c$, where $c$ is the cutoff at that occurrence. Such
+an index would be captured by an enclosing binder, or become negative. A
+shift with $d \ge 0$ is always defined.
+
 `shift(t, d, c)` implements it by carrying the binder depth $k$ and testing
 $i \ge c + k$, which unfolds the recursion on $c$.
 
@@ -106,10 +111,12 @@ body are shifted down. This is `instantiate(t, s)`.[^tapl]
 
 ### Shifting is checked, not assumed
 
-**Problem.** A negative shift on an ill-formed term yields a negative index,
-which silently refers to nothing.
+**Problem.** A downward shift can move a free index below its cutoff. Below
+zero the index refers to nothing; between zero and the cutoff it is captured
+by an enclosing binder. Either way the result is a silently wrong term.
 
-**Choice.** `shift` returns `Err(NegativeShift)` instead, and `shift`,
+**Choice.** `shift` returns `Err(NegativeShift)` when a free index would cross
+its cutoff, and `shift`,
 `substitute_bound`, `instantiate`, `validate` and `to_named` report
 `NegativeIndex` for any negative index they meet. The lemmas below show that
 the error cases are unreachable from well-scoped input, so the `Result` costs
@@ -157,8 +164,10 @@ i = k + m,\ m \ge 1 &: \text{kept, with root-relative index } m \in \{1, \dots, 
 \end{aligned}
 $$
 
-No free index $0$ remains, so the shift by $-1$ maps
-$\{1, \dots, n\} \to \{0, \dots, n - 1\}$ without a negative result. $\square$
+No free index $0$ remains. Under $k$ binders the shift by $-1$ has cutoff
+$k$ and moves the index $k + m$ with $m \ge 1$ to $k + m - 1 \ge k$, so no
+index crosses its cutoff, and the root-relative free indices are mapped
+$\{1, \dots, n\} \to \{0, \dots, n - 1\}$. $\square$
 
 Hence `instantiate` and `reduce_once` return no `ScopeError` on well-scoped
 input, and a reduct of a well-scoped term is well scoped (subject reduction
@@ -240,6 +249,8 @@ so the normalization theorem applies to `normalize`.
   [rewrite](rewrite.md), with rule name `"beta"`.
 - `shift(t, 0, c) == Ok(t)` for every `t` without negative indices, and
   shifts with one cutoff compose (Lemma 1).
+- `shift` never turns a free index into a bound one: if a free index would
+  fall below its cutoff, it returns `Err(NegativeShift)`.
 
 Cost: `shift` and `validate` are linear in the term size. `substitute_bound`
 costs $O(|t| + m \cdot |s|)$ for $m$ occurrences of the index, because each

@@ -32,8 +32,12 @@ unaffected by every operation below; we omit their cases.
   $ #sh($d$, $c$) i = cases(i & "if" i < c, i + d & "if" i >= c), quad
     #sh($d$, $c$) (lambda. t) = lambda. #sh($d$, $c + 1$) t, quad
     #sh($d$, $c$) (t space macron(u)) = (#sh($d$, $c$) t) space (#sh($d$, $c$) macron(u)). $
-  It is defined when no index becomes negative. The implementation carries
-  the binder depth $k$ instead of increasing $c$ and tests $i >= c + k$.
+  It is defined when no index crosses its cutoff: there is no index $i >= c$
+  with $i + d < c$, where $c$ is the cutoff at that occurrence. Such an index
+  would be captured by an enclosing binder (or become negative). For $d >= 0$
+  the shift is always defined. The implementation carries the binder depth $k$
+  instead of increasing $c$, tests $i >= c + k$, and reports the crossing
+  $i + d < c + k$ as `NegativeShift`.
 ]
 
 #definition[
@@ -87,8 +91,9 @@ unaffected by every operation below; we omit their cases.
 ]
 
 #proof[
-  An index $i < c$ is untouched. An index $i >= c$ becomes $i + 1 >= c + 1 > c$
-  and then $i$, which is not negative.
+  An index $i < c$ is untouched. An index $i >= c$ becomes $i + 1 >= c + 1$,
+  so the downward shift touches it and gives $i + 1 - 1 = i >= c$: no index
+  crosses the cutoff. The binder case raises the cutoff on both sides.
 ]
 
 = Substitution
@@ -139,10 +144,11 @@ unaffected by every operation below; we omit their cases.
 
 #proof[
   By Lemma 5 every free index of the substituted body lies in
-  ${1, dots, n}$. The shift by $-1$ at cutoff $0$ only touches free indices,
-  mapping them into ${0, dots, n - 1}$; bound indices stay below their
-  cutoff. Hence no index becomes negative and the result is well scoped at
-  depth $n$. A beta step in a context replaces a well-scoped subterm by a
+  ${1, dots, n}$. Under $k$ binders the shift by $-1$ has cutoff $k$; it
+  leaves the bound indices $i < k$ alone and touches the indices $i = k + m$
+  with $m$ a free index, so $m >= 1$ and $i - 1 = k + (m - 1) >= k$. Hence no
+  index crosses its cutoff, the shift is defined, the free indices are mapped
+  into ${0, dots, n - 1}$, and the result is well scoped at depth $n$. A beta step in a context replaces a well-scoped subterm by a
   well-scoped subterm at the same depth, so scope is preserved globally.
 ]
 
