@@ -8,11 +8,52 @@ struct Semantic[T] {
 /// Lazy semantic domain for untyped normalization by evaluation.
 priv enum SemanticInner[T] {
   Atom(T)
-  Closure(@debruijn.DbTerm[T], Array[Semantic[T]])
-  Delayed(@debruijn.DbTerm[T], Array[Semantic[T]])
+  Closure(@debruijn.DbTerm[T], Environment[T])
+  Delayed(@debruijn.DbTerm[T], Environment[T])
   NeutralFree(@core.Name)
   NeutralLevel(Int)
   NeutralApply(Semantic[T], Semantic[T])
+}
+
+///|
+/// An environment: a list of semantic values, index 0 the innermost.
+///
+/// Environments share their buffers. `values[0..length)` holds the entries,
+/// outermost first, so index `i` is `values[length - 1 - i]`. An environment
+/// never changes that prefix, so an extension may push onto the shared buffer
+/// when nothing has been pushed after the prefix yet, and copies the prefix
+/// otherwise. Opening a chain of nested binders extends each environment
+/// once and costs linear time in the depth, where copying every environment
+/// cost quadratic time.
+priv struct Environment[T] {
+  values : Array[Semantic[T]]
+  length : Int
+}
+
+///|
+fn[T] Environment::empty() -> Environment[T] {
+  { values: [], length: 0, }
+}
+
+///|
+/// The value of index `index`, which must be below `self.length`.
+fn[T] Environment::lookup(self : Environment[T], index : Int) -> Semantic[T] {
+  self.values[self.length - 1 - index]
+}
+
+///|
+/// `value · self`: the environment with `value` as the new index 0.
+fn[T] Environment::cons(
+  self : Environment[T],
+  value : Semantic[T],
+) -> Environment[T] {
+  let values = if self.values.length() == self.length {
+    self.values
+  } else {
+    self.values[0:self.length].to_owned()
+  }
+  values.push(value)
+  { values, length: self.length + 1, }
 }
 
 ///|
@@ -74,12 +115,21 @@ fn consumed(initial : Int, remaining : Int) -> Int {
 // spine is a tail call, so a spinning redex such as Omega runs in a constant
 // number of frames; a term that grows (`(λ. 0 0 0) (λ. 0 0 0)`) grows the
 // frame array, which is bounded by the fuel and lives on the heap.
+//
+// Deep input terms (issue #13). The same loops make the host stack
+// independent of the nesting depth of the input: an application node pushes
+// a frame and continues with its head, a binder returns a closure, and
+// readback pushes a frame per neutral application and per binder. The input
+// is validated by `@debruijn.validate`, which also runs over a heap stack.
+// Environments share their buffers (`Environment`), so that the n nested
+// binders of a deep term open in O(n) time instead of copying environments of
+// every length up to n.
 
 ///|
 /// The next step of the evaluation machine.
 priv enum EvalControl[T] {
   /// Evaluate a term in an environment (index 0 first).
-  Evaluate(@debruijn.DbTerm[T], Array[Semantic[T]])
+  Evaluate(@debruijn.DbTerm[T], Environment[T])
   /// Force a value: evaluate it if it is delayed, return it otherwise.
   Force(Semantic[T])
   /// Pass a value in weak head form to the innermost frame.
@@ -91,7 +141,7 @@ priv enum EvalControl[T] {
 priv enum EvalFrame[T] {
   /// Apply the returned value to `delay(arguments[next], environment)`, then
   /// the result to the remaining arguments of the spine.
-  ApplyArguments(Array[@debruijn.DbTerm[T]], Int, Array[Semantic[T]])
+  ApplyArguments(Array[@debruijn.DbTerm[T]], Int, Environment[T])
   /// The returned value is a forced function: apply it to this argument.
   ApplyTo(Semantic[T])
 }
@@ -115,14 +165,14 @@ fn[T] run_evaluation(start : EvalControl[T], fuel : Int) -> Run[T] {
           Bound(index) =>
             if index < 0 {
               break ScopeFailed(@debruijn.NegativeIndex(index~), remaining)
-            } else if index >= environment.length() {
+            } else if index >= environment.length {
               break ScopeFailed(
-                @debruijn.UnboundIndex(index~, depth=environment.length()),
+                @debruijn.UnboundIndex(index~, depth=environment.length),
                 remaining,
               )
             } else {
               // eval(i, ρ) = force(ρ_i): a tail call
-              continue Force(environment[index]), remaining
+              continue Force(environment.lookup(index)), remaining
             }
           Bind(body) =>
             continue Return({ inner: Closure(body, environment), }), remaining
@@ -164,12 +214,9 @@ fn[T] run_evaluation(start : EvalControl[T], fuel : Int) -> Run[T] {
           }
           Some(ApplyTo(argument)) =>
             match value.inner {
-              Closure(body, environment) => {
+              Closure(body, environment) =>
                 // apply(clo(t, ρ), e) = eval(t, e · ρ): a tail call
-                let next_environment = [argument]
-                next_environment.append(environment)
-                continue Evaluate(body, next_environment), fuel
-              }
+                continue Evaluate(body, environment.cons(argument)), fuel
               _ =>
                 continue Return({ inner: NeutralApply(value, argument), }), fuel
             }
@@ -182,7 +229,7 @@ fn[T] run_evaluation(start : EvalControl[T], fuel : Int) -> Run[T] {
 /// Evaluates `term` in `environment` to weak head form.
 fn[T] eval_semantic(
   term : @debruijn.DbTerm[T],
-  environment : Array[Semantic[T]],
+  environment : Environment[T],
   fuel : Int,
 ) -> Run[T] {
   run_evaluation(Evaluate(term, environment), fuel)
@@ -226,7 +273,7 @@ pub fn[T] eval(term : @debruijn.DbTerm[T], fuel : Int) -> EvaluationResult[T] {
   match @debruijn.validate(term) {
     Err(error) => EvaluationResult::ScopeFailure(error~, consumed=0)
     Ok(_) =>
-      match eval_semantic(term, [], fuel) {
+      match eval_semantic(term, Environment::empty(), fuel) {
         Done(value, remaining) =>
           Evaluated(value~, consumed=consumed(fuel, remaining))
         Exhausted(remaining) =>
@@ -318,10 +365,9 @@ fn[T] quote_semantic(
                 continue Emit(Bound(index)), remaining
               }
               Closure(body, environment) => {
-                let next_environment : Array[Semantic[T]] = [
-                  { inner: NeutralLevel(level), },
-                ]
-                next_environment.append(environment)
+                let next_environment = environment.cons({
+                  inner: NeutralLevel(level),
+                })
                 match eval_semantic(body, next_environment, remaining) {
                   Exhausted(rest) => break QuoteExhausted(rest)
                   ScopeFailed(error, rest) =>
@@ -365,7 +411,7 @@ pub fn[T] normalize(term : @debruijn.DbTerm[T], fuel : Int) -> NbeResult[T] {
   match @debruijn.validate(term) {
     Err(error) => ScopeFailure(error~, consumed=0)
     Ok(_) =>
-      match eval_semantic(term, [], fuel) {
+      match eval_semantic(term, Environment::empty(), fuel) {
         Exhausted(remaining) =>
           FuelExhausted(consumed=consumed(fuel, remaining))
         ScopeFailed(error, remaining) =>
