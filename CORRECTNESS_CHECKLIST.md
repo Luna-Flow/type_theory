@@ -8,19 +8,24 @@ Last audited: 2026-10-09
 | Alpha-equivalence | Correct | shadowing, QuickCheck reflexivity on `Int` payloads, `NaN` payload test (#15) | binder names are irrelevant; payloads are compared with `T`'s `==`, so the relation is an equivalence exactly when that `==` is |
 | Named substitution | Correct | nested binder, range, domain collision regressions | simultaneous and capture-avoiding |
 | Generic AST substitution | Correct | downstream adapter tests | inserted replacements are not revisited |
-| Structured reduction | Correct | path and trace tests; n-ary versus curried spine regression and lockstep property test for every strategy (#11) | one call contracts at most one redex; `ApplicativeOrder` reads spines curried |
+| Structured reduction | Correct | path and trace tests; n-ary versus curried spine regression and lockstep property test for every strategy (#11); 100,000-level head, argument and binder tests on every backend (#13) | one call contracts at most one redex; `ApplicativeOrder` reads spines curried; traversals use a constant host stack |
 | Named/De Bruijn conversion | Correct | both round-trip laws | named round trip is alpha-equivalent |
 | De Bruijn scope | Correct | dangling and negative index tests, reducer scope regressions (#3, #16) | invalid indices return `ScopeError`; `reduce_once` and `normalize` validate their input before any step |
 | Shift and instantiation | Correct | nested binder beta tests, downward-shift capture regressions (#9), negative cutoff regressions (#10) | standard cutoff-based shifting; a free index that would fall below the cutoff returns `NegativeShift`; a negative cutoff returns `NegativeCutoff` |
 | De Bruijn small-step | Correct | path, normalization and empty-application tests (#2) | leftmost-outermost beta; `Apply(h, [])` is read as `h` |
 | UTLC untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests, 30M-unit divergence tests on every backend and exact-cost tests (#12) | beta-normalization may exhaust fuel; evaluation and readback use a constant host stack |
-| STLC bidirectional typechecking | Correct | typing, rejection, shadowing and trailing-argument capture tests (#1); checking-mode redex tests on curried and flat spines, nested redexes, capture and ill-typed variants (#8) | inference is syntax-directed and lambdas check against arrows; a redex is typed in either mode by inferring its first argument, and a checked redex checks the rest of its spine against the expected type; a redex parameter is renamed apart from trailing arguments |
-| STLC typed eta-long NbE | Correct | eta-expansion, open neutral, beta/eta, curried redex spine tests (#7), and redexes returning a lambda (#8) | well-typed STLC terms normalize by type-directed readback; accepts exactly the terms `check` accepts |
+| STLC bidirectional typechecking | Correct | typing, rejection, shadowing and trailing-argument capture tests (#1); checking-mode redex tests on curried and flat spines, nested redexes, capture and ill-typed variants (#8); 100,000-level term and type tests on every backend (#13) | inference is syntax-directed and lambdas check against arrows; a redex is typed in either mode by inferring its first argument, and a checked redex checks the rest of its spine against the expected type; a redex parameter is renamed apart from trailing arguments; checking uses a constant host stack |
+| STLC typed eta-long NbE | Correct | eta-expansion, open neutral, beta/eta, curried redex spine tests (#7), and redexes returning a lambda (#8); 100,000-level term and type tests on every backend (#13) | well-typed STLC terms normalize by type-directed readback; accepts exactly the terms `check` accepts; evaluation and readback use a constant host stack |
 | Custom AST integration | Contract tested | mock downstream AST | domain canonicalization remains downstream |
 
 ## Known Boundaries
 
 - `Term[T]` assumes `T` is closed with respect to shared names.
+- `Debug`/`Repr` of deeply nested terms, types and errors is recursive and can
+  overflow the host stack; the #13 contract covers the algorithms, not derived
+  formatting.
+- `normalize_eta_long` can take quadratic time on deeply nested redexes and
+  argument spines; this performance issue is tracked separately from #13.
 - `alpha_equal` is the payload equality lifted through binders. With a
   non-reflexive `==`, such as `Double` with `NaN`, a term is not alpha-equal
   to itself.
@@ -44,12 +49,17 @@ Last audited: 2026-10-09
 
 Open:
 
-- Deeply nested input terms still overflow the host stack on js, wasm and
-  wasm-gc in `rewrite`, `eval`, `utlc/lambda` and `stlc`; `syntax`, `core`,
-  `substitution`, `debruijn` and `utlc/nbe` are stack-safe (#13).
+None in this checklist. `normalize_eta_long` performance and deep `Debug`
+formatting remain explicit boundaries above; they are not claimed as fixed by
+#13.
 
 Fixed on 2026-10-09:
 
+- Deep terms overflowed the stack in `rewrite`, `eval`, `utlc/lambda` and
+  `stlc` on JS and wasm backends (#13). Traversals, checker continuations,
+  typed NbE evaluation/readback and deep type equality now use explicit heap
+  stacks. Tests cover 100,000 levels on JS, wasm, wasm-gc and native. The
+  recursive `Debug`/`Repr` implementations are outside this guarantee.
 - STLC redex inference typed the trailing arguments `a2 ... an` of
   `(λx. b) a1 a2 ... an` with the parameter `x` in scope, so `check` accepted
   `(λx. λy. y) () x` at `Unit` under `x : B` (#1). The parameter is now renamed
