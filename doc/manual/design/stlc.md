@@ -176,9 +176,23 @@ has declarative type $B$ and no other. Without the renaming, the trailing
 $x$ would be typed in $\Gamma, x{:}\mathsf{Unit}$ and the checker would
 answer `Unit`; versions before the fix did exactly that, and `check` accepted
 the term at `Unit`. With $x' = x_1$ the trailing $x$ keeps its type $B$, and
-`infer` returns $B$. The typed evaluator computes the type of a redex head
-with the same rule, so `normalize_eta_long` accepts the same terms as
-`check`.
+`infer` returns $B$.
+
+The typed evaluator walks a spine the same way. It flattens nested `Apply`
+nodes before typing the head, so the curried
+$((\lambda x.\,\lambda y.\,y)\;())\;x$ is the same spine as the term above.
+A lambda head cannot be inferred, so its type is rebuilt from the premises of
+$\textsc{Redex}$ and the expected type $\tau$ of the whole application. Write
+$b' = h\,c_1 \cdots c_k$ with $h$ not an application ($k = 0$ if $b'$ is not
+one). The head gets the type $\sigma \to \rho$, where $\sigma$ is inferred
+for $a_1$ and $\rho$, the type of $b'$, is computed recursively: take the
+head type of the flattened spine $h\,c_1 \cdots c_k\,a_2 \cdots a_n$ under
+$\Gamma, x'{:}\sigma$ and remove its first $k$ domains ($\rho = \tau$ if
+that spine is empty). Any other head is inferred. A redex body that consumes
+the outer arguments, as in $(\lambda x.\,(\lambda y.\,\lambda z.\,z)\,x)\;()\;v$,
+is therefore handled as `infer` handles it, and `normalize_eta_long` accepts
+the same terms as `check`. Versions before the fix only recognised a bare
+lambda head and rejected both terms with `CannotInferLambda`.
 
 **Completeness for normal forms.** If $t$ is beta-normal and
 $\Gamma \vdash t : \tau$, then `check(Σ, Γ, t, τ)` succeeds. A beta-normal
@@ -331,8 +345,10 @@ input, and a neutral variable is never captured by a binder introduced later.
 
 The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing,
 eta expansion of open variables and of constants (including nested arrow
-types and higher-order arguments), and agreement of the two normalizers on
-small terms.
+types and higher-order arguments), agreement of the two normalizers on
+small terms, and agreement of `check` and `normalize_eta_long` on redexes with
+curried heads, mixed flat and nested spines, and bodies that consume the outer
+arguments.
 
 ## Alternatives rejected
 

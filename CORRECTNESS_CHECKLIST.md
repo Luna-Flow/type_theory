@@ -15,7 +15,7 @@ Last audited: 2026-10-09
 | De Bruijn small-step | Correct | path, normalization and empty-application tests (#2) | leftmost-outermost beta; `Apply(h, [])` is read as `h` |
 | UTLC untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests | beta-normalization may exhaust fuel |
 | STLC bidirectional typechecking | Correct | typing, rejection, shadowing and trailing-argument capture tests (#1) | inference is syntax-directed and lambdas check against arrows; a redex parameter is renamed apart from trailing arguments |
-| STLC typed eta-long NbE | Correct | eta-expansion, open neutral, and beta/eta tests | well-typed STLC terms normalize by type-directed readback |
+| STLC typed eta-long NbE | Correct | eta-expansion, open neutral, beta/eta, and curried redex spine tests (#7) | well-typed STLC terms normalize by type-directed readback |
 | Custom AST integration | Contract tested | mock downstream AST | domain canonicalization remains downstream |
 
 ## Known Boundaries
@@ -50,3 +50,8 @@ None open. Fixed on 2026-10-09:
 - `@debruijn.shift` with a negative `delta` moved a free index below the
   cutoff, where an enclosing binder captured it: `shift(Bind(Bound(1)), -1, 0)`
   returned `Ok(Bind(Bound(0)))` (#9). It now returns `NegativeShift`.
+- STLC typed NbE typed a redex head without flattening the spine, so
+  `normalize_eta_long` rejected `((λx. λy. y) ()) x` and
+  `(λx. (λy. λz. z) x) () v`, which `check` accepts, with `CannotInferLambda`
+  (#7). The evaluator now flattens the spine and follows redex bodies as
+  `infer` does.
