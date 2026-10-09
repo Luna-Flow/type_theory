@@ -15,7 +15,7 @@ Last audited: 2026-10-09
 | De Bruijn scope | Correct | dangling and negative index tests, reducer scope regressions (#3, #16) | invalid indices return `ScopeError`; `reduce_once` and `normalize` validate their input before any step |
 | Shift and instantiation | Correct | nested binder beta tests | standard cutoff-based shifting |
 | De Bruijn small-step | Correct | path, normalization and empty-application tests (#2) | leftmost-outermost beta; `Apply(h, [])` is read as `h` |
-| UTLC untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests | beta-normalization may exhaust fuel |
+| UTLC untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests, 30M-unit divergence tests on every backend and exact-cost tests (#12) | beta-normalization may exhaust fuel; evaluation and readback use a constant host stack |
 | STLC bidirectional typechecking | Correct | typing, rejection, shadowing and trailing-argument capture tests (#1) | inference is syntax-directed and lambdas check against arrows; a redex parameter is renamed apart from trailing arguments |
 | STLC typed eta-long NbE | Correct | eta-expansion, open neutral, beta/eta, and curried redex spine tests (#7) | well-typed STLC terms normalize by type-directed readback |
 | Custom AST integration | Contract tested | mock downstream AST | domain canonicalization remains downstream |
@@ -67,3 +67,7 @@ None open. Fixed on 2026-10-09:
   application, so `Apply(λx. b, [a1, a2])` reduced inside `a2` before the
   redex `(λx. b) a1` that the nested encoding contracts first (#11). It now
   follows the curried reading and takes the same steps on both encodings.
+- UTLC NbE overflowed the host stack on js, wasm and wasm-gc instead of
+  returning `FuelExhausted` when a divergent term was given a large budget
+  (#12). Evaluation and readback now keep pending work on a heap stack, so the
+  host stack no longer grows with the fuel spent.
