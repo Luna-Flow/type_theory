@@ -623,3 +623,265 @@ test "typed eta long nbe renames a curried redex parameter apart from outer argu
   let term_y = app(app(lam("x", inner_y), unit_term()), tm_var("x"))
   assert_nbe_agrees_with_check(sig, ctx, term_y, b, tm_var("x"))
 }
+
+///|
+test "checking mode accepts a redex whose result is a lambda" {
+  // ⊢ (λx. λy. y) () ⇐ Unit -> Unit   (issue #8, first term)
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty()
+  let uu = @stlc.Ty::Arrow(@stlc.Ty::Unit, @stlc.Ty::Unit)
+  let term = app(lam("x", lam("y", tm_var("y"))), unit_term())
+  assert_true(
+    @stlc.infer(sig, ctx, term) == Err(@stlc.TypeError::CannotInferLambda),
+  )
+  assert_nbe_agrees_with_check(sig, ctx, term, uu, lam("y", tm_var("y")))
+  assert_true(
+    @stlc.normalize_checked(sig, ctx, term, uu, 10) ==
+    Ok(@rewrite.NormalForm(term=lam("y", tm_var("y")), steps=1)),
+  )
+  // the same redex with a flat spine, and with the domain read from the type
+  let flat = spine(lam("x", lam("y", tm_var("y"))), [unit_term()])
+  assert_nbe_agrees_with_check(sig, ctx, flat, uu, lam("y", tm_var("y")))
+  let a = base("A")
+  assert_nbe_agrees_with_check(
+    sig,
+    ctx,
+    term,
+    @stlc.Ty::Arrow(a, a),
+    lam("y", tm_var("y")),
+  )
+}
+
+///|
+test "checking mode accepts a lambda redex as a function argument" {
+  // f : (A -> A) -> A ⊢ f ((λx. λy. y) ()) ⇐ A   (issue #8, second term)
+  let a = base("A")
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty().extend_with(
+    @core.Name::new("f"),
+    @stlc.Ty::Arrow(@stlc.Ty::Arrow(a, a), a),
+  )
+  let redex = app(lam("x", lam("y", tm_var("y"))), unit_term())
+  let term = app(tm_var("f"), redex)
+  assert_true(@stlc.infer(sig, ctx, term) == Ok(a))
+  assert_nbe_agrees_with_check(
+    sig,
+    ctx,
+    term,
+    a,
+    app(tm_var("f"), lam("z", tm_var("z"))),
+  )
+  assert_true(
+    @stlc.normalize_checked(sig, ctx, term, a, 10) ==
+    Ok(
+      @rewrite.NormalForm(term=app(tm_var("f"), lam("y", tm_var("y"))), steps=1),
+    ),
+  )
+  // the same argument under a constant of the same type
+  let csig = sig.extend_with(
+    @core.Name::new("g"),
+    @stlc.Ty::Arrow(@stlc.Ty::Arrow(a, a), a),
+  )
+  assert_nbe_agrees_with_check(
+    csig,
+    @stlc.TypeContext::empty(),
+    app(con("g"), redex),
+    a,
+    app(con("g"), lam("z", tm_var("z"))),
+  )
+}
+
+///|
+test "checking mode accepts curried and n-ary redexes ending at a lambda" {
+  // ⊢ (λx. λy. λz. z) () () ⇐ Unit -> Unit, as a curried and as a flat spine
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty()
+  let uu = @stlc.Ty::Arrow(@stlc.Ty::Unit, @stlc.Ty::Unit)
+  let k3 = lam("x", lam("y", lam("z", tm_var("z"))))
+  let curried = app(app(k3, unit_term()), unit_term())
+  let flat = spine(k3, [unit_term(), unit_term()])
+  let mixed = spine(spine(k3, [unit_term()]), [unit_term()])
+  for term in [curried, flat, mixed] {
+    assert_nbe_agrees_with_check(sig, ctx, term, uu, lam("z", tm_var("z")))
+  }
+  // one argument short: the result is a curried function
+  let uuu = @stlc.Ty::Arrow(@stlc.Ty::Unit, uu)
+  assert_nbe_agrees_with_check(
+    sig,
+    ctx,
+    app(k3, unit_term()),
+    uuu,
+    lam("y", lam("z", tm_var("z"))),
+  )
+  // a multi-argument result: (λx. λf. f) () ⇐ (A -> B) -> A -> B
+  let a = base("A")
+  let b = base("B")
+  let ab = @stlc.Ty::Arrow(a, b)
+  assert_nbe_agrees_with_check(
+    sig,
+    ctx,
+    app(lam("x", lam("f", tm_var("f"))), unit_term()),
+    @stlc.Ty::Arrow(ab, ab),
+    lam("f", lam("w", app(tm_var("f"), tm_var("w")))),
+  )
+}
+
+///|
+test "checking mode accepts nested redexes whose result is a lambda" {
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty()
+  let uu = @stlc.Ty::Arrow(@stlc.Ty::Unit, @stlc.Ty::Unit)
+  // ⊢ (λx. (λy. λz. z) x) () ⇐ Unit -> Unit: the body joins the spine
+  let inner = app(lam("y", lam("z", tm_var("z"))), tm_var("x"))
+  let term = app(lam("x", inner), unit_term())
+  assert_nbe_agrees_with_check(sig, ctx, term, uu, lam("z", tm_var("z")))
+  assert_true(
+    @stlc.normalize_checked(sig, ctx, term, uu, 10) ==
+    Ok(@rewrite.NormalForm(term=lam("z", tm_var("z")), steps=2)),
+  )
+  // ⊢ (λx. λy. (λz. λw. w) y) () ⇐ Unit -> Unit -> Unit: a checking-mode
+  // redex under the lambda that the outer redex returns
+  let under = lam("y", app(lam("z", lam("w", tm_var("w"))), tm_var("y")))
+  let outer = app(lam("x", under), unit_term())
+  assert_nbe_agrees_with_check(
+    sig,
+    ctx,
+    outer,
+    @stlc.Ty::Arrow(@stlc.Ty::Unit, uu),
+    lam("y", lam("w", tm_var("w"))),
+  )
+  // the result lambda is the first argument's redex: (λx. x) ((λy. λz. z) ())
+  // has an uninferable first argument, so it is still rejected
+  let a = base("A")
+  let wrapped = app(
+    lam("x", tm_var("x")),
+    app(lam("y", lam("z", tm_var("z"))), unit_term()),
+  )
+  assert_true(
+    @stlc.check(sig, ctx, wrapped, @stlc.Ty::Arrow(a, a)) ==
+    Err(@stlc.TypeError::CannotInferLambda),
+  )
+}
+
+///|
+test "checking mode renames a redex parameter apart from trailing arguments" {
+  // Γ = x : B ⊢ (λx. λy. λz. y) () x ⇐ A -> B   (the issue #1 shape, checked)
+  // without the renaming the trailing x would be typed as the parameter, Unit
+  let a = base("A")
+  let b = base("B")
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty().extend_with(@core.Name::new("x"), b)
+  let k = lam("x", lam("y", lam("z", tm_var("y"))))
+  let term = spine(k, [unit_term(), tm_var("x")])
+  let curried = app(app(k, unit_term()), tm_var("x"))
+  for t in [term, curried] {
+    assert_nbe_agrees_with_check(
+      sig,
+      ctx,
+      t,
+      @stlc.Ty::Arrow(a, b),
+      lam("w", tm_var("x")),
+    )
+    assert_true(
+      @stlc.check(sig, ctx, t, @stlc.Ty::Arrow(a, @stlc.Ty::Unit)) ==
+      Err(@stlc.TypeError::TypeMismatch(expected=@stlc.Ty::Unit, actual=b)),
+    )
+    assert_true(
+      @stlc.normalize_eta_long(sig, ctx, t, @stlc.Ty::Arrow(a, @stlc.Ty::Unit)) ==
+      Err(@stlc.TypeError::TypeMismatch(expected=@stlc.Ty::Unit, actual=b)),
+    )
+  }
+  // the parameter still shadows the outer x inside the returned lambda
+  let shadow = app(lam("x", lam("z", tm_var("x"))), unit_term())
+  assert_nbe_agrees_with_check(
+    sig,
+    ctx,
+    shadow,
+    @stlc.Ty::Arrow(a, @stlc.Ty::Unit),
+    lam("w", unit_term()),
+  )
+  assert_true(
+    @stlc.check(sig, ctx, shadow, @stlc.Ty::Arrow(a, b)) ==
+    Err(@stlc.TypeError::TypeMismatch(expected=b, actual=@stlc.Ty::Unit)),
+  )
+}
+
+///|
+test "checking mode still rejects ill-typed lambda redexes" {
+  let a = base("A")
+  let b = base("B")
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty()
+  let term = app(lam("x", lam("y", tm_var("y"))), unit_term())
+  // a wrong arrow: the result λy. y : Unit -> Unit does not have type Unit -> A
+  let wrong = @stlc.Ty::Arrow(@stlc.Ty::Unit, a)
+  let mismatch = Err(
+    @stlc.TypeError::TypeMismatch(expected=a, actual=@stlc.Ty::Unit),
+  )
+  assert_true(@stlc.check(sig, ctx, term, wrong) == mismatch)
+  assert_true(
+    @stlc.normalize_eta_long(sig, ctx, term, wrong) ==
+    Err(@stlc.TypeError::TypeMismatch(expected=a, actual=@stlc.Ty::Unit)),
+  )
+  assert_true(
+    @stlc.normalize_checked(sig, ctx, term, wrong, 10) ==
+    Err(@stlc.TypeError::TypeMismatch(expected=a, actual=@stlc.Ty::Unit)),
+  )
+  // a non-arrow type for a lambda result
+  assert_true(
+    @stlc.check(sig, ctx, term, @stlc.Ty::Unit) ==
+    Err(@stlc.TypeError::CannotInferLambda),
+  )
+  assert_true(
+    @stlc.normalize_eta_long(sig, ctx, term, @stlc.Ty::Unit) ==
+    Err(@stlc.TypeError::CannotInferLambda),
+  )
+  // too many arguments for the type the redex returns
+  let over = spine(lam("x", lam("y", tm_var("y"))), [
+    unit_term(),
+    unit_term(),
+    unit_term(),
+  ])
+  assert_true(
+    @stlc.check(sig, ctx, over, @stlc.Ty::Unit) ==
+    Err(@stlc.TypeError::ExpectedFunction(@stlc.Ty::Unit)),
+  )
+  // the first argument must still be inferable
+  let lambda_argument = app(
+    lam("x", lam("y", tm_var("y"))),
+    lam("z", tm_var("z")),
+  )
+  assert_true(
+    @stlc.check(sig, ctx, lambda_argument, @stlc.Ty::Arrow(a, a)) ==
+    Err(@stlc.TypeError::CannotInferLambda),
+  )
+  // the first argument is still typed: an unbound one is reported
+  let unbound = app(lam("x", lam("y", tm_var("y"))), tm_var("u"))
+  assert_true(
+    @stlc.check(sig, ctx, unbound, @stlc.Ty::Arrow(a, a)) ==
+    Err(@stlc.TypeError::UnboundVariable(@core.Name::new("u"))),
+  )
+  // a redex argument at the wrong arrow: f : (A -> B) -> A ⊢ f ((λx. λy. y) ())
+  let fctx = ctx.extend_with(
+    @core.Name::new("f"),
+    @stlc.Ty::Arrow(@stlc.Ty::Arrow(a, b), a),
+  )
+  let applied = app(tm_var("f"), term)
+  assert_true(
+    @stlc.check(sig, fctx, applied, a) ==
+    Err(@stlc.TypeError::TypeMismatch(expected=b, actual=a)),
+  )
+  assert_true(
+    @stlc.normalize_eta_long(sig, fctx, applied, a) ==
+    Err(@stlc.TypeError::TypeMismatch(expected=b, actual=a)),
+  )
+  // the body is checked under the inferred parameter type, not the expected one
+  let uses_x = app(lam("x", lam("y", tm_var("x"))), unit_term())
+  assert_true(
+    @stlc.check(sig, ctx, uses_x, @stlc.Ty::Arrow(a, a)) ==
+    Err(@stlc.TypeError::TypeMismatch(expected=a, actual=@stlc.Ty::Unit)),
+  )
+  assert_true(
+    @stlc.check(sig, ctx, uses_x, @stlc.Ty::Arrow(a, @stlc.Ty::Unit)) == Ok(()),
+  )
+}
