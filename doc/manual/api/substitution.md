@@ -9,6 +9,13 @@ variables. `Substitution[T]` works on `@syntax.Term[T]`;
 are abstract types, every operation returns a new value, and every method
 that returns an array returns a fresh copy.
 
+`Substitution::apply`, `Substitution::then` and
+`GenericSubstitution::apply_once` are stack-safe in the nesting depth of the
+term and of the replacements: they keep pending work in a heap array and use
+a constant amount of host stack, so terms nested 100 000 levels deep are
+handled on every backend. Formatting such a term with `Debug` is not
+stack-safe; see the [syntax API](syntax.md).
+
 The definition of capture-avoiding substitution and the proofs of its laws
 are in the [substitution design](../design/substitution.md).
 
