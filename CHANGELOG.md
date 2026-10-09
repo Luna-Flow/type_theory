@@ -34,6 +34,9 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
     `steps`, `result`). Use `ReductionPath::to_array` and the new
     `ReductionPath::length`, and `ReductionTrace::initial`, `steps`,
     `result`.
+  - `utlc/nbe`: `Semantic` (`inner`). Its payload type `SemanticInner` was
+    already opaque and is now private, so nothing changes for callers that
+    only used the `eval`, `reflect_*` and `quote` functions.
 
   Every `to_array` (and `ReductionTrace::steps`) returns a fresh array.
   Struct literals and field access on these types no longer compile outside

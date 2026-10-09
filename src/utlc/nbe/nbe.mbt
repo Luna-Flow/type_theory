@@ -1,12 +1,12 @@
 ///|
 /// Opaque semantic value produced by bounded evaluation.
-pub struct Semantic[T] {
+struct Semantic[T] {
   inner : SemanticInner[T]
 }
 
 ///|
 /// Lazy semantic domain for untyped normalization by evaluation.
-enum SemanticInner[T] {
+priv enum SemanticInner[T] {
   Atom(T)
   Closure(@debruijn.DbTerm[T], Array[Semantic[T]])
   Delayed(@debruijn.DbTerm[T], Array[Semantic[T]])

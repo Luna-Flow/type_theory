@@ -898,7 +898,7 @@ msgstr "可约式的后续参数在可约式的上下文中定型，而不是在
 
 #: manual/api/stlc.md:280
 #: manual/api/utlc/lambda.md:123
-#: manual/api/utlc/nbe.md:186
+#: manual/api/utlc/nbe.md:182
 msgid "Normalization"
 msgstr "范式化"
 
@@ -1339,67 +1339,67 @@ msgstr "语义值"
 msgid "`Semantic[T]` is an opaque semantic value."
 msgstr "`Semantic[T]` 是不透明的语义值。"
 
-#: manual/api/utlc/nbe.md:73
+#: manual/api/utlc/nbe.md:69
 msgid "A semantic value is a constant, a closure (a binder body with its environment), a delayed argument, or a neutral value (a free variable, a variable at a quote level, or a neutral value applied to an argument). The representation is private; values are produced by `eval` and the `reflect_*` functions and consumed by `quote`."
 msgstr "语义值是常量、闭包（带有环境的绑定子体）、延迟参数或中性值（自由变量、某个 quote 层级上的变量，或作用于参数的中性值）。其表示是私有的；值由 `eval` 和 `reflect_*` 函数产生，由 `quote` 消费。"
 
-#: manual/api/utlc/nbe.md:81
+#: manual/api/utlc/nbe.md:77
 msgid "`reflect_free` turns a free name into a neutral semantic value."
 msgstr "`reflect_free` 把自由名转换为中性语义值。"
 
-#: manual/api/utlc/nbe.md:87
+#: manual/api/utlc/nbe.md:83
 msgid "Quoting it gives `Free(name)`."
 msgstr "对其 quote 得到 `Free(name)`。"
 
-#: manual/api/utlc/nbe.md:91
+#: manual/api/utlc/nbe.md:87
 msgid "`reflect_level` turns a quote level into a neutral semantic variable."
 msgstr "`reflect_level` 把 quote 层级转换为中性语义变量。"
 
-#: manual/api/utlc/nbe.md:97
+#: manual/api/utlc/nbe.md:93
 msgid "Returns `None` for a negative level. Quoting the variable of level `l` at depth `n > l` gives `Bound(n - l - 1)`."
 msgstr "层级为负时返回 `None`。在深度 `n > l` 处对层级 `l` 的变量 quote 得到 `Bound(n - l - 1)`。"
 
-#: manual/api/utlc/nbe.md:118
+#: manual/api/utlc/nbe.md:114
 msgid "Evaluation and readback"
 msgstr "求值与读回"
 
-#: manual/api/utlc/nbe.md:122
+#: manual/api/utlc/nbe.md:118
 msgid "`EvaluationResult[T]` is the outcome of `eval`."
 msgstr "`EvaluationResult[T]` 是 `eval` 的结果。"
 
-#: manual/api/utlc/nbe.md:134
+#: manual/api/utlc/nbe.md:130
 msgid "`eval` evaluates a closed De Bruijn term to weak head form in the lazy semantic domain."
 msgstr "`eval` 在惰性语义域中把闭 De Bruijn 项求值为弱头形式。"
 
-#: manual/api/utlc/nbe.md:141
+#: manual/api/utlc/nbe.md:137
 msgid "The term must be well scoped (free names are allowed); otherwise the result is `ScopeFailure` with `consumed=0`. Evaluation is call by name: arguments are delayed and evaluated only when needed, and evaluation stops at a closure or a neutral value without entering binders."
 msgstr "项必须是良作用域的（允许自由名）；否则结果为 `ScopeFailure`，且 `consumed=0`。求值采用传名调用：参数被延迟，仅在需要时求值；求值在闭包或中性值处停止，不进入绑定子。"
 
-#: manual/api/utlc/nbe.md:148
+#: manual/api/utlc/nbe.md:144
 msgid "`QuoteResult[T]` is the outcome of `quote`."
 msgstr "`QuoteResult[T]` 是 `quote` 的结果。"
 
-#: manual/api/utlc/nbe.md:160
+#: manual/api/utlc/nbe.md:156
 msgid "`quote` reads a semantic value back as a beta-normal De Bruijn term."
 msgstr "`quote` 把语义值读回为 beta 范式的 De Bruijn 项。"
 
-#: manual/api/utlc/nbe.md:166
+#: manual/api/utlc/nbe.md:162
 msgid "`quote(value, level, fuel)` reads `value` back under `level` binders. A closure is read back by applying it to a fresh variable of the current level and reading the result under one more binder; neutral applications are read back argument by argument, which forces delayed arguments. Use `level = 0` for values from `eval`. A negative `level`, or a level variable that is not below `level`, gives `ScopeFailure(NegativeIndex)`."
 msgstr "`quote(value, level, fuel)` 在 `level` 个绑定子之下读回 `value`。闭包的读回方式是：把它作用于当前层级的一个新变量，再在多一层绑定子之下读回结果；中性应用逐个参数读回，这会强制延迟参数。对来自 `eval` 的值使用 `level = 0`。负的 `level`，或不小于 `level` 的层级变量，会得到 `ScopeFailure(NegativeIndex)`。"
 
-#: manual/api/utlc/nbe.md:190
+#: manual/api/utlc/nbe.md:186
 msgid "`NbeResult[T]` is the outcome of `normalize`."
 msgstr "`NbeResult[T]` 是 `normalize` 的结果。"
 
-#: manual/api/utlc/nbe.md:203
+#: manual/api/utlc/nbe.md:199
 msgid "`normalize` computes the beta normal form of a well-scoped De Bruijn term within a fuel budget."
 msgstr "`normalize` 在燃料预算内计算良作用域 De Bruijn 项的 beta 范式。"
 
-#: manual/api/utlc/nbe.md:210
+#: manual/api/utlc/nbe.md:206
 msgid "It validates the term, evaluates it and quotes the result at level 0, with one shared budget. `NormalForm(t, c)`: `t` is the beta normal form, reached with `c` units. `FuelExhausted(c)`: the budget ran out; the term may diverge or may need more fuel. `ScopeFailure`: the input has a dangling or negative index. The fuel test comes first, so an ill-scoped term with fuel `<= 0` gives `FuelExhausted(consumed=0)`, not `ScopeFailure`."
 msgstr "它校验项、对其求值并在层级 0 对结果 quote，三者共享同一预算。`NormalForm(t, c)`：`t` 是 beta 范式，用 `c` 个单位得到。`FuelExhausted(c)`：预算耗尽；该项可能发散，也可能需要更多燃料。`ScopeFailure`：输入含有悬空或负的索引。燃料检测先进行，因此燃料 `<= 0` 时，作用域不良的项给出 `FuelExhausted(consumed=0)`，而不是 `ScopeFailure`。"
 
-#: manual/api/utlc/nbe.md:217
+#: manual/api/utlc/nbe.md:213
 msgid "Applications in the result are unary: a normal form $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])` evaluates to the value of `h`, so it disappears from the result; the small-step reducers also read it as `h` but leave the node in place. The two normalizers agree after spines are flattened, where flattening merges nested applications and drops empty ones."
 msgstr "结果中的应用是一元的：范式 $f\\,a\\,b$ 以 `Apply(Apply(f, [a]), [b])` 返回，而 `@debruijn.normalize` 保留输入的 n 元脊 `Apply(f, [a, b])`。空应用 `Apply(h, [])` 求值为 `h` 的值，因此从结果中消失；小步归约器同样把它读作 `h`，但保留该节点。两个范式化器在脊展平之后一致，其中展平是指合并嵌套的应用并去掉空应用。"
 

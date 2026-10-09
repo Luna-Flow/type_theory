@@ -63,11 +63,7 @@ test "a large budget ends with FuelExhausted" {
 `Semantic[T]` is an opaque semantic value.
 
 ```mbti
-pub struct Semantic[T] {
-  inner : SemanticInner[T]
-}
-
-type SemanticInner[T]
+type Semantic[T]
 ```
 
 A semantic value is a constant, a closure (a binder body with its

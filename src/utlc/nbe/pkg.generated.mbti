@@ -40,11 +40,7 @@ pub(all) enum QuoteResult[T] {
   ScopeFailure(error~ : @debruijn.ScopeError, consumed~ : Int)
 }
 
-pub struct Semantic[T] {
-  inner : SemanticInner[T]
-}
-
-type SemanticInner[T]
+type Semantic[T]
 
 // Type aliases
 
