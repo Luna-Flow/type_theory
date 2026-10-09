@@ -898,7 +898,7 @@ msgstr "簡約基の後続の引数は、そのパラメータの下ではなく
 
 #: manual/api/stlc.md:280
 #: manual/api/utlc/lambda.md:123
-#: manual/api/utlc/nbe.md:186
+#: manual/api/utlc/nbe.md:182
 msgid "Normalization"
 msgstr "正規化"
 
@@ -1339,67 +1339,67 @@ msgstr "意味値"
 msgid "`Semantic[T]` is an opaque semantic value."
 msgstr "`Semantic[T]` は不透明な意味値である。"
 
-#: manual/api/utlc/nbe.md:73
+#: manual/api/utlc/nbe.md:69
 msgid "A semantic value is a constant, a closure (a binder body with its environment), a delayed argument, or a neutral value (a free variable, a variable at a quote level, or a neutral value applied to an argument). The representation is private; values are produced by `eval` and the `reflect_*` functions and consumed by `quote`."
 msgstr "意味値は、定数、クロージャ（環境付きの束縛子本体）、遅延引数、または中立値（自由変数、quote レベルの変数、あるいは引数に適用された中立値）のいずれかである。表現は非公開であり、値は `eval` と `reflect_*` 関数によって生成され、`quote` によって消費される。"
 
-#: manual/api/utlc/nbe.md:81
+#: manual/api/utlc/nbe.md:77
 msgid "`reflect_free` turns a free name into a neutral semantic value."
 msgstr "`reflect_free` は自由名を中立意味値に変換する。"
 
-#: manual/api/utlc/nbe.md:87
+#: manual/api/utlc/nbe.md:83
 msgid "Quoting it gives `Free(name)`."
 msgstr "これを quote すると `Free(name)` が得られる。"
 
-#: manual/api/utlc/nbe.md:91
+#: manual/api/utlc/nbe.md:87
 msgid "`reflect_level` turns a quote level into a neutral semantic variable."
 msgstr "`reflect_level` は quote レベルを中立意味変数に変換する。"
 
-#: manual/api/utlc/nbe.md:97
+#: manual/api/utlc/nbe.md:93
 msgid "Returns `None` for a negative level. Quoting the variable of level `l` at depth `n > l` gives `Bound(n - l - 1)`."
 msgstr "負のレベルに対しては `None` を返す。レベル `l` の変数を深さ `n > l` で quote すると `Bound(n - l - 1)` が得られる。"
 
-#: manual/api/utlc/nbe.md:118
+#: manual/api/utlc/nbe.md:114
 msgid "Evaluation and readback"
 msgstr "評価と読み戻し"
 
-#: manual/api/utlc/nbe.md:122
+#: manual/api/utlc/nbe.md:118
 msgid "`EvaluationResult[T]` is the outcome of `eval`."
 msgstr "`EvaluationResult[T]` は `eval` の結果である。"
 
-#: manual/api/utlc/nbe.md:134
+#: manual/api/utlc/nbe.md:130
 msgid "`eval` evaluates a closed De Bruijn term to weak head form in the lazy semantic domain."
 msgstr "`eval` は閉じた De Bruijn 項を遅延意味領域で弱頭部形まで評価する。"
 
-#: manual/api/utlc/nbe.md:141
+#: manual/api/utlc/nbe.md:137
 msgid "The term must be well scoped (free names are allowed); otherwise the result is `ScopeFailure` with `consumed=0`. Evaluation is call by name: arguments are delayed and evaluated only when needed, and evaluation stops at a closure or a neutral value without entering binders."
 msgstr "項はスコープが正しくなければならない（自由名は許される）。そうでなければ結果は `consumed=0` の `ScopeFailure` となる。評価は名前呼びである。引数は遅延され、必要になったときにのみ評価される。評価はクロージャまたは中立値で停止し、束縛子の中には入らない。"
 
-#: manual/api/utlc/nbe.md:148
+#: manual/api/utlc/nbe.md:144
 msgid "`QuoteResult[T]` is the outcome of `quote`."
 msgstr "`QuoteResult[T]` は `quote` の結果である。"
 
-#: manual/api/utlc/nbe.md:160
+#: manual/api/utlc/nbe.md:156
 msgid "`quote` reads a semantic value back as a beta-normal De Bruijn term."
 msgstr "`quote` は意味値を beta 正規形の De Bruijn 項として読み戻す。"
 
-#: manual/api/utlc/nbe.md:166
+#: manual/api/utlc/nbe.md:162
 msgid "`quote(value, level, fuel)` reads `value` back under `level` binders. A closure is read back by applying it to a fresh variable of the current level and reading the result under one more binder; neutral applications are read back argument by argument, which forces delayed arguments. Use `level = 0` for values from `eval`. A negative `level`, or a level variable that is not below `level`, gives `ScopeFailure(NegativeIndex)`."
 msgstr "`quote(value, level, fuel)` は `value` を `level` 個の束縛子の下で読み戻す。クロージャは、現在のレベルの新しい変数に適用し、その結果を束縛子 1 つ分深い位置で読み戻すことで読み戻される。中立な適用は引数ごとに読み戻され、その際に遅延引数が強制される。`eval` から得た値には `level = 0` を使う。負の `level`、あるいは `level` 未満でないレベル変数は `ScopeFailure(NegativeIndex)` となる。"
 
-#: manual/api/utlc/nbe.md:190
+#: manual/api/utlc/nbe.md:186
 msgid "`NbeResult[T]` is the outcome of `normalize`."
 msgstr "`NbeResult[T]` は `normalize` の結果である。"
 
-#: manual/api/utlc/nbe.md:203
+#: manual/api/utlc/nbe.md:199
 msgid "`normalize` computes the beta normal form of a well-scoped De Bruijn term within a fuel budget."
 msgstr "`normalize` はスコープの正しい De Bruijn 項の beta 正規形を燃料予算内で計算する。"
 
-#: manual/api/utlc/nbe.md:210
+#: manual/api/utlc/nbe.md:206
 msgid "It validates the term, evaluates it and quotes the result at level 0, with one shared budget. `NormalForm(t, c)`: `t` is the beta normal form, reached with `c` units. `FuelExhausted(c)`: the budget ran out; the term may diverge or may need more fuel. `ScopeFailure`: the input has a dangling or negative index. The fuel test comes first, so an ill-scoped term with fuel `<= 0` gives `FuelExhausted(consumed=0)`, not `ScopeFailure`."
 msgstr "項を検証し、評価し、結果をレベル 0 で quote する。これらは 1 つの予算を共有する。`NormalForm(t, c)`：`t` は beta 正規形であり、`c` 単位で到達した。`FuelExhausted(c)`：予算が尽きた。項は発散するかもしれないし、より多くの燃料が必要なだけかもしれない。`ScopeFailure`：入力にぶら下がった、または負のインデックスがある。燃料の検査が先に行われるので、燃料が `<= 0` のときはスコープの正しくない項でも `ScopeFailure` ではなく `FuelExhausted(consumed=0)` になる。"
 
-#: manual/api/utlc/nbe.md:217
+#: manual/api/utlc/nbe.md:213
 msgid "Applications in the result are unary: a normal form $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])` evaluates to the value of `h`, so it disappears from the result; the small-step reducers also read it as `h` but leave the node in place. The two normalizers agree after spines are flattened, where flattening merges nested applications and drops empty ones."
 msgstr "結果の適用は単項である。正規形 $f\\,a\\,b$ は `Apply(Apply(f, [a]), [b])` として返されるが、`@debruijn.normalize` は入力の n 項スパイン `Apply(f, [a, b])` を保つ。空の適用 `Apply(h, [])` は `h` の値に評価されるので結果から消える。小ステップの簡約器もそれを `h` と読むが、ノードはそのまま残す。2 つの正規化器はスパインを平坦化すれば一致する。ここで平坦化とは、入れ子の適用をまとめ、空の適用を取り除くことである。"
 

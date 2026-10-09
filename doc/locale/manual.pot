@@ -898,7 +898,7 @@ msgstr ""
 
 #: manual/api/stlc.md:280
 #: manual/api/utlc/lambda.md:123
-#: manual/api/utlc/nbe.md:186
+#: manual/api/utlc/nbe.md:182
 msgid "Normalization"
 msgstr ""
 
@@ -1339,67 +1339,67 @@ msgstr ""
 msgid "`Semantic[T]` is an opaque semantic value."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:73
+#: manual/api/utlc/nbe.md:69
 msgid "A semantic value is a constant, a closure (a binder body with its environment), a delayed argument, or a neutral value (a free variable, a variable at a quote level, or a neutral value applied to an argument). The representation is private; values are produced by `eval` and the `reflect_*` functions and consumed by `quote`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:81
+#: manual/api/utlc/nbe.md:77
 msgid "`reflect_free` turns a free name into a neutral semantic value."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:87
+#: manual/api/utlc/nbe.md:83
 msgid "Quoting it gives `Free(name)`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:91
+#: manual/api/utlc/nbe.md:87
 msgid "`reflect_level` turns a quote level into a neutral semantic variable."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:97
+#: manual/api/utlc/nbe.md:93
 msgid "Returns `None` for a negative level. Quoting the variable of level `l` at depth `n > l` gives `Bound(n - l - 1)`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:118
+#: manual/api/utlc/nbe.md:114
 msgid "Evaluation and readback"
 msgstr ""
 
-#: manual/api/utlc/nbe.md:122
+#: manual/api/utlc/nbe.md:118
 msgid "`EvaluationResult[T]` is the outcome of `eval`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:134
+#: manual/api/utlc/nbe.md:130
 msgid "`eval` evaluates a closed De Bruijn term to weak head form in the lazy semantic domain."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:141
+#: manual/api/utlc/nbe.md:137
 msgid "The term must be well scoped (free names are allowed); otherwise the result is `ScopeFailure` with `consumed=0`. Evaluation is call by name: arguments are delayed and evaluated only when needed, and evaluation stops at a closure or a neutral value without entering binders."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:148
+#: manual/api/utlc/nbe.md:144
 msgid "`QuoteResult[T]` is the outcome of `quote`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:160
+#: manual/api/utlc/nbe.md:156
 msgid "`quote` reads a semantic value back as a beta-normal De Bruijn term."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:166
+#: manual/api/utlc/nbe.md:162
 msgid "`quote(value, level, fuel)` reads `value` back under `level` binders. A closure is read back by applying it to a fresh variable of the current level and reading the result under one more binder; neutral applications are read back argument by argument, which forces delayed arguments. Use `level = 0` for values from `eval`. A negative `level`, or a level variable that is not below `level`, gives `ScopeFailure(NegativeIndex)`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:190
+#: manual/api/utlc/nbe.md:186
 msgid "`NbeResult[T]` is the outcome of `normalize`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:203
+#: manual/api/utlc/nbe.md:199
 msgid "`normalize` computes the beta normal form of a well-scoped De Bruijn term within a fuel budget."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:210
+#: manual/api/utlc/nbe.md:206
 msgid "It validates the term, evaluates it and quotes the result at level 0, with one shared budget. `NormalForm(t, c)`: `t` is the beta normal form, reached with `c` units. `FuelExhausted(c)`: the budget ran out; the term may diverge or may need more fuel. `ScopeFailure`: the input has a dangling or negative index. The fuel test comes first, so an ill-scoped term with fuel `<= 0` gives `FuelExhausted(consumed=0)`, not `ScopeFailure`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:217
+#: manual/api/utlc/nbe.md:213
 msgid "Applications in the result are unary: a normal form $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])` evaluates to the value of `h`, so it disappears from the result; the small-step reducers also read it as `h` but leave the node in place. The two normalizers agree after spines are flattened, where flattening merges nested applications and drops empty ones."
 msgstr ""
 
