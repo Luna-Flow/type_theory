@@ -111,6 +111,12 @@ test "reducers report ill-scoped input" {
     @debruijn.reduce_once(elsewhere) ==
     ScopeFailure(UnboundIndex(index=0, depth=0)),
   )
+  // validation comes before any step: the redex before the bad index is not
+  // contracted (issue #16)
+  assert_true(
+    @debruijn.normalize(elsewhere, 10) ==
+    ScopeFailure(term=elsewhere, error=UnboundIndex(index=0, depth=0), steps=0),
+  )
   // a well-scoped term with redexes under binders still reduces
   let under : @debruijn.DbTerm[Int] = Bind(
     Apply(Bind(Apply(Bound(1), [Bound(0)])), [Value(2)]),
