@@ -44,8 +44,9 @@ Last audited: 2026-10-09
 
 Open:
 
-- Deeply nested input terms overflow the host stack on js, wasm and wasm-gc
-  (#13).
+- Deeply nested input terms still overflow the host stack on js, wasm and
+  wasm-gc in `rewrite`, `eval`, `utlc/lambda` and `stlc`; `syntax`, `core`,
+  `substitution`, `debruijn` and `utlc/nbe` are stack-safe (#13).
 
 Fixed on 2026-10-09:
 

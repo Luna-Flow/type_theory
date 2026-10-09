@@ -37,13 +37,13 @@ msgid "The interface you implement to adapt your own AST is [`@syntax.BindingSyn
 msgstr "为适配你自己的 AST 而需实现的接口是 [`@syntax.BindingSyntax`](syntax.md)；随后你将获得的算法是 [`@syntax.generic_free_variables`](syntax.md)、[`@substitution.GenericSubstitution`](substitution.md) 和 [`@rewrite.generic_top_down_once`](rewrite.md)。该契约在 [adapter 设计](../design/adapter.md)中说明，[adapter 教程](../tutorial/adapter.md)则一步步构建一个适配器。"
 
 #: manual/api/adapter.md:33
-#: manual/api/core.md:14
+#: manual/api/core.md:16
 #: manual/api/debruijn.md:14
 #: manual/api/eval.md:12
 #: manual/api/rewrite.md:17
 #: manual/api/stlc.md:15
-#: manual/api/substitution.md:15
-#: manual/api/syntax.md:14
+#: manual/api/substitution.md:22
+#: manual/api/syntax.md:23
 #: manual/api/utlc/lambda.md:14
 #: manual/api/utlc/nbe.md:14
 msgid "Importing"
@@ -78,204 +78,204 @@ msgid "core API"
 msgstr "core API"
 
 #: manual/api/core.md:5
-msgid "The `core` package defines the vocabulary that every other package of `type_theory` shares: variable names, fresh-name generation, ordered scopes, telescopes and finite renamings. All values are immutable: every operation that \"changes\" a value returns a new one and leaves its argument untouched. `Context`, `Telescope` and `Renaming` are abstract types, so their storage cannot be reached from outside the package, and every method that returns an array returns a fresh copy. The mathematics behind these definitions is in the [core design](../design/core.md)."
-msgstr "`core` 包定义了 `type_theory` 中所有其他包共享的基本词汇：变量名、新名字生成、有序作用域、伸缩式（telescope）以及有限重命名。所有值都是不可变的：每个“改变”值的操作都返回一个新值，并保持其参数不变。`Context`、`Telescope` 和 `Renaming` 是抽象类型，因此包外无法触及它们的存储，且每个返回数组的方法都返回一个新的副本。这些定义背后的数学见 [core 设计](../design/core.md)。"
+msgid "The `core` package defines the vocabulary that every other package of `type_theory` shares: variable names, fresh-name generation, ordered scopes, telescopes and finite renamings. All values are immutable: every operation that \"changes\" a value returns a new one and leaves its argument untouched. `Context`, `Telescope` and `Renaming` are abstract types, so their storage cannot be reached from outside the package, and every method that returns an array returns a fresh copy. None of these values is nested, so every operation, the derived `==`, `compare`, `hash` and `Debug` included, uses a constant amount of host stack. The mathematics behind these definitions is in the [core design](../design/core.md)."
+msgstr "`core` 包定义了 `type_theory` 中所有其他包共享的基本词汇：变量名、新名字生成、有序作用域、伸缩式（telescope）以及有限重命名。所有值都是不可变的：每个“改变”值的操作都返回一个新值，并保持其参数不变。`Context`、`Telescope` 和 `Renaming` 是抽象类型，因此包外无法触及它们的存储，且每个返回数组的方法都返回一个新的副本。这些值都不是嵌套的，因此每个操作（包括派生的 `==`、`compare`、`hash` 和 `Debug`）只使用常数大小的宿主栈。这些定义背后的数学见 [core 设计](../design/core.md)。"
 
-#: manual/api/core.md:16
+#: manual/api/core.md:18
 #: manual/api/debruijn.md:16
 #: manual/api/eval.md:14
 #: manual/api/rewrite.md:19
 #: manual/api/stlc.md:17
-#: manual/api/substitution.md:17
-#: manual/api/syntax.md:16
+#: manual/api/substitution.md:24
+#: manual/api/syntax.md:25
 #: manual/api/utlc/lambda.md:16
 #: manual/api/utlc/nbe.md:16
 msgid "Add the package, and the packages whose types appear in its signatures, to your `moon.pkg`:"
 msgstr "将该包以及其签名中出现的类型所在的包添加到你的 `moon.pkg`："
 
-#: manual/api/core.md:26
+#: manual/api/core.md:28
 msgid "`hashset` is needed for the name sets that `fresh_name`, `Renaming::support` and `Renaming::targets` take or return. The examples on this page refer to every name through its package alias, for example `@core.Name`."
 msgstr "`fresh_name`、`Renaming::support` 和 `Renaming::targets` 接受或返回的名字集合需要 `hashset`。本页的示例都通过包别名引用名字，例如 `@core.Name`。"
 
-#: manual/api/core.md:30
+#: manual/api/core.md:32
 msgid "Names"
 msgstr "名字"
 
-#: manual/api/core.md:34
+#: manual/api/core.md:36
 msgid "`Name` is a variable name, compared by its text."
 msgstr "`Name` 是变量名，按其文本进行比较。"
 
-#: manual/api/core.md:42
+#: manual/api/core.md:44
 msgid "Two names are the same variable exactly when their texts are equal. A name carries no scope, no unique identifier and no type: binding is decided by the syntax that contains the name. The field `text` is read-only outside the package; use `Name::new` and `Name::text`."
 msgstr "两个名字当且仅当文本相等时才是同一个变量。名字不携带作用域、唯一标识符或类型：绑定关系由包含该名字的语法决定。字段 `text` 在包外是只读的；请使用 `Name::new` 和 `Name::text`。"
 
-#: manual/api/core.md:49
+#: manual/api/core.md:51
 msgid "`Name::new` makes a name from its text."
 msgstr "`Name::new` 由文本构造一个名字。"
 
-#: manual/api/core.md:55
+#: manual/api/core.md:57
 msgid "Any string is accepted, including the empty string and strings that look like generated names such as `x_1`. The library never parses the text, except that `fresh_name` appends `_<k>` suffixes to it."
 msgstr "任何字符串都可接受，包括空字符串以及看起来像生成名字的字符串，例如 `x_1`。库从不解析该文本，只是 `fresh_name` 会在其后追加 `_<k>` 后缀。"
 
-#: manual/api/core.md:61
+#: manual/api/core.md:63
 msgid "`Name::text` returns the text of a name."
 msgstr "`Name::text` 返回名字的文本。"
 
-#: manual/api/core.md:78
+#: manual/api/core.md:80
 msgid "These methods compare and hash names through their text."
 msgstr "这些方法通过名字的文本对其进行比较和哈希。"
 
-#: manual/api/core.md:86
+#: manual/api/core.md:88
 msgid "They are the `Eq`, `Compare` and `Hash` implementations promoted to methods. `compare` is the order of `String` on the texts: shorter texts first, then by UTF-16 code units. It is a total order, so names can be sorted for deterministic output; `hash` lets names live in `HashSet` and `HashMap`. Prefer the operators `==`, `!=`, `<` and friends in new code."
 msgstr "它们是提升为方法的 `Eq`、`Compare` 和 `Hash` 实现。`compare` 是文本上 `String` 的顺序：较短的文本在前，然后按 UTF-16 码元比较。这是一个全序，因此可以对名字排序以获得确定性输出；`hash` 使名字可以放入 `HashSet` 和 `HashMap`。新代码中请优先使用运算符 `==`、`!=`、`<` 等。"
 
-#: manual/api/core.md:104
+#: manual/api/core.md:106
 msgid "`fresh_name` returns a name that does not occur in a set of used names, keeping a hint when possible."
 msgstr "`fresh_name` 返回一个不在已用名字集合中出现的名字，并在可能时保留提示名。"
 
-#: manual/api/core.md:111
+#: manual/api/core.md:113
 msgid "`fresh_name(hint, used)` returns `hint` itself when `hint` is not in `used`. Otherwise it tries `hint_1`, `hint_2`, … in order and returns the first candidate that is not in `used`. The result is a function of `hint` and `used` only, so repeated runs produce the same names. It always terminates: at most $|used| + 1$ candidates are tried."
 msgstr "当 `hint` 不在 `used` 中时，`fresh_name(hint, used)` 直接返回 `hint`。否则它依次尝试 `hint_1`、`hint_2`、…，并返回第一个不在 `used` 中的候选。结果只依赖于 `hint` 和 `used`，因此重复运行会产生相同的名字。它总会终止：最多尝试 $|used| + 1$ 个候选。"
 
-#: manual/api/core.md:126
+#: manual/api/core.md:128
 msgid "Scopes"
 msgstr "作用域"
 
-#: manual/api/core.md:130
+#: manual/api/core.md:132
 msgid "`Context` is an ordered list of names in scope, innermost last."
 msgstr "`Context` 是作用域内名字的有序列表，最内层的在最后。"
 
-#: manual/api/core.md:136
+#: manual/api/core.md:138
 msgid "A context may contain the same name more than once; a later entry shadows an earlier one. Two contexts are equal when they list the same names in the same order. The type is abstract: read a context with `length`, `contains` and `to_array`."
 msgstr "一个上下文可以多次包含同一个名字；较后的条目遮蔽较早的条目。两个上下文当以相同顺序列出相同名字时相等。该类型是抽象的：请用 `length`、`contains` 和 `to_array` 读取上下文。"
 
-#: manual/api/core.md:143
+#: manual/api/core.md:145
 msgid "These functions build a context with no names, or with the names of an array in order."
 msgstr "这些函数构造一个不含名字的上下文，或按顺序包含某个数组中名字的上下文。"
 
-#: manual/api/core.md:151
+#: manual/api/core.md:153
 msgid "`from_array` copies the array, so later changes to the array do not affect the context."
 msgstr "`from_array` 会复制数组，因此之后对数组的修改不会影响上下文。"
 
-#: manual/api/core.md:156
+#: manual/api/core.md:158
 msgid "`Context::extend_with` returns the context with one more name at the inner end."
 msgstr "`Context::extend_with` 返回在内层末端多一个名字的上下文。"
 
-#: manual/api/core.md:163
+#: manual/api/core.md:165
 msgid "The original context is unchanged. The call copies the names, so it costs $O(n)$ for a context of length $n$."
 msgstr "原上下文保持不变。该调用会复制名字，因此对长度为 $n$ 的上下文开销为 $O(n)$。"
 
-#: manual/api/core.md:168
+#: manual/api/core.md:170
 msgid "These methods query a context."
 msgstr "这些方法查询上下文。"
 
-#: manual/api/core.md:177
+#: manual/api/core.md:179
 msgid "`contains` is a linear search. `to_array` returns a fresh array, outermost name first; changing it does not change the context. `equal` is the promoted `Eq` implementation."
 msgstr "`contains` 是线性查找。`to_array` 返回一个新数组，最外层名字在前；修改该数组不会改变上下文。`equal` 是提升的 `Eq` 实现。"
 
-#: manual/api/core.md:195
+#: manual/api/core.md:197
 msgid "`Telescope[T]` is a sequence of binders, each with an annotation of type `T`, in dependency order."
 msgstr "`Telescope[T]` 是按依赖顺序排列的绑定子序列，每个绑定子带有一个类型为 `T` 的标注。"
 
-#: manual/api/core.md:202
+#: manual/api/core.md:204
 msgid "In a telescope $x_1 : A_1, \\dots, x_n : A_n$ the annotation $A_i$ may refer to $x_1, \\dots, x_{i-1}$. `Telescope` records the order; it does not check what the annotations mention. The type is abstract: read a telescope with `length` and `to_array`."
 msgstr "在伸缩式 $x_1 : A_1, \\dots, x_n : A_n$ 中，标注 $A_i$ 可以引用 $x_1, \\dots, x_{i-1}$。`Telescope` 只记录顺序；它不检查标注中提及了什么。该类型是抽象的：请用 `length` 和 `to_array` 读取伸缩式。"
 
-#: manual/api/core.md:209
+#: manual/api/core.md:211
 msgid "These functions build and read a telescope."
 msgstr "这些函数构造和读取伸缩式。"
 
-#: manual/api/core.md:219
+#: manual/api/core.md:221
 msgid "`extend_with` appends one binder and returns a new telescope; `to_array` returns a fresh array of the entries, first binder first, and changing it does not change the telescope."
 msgstr "`extend_with` 追加一个绑定子并返回新的伸缩式；`to_array` 返回由条目组成的新数组，第一个绑定子在前，修改该数组不会改变伸缩式。"
 
-#: manual/api/core.md:235
+#: manual/api/core.md:237
 #: manual/design/core.md:66
 msgid "Renamings"
 msgstr "重命名"
 
-#: manual/api/core.md:239
+#: manual/api/core.md:241
 msgid "`Renaming` is a finite map from names to names; names outside its domain are left unchanged."
 msgstr "`Renaming` 是从名字到名字的有限映射；定义域之外的名字保持不变。"
 
-#: manual/api/core.md:246
+#: manual/api/core.md:248
 msgid "A renaming $\\rho$ denotes the total function $\\rho(n) = m$ if $(n, m)$ is an entry and $\\rho(n) = n$ otherwise. It is applied simultaneously: the image of a name is never renamed again. A renaming need not be injective. The type is abstract, so the only way to build a renaming is through the functions below, and each name has at most one entry. Equality (`Renaming::equal`) compares the entry lists, so two renamings that denote the same function can still be different values."
 msgstr "重命名 $\\rho$ 表示如下全函数：若 $(n, m)$ 是一个条目则 $\\rho(n) = m$，否则 $\\rho(n) = n$。它是同时作用的：名字的像不会再次被重命名。重命名不必是单射。该类型是抽象的，因此构造重命名的唯一途径是下面的函数，且每个名字至多有一个条目。相等性（`Renaming::equal`）比较的是条目列表，因此表示同一函数的两个重命名仍可能是不同的值。"
 
-#: manual/api/core.md:256
+#: manual/api/core.md:258
 msgid "These functions build renamings."
 msgstr "这些函数构造重命名。"
 
-#: manual/api/core.md:264
+#: manual/api/core.md:266
 msgid "`set(from, to_)` adds the entry `from ↦ to_`, replacing an existing image of `from` in place."
 msgstr "`set(from, to_)` 添加条目 `from ↦ to_`，若 `from` 已有像则就地替换。"
 
-#: manual/api/core.md:269
+#: manual/api/core.md:271
 msgid "`Renaming::apply` returns the image of a name."
 msgstr "`Renaming::apply` 返回名字的像。"
 
-#: manual/api/core.md:277
+#: manual/api/core.md:279
 msgid "These methods read the entries of a renaming."
 msgstr "这些方法读取重命名的条目。"
 
-#: manual/api/core.md:284
+#: manual/api/core.md:286
 msgid "`length` is the number of names in the domain. `to_array` returns the entries `(from, to_)` as a fresh array, in the order the names were first added; changing the array does not change the renaming. An entry may map a name to itself, so `length` can count names that `apply` leaves unchanged."
 msgstr "`length` 是定义域中名字的个数。`to_array` 以新数组的形式返回条目 `(from, to_)`，顺序为名字首次加入的顺序；修改该数组不会改变重命名。一个条目可以把名字映射到自身，因此 `length` 可能计入 `apply` 保持不变的名字。"
 
-#: manual/api/core.md:306
+#: manual/api/core.md:308
 msgid "`Renaming::without` removes a name from the domain."
 msgstr "`Renaming::without` 从定义域中移除一个名字。"
 
-#: manual/api/core.md:312
+#: manual/api/core.md:314
 msgid "This is the operation a binder performs: under a binder for `x`, free occurrences of `x` are no longer the `x` of the renaming."
 msgstr "这正是绑定子所执行的操作：在 `x` 的绑定子之下，`x` 的自由出现不再是该重命名中的 `x`。"
 
-#: manual/api/core.md:317
+#: manual/api/core.md:319
 msgid "These methods return the names a renaming mentions."
 msgstr "这些方法返回重命名中提及的名字。"
 
-#: manual/api/core.md:324
+#: manual/api/core.md:326
 msgid "`support` contains every source and every target of an entry; `targets` contains only the targets. Capture-avoiding operations use them to choose fresh binder names."
 msgstr "`support` 包含每个条目的所有源和所有目标；`targets` 只包含目标。避免捕获的操作用它们来选择新的绑定子名字。"
 
-#: manual/api/core.md:330
+#: manual/api/core.md:332
 msgid "`Renaming::then` composes two renamings, applying `self` first."
 msgstr "`Renaming::then` 复合两个重命名，先应用 `self`。"
 
-#: manual/api/core.md:336
+#: manual/api/core.md:338
 msgid "For every name $n$, `r.then(s).apply(n) == s.apply(r.apply(n))`."
 msgstr "对每个名字 $n$，`r.then(s).apply(n) == s.apply(r.apply(n))`。"
 
-#: manual/api/core.md:356
+#: manual/api/core.md:358
 msgid "`Renaming::equal` compares two renamings entry by entry."
 msgstr "`Renaming::equal` 逐条目比较两个重命名。"
 
-#: manual/api/core.md:362
+#: manual/api/core.md:364
 #: manual/api/eval.md:77
 msgid "It is the promoted `Eq` implementation; use `==` in new code."
 msgstr "它是提升的 `Eq` 实现；新代码中请使用 `==`。"
 
-#: manual/api/core.md:364
 #: manual/api/core.md:366
+#: manual/api/core.md:368
 #: manual/api/stlc.md:336
 #: manual/api/stlc.md:338
-#: manual/api/syntax.md:353
-#: manual/api/syntax.md:355
+#: manual/api/syntax.md:367
+#: manual/api/syntax.md:369
 #: manual/index.md:103
 msgid "Deprecated"
 msgstr "已弃用"
 
-#: manual/api/core.md:366
+#: manual/api/core.md:368
 #: manual/api/stlc.md:338
-#: manual/api/syntax.md:355
+#: manual/api/syntax.md:369
 msgid "Replacement"
 msgstr "替代项"
 
-#: manual/api/core.md:371
+#: manual/api/core.md:373
 msgid "The fields `Context::names`, `Telescope::entries` and `Renaming::entries` are no longer public; use `to_array`, `length`, `contains` and `apply` instead."
 msgstr "字段 `Context::names`、`Telescope::entries` 和 `Renaming::entries` 不再公开；请改用 `to_array`、`length`、`contains` 和 `apply`。"
 
-#: manual/api/core.md:375
+#: manual/api/core.md:377
 msgid "`extend` became a reserved word in MoonBit 0.10, so the methods were renamed. The old names remain as deprecated aliases. The method forms `not_equal`, `op_lt`, `op_le`, `op_gt`, `op_ge`, `hash_combine` and `to_repr` on these types are hidden and deprecated; use the operators `!=`, `<`, `<=`, `>`, `>=`, the `Hash` trait and `Repr(x)` instead."
 msgstr "`extend` 在 MoonBit 0.10 中成为保留字，因此这些方法被重命名。旧名字作为已弃用的别名保留。这些类型上的方法形式 `not_equal`、`op_lt`、`op_le`、`op_gt`、`op_ge`、`hash_combine` 和 `to_repr` 已被隐藏并弃用；请改用运算符 `!=`、`<`、`<=`、`>`、`>=`、`Hash` trait 以及 `Repr(x)`。"
 
@@ -295,8 +295,8 @@ msgstr "移位与实例化的定义及其性质的推导见 [debruijn 设计](..
 #: manual/api/eval.md:25
 #: manual/api/rewrite.md:29
 #: manual/api/stlc.md:29
-#: manual/api/substitution.md:28
-#: manual/api/syntax.md:26
+#: manual/api/substitution.md:35
+#: manual/api/syntax.md:35
 #: manual/api/utlc/lambda.md:28
 #: manual/api/utlc/nbe.md:27
 msgid "The examples on this page refer to every name through its package alias, for example `@core.Name`."
@@ -339,126 +339,142 @@ msgid "As with `@syntax.Term`, terms are shared, not copied: treat the argument 
 msgstr "与 `@syntax.Term` 一样，项是共享的而非复制的：请把 `Apply` 的参数数组视为不可变，需要修改时构造新节点，而不是原地修改。"
 
 #: manual/api/debruijn.md:63
-msgid "`DbTerm::equal` compares two terms structurally."
-msgstr "`DbTerm::equal` 按结构比较两个项。"
+msgid "`DbTerm::equal` compares two terms structurally. It implements `Eq`, so it is also the `==` of `DbTerm`."
+msgstr "`DbTerm::equal` 按结构比较两个项。它实现了 `Eq`，因此也是 `DbTerm` 的 `==`。"
 
 #: manual/api/debruijn.md:71
+msgid "The implementation is written by hand rather than derived, so that it handles terms of any nesting depth (see below); it is the same relation a derived `Eq` would compute."
+msgstr "该实现是手写的而非派生的，以便能处理任意嵌套深度的项（见下文）；它与派生的 `Eq` 所计算的关系相同。"
+
+#: manual/api/debruijn.md:75
+msgid "Nesting depth"
+msgstr "嵌套深度"
+
+#: manual/api/debruijn.md:77
+msgid "Every function of this package, and `==` on its types, works on terms of any nesting depth on every backend: long application chains in head or argument position, long chains of binders, and any mixture of these. The traversals keep their pending work in arrays on the heap, so the host call stack they use does not grow with the depth of the term, and the js, wasm and wasm-gc backends, whose stacks are small, give the same results as native. The tests run every operation on terms nested to depth 100 000 on all four backends."
+msgstr "本包的每个函数以及其类型上的 `==`，在每个后端上都能处理任意嵌套深度的项：头部或参数位置上的长应用链、长绑定子链，以及它们的任意混合。遍历把待处理的工作保存在堆上的数组中，因此它们使用的宿主调用栈不随项的深度增长，栈较小的 js、wasm 和 wasm-gc 后端也与 native 给出相同的结果。测试在全部四个后端上，对嵌套深度达 100 000 的项运行每个操作。"
+
+#: manual/api/debruijn.md:86
+msgid "The exception is the derived `Debug`: `@debug.to_string`, `inspect` and the failure message of `assert_eq` recurse over the term and can overflow the host stack on a deep term. To check deep terms in tests, compare them with `==` (for example `assert_true(a == b)`), which renders nothing."
+msgstr "例外是派生的 `Debug`：`@debug.to_string`、`inspect` 以及 `assert_eq` 的失败信息会对项进行递归，在很深的项上可能溢出宿主栈。要在测试中检查很深的项，请用 `==` 比较（例如 `assert_true(a == b)`），它不会渲染任何内容。"
+
+#: manual/api/debruijn.md:108
 msgid "`ScopeError` describes an index that does not refer to a binder."
 msgstr "`ScopeError` 描述一个不指向任何绑定子的索引。"
 
-#: manual/api/debruijn.md:83
+#: manual/api/debruijn.md:120
 msgid "`UnboundIndex(index, depth)`: `Bound(index)` occurs under only `depth` binders."
 msgstr "`UnboundIndex(index, depth)`：`Bound(index)` 仅出现在 `depth` 个绑定子之下。"
 
-#: manual/api/debruijn.md:85
+#: manual/api/debruijn.md:122
 msgid "`NegativeIndex(index)`: a negative index."
 msgstr "`NegativeIndex(index)`：负索引。"
 
-#: manual/api/debruijn.md:86
+#: manual/api/debruijn.md:123
 msgid "`NegativeShift(index, delta, cutoff)`: shifting the free `Bound(index)` by `delta` would move it below `cutoff`, the effective cutoff at the occurrence, where it would be captured by an enclosing binder or become negative."
 msgstr "`NegativeShift(index, delta, cutoff)`：将自由的 `Bound(index)` 移位 `delta` 会使其低于 `cutoff`（该出现处的有效截断值），从而被外围绑定子捕获或变为负数。"
 
-#: manual/api/debruijn.md:90
+#: manual/api/debruijn.md:127
 msgid "`NegativeCutoff(cutoff)`: `shift` was called with a negative `cutoff`."
 msgstr "`NegativeCutoff(cutoff)`：调用 `shift` 时给出了负的 `cutoff`。"
 
-#: manual/api/debruijn.md:92
+#: manual/api/debruijn.md:129
 msgid "Conversion and validation"
 msgstr "转换与验证"
 
-#: manual/api/debruijn.md:96
+#: manual/api/debruijn.md:133
 msgid "`from_named` converts named syntax to De Bruijn syntax."
 msgstr "`from_named` 将具名语法转换为 De Bruijn 语法。"
 
-#: manual/api/debruijn.md:102
+#: manual/api/debruijn.md:139
 msgid "A variable bound by an enclosing `Bind` becomes `Bound(i)`, where `i` counts the binders between the occurrence and its binder (the nearest binder of that name wins). Free variables become `Free`. The result is always well scoped, and alpha-equivalent named terms give equal results."
 msgstr "由外围 `Bind` 绑定的变量变为 `Bound(i)`，其中 `i` 计数该出现与其绑定子之间的绑定子个数（同名时最近的绑定子胜出）。自由变量变为 `Free`。结果总是良作用域的，且 α-等价的具名项给出相等的结果。"
 
-#: manual/api/debruijn.md:109
+#: manual/api/debruijn.md:146
 msgid "`to_named` converts De Bruijn syntax back to named syntax with deterministic binder names."
 msgstr "`to_named` 将 De Bruijn 语法转换回具名语法，并使用确定性的绑定子名字。"
 
-#: manual/api/debruijn.md:116
+#: manual/api/debruijn.md:153
 msgid "Binders are named `x`, `x_1`, `x_2`, …: each one gets the first name of that sequence that is neither a free name of the term nor the name of an enclosing binder. Returns `Err(NegativeIndex)` or `Err(UnboundIndex)` for an ill-scoped term. For a well-scoped `d`, `from_named(to_named(d))` is `d`; for a named `t`, `to_named(from_named(t))` is alpha-equivalent to `t`."
 msgstr "绑定子依次命名为 `x`、`x_1`、`x_2`、…：每个绑定子取该序列中第一个既不是项的自由名字、也不是外围绑定子名字的名字。对作用域不良的项返回 `Err(NegativeIndex)` 或 `Err(UnboundIndex)`。对良作用域的 `d`，`from_named(to_named(d))` 就是 `d`；对具名项 `t`，`to_named(from_named(t))` 与 `t` α-等价。"
 
-#: manual/api/debruijn.md:139
+#: manual/api/debruijn.md:176
 msgid "The binder becomes `x_1` because `x` is a free name of the term."
 msgstr "绑定子变为 `x_1`，因为 `x` 是该项的自由名字。"
 
-#: manual/api/debruijn.md:143
+#: manual/api/debruijn.md:180
 msgid "`validate` checks that every bound index refers to an enclosing binder."
 msgstr "`validate` 检查每个约束索引都指向某个外围绑定子。"
 
-#: manual/api/debruijn.md:149
+#: manual/api/debruijn.md:186
 msgid "Returns `Ok(())` for a well-scoped term and otherwise the first error found in pre-order."
 msgstr "对良作用域项返回 `Ok(())`，否则返回按前序遍历找到的第一个错误。"
 
-#: manual/api/debruijn.md:161
+#: manual/api/debruijn.md:198
 msgid "Index operations"
 msgstr "索引操作"
 
-#: manual/api/debruijn.md:165
+#: manual/api/debruijn.md:202
 msgid "`shift` adds `delta` to every index that is free relative to a cutoff."
 msgstr "`shift` 将 `delta` 加到每个相对于截断值为自由的索引上。"
 
-#: manual/api/debruijn.md:171
+#: manual/api/debruijn.md:208
 msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. It requires `cutoff >= 0`: a negative cutoff would treat indices bound inside `t` as free, so `shift` returns `Err(NegativeCutoff(cutoff~))` for it before looking at `t`, even when `t` has no index at all. The shift is defined when no index falls below the cutoff, that is, there is no `i >= cutoff + k` with `i + delta < cutoff + k`. Returns `Err(NegativeShift)` if an index would fall below the cutoff, where it would be captured by an enclosing binder or become negative, and `Err(NegativeIndex)` if the input contains a negative index."
 msgstr "`shift(t, delta, cutoff)` 即操作 $\\uparrow^{delta}_{cutoff}$：在 `k` 个绑定子之下，索引 `i >= cutoff + k` 变为 `i + delta`，较小的索引保持不变。它要求 `cutoff >= 0`：负的截断值会把 `t` 内部约束的索引当作自由索引，因此 `shift` 在查看 `t` 之前就对其返回 `Err(NegativeCutoff(cutoff~))`，即使 `t` 中根本没有索引。当没有索引落到截断值之下时，即不存在满足 `i + delta < cutoff + k` 的 `i >= cutoff + k` 时，移位才有定义。若某索引会落到截断值之下（从而被外围绑定子捕获或变为负数）则返回 `Err(NegativeShift)`，若输入包含负索引则返回 `Err(NegativeIndex)`。"
 
-#: manual/api/debruijn.md:184
+#: manual/api/debruijn.md:221
 msgid "`substitute_bound` replaces a free index by a term."
 msgstr "`substitute_bound` 用一个项替换一个自由索引。"
 
-#: manual/api/debruijn.md:190
+#: manual/api/debruijn.md:227
 msgid "`substitute_bound(t, j, s)` is $[j \\mapsto s]\\,t$: under `k` binders, `Bound(j + k)` is replaced by `s` shifted up by `k`, so that the free indices of `s` keep pointing at the same binders. Other indices are unchanged; the binder count of the result is not adjusted. Returns `Err(NegativeIndex)` for a negative `j` or a negative index in `t`. It does not check for unbound indices; use `validate` for that."
 msgstr "`substitute_bound(t, j, s)` 即 $[j \\mapsto s]\\,t$：在 `k` 个绑定子之下，`Bound(j + k)` 被替换为向上移位 `k` 的 `s`，使 `s` 的自由索引仍指向相同的绑定子。其他索引不变；结果的绑定子计数不作调整。对负的 `j` 或 `t` 中的负索引返回 `Err(NegativeIndex)`。它不检查未绑定的索引；请使用 `validate` 进行检查。"
 
-#: manual/api/debruijn.md:199
+#: manual/api/debruijn.md:236
 msgid "`instantiate` opens a binder body with an argument."
 msgstr "`instantiate` 用一个实参打开绑定子的体。"
 
-#: manual/api/debruijn.md:205
+#: manual/api/debruijn.md:242
 msgid "`instantiate(body, arg)` computes $\\uparrow^{-1}_0\\big([0 \\mapsto \\uparrow^{1}_0 arg]\\,body\\big)$, the result of the beta step $(\\lambda.\\,body)\\,arg$. On well-scoped input it never returns an error."
 msgstr "`instantiate(body, arg)` 计算 $\\uparrow^{-1}_0\\big([0 \\mapsto \\uparrow^{1}_0 arg]\\,body\\big)$，即 β 步 $(\\lambda.\\,body)\\,arg$ 的结果。在良作用域输入上它从不返回错误。"
 
-#: manual/api/debruijn.md:241
+#: manual/api/debruijn.md:278
 msgid "Reduction"
 msgstr "归约"
 
-#: manual/api/debruijn.md:245
+#: manual/api/debruijn.md:282
 msgid "`DbStepResult[T]` is the outcome of one De Bruijn reduction attempt."
 msgstr "`DbStepResult[T]` 是一次 De Bruijn 归约尝试的结果。"
 
-#: manual/api/debruijn.md:256
+#: manual/api/debruijn.md:293
 msgid "`NoStep` and `Reduced` have the meaning of `@rewrite.StepResult`; the rule name is always `\"beta\"`. `ScopeFailure` reports that the input is ill scoped: `reduce_once` validates the whole term before searching for a redex, and the error is the first one `validate` finds. No step is taken in that case."
 msgstr "`NoStep` 和 `Reduced` 的含义与 `@rewrite.StepResult` 相同；规则名总是 `\"beta\"`。`ScopeFailure` 报告输入的作用域不良：`reduce_once` 在搜索可约式之前先校验整个项，错误是 `validate` 找到的第一个错误。此时不进行任何一步归约。"
 
-#: manual/api/debruijn.md:264
+#: manual/api/debruijn.md:301
 msgid "`reduce_once` performs one leftmost-outermost beta step."
 msgstr "`reduce_once` 执行一步最左最外 β 归约。"
 
-#: manual/api/debruijn.md:270
+#: manual/api/debruijn.md:307
 msgid "A redex is `Apply(Bind(body), [a, ..rest])`; it becomes `instantiate(body, a)`, applied to `rest` if `rest` is not empty. An empty application `Apply(h, [])` is read as `h`, so a head wrapped in empty applications, as in `Apply(Apply(Bind(body), []), [a])`, still forms a redex; `Apply(Bind(body), [])` alone has no argument and is not one. The search order is the root, then the head, then the arguments from left to right, and binder bodies are entered."
 msgstr "可约式是 `Apply(Bind(body), [a, ..rest])`；它变为 `instantiate(body, a)`，若 `rest` 非空则再应用于 `rest`。空应用 `Apply(h, [])` 被读作 `h`，因此被空应用包裹的头部，如 `Apply(Apply(Bind(body), []), [a])`，仍然构成可约式；单独的 `Apply(Bind(body), [])` 没有参数，不是可约式。搜索顺序是根，然后是头部，然后从左到右是各参数，并且会进入绑定子的体。"
 
-#: manual/api/debruijn.md:278
+#: manual/api/debruijn.md:315
 msgid "`reduce_once` validates the whole term first, as `validate` does: an ill-scoped term gives `ScopeFailure` with the first error in pre-order, wherever the bad index is, for example `ScopeFailure(NegativeIndex(index=-1))` for `Bind(Bound(-1))` and `ScopeFailure(UnboundIndex(index=5, depth=1))` for `(λ. 5) 1`. A well-scoped term never gives `ScopeFailure`."
 msgstr "`reduce_once` 先像 `validate` 一样验证整个项：作用域不良的项无论坏索引在何处，都会得到带有先序中第一个错误的 `ScopeFailure`，例如 `Bind(Bound(-1))` 得到 `ScopeFailure(NegativeIndex(index=-1))`，`(λ. 5) 1` 得到 `ScopeFailure(UnboundIndex(index=5, depth=1))`。良作用域的项永远不会得到 `ScopeFailure`。"
 
-#: manual/api/debruijn.md:286
+#: manual/api/debruijn.md:323
 msgid "`DbNormalizationResult[T]` is the outcome of bounded De Bruijn normalization."
 msgstr "`DbNormalizationResult[T]` 是有界 De Bruijn 范式化的结果。"
 
-#: manual/api/debruijn.md:297
+#: manual/api/debruijn.md:334
 msgid "`ScopeFailure` carries the term that was found ill scoped, the error and the number of steps taken before it; `normalize` reports it only for its input, with `steps=0`."
 msgstr "`ScopeFailure` 携带被发现作用域不良的项、错误以及在此之前已执行的步数；`normalize` 只对其输入报告它，此时 `steps=0`。"
 
-#: manual/api/debruijn.md:303
+#: manual/api/debruijn.md:340
 msgid "`normalize` repeats `reduce_once` until no step applies, a step fails, or a step limit is reached."
 msgstr "`normalize` 重复执行 `reduce_once`，直到没有可执行的步骤、某一步失败或达到步数上限。"
 
-#: manual/api/debruijn.md:310
+#: manual/api/debruijn.md:347
 msgid "It has the step-count contract of `@rewrite.normalize`: at most `max_steps` steps, and one extra step attempt to classify the final term. It validates the input once: an ill-scoped term gives `ScopeFailure(term, error, steps=0)` without any step. Reducts of a well-scoped term are well scoped (see the [debruijn design](../design/debruijn.md)), so the later steps are not validated again, and the result is `ScopeFailure` exactly when the input is ill scoped."
 msgstr "它遵循 `@rewrite.normalize` 的步数契约：至多 `max_steps` 步，再加一次额外的步进尝试来判定最终项。输入只验证一次：作用域不良的项不执行任何步骤，直接得到 `ScopeFailure(term, error, steps=0)`。良作用域项的归约结果仍是良作用域的（见 [debruijn 设计](../design/debruijn.md)），因此后续步骤不再重新验证，且结果为 `ScopeFailure` 当且仅当输入作用域不良。"
 
@@ -719,7 +735,7 @@ msgid "`trace` runs the same loop as `normalize` and records every step."
 msgstr "`trace` 运行与 `normalize` 相同的循环，并记录每一步。"
 
 #: manual/api/rewrite.md:351
-#: manual/api/syntax.md:246
+#: manual/api/syntax.md:260
 msgid "Binding-aware ASTs"
 msgstr "感知绑定的 AST"
 
@@ -752,7 +768,7 @@ msgid "For a downstream AST see the [adapter tutorial](../tutorial/adapter.md)."
 msgstr "关于下游 AST，请参阅[适配器教程](../tutorial/adapter.md)。"
 
 #: manual/api/rewrite.md:416
-#: manual/api/substitution.md:271
+#: manual/api/substitution.md:278
 msgid "Removed fields"
 msgstr "已移除的字段"
 
@@ -898,7 +914,7 @@ msgstr "可约式的后续参数在可约式的上下文中定型，而不是在
 
 #: manual/api/stlc.md:280
 #: manual/api/utlc/lambda.md:123
-#: manual/api/utlc/nbe.md:182
+#: manual/api/utlc/nbe.md:191
 msgid "Normalization"
 msgstr "范式化"
 
@@ -935,106 +951,110 @@ msgid "The `substitution` package replaces free variables by terms without captu
 msgstr "`substitution` 包用项替换自由变量，且不会捕获变量。`Substitution[T]` 作用于 `@syntax.Term[T]`；`GenericSubstitution[N]` 作用于任何实现了 `@syntax.BindingSyntax` 的 AST。两者都是有限的、同时的且不可变的：它们是抽象类型，每个操作都返回新值，且每个返回数组的方法都返回一个新的副本。"
 
 #: manual/api/substitution.md:12
+msgid "`Substitution::apply`, `Substitution::then` and `GenericSubstitution::apply_once` are stack-safe in the nesting depth of the term and of the replacements: they keep pending work in a heap array and use a constant amount of host stack, so terms nested 100 000 levels deep are handled on every backend. Formatting such a term with `Debug` is not stack-safe; see the [syntax API](syntax.md)."
+msgstr "`Substitution::apply`、`Substitution::then` 和 `GenericSubstitution::apply_once` 对项及替换项的嵌套深度是栈安全的：它们把待处理的工作保存在堆数组中，只使用常数大小的宿主栈，因此嵌套 100 000 层的项在每个后端上都能处理。用 `Debug` 格式化这样的项不是栈安全的；见 [syntax API](syntax.md)。"
+
+#: manual/api/substitution.md:19
 msgid "The definition of capture-avoiding substitution and the proofs of its laws are in the [substitution design](../design/substitution.md)."
 msgstr "避免捕获的代换的定义及其定律的证明见[代换设计](../design/substitution.md)。"
 
-#: manual/api/substitution.md:31
+#: manual/api/substitution.md:38
 msgid "Substitutions on `Term`"
 msgstr "`Term` 上的代换"
 
-#: manual/api/substitution.md:35
+#: manual/api/substitution.md:42
 msgid "`Substitution[T]` is a finite map from names to replacement terms."
 msgstr "`Substitution[T]` 是从名字到替换项的有限映射。"
 
-#: manual/api/substitution.md:41
+#: manual/api/substitution.md:48
 msgid "It denotes the map $\\sigma$ with $\\sigma(x) = s$ for an entry $(x, s)$ and $\\sigma(x) = x$ (the variable itself) for every other name. The type is abstract: the entries cannot be reached from outside the package, so the functions below are the only way to build a substitution, and each name has at most one entry."
 msgstr "它表示映射 $\\sigma$：对于条目 $(x, s)$ 有 $\\sigma(x) = s$，对于其他所有名字有 $\\sigma(x) = x$（即变量本身）。该类型是抽象的：包外无法触及这些条目，因此下面的函数是构造替换的唯一途径，且每个名字至多有一个条目。"
 
-#: manual/api/substitution.md:47
+#: manual/api/substitution.md:54
 msgid "Replacement terms are stored and returned as they are, not copied: `get`, `to_array` and `apply` return terms that share structure with the terms passed to `singleton` and `set`. `Term` is a plain enum whose `Apply` arguments are an `Array`, so treat terms as immutable values; changing the argument array of a term in place would also change every substitution that holds it."
 msgstr "替换项按原样存储和返回，不会被复制：`get`、`to_array` 和 `apply` 返回的项与传给 `singleton` 和 `set` 的项共享结构。`Term` 是一个普通的枚举，其 `Apply` 的参数是一个 `Array`，因此请把项视为不可变值；原地修改某个项的参数数组，也会改变所有持有该项的替换。"
 
-#: manual/api/substitution.md:56
+#: manual/api/substitution.md:63
 msgid "These functions build substitutions."
 msgstr "以下函数用于构建代换。"
 
-#: manual/api/substitution.md:64
+#: manual/api/substitution.md:71
 msgid "`set(x, s)` adds $x \\mapsto s$, replacing an existing entry for `x` in place."
 msgstr "`set(x, s)` 添加 $x \\mapsto s$，若 `x` 已有条目则就地替换。"
 
-#: manual/api/substitution.md:68
+#: manual/api/substitution.md:75
 msgid "`Substitution::get` returns the replacement for a name, if any."
 msgstr "`Substitution::get` 返回某个名字的替换项（如果有）。"
 
-#: manual/api/substitution.md:76
+#: manual/api/substitution.md:83
 msgid "These methods read the entries of a substitution."
 msgstr "这些方法读取替换的条目。"
 
-#: manual/api/substitution.md:83
+#: manual/api/substitution.md:90
 msgid "`length` is the number of names in the domain. `to_array` returns the entries `(x, s)` as a fresh array, in the order the names were first added; changing the array does not change the substitution."
 msgstr "`length` 是定义域中名字的个数。`to_array` 以新数组的形式返回条目 `(x, s)`，顺序为名字首次加入的顺序；修改该数组不会改变替换。"
 
-#: manual/api/substitution.md:105
+#: manual/api/substitution.md:112
 msgid "These methods shrink the domain of a substitution."
 msgstr "以下方法用于缩小代换的定义域。"
 
-#: manual/api/substitution.md:112
+#: manual/api/substitution.md:119
 msgid "`without(x)` drops the entry for `x`, which is what a binder for `x` does. `restrict(names)` keeps only the entries whose name is in `names`."
 msgstr "`without(x)` 删除 `x` 的条目，这正是 `x` 的绑定子所起的作用。`restrict(names)` 只保留名字属于 `names` 的条目。"
 
-#: manual/api/substitution.md:132
+#: manual/api/substitution.md:139
 msgid "`Substitution::apply` replaces the free variables of a term simultaneously, renaming binders to avoid capture."
 msgstr "`Substitution::apply` 同时替换项中的自由变量，并重命名绑定子以避免捕获。"
 
-#: manual/api/substitution.md:139
+#: manual/api/substitution.md:146
 msgid "Every free occurrence of a name `x` in the domain is replaced by its replacement; nothing is substituted inside an inserted replacement. Under `Bind(y, body)` the entry for `y` is ignored. When a replacement that is actually inserted into `body` has `y` free, the binder is renamed to a fresh name first, so free variables of replacements stay free. The result is determined up to the choice of fresh names, which is deterministic."
 msgstr "定义域中名字 `x` 的每个自由出现都被替换为其替换项；不会在插入的替换项内部再做代换。在 `Bind(y, body)` 之下，`y` 的条目被忽略。当某个实际插入到 `body` 中的替换项含有自由的 `y` 时，会先将绑定子重命名为新鲜名字，从而替换项中的自由变量保持自由。结果在新鲜名字的选取意义下是确定的，而该选取本身是确定性的。"
 
-#: manual/api/substitution.md:160
+#: manual/api/substitution.md:167
 msgid "`Substitution::then` composes two substitutions, applying `self` first."
 msgstr "`Substitution::then` 复合两个代换，先应用 `self`。"
 
-#: manual/api/substitution.md:166
+#: manual/api/substitution.md:173
 msgid "`s.then(t)` maps each `x` in the domain of `s` to `t.apply(s(x))`, and each other `x` in the domain of `t` to `t(x)`. For every term, `s.then(t).apply(term)` is alpha-equivalent to `t.apply(s.apply(term))`."
 msgstr "`s.then(t)` 将 `s` 定义域中的每个 `x` 映射到 `t.apply(s(x))`，将 `t` 定义域中的其余每个 `x` 映射到 `t(x)`。对于每个项，`s.then(t).apply(term)` 与 `t.apply(s.apply(term))` α-等价。"
 
-#: manual/api/substitution.md:190
+#: manual/api/substitution.md:197
 msgid "`from_renaming` turns a renaming into a substitution on a given set of names."
 msgstr "`from_renaming` 将一个重命名转换为作用于给定名字集合上的代换。"
 
-#: manual/api/substitution.md:196
+#: manual/api/substitution.md:203
 msgid "The result maps each listed name `x` with `renaming.apply(x) != x` to `Variable(renaming.apply(x))`. When the free variables of a term are among the listed names, applying the result is alpha-equivalent to `term.rename_free(renaming)`."
 msgstr "结果将每个满足 `renaming.apply(x) != x` 的所列名字 `x` 映射到 `Variable(renaming.apply(x))`。当项的自由变量都在所列名字之中时，应用该结果与 `term.rename_free(renaming)` α-等价。"
 
-#: manual/api/substitution.md:213
+#: manual/api/substitution.md:220
 msgid "Substitutions on binding-aware ASTs"
 msgstr "感知绑定的 AST 上的代换"
 
-#: manual/api/substitution.md:217
+#: manual/api/substitution.md:224
 msgid "`GenericSubstitution[N]` is a finite map from names to nodes of a downstream AST `N`."
 msgstr "`GenericSubstitution[N]` 是从名字到下游 AST `N` 的节点的有限映射。"
 
-#: manual/api/substitution.md:224
+#: manual/api/substitution.md:231
 msgid "Like `Substitution`, the type is abstract and has at most one entry per name. Replacement nodes are stored and returned without copying."
 msgstr "与 `Substitution` 一样，该类型是抽象的，每个名字至多有一个条目。替换节点在存储和返回时都不会被复制。"
 
-#: manual/api/substitution.md:229
+#: manual/api/substitution.md:236
 msgid "These functions build and query generic substitutions; they behave exactly like their `Substitution` counterparts."
 msgstr "以下函数用于构建和查询泛型代换；它们的行为与对应的 `Substitution` 版本完全相同。"
 
-#: manual/api/substitution.md:244
+#: manual/api/substitution.md:251
 msgid "`GenericSubstitution::apply_once` applies the substitution to a node in one simultaneous, capture-avoiding pass."
 msgstr "`GenericSubstitution::apply_once` 以一趟同时且避免捕获的遍历将代换应用于节点。"
 
-#: manual/api/substitution.md:251
+#: manual/api/substitution.md:258
 msgid "The algorithm is the one of `Substitution::apply`, run through `BindingSyntax::project` and rebuilt with `variable`, `apply` and `bind`. `Opaque` nodes are returned unchanged. \"Once\" means that inserted replacements are not visited again: substituting $x \\mapsto y$ and $y \\mapsto 2$ in $x + y$ gives $y + 2$, not $2 + 2$."
 msgstr "算法与 `Substitution::apply` 相同，通过 `BindingSyntax::project` 执行，并用 `variable`、`apply` 和 `bind` 重建。`Opaque` 节点原样返回。“Once”的意思是不会再次访问插入的替换项：在 $x + y$ 中代换 $x \\mapsto y$ 和 $y \\mapsto 2$ 得到 $y + 2$，而不是 $2 + 2$。"
 
-#: manual/api/substitution.md:268
+#: manual/api/substitution.md:275
 msgid "On `Term[T]`, `apply_once` agrees with `Substitution::apply`. For a downstream AST see the [adapter tutorial](../tutorial/adapter.md)."
 msgstr "在 `Term[T]` 上，`apply_once` 与 `Substitution::apply` 一致。关于下游 AST，请参阅[适配器教程](../tutorial/adapter.md)。"
 
-#: manual/api/substitution.md:273
+#: manual/api/substitution.md:280
 msgid "The field `entries` of `Substitution` and of `GenericSubstitution` is no longer public. Read a substitution with `get`, `length` and `to_array`."
 msgstr "`Substitution` 和 `GenericSubstitution` 的字段 `entries` 不再公开。请用 `get`、`length` 和 `to_array` 读取替换。"
 
@@ -1047,179 +1067,183 @@ msgid "The `syntax` package defines named syntax with binders: the generic term 
 msgstr "`syntax` 包定义了带绑定子的命名语法：泛型项类型 `Term[T]`、其上的分析（自由变量、全部名字、α-等价）、重命名，以及开放 trait `BindingSyntax`——下游 AST 借助它获得同样的分析，以及其他包中的泛型代换与改写。"
 
 #: manual/api/syntax.md:11
+msgid "Every operation of the package, `==` included, is stack-safe in the nesting depth of its input: it keeps pending work in a heap array and uses a constant amount of host stack, so a term nested 100 000 levels deep (a chain of applications or of binders) is handled on every backend. The exception is `Debug`: `@debug.to_string`, `Repr` and the messages of `assert_eq` and `inspect` recurse and can overflow the stack on such a term. The generic functions are stack-safe when the `BindingSyntax` methods of the downstream type are, that is, when they look at one layer of a node."
+msgstr "本包的每个操作（包括 `==`）对其输入的嵌套深度都是栈安全的：它把待处理的工作保存在堆数组中，只使用常数大小的宿主栈，因此嵌套 100 000 层的项（应用链或绑定子链）在每个后端上都能处理。例外是 `Debug`：`@debug.to_string`、`Repr` 以及 `assert_eq` 和 `inspect` 的信息会递归，在这样的项上可能溢出栈。当下游类型的 `BindingSyntax` 方法是栈安全的（即只查看节点的一层）时，这些泛型函数也是栈安全的。"
+
+#: manual/api/syntax.md:20
 msgid "The definitions behind these functions, and the proofs of their laws, are in the [syntax design](../design/syntax.md)."
 msgstr "这些函数背后的定义及其定律的证明见[语法设计](../design/syntax.md)。"
 
-#: manual/api/syntax.md:29
+#: manual/api/syntax.md:38
 #: manual/design/syntax.md:24
 msgid "Terms"
 msgstr "项"
 
-#: manual/api/syntax.md:33
+#: manual/api/syntax.md:42
 msgid "`Term[T]` is named syntax with domain values, variables, n-ary application and single-variable binding."
 msgstr "`Term[T]` 是命名语法，包含领域值、变量、n 元应用和单变量绑定。"
 
-#: manual/api/syntax.md:45
+#: manual/api/syntax.md:55
 msgid "`Value(v)` is a domain constant. Its payload `T` is opaque: it is treated as closed, so no analysis looks inside it."
 msgstr "`Value(v)` 是领域常量。其载荷 `T` 是不透明的：它被视为闭合的，因此任何分析都不会查看其内部。"
 
-#: manual/api/syntax.md:47
+#: manual/api/syntax.md:57
 msgid "`Variable(x)` is an occurrence of the name `x`."
 msgstr "`Variable(x)` 是名字 `x` 的一次出现。"
 
-#: manual/api/syntax.md:48
+#: manual/api/syntax.md:58
 msgid "`Apply(head, args)` applies `head` to a sequence of arguments. The lambda calculus packages read it as the curried application $head\\ a_1\\ \\cdots\\ a_n$."
 msgstr "`Apply(head, args)` 将 `head` 应用于一串参数。lambda 演算相关的包将其解读为柯里化应用 $head\\ a_1\\ \\cdots\\ a_n$。"
 
-#: manual/api/syntax.md:51
+#: manual/api/syntax.md:61
 msgid "`Bind(x, body)` binds `x` in `body`. In the lambda calculus it is $\\lambda x.\\,body$; a downstream language may read it as any one-variable binder."
 msgstr "`Bind(x, body)` 在 `body` 中绑定 `x`。在 lambda 演算中它是 $\\lambda x.\\,body$；下游语言可以将其解读为任意单变量绑定子。"
 
-#: manual/api/syntax.md:55
+#: manual/api/syntax.md:65
 msgid "`==` (`Term::equal`) is structural equality: binder names must match literally. Use `alpha_equal` to compare terms up to renaming of bound variables."
 msgstr "`==`（`Term::equal`）是结构相等：绑定子名字必须字面一致。若要在约束变量重命名的意义下比较项，请使用 `alpha_equal`。"
 
-#: manual/api/syntax.md:59
+#: manual/api/syntax.md:69
 msgid "Terms are values that the library shares instead of copying: an operation may return its argument, a subterm of it, or a term stored in a substitution or a reduction trace. The argument list of `Apply` is an ordinary `Array`, so the compiler does not stop you from changing it in place, but doing so changes every term and every library value that shares it. Treat terms as immutable: build a new `Apply` node instead of changing the array of an existing one."
 msgstr "项是库共享而非复制的值：一个操作可能返回它的参数、参数的子项，或存储在替换或归约轨迹中的项。`Apply` 的参数列表是一个普通的 `Array`，因此编译器不会阻止你原地修改它，但这样做会改变所有共享它的项和库中的值。请把项视为不可变：构造新的 `Apply` 节点，而不是修改已有节点的数组。"
 
-#: manual/api/syntax.md:80
+#: manual/api/syntax.md:90
 msgid "`Term::equal` compares two terms structurally."
 msgstr "`Term::equal` 按结构比较两个项。"
 
-#: manual/api/syntax.md:86
-msgid "It is the promoted `Eq` implementation. `λx.x` and `λy.y` are not `equal`."
-msgstr "它是提升而来的 `Eq` 实现。`λx.x` 与 `λy.y` 并不 `equal`。"
+#: manual/api/syntax.md:96
+msgid "It is the promoted `Eq` implementation: the same constructors, the same names and arities, and payloads compared with `T`'s `==`. `λx.x` and `λy.y` are not `equal`. The implementation is written by hand rather than derived so that it is stack-safe; it has the semantics of the derived one, including a `Double` `NaN` payload making a term unequal to itself."
+msgstr "它是被提升的 `Eq` 实现：构造子相同、名字和元数相同，载荷用 `T` 的 `==` 比较。`λx.x` 与 `λy.y` 并不 `equal`。该实现是手写而非派生的，以便做到栈安全；它的语义与派生版本相同，包括带有 `Double` `NaN` 载荷的项不等于它自身。"
 
-#: manual/api/syntax.md:90
+#: manual/api/syntax.md:104
 msgid "`Term::map_values` applies a function to every domain value and keeps the variables and binders."
 msgstr "`Term::map_values` 对每个领域值应用一个函数，并保留变量和绑定子。"
 
-#: manual/api/syntax.md:97
+#: manual/api/syntax.md:111
 msgid "It is a functor map: `t.map_values(v => v)` is `t`, and mapping `f` then `g` equals mapping `v => g(f(v))`. Free variables are unchanged."
 msgstr "它是函子映射：`t.map_values(v => v)` 就是 `t`，先映射 `f` 再映射 `g` 等于映射 `v => g(f(v))`。自由变量保持不变。"
 
-#: manual/api/syntax.md:109
+#: manual/api/syntax.md:123
 msgid "Analyses"
 msgstr "分析"
 
-#: manual/api/syntax.md:113
+#: manual/api/syntax.md:127
 msgid "`free_variables` returns the names that occur free in a term."
 msgstr "`free_variables` 返回在项中自由出现的名字。"
 
-#: manual/api/syntax.md:119
+#: manual/api/syntax.md:133
 msgid "An occurrence of `x` is free when no enclosing `Bind(x, _)` binds it. Values contribute no names. Cost: $O(n)$ set operations for a term of size $n$."
 msgstr "当没有外层的 `Bind(x, _)` 绑定 `x` 的某次出现时，该出现是自由的。值不贡献任何名字。代价：对大小为 $n$ 的项需要 $O(n)$ 次集合运算。"
 
-#: manual/api/syntax.md:124
+#: manual/api/syntax.md:138
 msgid "`all_names` returns every name in a term: free variables, bound occurrences and binder names."
 msgstr "`all_names` 返回项中的每个名字：自由变量、约束出现和绑定子名字。"
 
-#: manual/api/syntax.md:131
+#: manual/api/syntax.md:145
 msgid "Use it as the \"used\" set when choosing a fresh name for a term."
 msgstr "为项选取新鲜名字时，可将其用作“已使用”集合。"
 
-#: manual/api/syntax.md:149
+#: manual/api/syntax.md:163
 msgid "`alpha_equal` decides whether two terms are equal up to the names of bound variables."
 msgstr "`alpha_equal` 判定两个项在约束变量名字的意义下是否相等。"
 
-#: manual/api/syntax.md:156
+#: manual/api/syntax.md:170
 msgid "Values are compared with `T`'s `==`, free variables by name, and bound variables by the binder they refer to, in one simultaneous traversal of both terms."
 msgstr "值用 `T` 的 `==` 比较，自由变量按名字比较，约束变量按其所指的绑定子比较，整个过程是对两个项的一趟同时遍历。"
 
-#: manual/api/syntax.md:160
+#: manual/api/syntax.md:174
 msgid "`alpha_equal` is the payload equality lifted through binders, so it inherits the properties of `T`'s `==`: each of reflexivity, symmetry and transitivity holds for `alpha_equal` exactly when it holds for that `==`, so `alpha_equal` is an equivalence relation exactly when `==` is one. When `==` is the identity of `T` (as for `Int` or `String`), it is alpha-equivalence. `Double` follows IEEE 754: `NaN` is not equal to itself, so a term with a `NaN` payload is not alpha-equal to itself, while `0.0` and `-0.0` are equal payloads."
 msgstr "`alpha_equal` 是把载荷相等关系穿过绑定子提升所得的关系，因此继承 `T` 的 `==` 的性质：自反性、对称性、传递性中的每一条对 `alpha_equal` 成立，当且仅当它对该 `==` 成立；所以 `alpha_equal` 是等价关系当且仅当 `==` 是等价关系。当 `==` 是 `T` 上的恒等关系时（如 `Int` 或 `String`），它就是 α-等价。`Double` 遵循 IEEE 754：`NaN` 不等于自身，所以含 `NaN` 载荷的项与自身不 α-相等，而 `0.0` 与 `-0.0` 是相等的载荷。"
 
-#: manual/api/syntax.md:191
+#: manual/api/syntax.md:205
 msgid "Renaming"
 msgstr "重命名"
 
-#: manual/api/syntax.md:195
+#: manual/api/syntax.md:209
 msgid "`Term::rename_free` applies a renaming to the free variables of a term, renaming binders where necessary to avoid capture."
 msgstr "`Term::rename_free` 对项的自由变量应用重命名，并在必要时重命名绑定子以避免捕获。"
 
-#: manual/api/syntax.md:202
+#: manual/api/syntax.md:216
 msgid "Under `Bind(x, body)` the renaming loses its entry for `x`, because the bound `x` is a different variable. If a remaining target of the renaming equals `x`, the binder is renamed to a fresh name first. The result is alpha-equivalent to the textbook capture-avoiding renaming."
 msgstr "在 `Bind(x, body)` 之下，重命名会失去 `x` 的条目，因为被绑定的 `x` 是另一个变量。如果重命名剩余的某个目标等于 `x`，会先将绑定子重命名为新鲜名字。结果与教科书中避免捕获的重命名 α-等价。"
 
-#: manual/api/syntax.md:220
+#: manual/api/syntax.md:234
 msgid "`Term::alpha_rename_bound` renames the occurrences of a variable that are bound by an enclosing binder, refusing a target name that could be captured."
 msgstr "`Term::alpha_rename_bound` 重命名被外层绑定子约束的某个变量的各次出现，并拒绝可能被捕获的目标名字。"
 
-#: manual/api/syntax.md:227
+#: manual/api/syntax.md:241
 msgid "Call it on the *body* of a binder: `body.alpha_rename_bound(from, to_)` replaces the occurrences of `from` that are free in `body` (and therefore bound by the enclosing `Bind(from, body)`) with `to_`. Inner binders named `from` stop the renaming. The result is `None` when `to_` occurs anywhere in `body`, and `Some(body)` when `from == to_`. On success, `Bind(from, body)` and `Bind(to_, result)` are alpha-equivalent."
 msgstr "请在绑定子的*体*上调用它：`body.alpha_rename_bound(from, to_)` 将 `from` 在 `body` 中自由（因而被外层 `Bind(from, body)` 约束）的出现替换为 `to_`。名为 `from` 的内层绑定子会阻止重命名。当 `to_` 出现在 `body` 中任何位置时结果为 `None`，当 `from == to_` 时结果为 `Some(body)`。成功时，`Bind(from, body)` 与 `Bind(to_, result)` α-等价。"
 
-#: manual/api/syntax.md:250
+#: manual/api/syntax.md:264
 msgid "`BindingView[N]` is the one-layer view of a node that generic algorithms inspect."
 msgstr "`BindingView[N]` 是泛型算法所检查的节点的单层视图。"
 
-#: manual/api/syntax.md:262
+#: manual/api/syntax.md:276
 msgid "`Opaque` marks a node with no variables inside, such as a literal. The other cases mirror the constructors of `Term`, with the children left in the downstream type `N`."
 msgstr "`Opaque` 标记内部不含变量的节点，例如字面量。其他情形与 `Term` 的构造器一一对应，子节点保留为下游类型 `N`。"
 
-#: manual/api/syntax.md:268
+#: manual/api/syntax.md:282
 msgid "`BindingSyntax` is the open trait that a downstream AST implements to use the generic binding algorithms."
 msgstr "`BindingSyntax` 是开放 trait，下游 AST 实现它即可使用泛型绑定算法。"
 
-#: manual/api/syntax.md:280
+#: manual/api/syntax.md:294
 msgid "`project(node)` tells the algorithms what the node is."
 msgstr "`project(node)` 告诉算法该节点是什么。"
 
-#: manual/api/syntax.md:281
+#: manual/api/syntax.md:295
 msgid "`variable`, `apply` and `bind` rebuild nodes of each kind."
 msgstr "`variable`、`apply` 和 `bind` 分别重建各类节点。"
 
-#: manual/api/syntax.md:283
+#: manual/api/syntax.md:297
 msgid "An implementation must make `project` and the three constructors agree: `project(variable(x))` is `Variable(x)`, `project(apply(h, args))` is `Apply(h, args)`, `project(bind(x, b))` is `Bind(x, b)`, and rebuilding a projected `Apply` or `Bind` node gives back an equivalent node. An `Opaque` node must not contain variables. The [adapter design](../design/adapter.md) explains these laws; the [adapter tutorial](../tutorial/adapter.md) implements them for a small AST."
 msgstr "实现必须使 `project` 与三个构造器保持一致：`project(variable(x))` 为 `Variable(x)`，`project(apply(h, args))` 为 `Apply(h, args)`，`project(bind(x, b))` 为 `Bind(x, b)`，并且重建一个投影得到的 `Apply` 或 `Bind` 节点会得到等价的节点。`Opaque` 节点不得包含变量。[适配器设计](../design/adapter.md)解释了这些定律；[适配器教程](../tutorial/adapter.md)为一个小型 AST 实现了它们。"
 
-#: manual/api/syntax.md:291
+#: manual/api/syntax.md:305
 msgid "Call the trait methods through the trait, for example `@syntax.BindingSyntax::project(node)`."
 msgstr "请通过 trait 调用 trait 方法，例如 `@syntax.BindingSyntax::project(node)`。"
 
-#: manual/api/syntax.md:296
+#: manual/api/syntax.md:310
 msgid "`Term[T]` implements `BindingSyntax` with the obvious projection."
 msgstr "`Term[T]` 以显然的投影实现了 `BindingSyntax`。"
 
-#: manual/api/syntax.md:302
+#: manual/api/syntax.md:316
 msgid "`Value` projects to `Opaque` and every other constructor to the case of the same name, so the generic functions below agree with their `Term` versions on `Term` values."
 msgstr "`Value` 投影为 `Opaque`，其他每个构造器投影为同名的情形，因此下面的泛型函数在 `Term` 值上与其 `Term` 版本一致。"
 
-#: manual/api/syntax.md:319
+#: manual/api/syntax.md:333
 msgid "These functions compute free variables and all names for any `BindingSyntax` type."
 msgstr "以下函数为任意 `BindingSyntax` 类型计算自由变量和全部名字。"
 
-#: manual/api/syntax.md:327
+#: manual/api/syntax.md:341
 msgid "On `Term[T]` they return the same sets as `free_variables` and `all_names`."
 msgstr "在 `Term[T]` 上，它们返回与 `free_variables` 和 `all_names` 相同的集合。"
 
-#: manual/api/syntax.md:331
+#: manual/api/syntax.md:345
 msgid "`generic_alpha_rename_bound` is `Term::alpha_rename_bound` for any `BindingSyntax` type."
 msgstr "`generic_alpha_rename_bound` 是适用于任意 `BindingSyntax` 类型的 `Term::alpha_rename_bound`。"
 
-#: manual/api/syntax.md:338
+#: manual/api/syntax.md:352
 msgid "It returns `None` when the target name occurs in the node, and rebuilds the renamed node through `variable`, `apply` and `bind`."
 msgstr "当目标名字出现在节点中时，它返回 `None`；它通过 `variable`、`apply` 和 `bind` 重建重命名后的节点。"
 
-#: manual/api/syntax.md:358
+#: manual/api/syntax.md:372
 msgid "`Term::variable(name)` method form"
 msgstr "`Term::variable(name)` 方法形式"
 
-#: manual/api/syntax.md:359
+#: manual/api/syntax.md:373
 msgid "`Term::apply(head, args)` method form"
 msgstr "`Term::apply(head, args)` 方法形式"
 
-#: manual/api/syntax.md:360
+#: manual/api/syntax.md:374
 msgid "`Term::bind(name, body)` method form"
 msgstr "`Term::bind(name, body)` 方法形式"
 
-#: manual/api/syntax.md:362
+#: manual/api/syntax.md:376
 msgid "`Repr(term)` or `@debug.to_string(term)`"
 msgstr "`Repr(term)` 或 `@debug.to_string(term)`"
 
-#: manual/api/syntax.md:364
+#: manual/api/syntax.md:378
 msgid "These method forms were implicit promotions of trait methods. They are kept hidden and deprecated so that old callers still compile."
 msgstr "这些方法形式原本是 trait 方法的隐式提升。保留它们（隐藏且已弃用）是为了让旧的调用者仍能编译。"
 
@@ -1331,75 +1355,79 @@ msgstr "燃料是以单位计量的步数预算：每次对项节点求值、每
 msgid "The budget bounds the work, not the depth of the host call stack. Evaluation and readback run as a loop that keeps pending work on a stack in the heap, so the call stack does not grow with the fuel spent: a divergent term ends with `FuelExhausted` on every backend, however large the budget. The pending work is bounded by the budget."
 msgstr "预算限制的是工作量，而不是宿主调用栈的深度。求值与读回以循环方式运行，把待完成的工作保存在堆上的栈中，因此调用栈不会随所花费的燃料增长：无论预算多大，发散项在每个后端上都以 `FuelExhausted` 结束。待完成的工作受预算限制。"
 
-#: manual/api/utlc/nbe.md:59
+#: manual/api/utlc/nbe.md:49
+msgid "Nor does the host call stack grow with the nesting depth of the input: validation (by `@debruijn.validate`), evaluation and readback handle terms of any depth, such as long application chains or long chains of binders, on every backend. A term of size $n$ needs a few units of fuel per node to be evaluated and read back, so a deep term needs a budget that grows with its size, not a larger stack. The derived `Debug` of `NbeResult` recurses over the term it contains; compare deep results with `==` instead of printing them."
+msgstr "宿主调用栈同样不随输入的嵌套深度增长：验证（由 `@debruijn.validate` 完成）、求值和读回在每个后端上都能处理任意深度的项，例如长应用链或长绑定子链。大小为 $n$ 的项在求值和读回时每个节点需要若干单位燃料，因此深的项需要随其大小增长的预算，而不是更大的栈。`NbeResult` 派生的 `Debug` 会递归遍历它所含的项；请用 `==` 比较很深的结果，而不要打印它们。"
+
+#: manual/api/utlc/nbe.md:68
 msgid "Semantic values"
 msgstr "语义值"
 
-#: manual/api/utlc/nbe.md:63
+#: manual/api/utlc/nbe.md:72
 msgid "`Semantic[T]` is an opaque semantic value."
 msgstr "`Semantic[T]` 是不透明的语义值。"
 
-#: manual/api/utlc/nbe.md:69
+#: manual/api/utlc/nbe.md:78
 msgid "A semantic value is a constant, a closure (a binder body with its environment), a delayed argument, or a neutral value (a free variable, a variable at a quote level, or a neutral value applied to an argument). The representation is private; values are produced by `eval` and the `reflect_*` functions and consumed by `quote`."
 msgstr "语义值是常量、闭包（带有环境的绑定子体）、延迟参数或中性值（自由变量、某个 quote 层级上的变量，或作用于参数的中性值）。其表示是私有的；值由 `eval` 和 `reflect_*` 函数产生，由 `quote` 消费。"
 
-#: manual/api/utlc/nbe.md:77
+#: manual/api/utlc/nbe.md:86
 msgid "`reflect_free` turns a free name into a neutral semantic value."
 msgstr "`reflect_free` 把自由名转换为中性语义值。"
 
-#: manual/api/utlc/nbe.md:83
+#: manual/api/utlc/nbe.md:92
 msgid "Quoting it gives `Free(name)`."
 msgstr "对其 quote 得到 `Free(name)`。"
 
-#: manual/api/utlc/nbe.md:87
+#: manual/api/utlc/nbe.md:96
 msgid "`reflect_level` turns a quote level into a neutral semantic variable."
 msgstr "`reflect_level` 把 quote 层级转换为中性语义变量。"
 
-#: manual/api/utlc/nbe.md:93
+#: manual/api/utlc/nbe.md:102
 msgid "Returns `None` for a negative level. Quoting the variable of level `l` at depth `n > l` gives `Bound(n - l - 1)`."
 msgstr "层级为负时返回 `None`。在深度 `n > l` 处对层级 `l` 的变量 quote 得到 `Bound(n - l - 1)`。"
 
-#: manual/api/utlc/nbe.md:114
+#: manual/api/utlc/nbe.md:123
 msgid "Evaluation and readback"
 msgstr "求值与读回"
 
-#: manual/api/utlc/nbe.md:118
+#: manual/api/utlc/nbe.md:127
 msgid "`EvaluationResult[T]` is the outcome of `eval`."
 msgstr "`EvaluationResult[T]` 是 `eval` 的结果。"
 
-#: manual/api/utlc/nbe.md:130
+#: manual/api/utlc/nbe.md:139
 msgid "`eval` evaluates a closed De Bruijn term to weak head form in the lazy semantic domain."
 msgstr "`eval` 在惰性语义域中把闭 De Bruijn 项求值为弱头形式。"
 
-#: manual/api/utlc/nbe.md:137
+#: manual/api/utlc/nbe.md:146
 msgid "The term must be well scoped (free names are allowed); otherwise the result is `ScopeFailure` with `consumed=0`. Evaluation is call by name: arguments are delayed and evaluated only when needed, and evaluation stops at a closure or a neutral value without entering binders."
 msgstr "项必须是良作用域的（允许自由名）；否则结果为 `ScopeFailure`，且 `consumed=0`。求值采用传名调用：参数被延迟，仅在需要时求值；求值在闭包或中性值处停止，不进入绑定子。"
 
-#: manual/api/utlc/nbe.md:144
+#: manual/api/utlc/nbe.md:153
 msgid "`QuoteResult[T]` is the outcome of `quote`."
 msgstr "`QuoteResult[T]` 是 `quote` 的结果。"
 
-#: manual/api/utlc/nbe.md:156
+#: manual/api/utlc/nbe.md:165
 msgid "`quote` reads a semantic value back as a beta-normal De Bruijn term."
 msgstr "`quote` 把语义值读回为 beta 范式的 De Bruijn 项。"
 
-#: manual/api/utlc/nbe.md:162
+#: manual/api/utlc/nbe.md:171
 msgid "`quote(value, level, fuel)` reads `value` back under `level` binders. A closure is read back by applying it to a fresh variable of the current level and reading the result under one more binder; neutral applications are read back argument by argument, which forces delayed arguments. Use `level = 0` for values from `eval`. A negative `level`, or a level variable that is not below `level`, gives `ScopeFailure(NegativeIndex)`."
 msgstr "`quote(value, level, fuel)` 在 `level` 个绑定子之下读回 `value`。闭包的读回方式是：把它作用于当前层级的一个新变量，再在多一层绑定子之下读回结果；中性应用逐个参数读回，这会强制延迟参数。对来自 `eval` 的值使用 `level = 0`。负的 `level`，或不小于 `level` 的层级变量，会得到 `ScopeFailure(NegativeIndex)`。"
 
-#: manual/api/utlc/nbe.md:186
+#: manual/api/utlc/nbe.md:195
 msgid "`NbeResult[T]` is the outcome of `normalize`."
 msgstr "`NbeResult[T]` 是 `normalize` 的结果。"
 
-#: manual/api/utlc/nbe.md:199
+#: manual/api/utlc/nbe.md:208
 msgid "`normalize` computes the beta normal form of a well-scoped De Bruijn term within a fuel budget."
 msgstr "`normalize` 在燃料预算内计算良作用域 De Bruijn 项的 beta 范式。"
 
-#: manual/api/utlc/nbe.md:206
+#: manual/api/utlc/nbe.md:215
 msgid "It validates the term, evaluates it and quotes the result at level 0, with one shared budget. `NormalForm(t, c)`: `t` is the beta normal form, reached with `c` units. `FuelExhausted(c)`: the budget ran out; the term may diverge or may need more fuel. `ScopeFailure`: the input has a dangling or negative index. The fuel test comes first, so an ill-scoped term with fuel `<= 0` gives `FuelExhausted(consumed=0)`, not `ScopeFailure`."
 msgstr "它校验项、对其求值并在层级 0 对结果 quote，三者共享同一预算。`NormalForm(t, c)`：`t` 是 beta 范式，用 `c` 个单位得到。`FuelExhausted(c)`：预算耗尽；该项可能发散，也可能需要更多燃料。`ScopeFailure`：输入含有悬空或负的索引。燃料检测先进行，因此燃料 `<= 0` 时，作用域不良的项给出 `FuelExhausted(consumed=0)`，而不是 `ScopeFailure`。"
 
-#: manual/api/utlc/nbe.md:213
+#: manual/api/utlc/nbe.md:222
 msgid "Applications in the result are unary: a normal form $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])` evaluates to the value of `h`, so it disappears from the result; the small-step reducers also read it as `h` but leave the node in place. The two normalizers agree after spines are flattened, where flattening merges nested applications and drops empty ones."
 msgstr "结果中的应用是一元的：范式 $f\\,a\\,b$ 以 `Apply(Apply(f, [a]), [b])` 返回，而 `@debruijn.normalize` 保留输入的 n 元脊 `Apply(f, [a, b])`。空应用 `Apply(h, [])` 求值为 `h` 的值，因此从结果中消失；小步归约器同样把它读作 `h`，但保留该节点。两个范式化器在脊展平之后一致，其中展平是指合并嵌套的应用并去掉空应用。"
 
@@ -1572,15 +1600,15 @@ msgid "A downstream variable type converts to `@core.Name` by an injective map (
 msgstr "下游变量类型通过单射（不同变量映射到不同名）转换为 `@core.Name`。正是单射性使名的相等与变量的同一性一致，从而对下游变量而言新鲜性和捕获检查是正确的。"
 
 #: manual/design/adapter.md:132
-#: manual/design/core.md:170
-#: manual/design/debruijn.md:242
+#: manual/design/core.md:182
+#: manual/design/debruijn.md:327
 #: manual/design/eval.md:203
 #: manual/design/rewrite.md:184
 #: manual/design/stlc.md:386
 #: manual/design/substitution.md:130
-#: manual/design/syntax.md:286
+#: manual/design/syntax.md:374
 #: manual/design/utlc/lambda.md:205
-#: manual/design/utlc/nbe.md:291
+#: manual/design/utlc/nbe.md:335
 msgid "Correctness and invariants"
 msgstr "正确性与不变量"
 
@@ -1625,15 +1653,15 @@ msgid "Downstream adapters should add tests of (V1)–(V5) for their own node ki
 msgstr "下游 adapter 应为自己的节点种类添加 (V1)–(V5) 的测试：投影每个构造子的结果，重建每个被投影的节点，并检查 opaque 节点没有自由变量。"
 
 #: manual/design/adapter.md:147
-#: manual/design/core.md:187
-#: manual/design/debruijn.md:263
+#: manual/design/core.md:199
+#: manual/design/debruijn.md:354
 #: manual/design/eval.md:226
 #: manual/design/rewrite.md:212
 #: manual/design/stlc.md:412
-#: manual/design/substitution.md:336
-#: manual/design/syntax.md:309
+#: manual/design/substitution.md:386
+#: manual/design/syntax.md:399
 #: manual/design/utlc/lambda.md:232
-#: manual/design/utlc/nbe.md:355
+#: manual/design/utlc/nbe.md:403
 msgid "Alternatives rejected"
 msgstr "被否决的替代方案"
 
@@ -1650,15 +1678,15 @@ msgid "**Checking the laws at run time.** The laws are equations over all nodes;
 msgstr "**在运行时检查定律。** 这些定律是关于所有节点的等式；它们通过测试验证，而非强制执行。"
 
 #: manual/design/adapter.md:158
-#: manual/design/core.md:200
-#: manual/design/debruijn.md:275
+#: manual/design/core.md:212
+#: manual/design/debruijn.md:366
 #: manual/design/eval.md:240
 #: manual/design/rewrite.md:224
 #: manual/design/stlc.md:425
-#: manual/design/substitution.md:350
-#: manual/design/syntax.md:323
+#: manual/design/substitution.md:400
+#: manual/design/syntax.md:413
 #: manual/design/utlc/lambda.md:243
-#: manual/design/utlc/nbe.md:374
+#: manual/design/utlc/nbe.md:422
 msgid "Boundaries"
 msgstr "边界"
 
@@ -1814,55 +1842,63 @@ msgstr "重命名不要求是单射"
 msgid "A renaming that maps two names to one target is useful (it identifies variables) and is allowed. The capture-avoiding operations therefore do not rely on injectivity: they freshen a binder whenever it is a target, see the [syntax design](syntax.md)."
 msgstr "把两个名映射到同一目标的重命名是有用的（它把变量等同起来），因此是允许的。所以避免捕获的操作不依赖单射性：只要绑定子是某个目标，它们就将其换成新鲜名，见 [syntax 设计](syntax.md)。"
 
+#: manual/design/core.md:170
+msgid "Flat values need no work stack"
+msgstr "扁平的值不需要工作栈"
+
 #: manual/design/core.md:172
+msgid "The library promises that its operations use a constant amount of host stack in the nesting depth of their input (issue #13); the traversals of terms keep their pending work on the heap, see the [syntax design](syntax.md). `core` has no nested values to traverse: a `Name` is a string, and `Context`, `Telescope` and `Renaming` are flat arrays. Every operation is a loop over such an array, and `fresh_name` a loop over suffixes, so each runs in constant host stack whatever the input; the derived `Eq`, `Compare`, `Hash` and `Debug` of these types recurse only into names and arrays of names, never into terms."
+msgstr "本库承诺其操作所用的宿主栈大小是常数，与输入的嵌套深度无关（issue #13）；项的遍历把待处理的工作保存在堆上，见 [syntax 设计](syntax.md)。`core` 中没有需要遍历的嵌套值：`Name` 是字符串，`Context`、`Telescope` 和 `Renaming` 是扁平数组。每个操作都是对这样一个数组的循环，`fresh_name` 则是对后缀的循环，因此无论输入如何，每个操作都在常数宿主栈内运行；这些类型派生的 `Eq`、`Compare`、`Hash` 和 `Debug` 只会递归到名字和名字数组中，绝不会递归到项中。"
+
+#: manual/design/core.md:184
 msgid "`fresh_name(h, U) ∉ U`, and `fresh_name(h, U) = h` when `h ∉ U` (freshness lemma)."
 msgstr "`fresh_name(h, U) ∉ U`，且当 `h ∉ U` 时 `fresh_name(h, U) = h`（新鲜性引理）。"
 
-#: manual/design/core.md:173
+#: manual/design/core.md:185
 msgid "`Renaming::set` keeps at most one entry per source, and because the type is abstract no other code can add an entry; `apply` therefore denotes a function."
 msgstr "`Renaming::set` 对每个源至多保留一个条目，并且由于该类型是抽象的，其他代码无法添加条目；因此 `apply` 表示一个函数。"
 
-#: manual/design/core.md:176
+#: manual/design/core.md:188
 msgid "`r.then(s)` denotes $\\sigma \\circ \\rho$ (composition lemma); `empty` is a two-sided identity for `then` as functions."
 msgstr "`r.then(s)` 表示 $\\sigma \\circ \\rho$（复合引理）；作为函数，`empty` 是 `then` 的双边单位元。"
 
-#: manual/design/core.md:178
+#: manual/design/core.md:190
 msgid "`r.without(x).apply(x) == x` and `r.without(x).apply(n) == r.apply(n)` for `n != x`."
 msgstr "`r.without(x).apply(x) == x`，且对 `n != x` 有 `r.without(x).apply(n) == r.apply(n)`。"
 
-#: manual/design/core.md:180
+#: manual/design/core.md:192
 msgid "Every operation returns a new value; no argument is mutated, and no array stored in a value is handed out, so a value cannot change after it is built."
 msgstr "每个操作都返回新值；不修改任何参数，也不交出值中存储的任何数组，因此值在构造后不会改变。"
 
-#: manual/design/core.md:184
+#: manual/design/core.md:196
 msgid "These laws are exercised by the tests in `src/core/core_test.mbt` and by every capture-avoidance test of the higher packages."
 msgstr "这些定律由 `src/core/core_test.mbt` 中的测试以及上层包的每个避免捕获测试检验。"
 
-#: manual/design/core.md:189
+#: manual/design/core.md:201
 msgid "**De Bruijn indices everywhere.** Indices remove the need for names in the kernel, and the [debruijn package](debruijn.md) provides them, but downstream ASTs (polynomials, numeric expressions) are written and printed with names. Names stay the shared interface; indices are an internal representation chosen per algorithm."
 msgstr "**处处使用 De Bruijn 索引。** 索引消除了内核对名的需要，[debruijn 包](debruijn.md)也提供了索引，但下游 AST（多项式、数值表达式）是用名书写和打印的。名仍是共享接口；索引是按算法选择的内部表示。"
 
-#: manual/design/core.md:194
+#: manual/design/core.md:206
 msgid "**Locally nameless or nominal types with name abstraction.** These need a richer type system or a library-wide change of representation, while the string-based design lets any downstream AST adopt the library by implementing one trait."
 msgstr "**局部无名表示或带名抽象的名义类型。** 它们需要更丰富的类型系统或全库范围的表示变更，而基于字符串的设计让任何下游 AST 只需实现一个 trait 就能采用本库。"
 
-#: manual/design/core.md:198
+#: manual/design/core.md:210
 msgid "**A global fresh-name counter.** Rejected as hidden state, see above."
 msgstr "**全局新鲜名计数器。** 作为隐藏状态而被否决，见上文。"
 
-#: manual/design/core.md:202
+#: manual/design/core.md:214
 msgid "`Name` has no scope, kind or sort. Distinguishing term variables from type variables, or variables of different downstream sorts, is left to the syntax that contains them."
 msgstr "`Name` 没有作用域、种类或 sort。区分项变量与类型变量，或区分不同下游 sort 的变量，交由包含它们的语法负责。"
 
-#: manual/design/core.md:205
+#: manual/design/core.md:217
 msgid "`Context` and `Telescope` do not check well-formedness: they neither reject duplicates nor check what annotations mention."
 msgstr "`Context` 和 `Telescope` 不检查良构性：它们既不拒绝重复，也不检查标注提及了什么。"
 
-#: manual/design/core.md:207
+#: manual/design/core.md:219
 msgid "`Renaming::equal` compares representations, not the denoted functions."
 msgstr "`Renaming::equal` 比较的是表示，而不是所表示的函数。"
 
-#: manual/design/core.md:208
+#: manual/design/core.md:220
 msgid "`fresh_name` guarantees freshness only with respect to the set it is given. Supplying a complete set of used names is the caller's responsibility."
 msgstr "`fresh_name` 只保证相对于所给集合的新鲜性。提供完整的已用名集合是调用者的责任。"
 
@@ -1903,7 +1939,7 @@ msgid "A term is *well scoped at depth $n$* when every index under $k$ binders i
 msgstr "若 $k$ 个绑定子之下的每个索引都小于 $n + k$，则称项*在深度 $n$ 处良作用域*；若它在深度 $0$ 处良作用域，则称其良作用域。`validate` 判定这一点。"
 
 #: manual/design/debruijn.md:44
-#: manual/design/syntax.md:217
+#: manual/design/syntax.md:218
 msgid "N. G. de Bruijn, \"Lambda calculus notation with nameless dummies\", Indagationes Mathematicae 34, 1972."
 msgstr "N. G. de Bruijn, \"Lambda calculus notation with nameless dummies\", Indagationes Mathematicae 34, 1972."
 
@@ -2059,65 +2095,113 @@ msgstr "脊柱与归约顺序"
 msgid "`Apply(head, args)` is a curried spine: `Apply(Bind(t), [a, ..rest])` is the redex $(\\lambda.\\,t)\\,a$ applied to `rest`, and a step contracts only the first argument. An empty spine `Apply(h, [])` stands for $h$ itself, so empty applications around the `Bind` are looked through when a redex is matched. `reduce_once` searches root, head, arguments, and enters binders: it is the normal-order strategy of the [eval design](eval.md) on nameless terms, so the normalization theorem applies to `normalize`."
 msgstr "`Apply(head, args)` 是柯里化的脊：`Apply(Bind(t), [a, ..rest])` 是应用于 `rest` 的可约式 $(\\lambda.\\,t)\\,a$，一步只收缩第一个参数。空脊 `Apply(h, [])` 表示 $h$ 本身，因此匹配可约式时会透过包裹 `Bind` 的空应用。`reduce_once` 依次搜索根、头部、参数，并进入绑定子：这正是 [eval 设计](eval.md) 中的正规序策略在无名项上的版本，因此范式化定理适用于 `normalize`。"
 
+#: manual/design/debruijn.md:242
+msgid "Explicit stacks instead of host recursion"
+msgstr "用显式栈代替宿主递归"
+
 #: manual/design/debruijn.md:244
+msgid "**Problem.** Every operation above is defined by structural recursion on the term, and a direct implementation keeps one host stack frame per level of nesting. Terms from users and downstream ASTs can be deep (a long spine $f\\,(f\\,(f \\cdots))$, a long chain of binders), and the js, wasm and wasm-gc stacks overflow at a depth of a few thousand, so the same call returned a result on native and crashed on the other backends."
+msgstr "**问题。** 上面的每个操作都由对项的结构递归定义，直接实现会为每一层嵌套保留一个宿主栈帧。来自用户和下游 AST 的项可能很深（长脊 $f\\,(f\\,(f \\cdots))$、长绑定子链），而 js、wasm 和 wasm-gc 的栈在几千层深度时就会溢出，因此同一个调用在 native 上返回结果，在其他后端上却崩溃。"
+
+#: manual/design/debruijn.md:251
+msgid "**Choice.** Each operation runs as a loop over an explicit stack in a heap array, and visits the subterms in exactly the order of its recursive definition, so its results, including the error it reports, are unchanged. The host stack depth is constant; the heap stacks hold at most one entry per node of the term."
+msgstr "**选择。** 每个操作都作为对堆数组中显式栈的循环来运行，并严格按其递归定义的顺序访问子项，因此其结果（包括所报告的错误）不变。宿主栈深度为常数；堆栈中每个项的节点至多占一个条目。"
+
+#: manual/design/debruijn.md:257
+msgid "*Checks.* `validate` and `==` keep a stack of the subterms (or pairs of subterms) still to visit. Write $\\mathrm{pre}(t)$ for the nodes of $t$ in pre-order, head before arguments and arguments from left to right:"
+msgstr "*检查。* `validate` 和 `==` 维护一个栈，保存仍待访问的子项（或子项对）。记 $\\mathrm{pre}(t)$ 为 $t$ 的节点的前序序列，头部在参数之前，参数从左到右："
+
+#: manual/design/debruijn.md:266
+msgid "and $\\mathrm{pre}(a) = a$ for a leaf $a$. The loop pops the top entry, checks it if it is a leaf, and otherwise pushes its children, $u_m$ first and the head $t$ last. With the stack $t_1 \\cdots t_r$ (top first) it maintains"
+msgstr "并且对叶子 $a$ 有 $\\mathrm{pre}(a) = a$。循环弹出栈顶条目，若是叶子则检查它，否则压入它的子项，先压 $u_m$，最后压头部 $t$。对于栈 $t_1 \\cdots t_r$（栈顶在前），它维持"
+
+#: manual/design/debruijn.md:274
+msgid "since popping $t\\,u_1 \\cdots u_m$ and pushing its children replaces $\\mathrm{pre}(t\\,\\vec u)$ by its tail. So the leaves are checked in pre-order. The recursive `validate` returns the first error of its head, else of its arguments from left to right, which by induction is also the first error in pre-order. Both return the same error. An index is checked against the number of binders above it, which the stack stores with each entry."
+msgstr "因为弹出 $t\\,u_1 \\cdots u_m$ 并压入其子项，就是把 $\\mathrm{pre}(t\\,\\vec u)$ 替换为它的尾部。因此叶子按前序被检查。递归的 `validate` 返回其头部的第一个错误，否则返回其参数从左到右的第一个错误，由归纳法这也是前序中的第一个错误。两者返回相同的错误。索引是对照它上方的绑定子个数来检查的，这个个数随每个条目存储在栈中。"
+
+#: manual/design/debruijn.md:281
+msgid "*Translations.* `shift`, `substitute_bound` (both through one rebuilding traversal that applies a function to each `Bound(i)` and its binder count), `from_named` and `to_named` produce a term. They keep a stack of tasks, $\\mathsf{visit}(t, k)$ and $\\mathsf{build}_@(m)$ / $\\mathsf{build}_\\lambda$, and a stack of results. Visiting a leaf pushes its translation; visiting $t\\,u_1 \\cdots u_m$ pushes $\\mathsf{build}_@(m)$ and above it the visits of $u_m, \\dots, u_1, t$; $\\mathsf{build}_@(m)$ pops the $m + 1$ translations and pushes the application of the first to the others. By induction on $t$, running the tasks pushed for $\\mathsf{visit}(t, k)$ pushes exactly one result, the recursive translation of $t$ under $k$ binders, and leaves the rest of both stacks untouched. Leaves are visited in pre-order as above; errors arise only at leaves, and both versions stop at the first one, so they return the same `Err`. In `substitute_bound` the replacement at an occurrence is shifted by the same loop, run to its end before the traversal continues."
+msgstr "*翻译。* `shift`、`substitute_bound`（二者都通过同一个重建遍历，该遍历对每个 `Bound(i)` 及其绑定子个数应用一个函数）、`from_named` 和 `to_named` 产生一个项。它们维护一个任务栈，任务为 $\\mathsf{visit}(t, k)$ 和 $\\mathsf{build}_@(m)$ / $\\mathsf{build}_\\lambda$，以及一个结果栈。访问叶子时压入它的翻译结果；访问 $t\\,u_1 \\cdots u_m$ 时压入 $\\mathsf{build}_@(m)$，并在其上方压入对 $u_m, \\dots, u_1, t$ 的访问；$\\mathsf{build}_@(m)$ 弹出 $m + 1$ 个翻译结果，并压入第一个对其余各个的应用。对 $t$ 做归纳，运行为 $\\mathsf{visit}(t, k)$ 所压入的任务，恰好压入一个结果，即 $t$ 在 $k$ 个绑定子之下的递归翻译，并且两个栈的其余部分保持不变。叶子如上按前序访问；错误只出现在叶子处，两个版本都在遇到第一个错误时停止，因此返回相同的 `Err`。在 `substitute_bound` 中，某次出现处的替换项由同一个循环移位，并在遍历继续之前运行到结束。"
+
+#: manual/design/debruijn.md:297
+msgid "`from_named` keeps, for each name, the levels of the enclosing binders of that name, and maps an occurrence under $n$ binders to $n - 1 - \\ell$ for the innermost level $\\ell$, the index of the nearest binder of that name. `to_named` names a binder with the first name of $x, x_1, x_2, \\dots$ that is neither free in the term ($F$) nor the name of an enclosing binder. Let $c_0, c_1, \\dots$ be the names of that sequence not in $F$. By induction on the level, the enclosing binders of a binder at level $n$ are named $c_0, \\dots, c_{n-1}$, so it gets $c_n$: the name depends only on the level and is computed once. Both translations are therefore linear in the size of the term (up to hashing), where a copy of the binder stack at each binder and a rescan of the candidate names made a chain of $n$ binders cost $O(n^2)$."
+msgstr "`from_named` 为每个名字保存包围它的同名绑定子的层级，并把处于 $n$ 个绑定子之下的出现映射为 $n - 1 - \\ell$，其中 $\\ell$ 为最内层的层级，即同名最近绑定子的索引。`to_named` 用序列 $x, x_1, x_2, \\dots$ 中第一个既不在项中自由出现（$F$）、也不是某个包围绑定子的名字的名字来命名绑定子。设 $c_0, c_1, \\dots$ 为该序列中不在 $F$ 内的名字。对层级做归纳，层级 $n$ 处的绑定子的包围绑定子被命名为 $c_0, \\dots, c_{n-1}$，所以它得到 $c_n$：名字只依赖于层级，且只计算一次。因此两种翻译都与项的大小成线性关系（相差哈希），而在每个绑定子处复制绑定子栈并重新扫描候选名字，会使 $n$ 个绑定子的链花费 $O(n^2)$。"
+
+#: manual/design/debruijn.md:310
+msgid "*Reduction.* The recursive search of `reduce_once` tries a node, then its head, then its arguments from left to right, and enters binder bodies, and it contracts the first redex it meets: the first redex in pre-order. The loop walks the term in pre-order and keeps the path from the root, each ancestor with the child it descended into; when a leaf ends a branch it returns to the nearest application with an argument left. When it meets a redex it contracts it, then rebuilds the ancestors from the innermost outwards and prepends one frame per ancestor to the reduction path, which is the order in which the recursive calls return. The steps, their paths and their counts in `normalize` are therefore unchanged."
+msgstr "*归约。* `reduce_once` 的递归搜索先尝试一个节点，再尝试它的头部，然后从左到右尝试它的参数，并进入绑定子的体，它收缩遇到的第一个可约式：前序中的第一个可约式。循环按前序遍历项，并保存从根开始的路径，其中每个祖先都带有向下进入的那个子项；当叶子结束一个分支时，它回到最近的还有参数剩余的应用。遇到可约式时它收缩该可约式，然后从最内层向外重建祖先，并为每个祖先在归约路径前添加一帧，这正是递归调用返回的顺序。因此 `normalize` 中的步骤、它们的路径和它们的计数都不变。"
+
+#: manual/design/debruijn.md:321
+msgid "The tests in `src/debruijn/deep_test.mbt` run every operation on terms nested to depth 100 000 (application chains in head and in argument position, binder chains with indices that reach the outermost binder, and mixtures of these, well scoped and ill scoped) on every backend; before the change each of them overflowed the stack on js, wasm and wasm-gc."
+msgstr "`src/debruijn/deep_test.mbt` 中的测试在每个后端上，对嵌套深度达 100 000 的项（头部和参数位置上的应用链、索引可达最外层绑定子的绑定子链，以及它们的混合，作用域良好的和作用域不良的）运行每个操作；在这一改动之前，其中每一个在 js、wasm 和 wasm-gc 上都会栈溢出。"
+
+#: manual/design/debruijn.md:329
 msgid "`validate(from_named(t)) == Ok(())` for every named $t$."
 msgstr "对每个具名项 $t$，`validate(from_named(t)) == Ok(())`。"
 
-#: manual/design/debruijn.md:245
+#: manual/design/debruijn.md:330
 msgid "Round trips (1)–(3) above; `==` on well-scoped `DbTerm` is alpha-equivalence."
 msgstr "上文的往返 (1)–(3)；良作用域的 `DbTerm` 上的 `==` 即 alpha 等价。"
 
-#: manual/design/debruijn.md:246
+#: manual/design/debruijn.md:331
 msgid "Lemma 2: on well-scoped input `instantiate` succeeds and preserves scope; `reduce_once` never returns `ScopeFailure`, and every reduct is well scoped. On ill-scoped input `reduce_once` and `normalize` return `ScopeFailure` with the error `validate` reports."
 msgstr "引理 2：在良作用域输入上，`instantiate` 成功并保持作用域；`reduce_once` 从不返回 `ScopeFailure`，且每个归约结果都是良作用域的。在作用域不良的输入上，`reduce_once` 与 `normalize` 返回带有 `validate` 所报告错误的 `ScopeFailure`。"
 
-#: manual/design/debruijn.md:250
+#: manual/design/debruijn.md:335
 msgid "`reduce_once` satisfies the one-redex contract of [rewrite](rewrite.md), with rule name `\"beta\"`."
 msgstr "`reduce_once` 满足 [rewrite](rewrite.md) 的单可约式契约，规则名为 `\"beta\"`。"
 
-#: manual/design/debruijn.md:252
+#: manual/design/debruijn.md:337
 msgid "`shift(t, 0, c) == Ok(t)` for every `t` without negative indices, and shifts with one cutoff compose (Lemma 1)."
 msgstr "对每个不含负索引的 `t`，`shift(t, 0, c) == Ok(t)`，且同一截断值下的移位可以复合（引理 1）。"
 
-#: manual/design/debruijn.md:254
+#: manual/design/debruijn.md:339
 msgid "`shift` never turns a free index into a bound one: if a free index would fall below its cutoff, it returns `Err(NegativeShift)`, and it rejects a negative cutoff, which would free bound indices, with `Err(NegativeCutoff)`."
 msgstr "`shift` 从不把自由索引变成约束索引：若某个自由索引会落到其截断点之下，它返回 `Err(NegativeShift)`；负的截断点会使约束索引变为自由，它以 `Err(NegativeCutoff)` 拒绝之。"
 
-#: manual/design/debruijn.md:258
-msgid "Cost: `shift` and `validate` are linear in the term size. `substitute_bound` costs $O(|t| + m \\cdot |s|)$ for $m$ occurrences of the index, because each inserted copy is shifted. A `reduce_once` step costs one search plus one `instantiate`."
-msgstr "代价：`shift` 与 `validate` 与项的大小成线性关系。对于索引的 $m$ 次出现，`substitute_bound` 的代价为 $O(|t| + m \\cdot |s|)$，因为每个插入的副本都要移位。一次 `reduce_once` 步骤的代价为一次搜索加一次 `instantiate`。"
+#: manual/design/debruijn.md:343
+msgid "Cost: `shift`, `validate`, `from_named` and `to_named` are linear in the term size (the translations up to hashing of names). `substitute_bound` costs $O(|t| + m \\cdot |s|)$ for $m$ occurrences of the index, because each inserted copy is shifted. A `reduce_once` step costs one search plus one `instantiate`, plus building the reduction path, which has one frame per ancestor of the redex and is built with `@rewrite.ReductionPath::prepend`."
+msgstr "代价：`shift`、`validate`、`from_named` 和 `to_named` 与项的大小成线性关系（翻译在名字哈希的意义下）。对于索引的 $m$ 次出现，`substitute_bound` 的代价为 $O(|t| + m \\cdot |s|)$，因为每个插入的副本都要移位。一次 `reduce_once` 步骤的代价为一次搜索加一次 `instantiate`，再加上构建归约路径的代价；归约路径中可约式的每个祖先对应一帧，用 `@rewrite.ReductionPath::prepend` 构建。"
 
-#: manual/design/debruijn.md:265
+#: manual/design/debruijn.md:350
+msgid "Stack: every operation uses a constant depth of host stack, whatever the nesting depth of the term; its pending work is kept in heap arrays with at most one entry per node."
+msgstr "栈：每个操作使用的宿主栈深度都是常数，与项的嵌套深度无关；它待处理的工作保存在堆数组中，每个节点至多一个条目。"
+
+#: manual/design/debruijn.md:356
 msgid "**Levels instead of indices in syntax.** Levels make weakening free but substitution under binders more complex; indices are the standard for syntax, and levels are used where they help (NbE)."
 msgstr "**在语法中使用层级而非索引。** 层级使弱化无需代价，但使绑定子下的代换更复杂；索引是语法表示的标准做法，层级则用在有帮助的地方（NbE）。"
 
-#: manual/design/debruijn.md:268
+#: manual/design/debruijn.md:359
 msgid "**Fully nameless free variables.** Free variables are kept as names so that open terms from users and downstream ASTs need no global variable numbering, and so that `to_named` can restore them exactly."
 msgstr "**完全无名的自由变量。** 自由变量保留为名称，这样来自用户和下游 AST 的开项无需全局变量编号，并且 `to_named` 可以精确地还原它们。"
 
-#: manual/design/debruijn.md:271
+#: manual/design/debruijn.md:362
 msgid "**Explicit substitutions.** A calculus with suspended substitutions avoids repeated shifting but complicates every consumer; the NbE package provides the efficient path instead."
 msgstr "**显式代换。** 带有挂起代换的演算可以避免重复移位，但会使每个使用者都变得复杂；高效路径改由 NbE 包提供。"
 
-#: manual/design/debruijn.md:277
+#: manual/design/debruijn.md:368
 msgid "Binder names are not preserved: `to_named` chooses `x`, `x_1`, …."
 msgstr "绑定子名称不会被保留：`to_named` 选择 `x`、`x_1`、…。"
 
-#: manual/design/debruijn.md:278
+#: manual/design/debruijn.md:369
 msgid "`shift`, `substitute_bound` and `instantiate` operate on open terms and do not detect dangling indices; the reducers and `validate` do."
 msgstr "`shift`、`substitute_bound` 与 `instantiate` 作用于开放项，不检测悬空索引；归约器和 `validate` 会检测。"
 
-#: manual/design/debruijn.md:280
+#: manual/design/debruijn.md:371
 msgid "An empty application `Apply(h, [])` is read as `h` when a redex is matched, so it never hides a redex, but `reduce_once` leaves the node in place, whereas [utlc/nbe](utlc/nbe.md) drops it from its normal forms."
 msgstr "空应用 `Apply(h, [])` 在匹配可约式时被读作 `h`，因此从不隐藏可约式；但 `reduce_once` 保留该节点，而 [utlc/nbe](utlc/nbe.md) 会把它从范式中去掉。"
 
-#: manual/design/debruijn.md:283
+#: manual/design/debruijn.md:374
 msgid "Only beta is implemented; there is no eta rule for De Bruijn terms."
 msgstr "只实现了 beta；De Bruijn 项没有 eta 规则。"
 
-#: manual/design/debruijn.md:284
+#: manual/design/debruijn.md:375
 msgid "Values are opaque; their contents are never shifted."
 msgstr "值是不透明的；其内容从不被移位。"
+
+#: manual/design/debruijn.md:376
+msgid "The derived `Debug` of `DbTerm` (and of the result types that contain one) recurses over the term, so printing a deeply nested term can overflow the host stack on js, wasm and wasm-gc. Every other operation, `==` included, handles any nesting depth."
+msgstr "`DbTerm`（以及包含它的结果类型）派生的 `Debug` 会对项递归，因此打印很深的嵌套项可能在 js、wasm 和 wasm-gc 上溢出宿主栈。其他所有操作（包括 `==`）都能处理任意嵌套深度。"
 
 #: manual/design/eval.md:1
 msgid "eval design"
@@ -3072,42 +3156,75 @@ msgid "Cost"
 msgstr "开销"
 
 #: manual/design/substitution.md:319
-msgid "At each binder, `apply` computes the free variables of the body and of the replacements that are inserted into it, and removes one entry from the substitution. For a term of size $n$ and binder depth $d$ this is $O(n \\cdot d)$ hash-set operations, plus $O(|\\sigma|)$ work and the free variables of the relevant replacements per binder, plus one traversal of the body for each renamed binder. `then` costs one `apply` and one `set` per entry of `self`, so $O(k^2)$ entry copies for $k$ entries besides the applications."
-msgstr "在每个绑定子处，`apply` 计算体以及插入其中的替换项的自由变量，并从代换中移除一个条目。对大小为 $n$、绑定深度为 $d$ 的项，这是 $O(n \\cdot d)$ 次哈希集合操作，外加每个绑定子 $O(|\\sigma|)$ 的工作量以及相关替换项的自由变量计算，再加上每个被重命名的绑定子一次体遍历。`then` 对 `self` 的每个条目执行一次 `apply` 和一次 `set`，因此除这些 `apply` 调用外，$k$ 个条目需要 $O(k^2)$ 次条目复制。"
+msgid "`apply` computes the free variables of every replacement once. At each binder it removes one entry from the substitution and looks for entries whose replacement has the binder free; only if there is one does it compute the free variables of the body (see the capture test below). So a term of size $n$ costs $O(n \\cdot |\\sigma|)$ besides the free variables of the replacements, and each binder that is a candidate for capture adds one traversal of its body, each renamed binder one more. `then` costs one `apply` and one `set` per entry of `self`, so $O(k^2)$ entry copies for $k$ entries besides the applications."
+msgstr "`apply` 对每个替换项的自由变量只计算一次。在每个绑定子处，它从代换中移除一个条目，并查找哪些条目的替换项中该绑定子是自由的；只有存在这样的条目时，它才计算体的自由变量（见下面的捕获判定）。因此，大小为 $n$ 的项的代价为 $O(n \\cdot |\\sigma|)$（不含替换项的自由变量），每个可能发生捕获的绑定子额外增加一次对其体的遍历，每个被重命名的绑定子再增加一次。`then` 对 `self` 的每个条目执行一次 `apply` 和一次 `set`，因此除这些 `apply` 调用外，$k$ 个条目需要 $O(k^2)$ 次条目复制。"
 
-#: manual/design/substitution.md:328
+#: manual/design/substitution.md:329
 msgid "Generic substitution"
 msgstr "泛型代换"
 
-#: manual/design/substitution.md:330
+#: manual/design/substitution.md:331
 msgid "`GenericSubstitution::apply_once` is the same definition with every constructor replaced by its `BindingSyntax` counterpart. Reading a node through its view gives a named term, so Lemmas 0–3 hold for any implementation that satisfies the view laws of the [adapter design](adapter.md). On `Term[T]` the two algorithms coincide."
 msgstr "`GenericSubstitution::apply_once` 是同一定义，只是每个构造子都换成了对应的 `BindingSyntax` 版本。通过视图读取节点会得到具名项，因此引理 0–3 对任何满足 [adapter 设计](adapter.md) 中视图定律的实现都成立。在 `Term[T]` 上两种算法一致。"
 
-#: manual/design/substitution.md:338
+#: manual/design/substitution.md:337
+#: manual/design/syntax.md:287
+msgid "Traversal with an explicit work stack"
+msgstr "用显式工作栈遍历"
+
+#: manual/design/substitution.md:339
+msgid "**Problem.** The definition of $t\\sigma$ is a structural recursion, and run as host recursion it overflows the js, wasm and wasm-gc stacks on terms nested a few thousand levels deep."
+msgstr "**问题。** $t\\sigma$ 的定义是结构递归，若按宿主递归运行，在嵌套几千层的项上会溢出 js、wasm 和 wasm-gc 的栈。"
+
+#: manual/design/substitution.md:343
+msgid "**Choice.** `Substitution::apply` and `GenericSubstitution::apply_once` are one private loop, `substitute`, over the view of the generic substitution above. It is an instance of the rebuild scheme of the [syntax design](syntax.md) with the context $c = \\sigma$ and"
+msgstr "**选择。** `Substitution::apply` 和 `GenericSubstitution::apply_once` 是同一个私有循环 `substitute`，它作用于上面泛型代换的视图。它是 [syntax 设计](syntax.md) 中重建方案的一个实例，其上下文 $c = \\sigma$，且"
+
+#: manual/design/substitution.md:356
+msgid "with $\\sigma' = \\sigma \\setminus x$ and $x'$ as in the definition. By the rebuild lemma the loop computes exactly $t\\sigma$, the same term and the same fresh names as the recursion, using a constant amount of host stack; the analyses it calls ($\\mathrm{FV}$, $\\mathrm{names}$ and the checked bound renaming) are stack-safe as well. On `Term[T]`, `Value` and the variables outside the domain are returned as they are instead of being rebuilt, which gives an equal term."
+msgstr "其中 $\\sigma' = \\sigma \\setminus x$，$x'$ 如定义中所示。由重建引理，该循环恰好计算出 $t\\sigma$，得到与递归相同的项和相同的新名字，并且只使用常数大小的宿主栈；它所调用的分析（$\\mathrm{FV}$、$\\mathrm{names}$ 和带检查的绑定重命名）同样是栈安全的。在 `Term[T]` 上，`Value` 和定义域之外的变量原样返回而不重建，这给出一个相等的项。"
+
+#: manual/design/substitution.md:364
+msgid "**The capture test.** The condition $x \\in R_{\\sigma'}(\\mathrm{FV}(t))$ is decided in a cheaper order. Unfolding $R$,"
+msgstr "**捕获判定。** 条件 $x \\in R_{\\sigma'}(\\mathrm{FV}(t))$ 以更廉价的顺序来判定。展开 $R$，"
+
+#: manual/design/substitution.md:374
+msgid "where $C = \\{z \\in \\operatorname{dom}\\sigma' \\mid x \\in \\mathrm{FV}(\\sigma'(z))\\}$ is the set of *candidates*. The sets $\\mathrm{FV}(\\sigma(z))$ are computed once per call, and since $\\sigma' \\subseteq \\sigma$ as a set of entries they serve every binder. If $C = \\varnothing$ the condition is false without looking at $t$; otherwise $\\mathrm{FV}(t)$ is computed once. The boolean is the same, so the result is too, but a chain of $n$ binders none of which can capture now costs $O(n)$ instead of $O(n^2)$."
+msgstr "其中 $C = \\{z \\in \\operatorname{dom}\\sigma' \\mid x \\in \\mathrm{FV}(\\sigma'(z))\\}$ 是*候选*的集合。集合 $\\mathrm{FV}(\\sigma(z))$ 每次调用只计算一次，且由于 $\\sigma' \\subseteq \\sigma$（作为条目的集合），它们可用于每个绑定子。若 $C = \\varnothing$，则无需查看 $t$ 即可知条件为假；否则只计算一次 $\\mathrm{FV}(t)$。布尔值相同，因而结果也相同，但一条由 $n$ 个绑定子组成、且都不会发生捕获的链，现在的代价是 $O(n)$ 而非 $O(n^2)$。"
+
+#: manual/design/substitution.md:382
+msgid "The tests in `src/substitution/stack_safety_test.mbt` run substitution, freshening at the outermost binder, deep replacements, composition and the generic substitution on terms nested 100 000 levels deep, on every backend."
+msgstr "`src/substitution/stack_safety_test.mbt` 中的测试在每个后端上，对嵌套 100 000 层的项运行代换、在最外层绑定子处换新名字、深的替换项、复合以及泛型代换。"
+
+#: manual/design/substitution.md:388
 msgid "**The Barendregt variable convention.** Assuming that bound names are distinct from all free names would remove the renaming case, but terms come from users and from other algorithms, and the convention is not preserved by reduction. The library renames explicitly instead."
 msgstr "**Barendregt 变量约定。** 假定约束名与所有自由名都不同，可以去掉重命名情形；但项来自用户和其他算法，而且该约定在归约下不保持。因此本库改为显式重命名。"
 
-#: manual/design/substitution.md:342
+#: manual/design/substitution.md:392
 msgid "**Substitution on De Bruijn terms only.** Index-based substitution needs no renaming and is provided by [debruijn](debruijn.md), but the shared interface for downstream ASTs is named, so named substitution must be correct on its own."
 msgstr "**仅在 De Bruijn 项上做代换。** 基于索引的代换不需要重命名，由 [debruijn](debruijn.md) 提供；但下游 AST 共享的接口是具名的，因此具名代换本身必须正确。"
 
-#: manual/design/substitution.md:346
+#: manual/design/substitution.md:396
 msgid "**Iterated substitution.** Repeating until no domain variable occurs can diverge ($x \\mapsto f(x)$) and has no composition law. Callers that want a fixed point iterate explicitly."
 msgstr "**迭代代换。** 重复直到定义域变量不再出现可能发散（$x \\mapsto f(x)$），且没有复合律。需要不动点的调用方应显式迭代。"
 
-#: manual/design/substitution.md:352
+#: manual/design/substitution.md:402
 msgid "No unification, matching or occurs check: substitutions are given, not solved for."
 msgstr "没有合一、匹配或出现检查（occurs check）：代换是给定的，而不是求解得到的。"
 
-#: manual/design/substitution.md:354
+#: manual/design/substitution.md:404
 msgid "`GenericSubstitution` has no `then` or `restrict`; compose generic substitutions by applying them in turn."
 msgstr "`GenericSubstitution` 没有 `then` 或 `restrict`；要复合泛型代换，请依次应用它们。"
 
-#: manual/design/substitution.md:356
+#: manual/design/substitution.md:406
 msgid "Results are equal to the textbook definition only up to $=_\\alpha$; use `@syntax.alpha_equal` to compare them."
 msgstr "结果只在 $=_\\alpha$ 意义下等于教科书定义；请用 `@syntax.alpha_equal` 比较它们。"
 
-#: manual/design/substitution.md:358
+#: manual/design/substitution.md:408
+msgid "Stack safety is in the nesting depth, not in the cost: a chain of $n$ binders every one of which is renamed still costs $O(n^2)$, because each renaming traverses the body below it."
+msgstr "栈安全针对的是嵌套深度，而非代价：一条由 $n$ 个绑定子组成、且每个都被重命名的链，代价仍是 $O(n^2)$，因为每次重命名都要遍历其下方的体。"
+
+#: manual/design/substitution.md:411
 msgid "Values are never entered, so a `Value` payload that contains variables is not substituted into."
 msgstr "值从不会被进入，因此包含变量的 `Value` 载荷不会被代换。"
 
@@ -3256,34 +3373,34 @@ msgstr ""
 "ot\\approx_T \\mathrm{NaN}$。因此 `Term[Double]` 上的 `alpha_equal` 是对称且传递的，恰在不含 `NaN` 载荷的项上自反，并且把 `Value(0.0)` 与 `Value(-0.0)` 视为相等。"
 
 #: manual/design/syntax.md:213
-msgid "Each node is visited once. A variable lookup scans the environment, and each binder copies it, both in $O(d)$ for binder depth $d$, so the comparison costs $O(n \\cdot d)$ for terms of size $n$."
-msgstr "每个节点只访问一次。变量查找要扫描环境，每个绑定子要复制环境，对绑定深度 $d$ 两者都是 $O(d)$，因此对大小为 $n$ 的项，比较的开销是 $O(n \\cdot d)$。"
+msgid "Each node is visited once. The environments are persistent hash maps, so a variable lookup and the extension at a binder are one map operation each, the extension shares the outer environment instead of copying it, and the comparison costs $O(n)$ map operations for terms of size $n$."
+msgstr "每个节点只访问一次。环境是持久哈希映射，因此变量查找与在绑定子处的扩展各是一次映射操作，扩展共享外层环境而不复制它，对大小为 $n$ 的项，比较的代价为 $O(n)$ 次映射操作。"
 
-#: manual/design/syntax.md:219
+#: manual/design/syntax.md:220
 msgid "IEEE Std 754-2019, *IEEE Standard for Floating-Point Arithmetic*, §5.11: every NaN compares unordered with everything, itself included, and $+0 = -0$."
 msgstr "IEEE Std 754-2019，*IEEE Standard for Floating-Point Arithmetic*，§5.11：每个 NaN 与任何值（包括自身）比较的结果都是无序，并且 $+0 = -0$。"
 
-#: manual/design/syntax.md:221
+#: manual/design/syntax.md:222
 msgid "Capture-avoiding renaming of free variables"
 msgstr "自由变量的避免捕获重命名"
 
-#: manual/design/syntax.md:223
+#: manual/design/syntax.md:224
 msgid "**Problem.** Applying a renaming $\\rho$ under a binder can capture: renaming $x \\mapsto y$ in $\\beta y.\\,x$ naively gives $\\beta y.\\,y$."
 msgstr "**问题。** 在绑定子之下应用重命名 $\\rho$ 可能发生捕获：在 $\\beta y.\\,x$ 中朴素地重命名 $x \\mapsto y$ 会得到 $\\beta y.\\,y$。"
 
-#: manual/design/syntax.md:226
+#: manual/design/syntax.md:227
 msgid "**Choice.** `rename_free` implements"
 msgstr "**选择。** `rename_free` 实现"
 
-#: manual/design/syntax.md:239
+#: manual/design/syntax.md:240
 msgid "with $x' = \\operatorname{fresh}(x,\\ \\mathrm{names}(t) \\cup \\operatorname{supp}(\\rho \\setminus x) \\cup \\{x\\})$."
 msgstr "其中 $x' = \\operatorname{fresh}(x,\\ \\mathrm{names}(t) \\cup \\operatorname{supp}(\\rho \\setminus x) \\cup \\{x\\})$。"
 
-#: manual/design/syntax.md:241
+#: manual/design/syntax.md:242
 msgid "**Lemma (free variables of a renaming).** $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$."
 msgstr "**引理（重命名的自由变量）。** $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$。"
 
-#: manual/design/syntax.md:244
+#: manual/design/syntax.md:245
 msgid ""
 "The only interesting case is the binder without freshening. Let $\\rho' = \\rho \\setminus x$ with $x \\n"
 "otin \\operatorname{tgt}\\rho'$. By induction $\\mathrm{FV}(t\\rho') = \\rho'(\\mathrm{FV}(t))$, so"
@@ -3291,7 +3408,7 @@ msgstr ""
 "唯一有意思的情形是不取新鲜名字的绑定子。令 $\\rho' = \\rho \\setminus x$，且 $x \\n"
 "otin \\operatorname{tgt}\\rho'$。由归纳 $\\mathrm{FV}(t\\rho') = \\rho'(\\mathrm{FV}(t))$，于是"
 
-#: manual/design/syntax.md:257
+#: manual/design/syntax.md:258
 msgid ""
 "The second step uses $\\rho(n) \\n"
 "e x$ for $n \\n"
@@ -3303,7 +3420,7 @@ msgstr ""
 "e x$：要么 $n \\in \\operatorname{dom}\\rho'$ 且 $\\rho(n) \\in \\operatorname{tgt}\\rho'$，这排除了 $x$；要么 $\\rho(n) = n \\n"
 "e x$。在取新鲜名字的情形，同样的计算适用于 $t\\{x \\mapsto x'\\}$ 和 $x'$，因为 $x'$ 在 $\\operatorname{supp}\\rho'$ 之外，因而既不是源也不是目标。该引理恰好说明没有自由变量被捕获。"
 
-#: manual/design/syntax.md:264
+#: manual/design/syntax.md:265
 msgid ""
 "The test $x \\n"
 "otin \\operatorname{tgt}(\\rho \\setminus x)$ is conservative: it also renames the binder when the offending entry's source does not occur in $t$. The result is still alpha-equivalent to the minimal one. The lemma shows that no variable is captured; that the result is the intended term up to $=_\\alpha$ follows from the translation lemma of the [substitution design](substitution.md), which covers renamings as well."
@@ -3311,11 +3428,11 @@ msgstr ""
 "测试 $x \\n"
 "otin \\operatorname{tgt}(\\rho \\setminus x)$ 是保守的：即使造成问题的条目的源在 $t$ 中不出现，它也会重命名绑定子。结果仍与最小结果 α-等价。该引理表明没有变量被捕获；至于结果在 $=_\\alpha$ 意义下就是预期的项，则由 [substitution 设计](substitution.md)中的翻译引理得出，该引理同样涵盖重命名。"
 
-#: manual/design/syntax.md:271
+#: manual/design/syntax.md:272
 msgid "Checked bound renaming"
 msgstr "带检查的约束变量重命名"
 
-#: manual/design/syntax.md:273
+#: manual/design/syntax.md:274
 msgid ""
 "`alpha_rename_bound(t, x, y)` computes $t\\{x \\mapsto y\\}$, the body of the alpha step above, and returns `None` unless $y \\n"
 "otin \\mathrm{names}(t)$ (or $x = y$). Under that side condition the alpha axiom gives directly"
@@ -3323,71 +3440,131 @@ msgstr ""
 "`alpha_rename_bound(t, x, y)` 计算 $t\\{x \\mapsto y\\}$，即上面 α 步骤中的体，并且除非 $y \\n"
 "otin \\mathrm{names}(t)$（或 $x = y$），否则返回 `None`。在该附加条件下，α 公理直接给出"
 
-#: manual/design/syntax.md:281
+#: manual/design/syntax.md:282
 msgid "The check is stronger than necessary (an occurrence of $y$ under an inner binder for $y$ would be harmless), but it is cheap and it is all the substitution algorithms need, because they always call it with a name chosen fresh for the body."
 msgstr "该检查比必要的更强（内层 $y$ 绑定子之下的 $y$ 出现是无害的），但它开销低，而且正是代换算法所需要的全部，因为它们总是用对该体而言新鲜的名字来调用它。"
 
-#: manual/design/syntax.md:288
+#: manual/design/syntax.md:289
+msgid "**Problem.** Every definition above is a structural recursion. Run as host recursion, a term nested $n$ levels deep (a chain of `Apply` heads, of `Apply` arguments, or of binders) needs $n$ host frames. The js, wasm and wasm-gc stacks overflow after a few thousand levels, native at $10^5$ levels in the tests, and nothing in the definitions bounds the nesting depth of an input."
+msgstr "**问题。** 上面的每个定义都是结构递归。若按宿主递归运行，嵌套 $n$ 层的项（`Apply` 头部链、`Apply` 参数链或绑定子链）需要 $n$ 个宿主栈帧。js、wasm 和 wasm-gc 的栈在几千层之后就会溢出，native 在测试中则在 $10^5$ 层时溢出，而定义中没有任何东西限制输入的嵌套深度。"
+
+#: manual/design/syntax.md:295
+msgid "**Choice.** Every operation of the package is a loop over a heap `Array` of pending work. The host stack depth is constant in the nesting depth, and the heap holds $O(n)$ pending items for a term of size $n$. There are two schemes, one for folds and one for rebuilds."
+msgstr "**选择。** 本包的每个操作都是对待处理工作的堆 `Array` 的循环。宿主栈深度相对于嵌套深度是常数，对于大小为 $n$ 的项，堆中保存 $O(n)$ 个待处理项。有两种方案，一种用于折叠，一种用于重建。"
+
+#: manual/design/syntax.md:300
+msgid "*Folds.* `free_variables`, `all_names`, `==` and `alpha_equal` have the form"
+msgstr "*折叠。* `free_variables`、`all_names`、`==` 和 `alpha_equal` 具有如下形式"
+
+#: manual/design/syntax.md:306
+msgid "where $\\operatorname{ch}(t, c)$ lists the children of $t$ with the context the recursive call receives (the bound set $B$, extended to $B \\cup \\{x\\}$ under $\\beta x$; for `alpha_equal`, the environments and the depth), $\\ell$ is the contribution of the node itself, and $\\oplus$ is $\\cup$ for the name sets and $\\wedge$ for the comparisons; for a comparison a node is a pair of subterms, and a mismatch of constructors, names or arities makes $\\ell$ false. Both operations are associative and commutative with a unit ($\\varnothing$, true). The loop keeps an accumulator $A$ and a multiset $W$ of pending pairs, with the invariant"
+msgstr "其中 $\\operatorname{ch}(t, c)$ 列出 $t$ 的子项以及递归调用所接收的上下文（绑定集合 $B$，在 $\\beta x$ 之下扩展为 $B \\cup \\{x\\}$；对 `alpha_equal` 则是环境和深度），$\\ell$ 是节点自身的贡献，$\\oplus$ 对名字集合是 $\\cup$，对比较是 $\\wedge$；对于比较，节点是一对子项，构造子、名字或元数不匹配会使 $\\ell$ 为假。两种运算都是结合的、可交换的，且有单位元（$\\varnothing$、真）。循环维护一个累加器 $A$ 和一个待处理对的多重集 $W$，不变式为"
+
+#: manual/design/syntax.md:320
+msgid "It holds initially with $A$ the unit and $W = \\{(t_0, c_0)\\}$. Taking $(t, c)$ out of $W$, adding $\\ell(t, c)$ to $A$ and putting $\\operatorname{ch}(t, c)$ into $W$ unfolds one equation of $F$, so the invariant is preserved; every pair is put into $W$ once, so the loop stops, and then $A = F(t_0, c_0)$. For $\\wedge$ the loop returns as soon as $A$ is false, because $\\text{false} \\wedge b = \\text{false}$. The contexts are persistent values (`HashSet`, `HashMap`), so pushing the children of a node shares the context instead of copying it."
+msgstr "初始时它成立，其中 $A$ 为单位元，$W = \\{(t_0, c_0)\\}$。从 $W$ 中取出 $(t, c)$，把 $\\ell(t, c)$ 加到 $A$ 上，并把 $\\operatorname{ch}(t, c)$ 放入 $W$，就是展开 $F$ 的一个等式，因此不变式得以保持；每一对只放入 $W$ 一次，所以循环会停止，此时 $A = F(t_0, c_0)$。对 $\\wedge$，只要 $A$ 为假循环就立即返回，因为 $\\text{false} \\wedge b = \\text{false}$。上下文是持久值（`HashSet`、`HashMap`），所以压入节点的子项时是共享上下文而不是复制它。"
+
+#: manual/design/syntax.md:329
+msgid "*Rebuilds.* `map_values`, `rename_free`, `alpha_rename_bound` and the substitutions of the [substitution design](substitution.md) have the form"
+msgstr "*重建。* `map_values`、`rename_free`、`alpha_rename_bound` 以及 [substitution 设计](substitution.md) 中的代换具有如下形式"
+
+#: manual/design/syntax.md:339
+msgid "with $R$ given directly on values and variables. A private `rebuild` runs it with a stack of tasks and a stack of results. `Visit(t, c)` of a leaf pushes its result. `Visit` of an application pushes `BuildApply(n)`, then `Visit` of the arguments from last to first, then `Visit` of the head; `Visit` of a binder calls $\\operatorname{binder}$ and pushes `BuildBind(x')` and `Visit(t', c')`. `BuildApply(n)` pops $n + 1$ results and pushes their application, and `BuildBind(x')` wraps the top result in a binder."
+msgstr "其中 $R$ 直接在值和变量上给出。私有的 `rebuild` 用一个任务栈和一个结果栈来运行它。叶子的 `Visit(t, c)` 压入它的结果。应用的 `Visit` 压入 `BuildApply(n)`，然后是从最后一个到第一个参数的 `Visit`，再是头部的 `Visit`；绑定子的 `Visit` 调用 $\\operatorname{binder}$，并压入 `BuildBind(x')` 和 `Visit(t', c')`。`BuildApply(n)` 弹出 $n + 1$ 个结果并压入它们的应用，`BuildBind(x')` 则用一个绑定子包裹栈顶的结果。"
+
+#: manual/design/syntax.md:347
+msgid "**Lemma (rebuild).** Started on a result stack $S$, the tasks that a `Visit(t, c)` puts on the task stack leave $S \\cdot R(t, c)$ when they are done, and leave the task stack below them unchanged."
+msgstr "**引理（重建）。** 从结果栈 $S$ 开始，`Visit(t, c)` 放到任务栈上的那些任务完成时，留下 $S \\cdot R(t, c)$，并且任务栈在它们之下的部分保持不变。"
+
+#: manual/design/syntax.md:351
+msgid "*Proof.* By induction on $t$. A leaf pushes $R(t, c)$. For an application, the tasks run in the order `Visit(t)`, `Visit(u_1)`, …, `Visit(u_n)`, `BuildApply(n)`; by induction they leave $S \\cdot R(t, c) \\cdot R(u_1, c) \\cdots R(u_n, c)$ before `BuildApply(n)`, which turns the top $n + 1$ results into $R(t, c)(R(u_1, c), \\dots)$. A binder is the same with one child. $\\square$"
+msgstr "*证明。* 对 $t$ 做归纳。叶子压入 $R(t, c)$。对于应用，任务按 `Visit(t)`、`Visit(u_1)`、…、`Visit(u_n)`、`BuildApply(n)` 的顺序运行；由归纳假设，在 `BuildApply(n)` 之前它们留下 $S \\cdot R(t, c) \\cdot R(u_1, c) \\cdots R(u_n, c)$，而 `BuildApply(n)` 把栈顶的 $n + 1$ 个结果变为 $R(t, c)(R(u_1, c), \\dots)$。绑定子的情形相同，只有一个子项。$\\square$"
+
+#: manual/design/syntax.md:358
+msgid "Applied to the root, the lemma gives the result stack $[R(t_0, c_0)]$. The callbacks run in the order of the recursive definition: `project`, the `binder` step and `map_values`'s function in pre-order, head first and then the arguments from left to right, and the constructors of `BindingSyntax` in post-order. So the result is the recursive one, even for an impure function passed to `map_values`."
+msgstr "应用于根时，引理给出结果栈 $[R(t_0, c_0)]$。回调按递归定义的顺序运行：`project`、`binder` 步骤和 `map_values` 的函数按前序，先头部再从左到右的参数，而 `BindingSyntax` 的构造子按后序。因此结果与递归的结果一致，即使传给 `map_values` 的是不纯的函数也是如此。"
+
+#: manual/design/syntax.md:365
+msgid "**Equality.** A derived `Eq` is itself a structural recursion, so `Term` implements `Eq` by hand as a fold with $\\wedge$: the same constructors, the same names, the same arities, and payloads related by `T`'s `==`. It has no shortcut for physically equal subterms, because the derived `==` has none: a term with a `NaN` payload is not `==` to itself in either."
+msgstr "**相等。** 派生的 `Eq` 本身就是结构递归，所以 `Term` 手写实现 `Eq`，作为带 $\\wedge$ 的折叠：构造子相同、名字相同、元数相同，且载荷由 `T` 的 `==` 相关联。它对物理上相同的子项没有捷径，因为派生的 `==` 也没有：带有 `NaN` 载荷的项在两者中都不 `==` 它自身。"
+
+#: manual/design/syntax.md:371
+msgid "The tests in `src/syntax/stack_safety_wbtest.mbt` run every operation on the three chains and a mixture of them, 100 000 levels deep, on every backend."
+msgstr "`src/syntax/stack_safety_wbtest.mbt` 中的测试在每个后端上，对这三种链及它们的混合运行每个操作，深度为 100 000 层。"
+
+#: manual/design/syntax.md:376
 msgid "$\\mathrm{FV}(t) \\subseteq \\mathrm{names}(t)$; `map_values` preserves both."
 msgstr "$\\mathrm{FV}(t) \\subseteq \\mathrm{names}(t)$；`map_values` 保持这两者。"
 
-#: manual/design/syntax.md:289
+#: manual/design/syntax.md:377
 msgid "`alpha_equal` decides the lifting of `T`'s `==` to nameless terms, and coincides with $=_\\alpha$ when that `==` is the identity (theorem above). It is reflexive, symmetric and transitive exactly when `==` is (corollary above). Reflexivity for `Int` payloads is checked by a QuickCheck property in `src/syntax/syntax_wbtest.mbt`, and a test there records that a `NaN` payload is not alpha-equal to itself."
 msgstr "`alpha_equal` 判定 `T` 的 `==` 到无名项的提升，并在该 `==` 为恒等关系时与 $=_\\alpha$ 一致（见上面的定理）。它是自反、对称且传递的，当且仅当 `==` 是如此（见上面的推论）。`src/syntax/syntax_wbtest.mbt` 中的 QuickCheck 性质检查了 `Int` 载荷下的自反性，那里的一个测试还记录了含 `NaN` 载荷的项与自身不 α-相等。"
 
-#: manual/design/syntax.md:295
+#: manual/design/syntax.md:383
 msgid "`rename_free` satisfies $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$ and is invariant under $=_\\alpha$: alpha-equivalent inputs give alpha-equivalent outputs."
 msgstr "`rename_free` 满足 $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$，并在 $=_\\alpha$ 下不变：α-等价的输入给出 α-等价的输出。"
 
-#: manual/design/syntax.md:298
+#: manual/design/syntax.md:386
 msgid "`alpha_rename_bound(t, x, y) = Some(t')` implies $\\beta x.\\,t =_\\alpha \\beta y.\\,t'$."
 msgstr "`alpha_rename_bound(t, x, y) = Some(t')` 蕴含 $\\beta x.\\,t =_\\alpha \\beta y.\\,t'$。"
 
-#: manual/design/syntax.md:300
+#: manual/design/syntax.md:388
 msgid "On `Term[T]` every `generic_*` function equals its specialised counterpart."
 msgstr "在 `Term[T]` 上，每个 `generic_*` 函数都等于其特化版本。"
 
-#: manual/design/syntax.md:302
-msgid "Cost: `free_variables` and `all_names` make $O(n)$ hash-set operations for a term of size $n$; each union costs up to the size of the sets involved. `alpha_rename_bound` adds one traversal to `all_names`. `rename_free` removes one entry and computes the targets of the renaming at every binder, so it costs $O(n \\cdot |\\rho|)$ when no binder is renamed; each freshened binder adds `all_names` and one renaming traversal of its body."
-msgstr "开销：对大小为 $n$ 的项，`free_variables` 和 `all_names` 执行 $O(n)$ 次哈希集合操作；每次并集的开销至多为所涉集合的大小。`alpha_rename_bound` 在 `all_names` 之外多一次遍历。`rename_free` 在每个绑定子处移除一个条目并计算重命名的目标，因此在没有绑定子被重命名时开销为 $O(n \\cdot |\\rho|)$；每个换用新名字的绑定子额外增加一次 `all_names` 以及对其体的一次重命名遍历。"
+#: manual/design/syntax.md:389
+msgid "Every operation, `==` included, uses a constant amount of host stack in the nesting depth of its input (traversal with an explicit work stack, above)."
+msgstr "每个操作（包括 `==`）所用的宿主栈大小相对于其输入的嵌套深度是常数（上文的用显式工作栈遍历）。"
 
-#: manual/design/syntax.md:311
+#: manual/design/syntax.md:392
+msgid "Cost: `free_variables` and `all_names` make $O(n)$ hash-set insertions for a term of size $n$. `alpha_rename_bound` adds one traversal to `all_names`. `rename_free` removes one entry and computes the targets of the renaming at every binder, so it costs $O(n \\cdot |\\rho|)$ when no binder is renamed; each freshened binder adds `all_names` and one renaming traversal of its body."
+msgstr "开销：对大小为 $n$ 的项，`free_variables` 和 `all_names` 执行 $O(n)$ 次哈希集合插入。`alpha_rename_bound` 在 `all_names` 之外多一次遍历。`rename_free` 在每个绑定子处移除一个条目并计算重命名的目标，因此在没有绑定子被重命名时开销为 $O(n \\cdot |\\rho|)$；每个换用新名字的绑定子额外增加一次 `all_names` 以及对其体的一次重命名遍历。"
+
+#: manual/design/syntax.md:401
 msgid "**Variables inside values.** Letting `T` contain names would require a traversal trait on `T` as well. Such ASTs implement `BindingSyntax` directly, which covers the same need with one trait."
 msgstr "**值内部的变量。** 让 `T` 包含名字就需要在 `T` 上也有遍历 trait。这样的 AST 直接实现 `BindingSyntax`，用一个 trait 就满足了同样的需求。"
 
-#: manual/design/syntax.md:314
+#: manual/design/syntax.md:404
 msgid "**Multi-variable binders.** A binder for several names at once is expressed as nested `Bind` nodes. This keeps the view small and the proofs per binder."
 msgstr "**多变量绑定子。** 一次绑定多个名字的绑定子用嵌套的 `Bind` 节点表示。这使视图保持精简，证明也可以逐个绑定子进行。"
 
-#: manual/design/syntax.md:316
+#: manual/design/syntax.md:406
 msgid "**Unchecked bound renaming.** A version without the `None` case would make a capture silent. The checked form makes the precondition visible in the type."
 msgstr "**不带检查的约束变量重命名。** 去掉 `None` 情形的版本会让捕获悄无声息地发生。带检查的形式让前置条件在类型中可见。"
 
-#: manual/design/syntax.md:319
+#: manual/design/syntax.md:409
 msgid "**Alpha-equivalence by conversion.** Converting both terms to De Bruijn form and comparing would allocate two new terms; the lockstep algorithm is the same comparison without the allocation."
 msgstr "**通过转换判定 α-等价。** 把两个项都转换成 De Bruijn 形式再比较会分配两个新项；同步遍历算法做的是同样的比较，但无需分配。"
 
-#: manual/design/syntax.md:325
+#: manual/design/syntax.md:415
 msgid "`Value` payloads are never inspected. A payload that contains variables is outside the contract."
 msgstr "`Value` 载荷从不被检查。包含变量的载荷不在约定范围之内。"
 
-#: manual/design/syntax.md:327
+#: manual/design/syntax.md:417
 msgid "`==` on terms is structural, not alpha-equivalence."
 msgstr "项上的 `==` 是结构相等，而不是 α-等价。"
 
-#: manual/design/syntax.md:328
+#: manual/design/syntax.md:418
+msgid "`Debug` on terms (`@debug.to_string`, `Repr`, the messages of `assert_eq` and `inspect`) is derived and recursive, so formatting a term nested tens of thousands of levels deep can still overflow the host stack."
+msgstr "项上的 `Debug`（`@debug.to_string`、`Repr`、`assert_eq` 和 `inspect` 的信息）是派生的且递归的，因此格式化嵌套数万层的项仍可能溢出宿主栈。"
+
+#: manual/design/syntax.md:421
+msgid "The generic algorithms are stack-safe when the `BindingSyntax` methods of the downstream type are: `project` and the three constructors should look at one layer of a node and not recurse into it."
+msgstr "当下游类型的 `BindingSyntax` 方法是栈安全的时，泛型算法也是栈安全的：`project` 和三个构造子应当只查看节点的一层，而不递归进入它。"
+
+#: manual/design/syntax.md:424
 msgid "`alpha_equal` compares payloads with `T`'s `==` and adds no reflexivity of its own: with a non-reflexive `==` (such as `Double` and `NaN`) a term can fail to be alpha-equal to itself."
 msgstr "`alpha_equal` 用 `T` 的 `==` 比较载荷，自身不额外提供自反性：若 `==` 不是自反的（如 `Double` 与 `NaN`），一个项可能与自身不 α-相等。"
 
-#: manual/design/syntax.md:331
+#: manual/design/syntax.md:427
 msgid "No sorts, scopes or types: every name is a term variable of the same kind."
 msgstr "没有 sort、作用域或类型：每个名字都是同一种类的项变量。"
 
-#: manual/design/syntax.md:332
+#: manual/design/syntax.md:428
 msgid "The package does not check that a `BindingSyntax` implementation obeys its laws; [adapter](adapter.md) describes how to test them."
 msgstr "本包不检查 `BindingSyntax` 实现是否遵守其定律；[adapter](adapter.md) 描述了如何测试它们。"
 
-#: manual/design/syntax.md:334
+#: manual/design/syntax.md:430
 msgid "Substitution lives in [substitution](substitution.md), traversal and rewriting in [rewrite](rewrite.md)."
 msgstr "代换位于 [substitution](substitution.md)，遍历与重写位于 [rewrite](rewrite.md)。"
 
@@ -3708,122 +3885,138 @@ msgid "These are the readback equations above, with the head of a neutral read b
 msgstr "这些就是上面的读回方程，并且与之前一样，先读回中性值的头部，再读回其参数。$\\mathsf{rb}$ 步中的强制与求值会把求值机运行到结束，再返回读回循环，因此宿主栈中至多只有这两个循环，而 $Q$ 与 $K$ 一样受已花费的单位数限制。"
 
 #: manual/design/utlc/nbe.md:260
+msgid "*Deep input terms.* The same machines make the host stack independent of the nesting depth of the input. The rule for $\\mathsf{ev}(t\\,\\vec u, \\rho)$ pushes a frame and continues with the head, so a long chain of applications in head position grows $K$, not the host stack; arguments are delayed, and a chain nested in argument position is evaluated one level per $\\mathsf{fo}$ step, when readback forces the argument. A binder is a closure, and readback opens it with one $\\mathsf{bind}$ frame. Every frame is paid for by a unit, so the bound $|K| \\le f_0 + 1$ above covers deep input as well. Before evaluating, `eval` and `normalize` validate the input with `@debruijn.validate`, which keeps its pending subterms on a heap stack (see the [debruijn design](../debruijn.md)). On every backend, the depth of the input therefore costs fuel and heap, not host stack."
+msgstr "*深的输入项。* 同样的机器使宿主栈与输入的嵌套深度无关。$\\mathsf{ev}(t\\,\\vec u, \\rho)$ 的规则压入一个帧并继续处理头部，因此头部位置上的长应用链增长的是 $K$，而不是宿主栈；参数是延迟的，嵌套在参数位置上的链在读回强制该参数时，每个 $\\mathsf{fo}$ 步骤求值一层。绑定子是闭包，读回用一个 $\\mathsf{bind}$ 帧打开它。每个帧都由一个单位付费，因此上面的界 $|K| \\le f_0 + 1$ 也涵盖深的输入。求值之前，`eval` 和 `normalize` 用 `@debruijn.validate` 验证输入，它把待处理的子项保存在堆栈上（见 [debruijn 设计](../debruijn.md)）。因此在每个后端上，输入的深度消耗的是燃料和堆，而不是宿主栈。"
+
+#: manual/design/utlc/nbe.md:273
+msgid "*Shared environments.* Opening a binder extends an environment: $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$ evaluates $t$ in $e \\cdot \\rho$, and readback of $\\mathsf{clo}(t, \\rho)$ under $n$ binders evaluates $t$ in $\\mathsf{lvl}(n) \\cdot \\rho$. Copying $\\rho$ for each extension makes a term with $n$ nested binders cost"
+msgstr "*共享环境。* 打开一个绑定子会扩展环境：$\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$ 在 $e \\cdot \\rho$ 中对 $t$ 求值，而 $\\mathsf{clo}(t, \\rho)$ 在 $n$ 个绑定子之下的读回在 $\\mathsf{lvl}(n) \\cdot \\rho$ 中对 $t$ 求值。每次扩展都复制 $\\rho$，会使含 $n$ 个嵌套绑定子的项花费"
+
+#: manual/design/utlc/nbe.md:283
+msgid "element copies, tens of seconds for $n = 100\\,000$. Environments are therefore persistent lists stored in shared arrays: an environment is a pair $(a, \\ell)$ of an array and a length, with $\\rho_i = a[\\ell - 1 - i]$, outermost entry first. No environment ever changes $a[0..\\ell)$, so"
+msgstr "次元素复制，$n = 100\\,000$ 时需要几十秒。因此环境是存放在共享数组中的持久列表：环境是由一个数组和一个长度组成的对 $(a, \\ell)$，其中 $\\rho_i = a[\\ell - 1 - i]$，最外层的条目在前。没有任何环境会改变 $a[0..\\ell)$，所以"
+
+#: manual/design/utlc/nbe.md:297
+msgid "leaves every other environment that shares $a$ unchanged: they read only their own prefixes, which the push does not touch. A chain of binders extends each environment once, at the end of its array, so it costs $O(n)$; lookup stays $O(1)$; an environment extended twice, as when one closure is applied to two arguments, copies as before. Values, the order of the steps and the fuel spent are the same as with copied environments."
+msgstr "不会改变共享 $a$ 的任何其他环境：它们只读取自己的前缀，而压入并不触及这些前缀。一条绑定子链在其数组末尾只扩展每个环境一次，因此代价为 $O(n)$；查找仍为 $O(1)$；被扩展两次的环境（例如一个闭包应用于两个参数时）像以前一样复制。值、步骤的顺序和消耗的燃料与复制环境时相同。"
+
+#: manual/design/utlc/nbe.md:304
 msgid "M. Felleisen and D. P. Friedman, \"Control operators, the SECD-machine, and the λ-calculus\", 1986, for the CEK machine; M. S. Ager, D. Biernacki, O. Danvy and J. Midtgaard, \"A functional correspondence between evaluators and abstract machines\", PPDP 2003, for deriving it from an evaluator by CPS transformation and defunctionalization."
 msgstr "CEK 机见 M. Felleisen 与 D. P. Friedman，“Control operators, the SECD-machine, and the λ-calculus”，1986；通过 CPS 变换与去函数化从求值器推导出它，见 M. S. Ager、D. Biernacki、O. Danvy 与 J. Midtgaard，“A functional correspondence between evaluators and abstract machines”，PPDP 2003。"
 
-#: manual/design/utlc/nbe.md:262
+#: manual/design/utlc/nbe.md:306
 msgid "Laziness without sharing"
 msgstr "无共享的惰性"
 
-#: manual/design/utlc/nbe.md:264
+#: manual/design/utlc/nbe.md:308
 msgid "**Problem.** Strict evaluation (call by value) diverges on $(\\lambda.\\,7)\\,\\Omega$, although the term has the normal form $7$."
 msgstr "**问题。** 严格求值（传值调用）在 $(\\lambda.\\,7)\\,\\Omega$ 上发散，尽管该项有范式 $7$。"
 
-#: manual/design/utlc/nbe.md:267
+#: manual/design/utlc/nbe.md:311
 msgid "**Choice.** Arguments are delayed. Together with readback, which evaluates the head of every neutral first and its arguments afterwards, and enters closures only after their head is known, this realizes normal-order (leftmost-outermost) reduction, the normalizing strategy of the [eval design](../eval.md). Call by need would share delayed results; it is not used because it needs mutable thunks, and the budget keeps the cost of recomputation bounded and visible."
 msgstr "**选择。** 参数被延迟。读回先对每个中性项的头部求值，然后再处理其参数，并且只在头部确定之后才进入闭包；二者结合实现了正规序（最左最外）归约，即 [eval 设计](../eval.md)中的范式化策略。传需求调用会共享延迟的结果；未采用它是因为它需要可变的 thunk，而预算使重复计算的开销有界且可见。"
 
-#: manual/design/utlc/nbe.md:275
+#: manual/design/utlc/nbe.md:319
 msgid "Opaque semantic values"
 msgstr "不透明的语义值"
 
-#: manual/design/utlc/nbe.md:277
+#: manual/design/utlc/nbe.md:321
 msgid "`Semantic[T]` is a struct around a private enum. Callers can create neutral values (`reflect_free`, `reflect_level`), evaluate, and quote, but cannot build closures with ill-scoped environments. This keeps the invariant that every closure environment matches the scope of its body, which is why `eval` validates its input once and can then trust every index lookup."
 msgstr "`Semantic[T]` 是包裹一个私有枚举的结构体。调用者可以创建中性值（`reflect_free`、`reflect_level`）、求值和 quote，但无法构造环境作用域不良的闭包。这保持了“每个闭包环境都与其体的作用域相匹配”这一不变式，这也是 `eval` 只需验证一次输入、之后便可信任每次索引查找的原因。"
 
-#: manual/design/utlc/nbe.md:283
+#: manual/design/utlc/nbe.md:327
 msgid "Unary applications in normal forms"
 msgstr "范式中的一元应用"
 
-#: manual/design/utlc/nbe.md:285
+#: manual/design/utlc/nbe.md:329
 msgid "Readback produces $R_n(\\mathsf{app}(d, e)) = R_n(d)\\,R_n(e)$ as a unary `Apply`, so the spine $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`. The small-step reducer keeps the n-ary `Apply(f, [a, b])` of its input. Both denote the same curried application; comparisons between the two normalizers must flatten spines first."
 msgstr "读回将 $R_n(\\mathsf{app}(d, e)) = R_n(d)\\,R_n(e)$ 生成为一元 `Apply`，因此脊 $f\\,a\\,b$ 被返回为 `Apply(Apply(f, [a]), [b])`。小步归约器则保留其输入中的 n 元 `Apply(f, [a, b])`。两者表示同一个柯里化应用；比较这两个范式化器时必须先展平脊。"
 
-#: manual/design/utlc/nbe.md:293
+#: manual/design/utlc/nbe.md:337
 msgid "**Theorem (soundness).** If `normalize(t, fuel)` returns `NormalForm(u, _)`, then $u$ is beta-normal and $t =_\\beta u$ (up to spine flattening)."
 msgstr "**定理（可靠性）。** 若 `normalize(t, fuel)` 返回 `NormalForm(u, _)`，则 $u$ 是 β-范式，且 $t =_\\beta u$（在脊展平意义下）。"
 
-#: manual/design/utlc/nbe.md:296
+#: manual/design/utlc/nbe.md:340
 msgid "*Sketch.* Define the *denotation* $\\lfloor d \\rfloor_n$ of a value under $n$ binders as the term it stands for: $\\lfloor \\mathsf{clo}(t, \\rho) \\rfloor_n = \\lambda.\\,t[\\rho]$, $\\lfloor \\mathsf{delay}(t, \\rho) \\rfloor_n = t[\\rho]$, $\\lfloor \\mathsf{lvl}(\\ell) \\rfloor_n = n - 1 - \\ell$, and so on, where $t[\\rho]$ substitutes the denotations of $\\rho$ for the free indices of $t$. By induction on evaluation, $t[\\rho] \\to_\\beta^{*} \\lfloor \\llbracket t \\rrbracket\\rho \\rfloor_n$: the only non-trivial case is $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$, which is the beta step $(\\lambda.\\,t[\\rho])\\,\\lfloor e \\rfloor \\to_\\beta t[\\lfloor e \\rfloor \\cdot \\rho]$ (substitution lemma of the [debruijn attachment](../../../attachments/design_debruijn_index-lemmas.typ)). Readback inserts only beta steps under binders, so $t \\to_\\beta^{*} u$. For normality: $R$ produces $\\lambda$ only from closures, and applications only from $\\mathsf{app}(d, e)$, whose head $d$ is a neutral or a constant, never a closure (application of a closure is evaluated, not stored). Hence the output follows the grammar"
 msgstr "*证明概要。* 将值在 $n$ 个绑定子之下的*指称* $\\lfloor d \\rfloor_n$ 定义为它所代表的项：$\\lfloor \\mathsf{clo}(t, \\rho) \\rfloor_n = \\lambda.\\,t[\\rho]$，$\\lfloor \\mathsf{delay}(t, \\rho) \\rfloor_n = t[\\rho]$，$\\lfloor \\mathsf{lvl}(\\ell) \\rfloor_n = n - 1 - \\ell$，依此类推，其中 $t[\\rho]$ 将 $\\rho$ 的指称代换为 $t$ 的自由索引。对求值归纳可得 $t[\\rho] \\to_\\beta^{*} \\lfloor \\llbracket t \\rrbracket\\rho \\rfloor_n$：唯一非平凡的情形是 $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$，它就是 β 步 $(\\lambda.\\,t[\\rho])\\,\\lfloor e \\rfloor \\to_\\beta t[\\lfloor e \\rfloor \\cdot \\rho]$（[debruijn 附录](../../../attachments/design_debruijn_index-lemmas.typ)中的代换引理）。读回只在绑定子之下插入 β 步，因此 $t \\to_\\beta^{*} u$。关于范式性：$R$ 只从闭包生成 $\\lambda$，只从 $\\mathsf{app}(d, e)$ 生成应用，而其头部 $d$ 是中性项或常量，绝不是闭包（闭包的应用会被求值，而不是被存储）。因此输出遵循文法"
 
-#: manual/design/utlc/nbe.md:315
+#: manual/design/utlc/nbe.md:359
 msgid "which contains no redex $(\\lambda.\\,t)\\,u$. $\\square$"
 msgstr "其中不含可约式 $(\\lambda.\\,t)\\,u$。$\\square$"
 
-#: manual/design/utlc/nbe.md:317
+#: manual/design/utlc/nbe.md:361
 msgid "**Completeness (sketch).** If $t$ has a beta normal form, `normalize` returns it for sufficient fuel. Evaluation computes the weak head normal form by call by name, and readback recursively normalizes the body of a closure and the arguments of a neutral after its head: this is the leftmost-outermost strategy decomposed into head and arguments. By the normalization theorem (Barendregt 13.2.2) this strategy terminates on every term with a normal form, and by confluence the normal form is unique.[^nbe]"
 msgstr "**完备性（证明概要）。** 若 $t$ 有 β 范式，则在燃料充足时 `normalize` 返回它。求值通过传名调用计算弱头范式，读回则递归地范式化闭包的体，以及中性项在其头部之后的参数：这正是分解为头部与参数的最左最外策略。由范式化定理（Barendregt 13.2.2），该策略在每个有范式的项上终止；由合流性，范式是唯一的。[^nbe]"
 
-#: manual/design/utlc/nbe.md:325
+#: manual/design/utlc/nbe.md:369
 msgid "For untyped NbE see K. Aehlig and F. Joachimski, \"Operational aspects of untyped normalisation by evaluation\", Mathematical Structures in Computer Science 14, 2004; for strong reduction by evaluation, B. Grégoire and X. Leroy, \"A compiled implementation of strong reduction\", ICFP 2002."
 msgstr "关于无类型 NbE，见 K. Aehlig 与 F. Joachimski，\"Operational aspects of untyped normalisation by evaluation\"，Mathematical Structures in Computer Science 14，2004；关于通过求值实现的强归约，见 B. Grégoire 与 X. Leroy，\"A compiled implementation of strong reduction\"，ICFP 2002。"
 
-#: manual/design/utlc/nbe.md:327
-msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices. Further tests run $\\Omega$, a divergent term whose head grows, and two terms with infinite normal forms with budgets of thirty million units on every backend, and pin the exact cost of Church numeral arithmetic together with its reproducibility at `consumed` and `consumed - 1`."
-msgstr "**与小步归约一致。** 由可靠性与合流性，只要 `@nbe.normalize` 与 `@debruijn.normalize` 对同一个良作用域项都返回范式，两个范式在脊展平（合并嵌套的应用并去掉空应用）之后相等。两者都把 `Apply(h, [])` 读作 $h$：求值会抹去该节点，小步归约器在匹配可约式时透过它（见 [eval 设计](../eval.md)）。`src/utlc/nbe/nbe_test.mbt` 中的测试检查这一点，以及 $(\\lambda.\\,7)\\,\\Omega$ 上的惰性、$\\Omega$ 上的燃料耗尽，以及 quote 把层级转回索引。其他测试在每个后端上以三千万单位的预算运行 $\\Omega$、一个头部不断增长的发散项以及两个具有无限范式的项，并固定丘奇数算术的确切开销及其在 `consumed` 与 `consumed - 1` 下的可复现性。"
+#: manual/design/utlc/nbe.md:371
+msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices. Further tests run $\\Omega$, a divergent term whose head grows, and two terms with infinite normal forms with budgets of thirty million units on every backend, and pin the exact cost of Church numeral arithmetic together with its reproducibility at `consumed` and `consumed - 1`. The tests in `src/utlc/nbe/deep_test.mbt` evaluate, read back and normalize terms nested to depth 100 000, normal and with redexes, on every backend."
+msgstr "**与小步归约一致。** 由可靠性与合流性，只要 `@nbe.normalize` 与 `@debruijn.normalize` 对同一个良作用域项都返回范式，两个范式在脊展平（合并嵌套的应用并去掉空应用）之后相等。两者都把 `Apply(h, [])` 读作 $h$：求值会抹去该节点，小步归约器在匹配可约式时透过它（见 [eval 设计](../eval.md)）。`src/utlc/nbe/nbe_test.mbt` 中的测试检查这一点，以及 $(\\lambda.\\,7)\\,\\Omega$ 上的惰性、$\\Omega$ 上的燃料耗尽，以及 quote 把层级转回索引。其他测试在每个后端上以三千万单位的预算运行 $\\Omega$、一个头部不断增长的发散项以及两个具有无限范式的项，并固定丘奇数算术的确切开销及其在 `consumed` 与 `consumed - 1` 下的可复现性。`src/utlc/nbe/deep_test.mbt` 中的测试在每个后端上对嵌套深度达 100 000 的项（范式的和含可约式的）求值、读回并归一化。"
 
-#: manual/design/utlc/nbe.md:342
+#: manual/design/utlc/nbe.md:388
 msgid "Other invariants:"
 msgstr "其他不变式："
 
-#: manual/design/utlc/nbe.md:344
+#: manual/design/utlc/nbe.md:390
 msgid "With positive fuel, `eval` and `normalize` reject ill-scoped input with `ScopeFailure` and `consumed=0` before doing any work; with fuel `<= 0` they return `FuelExhausted(consumed=0)` without looking at the term."
 msgstr "燃料为正时，`eval` 和 `normalize` 在做任何工作之前就以 `ScopeFailure` 和 `consumed=0` 拒绝作用域不良的输入；燃料 `<= 0` 时，它们不查看项就返回 `FuelExhausted(consumed=0)`。"
 
-#: manual/design/utlc/nbe.md:347
+#: manual/design/utlc/nbe.md:393
 msgid "`quote(value, n, _)` returns `ScopeFailure` only when $n < 0$ or a level variable is not below $n$. Values produced by `eval` contain no level variables, so quoting them at any level $n \\ge 0$ never fails this way."
 msgstr "`quote(value, n, _)` 仅当 $n < 0$ 或某个层级变量不小于 $n$ 时才返回 `ScopeFailure`。由 `eval` 产生的值不含层级变量，因此在任意层级 $n \\ge 0$ 对它们 quote 都不会以这种方式失败。"
 
-#: manual/design/utlc/nbe.md:350
+#: manual/design/utlc/nbe.md:396
 msgid "Fuel: `consumed` never exceeds the fuel given; the determinism property above holds."
 msgstr "燃料：`consumed` 从不超过给定的燃料；上述确定性性质成立。"
 
-#: manual/design/utlc/nbe.md:352
-msgid "Stack: evaluation and readback use a constant depth of host stack; their frame stacks live in the heap and are bounded by the budget."
-msgstr "栈：求值与读回使用常数深度的宿主栈；它们的帧栈位于堆上，并受预算限制。"
+#: manual/design/utlc/nbe.md:398
+msgid "Stack: validation, evaluation and readback use a constant depth of host stack, whatever the budget and the nesting depth of the input; their frame stacks live in the heap and are bounded by the budget (validation's by the size of the input)."
+msgstr "栈：验证、求值与读回使用常数深度的宿主栈，与预算和输入的嵌套深度无关；它们的帧栈位于堆上，并受预算限制（验证的帧栈则受输入大小限制）。"
 
-#: manual/design/utlc/nbe.md:357
+#: manual/design/utlc/nbe.md:405
 msgid "**Typed or eta-long readback.** Untyped readback cannot know where to eta-expand; eta-long normal forms are provided for typed terms by [stlc](../stlc.md)."
 msgstr "**有类型或 η-长形式的读回。** 无类型读回无法知道在何处进行 η-展开；有类型项的 η-长形式范式由 [stlc](../stlc.md) 提供。"
 
-#: manual/design/utlc/nbe.md:360
+#: manual/design/utlc/nbe.md:408
 msgid "**Host-language closures (HOAS).** Representing $\\mathsf{clo}$ as a MoonBit function would be faster but makes fuel accounting and inspection of values impossible, and the values could not be quoted without a fresh-variable trick on the host side. A first-order closure keeps everything observable."
 msgstr "**宿主语言闭包（HOAS）。** 将 $\\mathsf{clo}$ 表示为 MoonBit 函数会更快，但会使燃料计量与值的检查变得不可能，而且若不在宿主侧使用新变量技巧，这些值也无法被 quote。一阶闭包使一切都保持可观察。"
 
-#: manual/design/utlc/nbe.md:364
+#: manual/design/utlc/nbe.md:412
 msgid "**Named environments.** Indexing the environment by De Bruijn index makes lookup positional and needs no fresh names during evaluation."
 msgstr "**具名环境。** 以 De Bruijn 索引对环境进行索引使查找按位置进行，并且求值期间不需要新名字。"
 
-#: manual/design/utlc/nbe.md:366
+#: manual/design/utlc/nbe.md:414
 msgid "**Direct recursion with a larger stack.** The js and wasm hosts fix the stack size, and any fixed stack is exhausted by some budget, so the outcome would depend on the backend."
 msgstr "**直接递归并加大栈。** js 与 wasm 的宿主固定了栈大小，而任何固定大小的栈都会被某个预算耗尽，因此结果将取决于后端。"
 
-#: manual/design/utlc/nbe.md:369
+#: manual/design/utlc/nbe.md:417
 msgid "**Trampolining through host closures.** Returning a closure for the rest of the computation also bounds the stack, but allocates a host function per step and hides the pending work. First-order frames keep the machine observable, for the same reason as first-order semantic closures."
 msgstr "**通过宿主闭包进行蹦床。** 为剩余计算返回一个闭包同样能限制栈深度，但每一步都要分配一个宿主函数，并且隐藏了待完成的工作。一阶帧使机器保持可观察，理由与一阶语义闭包相同。"
 
-#: manual/design/utlc/nbe.md:376
+#: manual/design/utlc/nbe.md:424
 msgid "Beta only: no eta, no reduction of constants."
 msgstr "仅 β：没有 η，也没有常量的归约。"
 
-#: manual/design/utlc/nbe.md:377
+#: manual/design/utlc/nbe.md:425
 msgid "Not total: `FuelExhausted` is the expected outcome for divergent terms and does not prove divergence."
 msgstr "不是全函数：`FuelExhausted` 是发散项的预期结果，但它并不证明发散。"
 
-#: manual/design/utlc/nbe.md:379
+#: manual/design/utlc/nbe.md:427
 msgid "No sharing of delayed arguments."
 msgstr "延迟参数不共享。"
 
-#: manual/design/utlc/nbe.md:380
-msgid "Only evaluation and readback have a bounded host stack. `eval` and `normalize` first validate their input with `@debruijn.validate`, which recurses over the term, so the stack depth they need still grows with the nesting depth of the input term."
-msgstr "只有求值与读回具有有界的宿主栈。`eval` 与 `normalize` 首先用 `@debruijn.validate` 验证输入，它对项进行递归，因此它们所需的栈深度仍随输入项的嵌套深度增长。"
+#: manual/design/utlc/nbe.md:428
+msgid "The derived `Debug` of `NbeResult` recurses over the term it contains, so printing a deeply nested normal form can overflow the host stack on js, wasm and wasm-gc; `==` handles any depth."
+msgstr "`NbeResult` 派生的 `Debug` 会对其所含的项递归，因此打印很深的嵌套范式可能在 js、wasm 和 wasm-gc 上溢出宿主栈；`==` 能处理任意深度。"
 
-#: manual/design/utlc/nbe.md:384
+#: manual/design/utlc/nbe.md:431
 msgid "Normal forms use unary applications."
 msgstr "范式使用一元应用。"
 
-#: manual/design/utlc/nbe.md:385
+#: manual/design/utlc/nbe.md:432
 msgid "Input must be De Bruijn syntax; convert named terms with `@debruijn.from_named` and results back with `@debruijn.to_named`."
 msgstr "输入必须是 De Bruijn 语法；用 `@debruijn.from_named` 转换具名项，并用 `@debruijn.to_named` 把结果转换回来。"
 
@@ -5692,6 +5885,18 @@ msgstr "[utlc/nbe 设计](../../design/utlc/nbe.md)：语义域与可靠性论�
 #: manual/tutorial/utlc/nbe.md:203
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc 教程](../stlc.md)：带类型的 η-长形式 NbE。"
+
+#~ msgid "`DbTerm::equal` compares two terms structurally."
+#~ msgstr "`DbTerm::equal` 按结构比较两个项。"
+
+#~ msgid "It is the promoted `Eq` implementation. `λx.x` and `λy.y` are not `equal`."
+#~ msgstr "它是提升而来的 `Eq` 实现。`λx.x` 与 `λy.y` 并不 `equal`。"
+
+#~ msgid "Each node is visited once. A variable lookup scans the environment, and each binder copies it, both in $O(d)$ for binder depth $d$, so the comparison costs $O(n \\cdot d)$ for terms of size $n$."
+#~ msgstr "每个节点只访问一次。变量查找要扫描环境，每个绑定子要复制环境，对绑定深度 $d$ 两者都是 $O(d)$，因此对大小为 $n$ 的项，比较的开销是 $O(n \\cdot d)$。"
+
+#~ msgid "Only evaluation and readback have a bounded host stack. `eval` and `normalize` first validate their input with `@debruijn.validate`, which recurses over the term, so the stack depth they need still grows with the nesting depth of the input term."
+#~ msgstr "只有求值与读回具有有界的宿主栈。`eval` 与 `normalize` 首先用 `@debruijn.validate` 验证输入，它对项进行递归，因此它们所需的栈深度仍随输入项的嵌套深度增长。"
 
 #~ msgid "The `core` package defines the vocabulary that every other package of `type_theory` shares: variable names, fresh-name generation, ordered scopes, telescopes and finite renamings. All values are immutable: every operation that \"changes\" a value returns a new one and leaves its argument untouched. The mathematics behind these definitions is in the [core design](../design/core.md)."
 #~ msgstr "`core` 包定义了 `type_theory` 中所有其他包共享的基本词汇：变量名、新名字生成、有序作用域、伸缩式（telescope）以及有限重命名。所有值都是不可变的：每个“改变”值的操作都返回一个新值，并保持其参数不变。这些定义背后的数学见 [core 设计](../design/core.md)。"

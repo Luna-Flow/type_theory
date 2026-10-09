@@ -37,13 +37,13 @@ msgid "The interface you implement to adapt your own AST is [`@syntax.BindingSyn
 msgstr ""
 
 #: manual/api/adapter.md:33
-#: manual/api/core.md:14
+#: manual/api/core.md:16
 #: manual/api/debruijn.md:14
 #: manual/api/eval.md:12
 #: manual/api/rewrite.md:17
 #: manual/api/stlc.md:15
-#: manual/api/substitution.md:15
-#: manual/api/syntax.md:14
+#: manual/api/substitution.md:22
+#: manual/api/syntax.md:23
 #: manual/api/utlc/lambda.md:14
 #: manual/api/utlc/nbe.md:14
 msgid "Importing"
@@ -78,204 +78,204 @@ msgid "core API"
 msgstr ""
 
 #: manual/api/core.md:5
-msgid "The `core` package defines the vocabulary that every other package of `type_theory` shares: variable names, fresh-name generation, ordered scopes, telescopes and finite renamings. All values are immutable: every operation that \"changes\" a value returns a new one and leaves its argument untouched. `Context`, `Telescope` and `Renaming` are abstract types, so their storage cannot be reached from outside the package, and every method that returns an array returns a fresh copy. The mathematics behind these definitions is in the [core design](../design/core.md)."
+msgid "The `core` package defines the vocabulary that every other package of `type_theory` shares: variable names, fresh-name generation, ordered scopes, telescopes and finite renamings. All values are immutable: every operation that \"changes\" a value returns a new one and leaves its argument untouched. `Context`, `Telescope` and `Renaming` are abstract types, so their storage cannot be reached from outside the package, and every method that returns an array returns a fresh copy. None of these values is nested, so every operation, the derived `==`, `compare`, `hash` and `Debug` included, uses a constant amount of host stack. The mathematics behind these definitions is in the [core design](../design/core.md)."
 msgstr ""
 
-#: manual/api/core.md:16
+#: manual/api/core.md:18
 #: manual/api/debruijn.md:16
 #: manual/api/eval.md:14
 #: manual/api/rewrite.md:19
 #: manual/api/stlc.md:17
-#: manual/api/substitution.md:17
-#: manual/api/syntax.md:16
+#: manual/api/substitution.md:24
+#: manual/api/syntax.md:25
 #: manual/api/utlc/lambda.md:16
 #: manual/api/utlc/nbe.md:16
 msgid "Add the package, and the packages whose types appear in its signatures, to your `moon.pkg`:"
 msgstr ""
 
-#: manual/api/core.md:26
+#: manual/api/core.md:28
 msgid "`hashset` is needed for the name sets that `fresh_name`, `Renaming::support` and `Renaming::targets` take or return. The examples on this page refer to every name through its package alias, for example `@core.Name`."
 msgstr ""
 
-#: manual/api/core.md:30
+#: manual/api/core.md:32
 msgid "Names"
 msgstr ""
 
-#: manual/api/core.md:34
+#: manual/api/core.md:36
 msgid "`Name` is a variable name, compared by its text."
 msgstr ""
 
-#: manual/api/core.md:42
+#: manual/api/core.md:44
 msgid "Two names are the same variable exactly when their texts are equal. A name carries no scope, no unique identifier and no type: binding is decided by the syntax that contains the name. The field `text` is read-only outside the package; use `Name::new` and `Name::text`."
 msgstr ""
 
-#: manual/api/core.md:49
+#: manual/api/core.md:51
 msgid "`Name::new` makes a name from its text."
 msgstr ""
 
-#: manual/api/core.md:55
+#: manual/api/core.md:57
 msgid "Any string is accepted, including the empty string and strings that look like generated names such as `x_1`. The library never parses the text, except that `fresh_name` appends `_<k>` suffixes to it."
 msgstr ""
 
-#: manual/api/core.md:61
+#: manual/api/core.md:63
 msgid "`Name::text` returns the text of a name."
 msgstr ""
 
-#: manual/api/core.md:78
+#: manual/api/core.md:80
 msgid "These methods compare and hash names through their text."
 msgstr ""
 
-#: manual/api/core.md:86
+#: manual/api/core.md:88
 msgid "They are the `Eq`, `Compare` and `Hash` implementations promoted to methods. `compare` is the order of `String` on the texts: shorter texts first, then by UTF-16 code units. It is a total order, so names can be sorted for deterministic output; `hash` lets names live in `HashSet` and `HashMap`. Prefer the operators `==`, `!=`, `<` and friends in new code."
 msgstr ""
 
-#: manual/api/core.md:104
+#: manual/api/core.md:106
 msgid "`fresh_name` returns a name that does not occur in a set of used names, keeping a hint when possible."
 msgstr ""
 
-#: manual/api/core.md:111
+#: manual/api/core.md:113
 msgid "`fresh_name(hint, used)` returns `hint` itself when `hint` is not in `used`. Otherwise it tries `hint_1`, `hint_2`, … in order and returns the first candidate that is not in `used`. The result is a function of `hint` and `used` only, so repeated runs produce the same names. It always terminates: at most $|used| + 1$ candidates are tried."
 msgstr ""
 
-#: manual/api/core.md:126
+#: manual/api/core.md:128
 msgid "Scopes"
 msgstr ""
 
-#: manual/api/core.md:130
+#: manual/api/core.md:132
 msgid "`Context` is an ordered list of names in scope, innermost last."
 msgstr ""
 
-#: manual/api/core.md:136
+#: manual/api/core.md:138
 msgid "A context may contain the same name more than once; a later entry shadows an earlier one. Two contexts are equal when they list the same names in the same order. The type is abstract: read a context with `length`, `contains` and `to_array`."
 msgstr ""
 
-#: manual/api/core.md:143
+#: manual/api/core.md:145
 msgid "These functions build a context with no names, or with the names of an array in order."
 msgstr ""
 
-#: manual/api/core.md:151
+#: manual/api/core.md:153
 msgid "`from_array` copies the array, so later changes to the array do not affect the context."
 msgstr ""
 
-#: manual/api/core.md:156
+#: manual/api/core.md:158
 msgid "`Context::extend_with` returns the context with one more name at the inner end."
 msgstr ""
 
-#: manual/api/core.md:163
+#: manual/api/core.md:165
 msgid "The original context is unchanged. The call copies the names, so it costs $O(n)$ for a context of length $n$."
 msgstr ""
 
-#: manual/api/core.md:168
+#: manual/api/core.md:170
 msgid "These methods query a context."
 msgstr ""
 
-#: manual/api/core.md:177
+#: manual/api/core.md:179
 msgid "`contains` is a linear search. `to_array` returns a fresh array, outermost name first; changing it does not change the context. `equal` is the promoted `Eq` implementation."
 msgstr ""
 
-#: manual/api/core.md:195
+#: manual/api/core.md:197
 msgid "`Telescope[T]` is a sequence of binders, each with an annotation of type `T`, in dependency order."
 msgstr ""
 
-#: manual/api/core.md:202
+#: manual/api/core.md:204
 msgid "In a telescope $x_1 : A_1, \\dots, x_n : A_n$ the annotation $A_i$ may refer to $x_1, \\dots, x_{i-1}$. `Telescope` records the order; it does not check what the annotations mention. The type is abstract: read a telescope with `length` and `to_array`."
 msgstr ""
 
-#: manual/api/core.md:209
+#: manual/api/core.md:211
 msgid "These functions build and read a telescope."
 msgstr ""
 
-#: manual/api/core.md:219
+#: manual/api/core.md:221
 msgid "`extend_with` appends one binder and returns a new telescope; `to_array` returns a fresh array of the entries, first binder first, and changing it does not change the telescope."
 msgstr ""
 
-#: manual/api/core.md:235
+#: manual/api/core.md:237
 #: manual/design/core.md:66
 msgid "Renamings"
 msgstr ""
 
-#: manual/api/core.md:239
+#: manual/api/core.md:241
 msgid "`Renaming` is a finite map from names to names; names outside its domain are left unchanged."
 msgstr ""
 
-#: manual/api/core.md:246
+#: manual/api/core.md:248
 msgid "A renaming $\\rho$ denotes the total function $\\rho(n) = m$ if $(n, m)$ is an entry and $\\rho(n) = n$ otherwise. It is applied simultaneously: the image of a name is never renamed again. A renaming need not be injective. The type is abstract, so the only way to build a renaming is through the functions below, and each name has at most one entry. Equality (`Renaming::equal`) compares the entry lists, so two renamings that denote the same function can still be different values."
 msgstr ""
 
-#: manual/api/core.md:256
+#: manual/api/core.md:258
 msgid "These functions build renamings."
 msgstr ""
 
-#: manual/api/core.md:264
+#: manual/api/core.md:266
 msgid "`set(from, to_)` adds the entry `from ↦ to_`, replacing an existing image of `from` in place."
 msgstr ""
 
-#: manual/api/core.md:269
+#: manual/api/core.md:271
 msgid "`Renaming::apply` returns the image of a name."
 msgstr ""
 
-#: manual/api/core.md:277
+#: manual/api/core.md:279
 msgid "These methods read the entries of a renaming."
 msgstr ""
 
-#: manual/api/core.md:284
+#: manual/api/core.md:286
 msgid "`length` is the number of names in the domain. `to_array` returns the entries `(from, to_)` as a fresh array, in the order the names were first added; changing the array does not change the renaming. An entry may map a name to itself, so `length` can count names that `apply` leaves unchanged."
 msgstr ""
 
-#: manual/api/core.md:306
+#: manual/api/core.md:308
 msgid "`Renaming::without` removes a name from the domain."
 msgstr ""
 
-#: manual/api/core.md:312
+#: manual/api/core.md:314
 msgid "This is the operation a binder performs: under a binder for `x`, free occurrences of `x` are no longer the `x` of the renaming."
 msgstr ""
 
-#: manual/api/core.md:317
+#: manual/api/core.md:319
 msgid "These methods return the names a renaming mentions."
 msgstr ""
 
-#: manual/api/core.md:324
+#: manual/api/core.md:326
 msgid "`support` contains every source and every target of an entry; `targets` contains only the targets. Capture-avoiding operations use them to choose fresh binder names."
 msgstr ""
 
-#: manual/api/core.md:330
+#: manual/api/core.md:332
 msgid "`Renaming::then` composes two renamings, applying `self` first."
 msgstr ""
 
-#: manual/api/core.md:336
+#: manual/api/core.md:338
 msgid "For every name $n$, `r.then(s).apply(n) == s.apply(r.apply(n))`."
 msgstr ""
 
-#: manual/api/core.md:356
+#: manual/api/core.md:358
 msgid "`Renaming::equal` compares two renamings entry by entry."
 msgstr ""
 
-#: manual/api/core.md:362
+#: manual/api/core.md:364
 #: manual/api/eval.md:77
 msgid "It is the promoted `Eq` implementation; use `==` in new code."
 msgstr ""
 
-#: manual/api/core.md:364
 #: manual/api/core.md:366
+#: manual/api/core.md:368
 #: manual/api/stlc.md:336
 #: manual/api/stlc.md:338
-#: manual/api/syntax.md:353
-#: manual/api/syntax.md:355
+#: manual/api/syntax.md:367
+#: manual/api/syntax.md:369
 #: manual/index.md:103
 msgid "Deprecated"
 msgstr ""
 
-#: manual/api/core.md:366
+#: manual/api/core.md:368
 #: manual/api/stlc.md:338
-#: manual/api/syntax.md:355
+#: manual/api/syntax.md:369
 msgid "Replacement"
 msgstr ""
 
-#: manual/api/core.md:371
+#: manual/api/core.md:373
 msgid "The fields `Context::names`, `Telescope::entries` and `Renaming::entries` are no longer public; use `to_array`, `length`, `contains` and `apply` instead."
 msgstr ""
 
-#: manual/api/core.md:375
+#: manual/api/core.md:377
 msgid "`extend` became a reserved word in MoonBit 0.10, so the methods were renamed. The old names remain as deprecated aliases. The method forms `not_equal`, `op_lt`, `op_le`, `op_gt`, `op_ge`, `hash_combine` and `to_repr` on these types are hidden and deprecated; use the operators `!=`, `<`, `<=`, `>`, `>=`, the `Hash` trait and `Repr(x)` instead."
 msgstr ""
 
@@ -295,8 +295,8 @@ msgstr ""
 #: manual/api/eval.md:25
 #: manual/api/rewrite.md:29
 #: manual/api/stlc.md:29
-#: manual/api/substitution.md:28
-#: manual/api/syntax.md:26
+#: manual/api/substitution.md:35
+#: manual/api/syntax.md:35
 #: manual/api/utlc/lambda.md:28
 #: manual/api/utlc/nbe.md:27
 msgid "The examples on this page refer to every name through its package alias, for example `@core.Name`."
@@ -339,126 +339,142 @@ msgid "As with `@syntax.Term`, terms are shared, not copied: treat the argument 
 msgstr ""
 
 #: manual/api/debruijn.md:63
-msgid "`DbTerm::equal` compares two terms structurally."
+msgid "`DbTerm::equal` compares two terms structurally. It implements `Eq`, so it is also the `==` of `DbTerm`."
 msgstr ""
 
 #: manual/api/debruijn.md:71
-msgid "`ScopeError` describes an index that does not refer to a binder."
+msgid "The implementation is written by hand rather than derived, so that it handles terms of any nesting depth (see below); it is the same relation a derived `Eq` would compute."
 msgstr ""
 
-#: manual/api/debruijn.md:83
-msgid "`UnboundIndex(index, depth)`: `Bound(index)` occurs under only `depth` binders."
+#: manual/api/debruijn.md:75
+msgid "Nesting depth"
 msgstr ""
 
-#: manual/api/debruijn.md:85
-msgid "`NegativeIndex(index)`: a negative index."
+#: manual/api/debruijn.md:77
+msgid "Every function of this package, and `==` on its types, works on terms of any nesting depth on every backend: long application chains in head or argument position, long chains of binders, and any mixture of these. The traversals keep their pending work in arrays on the heap, so the host call stack they use does not grow with the depth of the term, and the js, wasm and wasm-gc backends, whose stacks are small, give the same results as native. The tests run every operation on terms nested to depth 100 000 on all four backends."
 msgstr ""
 
 #: manual/api/debruijn.md:86
+msgid "The exception is the derived `Debug`: `@debug.to_string`, `inspect` and the failure message of `assert_eq` recurse over the term and can overflow the host stack on a deep term. To check deep terms in tests, compare them with `==` (for example `assert_true(a == b)`), which renders nothing."
+msgstr ""
+
+#: manual/api/debruijn.md:108
+msgid "`ScopeError` describes an index that does not refer to a binder."
+msgstr ""
+
+#: manual/api/debruijn.md:120
+msgid "`UnboundIndex(index, depth)`: `Bound(index)` occurs under only `depth` binders."
+msgstr ""
+
+#: manual/api/debruijn.md:122
+msgid "`NegativeIndex(index)`: a negative index."
+msgstr ""
+
+#: manual/api/debruijn.md:123
 msgid "`NegativeShift(index, delta, cutoff)`: shifting the free `Bound(index)` by `delta` would move it below `cutoff`, the effective cutoff at the occurrence, where it would be captured by an enclosing binder or become negative."
 msgstr ""
 
-#: manual/api/debruijn.md:90
+#: manual/api/debruijn.md:127
 msgid "`NegativeCutoff(cutoff)`: `shift` was called with a negative `cutoff`."
 msgstr ""
 
-#: manual/api/debruijn.md:92
+#: manual/api/debruijn.md:129
 msgid "Conversion and validation"
 msgstr ""
 
-#: manual/api/debruijn.md:96
+#: manual/api/debruijn.md:133
 msgid "`from_named` converts named syntax to De Bruijn syntax."
 msgstr ""
 
-#: manual/api/debruijn.md:102
+#: manual/api/debruijn.md:139
 msgid "A variable bound by an enclosing `Bind` becomes `Bound(i)`, where `i` counts the binders between the occurrence and its binder (the nearest binder of that name wins). Free variables become `Free`. The result is always well scoped, and alpha-equivalent named terms give equal results."
 msgstr ""
 
-#: manual/api/debruijn.md:109
+#: manual/api/debruijn.md:146
 msgid "`to_named` converts De Bruijn syntax back to named syntax with deterministic binder names."
 msgstr ""
 
-#: manual/api/debruijn.md:116
+#: manual/api/debruijn.md:153
 msgid "Binders are named `x`, `x_1`, `x_2`, …: each one gets the first name of that sequence that is neither a free name of the term nor the name of an enclosing binder. Returns `Err(NegativeIndex)` or `Err(UnboundIndex)` for an ill-scoped term. For a well-scoped `d`, `from_named(to_named(d))` is `d`; for a named `t`, `to_named(from_named(t))` is alpha-equivalent to `t`."
 msgstr ""
 
-#: manual/api/debruijn.md:139
+#: manual/api/debruijn.md:176
 msgid "The binder becomes `x_1` because `x` is a free name of the term."
 msgstr ""
 
-#: manual/api/debruijn.md:143
+#: manual/api/debruijn.md:180
 msgid "`validate` checks that every bound index refers to an enclosing binder."
 msgstr ""
 
-#: manual/api/debruijn.md:149
+#: manual/api/debruijn.md:186
 msgid "Returns `Ok(())` for a well-scoped term and otherwise the first error found in pre-order."
 msgstr ""
 
-#: manual/api/debruijn.md:161
+#: manual/api/debruijn.md:198
 msgid "Index operations"
 msgstr ""
 
-#: manual/api/debruijn.md:165
+#: manual/api/debruijn.md:202
 msgid "`shift` adds `delta` to every index that is free relative to a cutoff."
 msgstr ""
 
-#: manual/api/debruijn.md:171
+#: manual/api/debruijn.md:208
 msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. It requires `cutoff >= 0`: a negative cutoff would treat indices bound inside `t` as free, so `shift` returns `Err(NegativeCutoff(cutoff~))` for it before looking at `t`, even when `t` has no index at all. The shift is defined when no index falls below the cutoff, that is, there is no `i >= cutoff + k` with `i + delta < cutoff + k`. Returns `Err(NegativeShift)` if an index would fall below the cutoff, where it would be captured by an enclosing binder or become negative, and `Err(NegativeIndex)` if the input contains a negative index."
 msgstr ""
 
-#: manual/api/debruijn.md:184
+#: manual/api/debruijn.md:221
 msgid "`substitute_bound` replaces a free index by a term."
 msgstr ""
 
-#: manual/api/debruijn.md:190
+#: manual/api/debruijn.md:227
 msgid "`substitute_bound(t, j, s)` is $[j \\mapsto s]\\,t$: under `k` binders, `Bound(j + k)` is replaced by `s` shifted up by `k`, so that the free indices of `s` keep pointing at the same binders. Other indices are unchanged; the binder count of the result is not adjusted. Returns `Err(NegativeIndex)` for a negative `j` or a negative index in `t`. It does not check for unbound indices; use `validate` for that."
 msgstr ""
 
-#: manual/api/debruijn.md:199
+#: manual/api/debruijn.md:236
 msgid "`instantiate` opens a binder body with an argument."
 msgstr ""
 
-#: manual/api/debruijn.md:205
+#: manual/api/debruijn.md:242
 msgid "`instantiate(body, arg)` computes $\\uparrow^{-1}_0\\big([0 \\mapsto \\uparrow^{1}_0 arg]\\,body\\big)$, the result of the beta step $(\\lambda.\\,body)\\,arg$. On well-scoped input it never returns an error."
 msgstr ""
 
-#: manual/api/debruijn.md:241
+#: manual/api/debruijn.md:278
 msgid "Reduction"
 msgstr ""
 
-#: manual/api/debruijn.md:245
+#: manual/api/debruijn.md:282
 msgid "`DbStepResult[T]` is the outcome of one De Bruijn reduction attempt."
 msgstr ""
 
-#: manual/api/debruijn.md:256
+#: manual/api/debruijn.md:293
 msgid "`NoStep` and `Reduced` have the meaning of `@rewrite.StepResult`; the rule name is always `\"beta\"`. `ScopeFailure` reports that the input is ill scoped: `reduce_once` validates the whole term before searching for a redex, and the error is the first one `validate` finds. No step is taken in that case."
 msgstr ""
 
-#: manual/api/debruijn.md:264
+#: manual/api/debruijn.md:301
 msgid "`reduce_once` performs one leftmost-outermost beta step."
 msgstr ""
 
-#: manual/api/debruijn.md:270
+#: manual/api/debruijn.md:307
 msgid "A redex is `Apply(Bind(body), [a, ..rest])`; it becomes `instantiate(body, a)`, applied to `rest` if `rest` is not empty. An empty application `Apply(h, [])` is read as `h`, so a head wrapped in empty applications, as in `Apply(Apply(Bind(body), []), [a])`, still forms a redex; `Apply(Bind(body), [])` alone has no argument and is not one. The search order is the root, then the head, then the arguments from left to right, and binder bodies are entered."
 msgstr ""
 
-#: manual/api/debruijn.md:278
+#: manual/api/debruijn.md:315
 msgid "`reduce_once` validates the whole term first, as `validate` does: an ill-scoped term gives `ScopeFailure` with the first error in pre-order, wherever the bad index is, for example `ScopeFailure(NegativeIndex(index=-1))` for `Bind(Bound(-1))` and `ScopeFailure(UnboundIndex(index=5, depth=1))` for `(λ. 5) 1`. A well-scoped term never gives `ScopeFailure`."
 msgstr ""
 
-#: manual/api/debruijn.md:286
+#: manual/api/debruijn.md:323
 msgid "`DbNormalizationResult[T]` is the outcome of bounded De Bruijn normalization."
 msgstr ""
 
-#: manual/api/debruijn.md:297
+#: manual/api/debruijn.md:334
 msgid "`ScopeFailure` carries the term that was found ill scoped, the error and the number of steps taken before it; `normalize` reports it only for its input, with `steps=0`."
 msgstr ""
 
-#: manual/api/debruijn.md:303
+#: manual/api/debruijn.md:340
 msgid "`normalize` repeats `reduce_once` until no step applies, a step fails, or a step limit is reached."
 msgstr ""
 
-#: manual/api/debruijn.md:310
+#: manual/api/debruijn.md:347
 msgid "It has the step-count contract of `@rewrite.normalize`: at most `max_steps` steps, and one extra step attempt to classify the final term. It validates the input once: an ill-scoped term gives `ScopeFailure(term, error, steps=0)` without any step. Reducts of a well-scoped term are well scoped (see the [debruijn design](../design/debruijn.md)), so the later steps are not validated again, and the result is `ScopeFailure` exactly when the input is ill scoped."
 msgstr ""
 
@@ -719,7 +735,7 @@ msgid "`trace` runs the same loop as `normalize` and records every step."
 msgstr ""
 
 #: manual/api/rewrite.md:351
-#: manual/api/syntax.md:246
+#: manual/api/syntax.md:260
 msgid "Binding-aware ASTs"
 msgstr ""
 
@@ -752,7 +768,7 @@ msgid "For a downstream AST see the [adapter tutorial](../tutorial/adapter.md)."
 msgstr ""
 
 #: manual/api/rewrite.md:416
-#: manual/api/substitution.md:271
+#: manual/api/substitution.md:278
 msgid "Removed fields"
 msgstr ""
 
@@ -898,7 +914,7 @@ msgstr ""
 
 #: manual/api/stlc.md:280
 #: manual/api/utlc/lambda.md:123
-#: manual/api/utlc/nbe.md:182
+#: manual/api/utlc/nbe.md:191
 msgid "Normalization"
 msgstr ""
 
@@ -935,106 +951,110 @@ msgid "The `substitution` package replaces free variables by terms without captu
 msgstr ""
 
 #: manual/api/substitution.md:12
+msgid "`Substitution::apply`, `Substitution::then` and `GenericSubstitution::apply_once` are stack-safe in the nesting depth of the term and of the replacements: they keep pending work in a heap array and use a constant amount of host stack, so terms nested 100 000 levels deep are handled on every backend. Formatting such a term with `Debug` is not stack-safe; see the [syntax API](syntax.md)."
+msgstr ""
+
+#: manual/api/substitution.md:19
 msgid "The definition of capture-avoiding substitution and the proofs of its laws are in the [substitution design](../design/substitution.md)."
 msgstr ""
 
-#: manual/api/substitution.md:31
+#: manual/api/substitution.md:38
 msgid "Substitutions on `Term`"
 msgstr ""
 
-#: manual/api/substitution.md:35
+#: manual/api/substitution.md:42
 msgid "`Substitution[T]` is a finite map from names to replacement terms."
 msgstr ""
 
-#: manual/api/substitution.md:41
+#: manual/api/substitution.md:48
 msgid "It denotes the map $\\sigma$ with $\\sigma(x) = s$ for an entry $(x, s)$ and $\\sigma(x) = x$ (the variable itself) for every other name. The type is abstract: the entries cannot be reached from outside the package, so the functions below are the only way to build a substitution, and each name has at most one entry."
 msgstr ""
 
-#: manual/api/substitution.md:47
+#: manual/api/substitution.md:54
 msgid "Replacement terms are stored and returned as they are, not copied: `get`, `to_array` and `apply` return terms that share structure with the terms passed to `singleton` and `set`. `Term` is a plain enum whose `Apply` arguments are an `Array`, so treat terms as immutable values; changing the argument array of a term in place would also change every substitution that holds it."
 msgstr ""
 
-#: manual/api/substitution.md:56
+#: manual/api/substitution.md:63
 msgid "These functions build substitutions."
 msgstr ""
 
-#: manual/api/substitution.md:64
+#: manual/api/substitution.md:71
 msgid "`set(x, s)` adds $x \\mapsto s$, replacing an existing entry for `x` in place."
 msgstr ""
 
-#: manual/api/substitution.md:68
+#: manual/api/substitution.md:75
 msgid "`Substitution::get` returns the replacement for a name, if any."
 msgstr ""
 
-#: manual/api/substitution.md:76
+#: manual/api/substitution.md:83
 msgid "These methods read the entries of a substitution."
 msgstr ""
 
-#: manual/api/substitution.md:83
+#: manual/api/substitution.md:90
 msgid "`length` is the number of names in the domain. `to_array` returns the entries `(x, s)` as a fresh array, in the order the names were first added; changing the array does not change the substitution."
 msgstr ""
 
-#: manual/api/substitution.md:105
+#: manual/api/substitution.md:112
 msgid "These methods shrink the domain of a substitution."
 msgstr ""
 
-#: manual/api/substitution.md:112
+#: manual/api/substitution.md:119
 msgid "`without(x)` drops the entry for `x`, which is what a binder for `x` does. `restrict(names)` keeps only the entries whose name is in `names`."
 msgstr ""
 
-#: manual/api/substitution.md:132
+#: manual/api/substitution.md:139
 msgid "`Substitution::apply` replaces the free variables of a term simultaneously, renaming binders to avoid capture."
 msgstr ""
 
-#: manual/api/substitution.md:139
+#: manual/api/substitution.md:146
 msgid "Every free occurrence of a name `x` in the domain is replaced by its replacement; nothing is substituted inside an inserted replacement. Under `Bind(y, body)` the entry for `y` is ignored. When a replacement that is actually inserted into `body` has `y` free, the binder is renamed to a fresh name first, so free variables of replacements stay free. The result is determined up to the choice of fresh names, which is deterministic."
 msgstr ""
 
-#: manual/api/substitution.md:160
+#: manual/api/substitution.md:167
 msgid "`Substitution::then` composes two substitutions, applying `self` first."
 msgstr ""
 
-#: manual/api/substitution.md:166
+#: manual/api/substitution.md:173
 msgid "`s.then(t)` maps each `x` in the domain of `s` to `t.apply(s(x))`, and each other `x` in the domain of `t` to `t(x)`. For every term, `s.then(t).apply(term)` is alpha-equivalent to `t.apply(s.apply(term))`."
 msgstr ""
 
-#: manual/api/substitution.md:190
+#: manual/api/substitution.md:197
 msgid "`from_renaming` turns a renaming into a substitution on a given set of names."
 msgstr ""
 
-#: manual/api/substitution.md:196
+#: manual/api/substitution.md:203
 msgid "The result maps each listed name `x` with `renaming.apply(x) != x` to `Variable(renaming.apply(x))`. When the free variables of a term are among the listed names, applying the result is alpha-equivalent to `term.rename_free(renaming)`."
 msgstr ""
 
-#: manual/api/substitution.md:213
+#: manual/api/substitution.md:220
 msgid "Substitutions on binding-aware ASTs"
 msgstr ""
 
-#: manual/api/substitution.md:217
+#: manual/api/substitution.md:224
 msgid "`GenericSubstitution[N]` is a finite map from names to nodes of a downstream AST `N`."
 msgstr ""
 
-#: manual/api/substitution.md:224
+#: manual/api/substitution.md:231
 msgid "Like `Substitution`, the type is abstract and has at most one entry per name. Replacement nodes are stored and returned without copying."
 msgstr ""
 
-#: manual/api/substitution.md:229
+#: manual/api/substitution.md:236
 msgid "These functions build and query generic substitutions; they behave exactly like their `Substitution` counterparts."
 msgstr ""
 
-#: manual/api/substitution.md:244
+#: manual/api/substitution.md:251
 msgid "`GenericSubstitution::apply_once` applies the substitution to a node in one simultaneous, capture-avoiding pass."
 msgstr ""
 
-#: manual/api/substitution.md:251
+#: manual/api/substitution.md:258
 msgid "The algorithm is the one of `Substitution::apply`, run through `BindingSyntax::project` and rebuilt with `variable`, `apply` and `bind`. `Opaque` nodes are returned unchanged. \"Once\" means that inserted replacements are not visited again: substituting $x \\mapsto y$ and $y \\mapsto 2$ in $x + y$ gives $y + 2$, not $2 + 2$."
 msgstr ""
 
-#: manual/api/substitution.md:268
+#: manual/api/substitution.md:275
 msgid "On `Term[T]`, `apply_once` agrees with `Substitution::apply`. For a downstream AST see the [adapter tutorial](../tutorial/adapter.md)."
 msgstr ""
 
-#: manual/api/substitution.md:273
+#: manual/api/substitution.md:280
 msgid "The field `entries` of `Substitution` and of `GenericSubstitution` is no longer public. Read a substitution with `get`, `length` and `to_array`."
 msgstr ""
 
@@ -1047,179 +1067,183 @@ msgid "The `syntax` package defines named syntax with binders: the generic term 
 msgstr ""
 
 #: manual/api/syntax.md:11
+msgid "Every operation of the package, `==` included, is stack-safe in the nesting depth of its input: it keeps pending work in a heap array and uses a constant amount of host stack, so a term nested 100 000 levels deep (a chain of applications or of binders) is handled on every backend. The exception is `Debug`: `@debug.to_string`, `Repr` and the messages of `assert_eq` and `inspect` recurse and can overflow the stack on such a term. The generic functions are stack-safe when the `BindingSyntax` methods of the downstream type are, that is, when they look at one layer of a node."
+msgstr ""
+
+#: manual/api/syntax.md:20
 msgid "The definitions behind these functions, and the proofs of their laws, are in the [syntax design](../design/syntax.md)."
 msgstr ""
 
-#: manual/api/syntax.md:29
+#: manual/api/syntax.md:38
 #: manual/design/syntax.md:24
 msgid "Terms"
 msgstr ""
 
-#: manual/api/syntax.md:33
+#: manual/api/syntax.md:42
 msgid "`Term[T]` is named syntax with domain values, variables, n-ary application and single-variable binding."
 msgstr ""
 
-#: manual/api/syntax.md:45
+#: manual/api/syntax.md:55
 msgid "`Value(v)` is a domain constant. Its payload `T` is opaque: it is treated as closed, so no analysis looks inside it."
 msgstr ""
 
-#: manual/api/syntax.md:47
+#: manual/api/syntax.md:57
 msgid "`Variable(x)` is an occurrence of the name `x`."
 msgstr ""
 
-#: manual/api/syntax.md:48
+#: manual/api/syntax.md:58
 msgid "`Apply(head, args)` applies `head` to a sequence of arguments. The lambda calculus packages read it as the curried application $head\\ a_1\\ \\cdots\\ a_n$."
 msgstr ""
 
-#: manual/api/syntax.md:51
+#: manual/api/syntax.md:61
 msgid "`Bind(x, body)` binds `x` in `body`. In the lambda calculus it is $\\lambda x.\\,body$; a downstream language may read it as any one-variable binder."
 msgstr ""
 
-#: manual/api/syntax.md:55
+#: manual/api/syntax.md:65
 msgid "`==` (`Term::equal`) is structural equality: binder names must match literally. Use `alpha_equal` to compare terms up to renaming of bound variables."
 msgstr ""
 
-#: manual/api/syntax.md:59
+#: manual/api/syntax.md:69
 msgid "Terms are values that the library shares instead of copying: an operation may return its argument, a subterm of it, or a term stored in a substitution or a reduction trace. The argument list of `Apply` is an ordinary `Array`, so the compiler does not stop you from changing it in place, but doing so changes every term and every library value that shares it. Treat terms as immutable: build a new `Apply` node instead of changing the array of an existing one."
 msgstr ""
 
-#: manual/api/syntax.md:80
+#: manual/api/syntax.md:90
 msgid "`Term::equal` compares two terms structurally."
 msgstr ""
 
-#: manual/api/syntax.md:86
-msgid "It is the promoted `Eq` implementation. `λx.x` and `λy.y` are not `equal`."
+#: manual/api/syntax.md:96
+msgid "It is the promoted `Eq` implementation: the same constructors, the same names and arities, and payloads compared with `T`'s `==`. `λx.x` and `λy.y` are not `equal`. The implementation is written by hand rather than derived so that it is stack-safe; it has the semantics of the derived one, including a `Double` `NaN` payload making a term unequal to itself."
 msgstr ""
 
-#: manual/api/syntax.md:90
+#: manual/api/syntax.md:104
 msgid "`Term::map_values` applies a function to every domain value and keeps the variables and binders."
 msgstr ""
 
-#: manual/api/syntax.md:97
+#: manual/api/syntax.md:111
 msgid "It is a functor map: `t.map_values(v => v)` is `t`, and mapping `f` then `g` equals mapping `v => g(f(v))`. Free variables are unchanged."
 msgstr ""
 
-#: manual/api/syntax.md:109
+#: manual/api/syntax.md:123
 msgid "Analyses"
 msgstr ""
 
-#: manual/api/syntax.md:113
+#: manual/api/syntax.md:127
 msgid "`free_variables` returns the names that occur free in a term."
 msgstr ""
 
-#: manual/api/syntax.md:119
+#: manual/api/syntax.md:133
 msgid "An occurrence of `x` is free when no enclosing `Bind(x, _)` binds it. Values contribute no names. Cost: $O(n)$ set operations for a term of size $n$."
 msgstr ""
 
-#: manual/api/syntax.md:124
+#: manual/api/syntax.md:138
 msgid "`all_names` returns every name in a term: free variables, bound occurrences and binder names."
 msgstr ""
 
-#: manual/api/syntax.md:131
+#: manual/api/syntax.md:145
 msgid "Use it as the \"used\" set when choosing a fresh name for a term."
 msgstr ""
 
-#: manual/api/syntax.md:149
+#: manual/api/syntax.md:163
 msgid "`alpha_equal` decides whether two terms are equal up to the names of bound variables."
 msgstr ""
 
-#: manual/api/syntax.md:156
+#: manual/api/syntax.md:170
 msgid "Values are compared with `T`'s `==`, free variables by name, and bound variables by the binder they refer to, in one simultaneous traversal of both terms."
 msgstr ""
 
-#: manual/api/syntax.md:160
+#: manual/api/syntax.md:174
 msgid "`alpha_equal` is the payload equality lifted through binders, so it inherits the properties of `T`'s `==`: each of reflexivity, symmetry and transitivity holds for `alpha_equal` exactly when it holds for that `==`, so `alpha_equal` is an equivalence relation exactly when `==` is one. When `==` is the identity of `T` (as for `Int` or `String`), it is alpha-equivalence. `Double` follows IEEE 754: `NaN` is not equal to itself, so a term with a `NaN` payload is not alpha-equal to itself, while `0.0` and `-0.0` are equal payloads."
 msgstr ""
 
-#: manual/api/syntax.md:191
+#: manual/api/syntax.md:205
 msgid "Renaming"
 msgstr ""
 
-#: manual/api/syntax.md:195
+#: manual/api/syntax.md:209
 msgid "`Term::rename_free` applies a renaming to the free variables of a term, renaming binders where necessary to avoid capture."
 msgstr ""
 
-#: manual/api/syntax.md:202
+#: manual/api/syntax.md:216
 msgid "Under `Bind(x, body)` the renaming loses its entry for `x`, because the bound `x` is a different variable. If a remaining target of the renaming equals `x`, the binder is renamed to a fresh name first. The result is alpha-equivalent to the textbook capture-avoiding renaming."
 msgstr ""
 
-#: manual/api/syntax.md:220
+#: manual/api/syntax.md:234
 msgid "`Term::alpha_rename_bound` renames the occurrences of a variable that are bound by an enclosing binder, refusing a target name that could be captured."
 msgstr ""
 
-#: manual/api/syntax.md:227
+#: manual/api/syntax.md:241
 msgid "Call it on the *body* of a binder: `body.alpha_rename_bound(from, to_)` replaces the occurrences of `from` that are free in `body` (and therefore bound by the enclosing `Bind(from, body)`) with `to_`. Inner binders named `from` stop the renaming. The result is `None` when `to_` occurs anywhere in `body`, and `Some(body)` when `from == to_`. On success, `Bind(from, body)` and `Bind(to_, result)` are alpha-equivalent."
 msgstr ""
 
-#: manual/api/syntax.md:250
+#: manual/api/syntax.md:264
 msgid "`BindingView[N]` is the one-layer view of a node that generic algorithms inspect."
 msgstr ""
 
-#: manual/api/syntax.md:262
+#: manual/api/syntax.md:276
 msgid "`Opaque` marks a node with no variables inside, such as a literal. The other cases mirror the constructors of `Term`, with the children left in the downstream type `N`."
 msgstr ""
 
-#: manual/api/syntax.md:268
+#: manual/api/syntax.md:282
 msgid "`BindingSyntax` is the open trait that a downstream AST implements to use the generic binding algorithms."
 msgstr ""
 
-#: manual/api/syntax.md:280
+#: manual/api/syntax.md:294
 msgid "`project(node)` tells the algorithms what the node is."
 msgstr ""
 
-#: manual/api/syntax.md:281
+#: manual/api/syntax.md:295
 msgid "`variable`, `apply` and `bind` rebuild nodes of each kind."
 msgstr ""
 
-#: manual/api/syntax.md:283
+#: manual/api/syntax.md:297
 msgid "An implementation must make `project` and the three constructors agree: `project(variable(x))` is `Variable(x)`, `project(apply(h, args))` is `Apply(h, args)`, `project(bind(x, b))` is `Bind(x, b)`, and rebuilding a projected `Apply` or `Bind` node gives back an equivalent node. An `Opaque` node must not contain variables. The [adapter design](../design/adapter.md) explains these laws; the [adapter tutorial](../tutorial/adapter.md) implements them for a small AST."
 msgstr ""
 
-#: manual/api/syntax.md:291
+#: manual/api/syntax.md:305
 msgid "Call the trait methods through the trait, for example `@syntax.BindingSyntax::project(node)`."
 msgstr ""
 
-#: manual/api/syntax.md:296
+#: manual/api/syntax.md:310
 msgid "`Term[T]` implements `BindingSyntax` with the obvious projection."
 msgstr ""
 
-#: manual/api/syntax.md:302
+#: manual/api/syntax.md:316
 msgid "`Value` projects to `Opaque` and every other constructor to the case of the same name, so the generic functions below agree with their `Term` versions on `Term` values."
 msgstr ""
 
-#: manual/api/syntax.md:319
+#: manual/api/syntax.md:333
 msgid "These functions compute free variables and all names for any `BindingSyntax` type."
 msgstr ""
 
-#: manual/api/syntax.md:327
+#: manual/api/syntax.md:341
 msgid "On `Term[T]` they return the same sets as `free_variables` and `all_names`."
 msgstr ""
 
-#: manual/api/syntax.md:331
+#: manual/api/syntax.md:345
 msgid "`generic_alpha_rename_bound` is `Term::alpha_rename_bound` for any `BindingSyntax` type."
 msgstr ""
 
-#: manual/api/syntax.md:338
+#: manual/api/syntax.md:352
 msgid "It returns `None` when the target name occurs in the node, and rebuilds the renamed node through `variable`, `apply` and `bind`."
 msgstr ""
 
-#: manual/api/syntax.md:358
+#: manual/api/syntax.md:372
 msgid "`Term::variable(name)` method form"
 msgstr ""
 
-#: manual/api/syntax.md:359
+#: manual/api/syntax.md:373
 msgid "`Term::apply(head, args)` method form"
 msgstr ""
 
-#: manual/api/syntax.md:360
+#: manual/api/syntax.md:374
 msgid "`Term::bind(name, body)` method form"
 msgstr ""
 
-#: manual/api/syntax.md:362
+#: manual/api/syntax.md:376
 msgid "`Repr(term)` or `@debug.to_string(term)`"
 msgstr ""
 
-#: manual/api/syntax.md:364
+#: manual/api/syntax.md:378
 msgid "These method forms were implicit promotions of trait methods. They are kept hidden and deprecated so that old callers still compile."
 msgstr ""
 
@@ -1331,75 +1355,79 @@ msgstr ""
 msgid "The budget bounds the work, not the depth of the host call stack. Evaluation and readback run as a loop that keeps pending work on a stack in the heap, so the call stack does not grow with the fuel spent: a divergent term ends with `FuelExhausted` on every backend, however large the budget. The pending work is bounded by the budget."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:59
+#: manual/api/utlc/nbe.md:49
+msgid "Nor does the host call stack grow with the nesting depth of the input: validation (by `@debruijn.validate`), evaluation and readback handle terms of any depth, such as long application chains or long chains of binders, on every backend. A term of size $n$ needs a few units of fuel per node to be evaluated and read back, so a deep term needs a budget that grows with its size, not a larger stack. The derived `Debug` of `NbeResult` recurses over the term it contains; compare deep results with `==` instead of printing them."
+msgstr ""
+
+#: manual/api/utlc/nbe.md:68
 msgid "Semantic values"
 msgstr ""
 
-#: manual/api/utlc/nbe.md:63
+#: manual/api/utlc/nbe.md:72
 msgid "`Semantic[T]` is an opaque semantic value."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:69
+#: manual/api/utlc/nbe.md:78
 msgid "A semantic value is a constant, a closure (a binder body with its environment), a delayed argument, or a neutral value (a free variable, a variable at a quote level, or a neutral value applied to an argument). The representation is private; values are produced by `eval` and the `reflect_*` functions and consumed by `quote`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:77
+#: manual/api/utlc/nbe.md:86
 msgid "`reflect_free` turns a free name into a neutral semantic value."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:83
+#: manual/api/utlc/nbe.md:92
 msgid "Quoting it gives `Free(name)`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:87
+#: manual/api/utlc/nbe.md:96
 msgid "`reflect_level` turns a quote level into a neutral semantic variable."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:93
+#: manual/api/utlc/nbe.md:102
 msgid "Returns `None` for a negative level. Quoting the variable of level `l` at depth `n > l` gives `Bound(n - l - 1)`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:114
+#: manual/api/utlc/nbe.md:123
 msgid "Evaluation and readback"
 msgstr ""
 
-#: manual/api/utlc/nbe.md:118
+#: manual/api/utlc/nbe.md:127
 msgid "`EvaluationResult[T]` is the outcome of `eval`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:130
+#: manual/api/utlc/nbe.md:139
 msgid "`eval` evaluates a closed De Bruijn term to weak head form in the lazy semantic domain."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:137
+#: manual/api/utlc/nbe.md:146
 msgid "The term must be well scoped (free names are allowed); otherwise the result is `ScopeFailure` with `consumed=0`. Evaluation is call by name: arguments are delayed and evaluated only when needed, and evaluation stops at a closure or a neutral value without entering binders."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:144
+#: manual/api/utlc/nbe.md:153
 msgid "`QuoteResult[T]` is the outcome of `quote`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:156
+#: manual/api/utlc/nbe.md:165
 msgid "`quote` reads a semantic value back as a beta-normal De Bruijn term."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:162
+#: manual/api/utlc/nbe.md:171
 msgid "`quote(value, level, fuel)` reads `value` back under `level` binders. A closure is read back by applying it to a fresh variable of the current level and reading the result under one more binder; neutral applications are read back argument by argument, which forces delayed arguments. Use `level = 0` for values from `eval`. A negative `level`, or a level variable that is not below `level`, gives `ScopeFailure(NegativeIndex)`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:186
+#: manual/api/utlc/nbe.md:195
 msgid "`NbeResult[T]` is the outcome of `normalize`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:199
+#: manual/api/utlc/nbe.md:208
 msgid "`normalize` computes the beta normal form of a well-scoped De Bruijn term within a fuel budget."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:206
+#: manual/api/utlc/nbe.md:215
 msgid "It validates the term, evaluates it and quotes the result at level 0, with one shared budget. `NormalForm(t, c)`: `t` is the beta normal form, reached with `c` units. `FuelExhausted(c)`: the budget ran out; the term may diverge or may need more fuel. `ScopeFailure`: the input has a dangling or negative index. The fuel test comes first, so an ill-scoped term with fuel `<= 0` gives `FuelExhausted(consumed=0)`, not `ScopeFailure`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:213
+#: manual/api/utlc/nbe.md:222
 msgid "Applications in the result are unary: a normal form $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])` evaluates to the value of `h`, so it disappears from the result; the small-step reducers also read it as `h` but leave the node in place. The two normalizers agree after spines are flattened, where flattening merges nested applications and drops empty ones."
 msgstr ""
 
@@ -1572,15 +1600,15 @@ msgid "A downstream variable type converts to `@core.Name` by an injective map (
 msgstr ""
 
 #: manual/design/adapter.md:132
-#: manual/design/core.md:170
-#: manual/design/debruijn.md:242
+#: manual/design/core.md:182
+#: manual/design/debruijn.md:327
 #: manual/design/eval.md:203
 #: manual/design/rewrite.md:184
 #: manual/design/stlc.md:386
 #: manual/design/substitution.md:130
-#: manual/design/syntax.md:286
+#: manual/design/syntax.md:374
 #: manual/design/utlc/lambda.md:205
-#: manual/design/utlc/nbe.md:291
+#: manual/design/utlc/nbe.md:335
 msgid "Correctness and invariants"
 msgstr ""
 
@@ -1625,15 +1653,15 @@ msgid "Downstream adapters should add tests of (V1)–(V5) for their own node ki
 msgstr ""
 
 #: manual/design/adapter.md:147
-#: manual/design/core.md:187
-#: manual/design/debruijn.md:263
+#: manual/design/core.md:199
+#: manual/design/debruijn.md:354
 #: manual/design/eval.md:226
 #: manual/design/rewrite.md:212
 #: manual/design/stlc.md:412
-#: manual/design/substitution.md:336
-#: manual/design/syntax.md:309
+#: manual/design/substitution.md:386
+#: manual/design/syntax.md:399
 #: manual/design/utlc/lambda.md:232
-#: manual/design/utlc/nbe.md:355
+#: manual/design/utlc/nbe.md:403
 msgid "Alternatives rejected"
 msgstr ""
 
@@ -1650,15 +1678,15 @@ msgid "**Checking the laws at run time.** The laws are equations over all nodes;
 msgstr ""
 
 #: manual/design/adapter.md:158
-#: manual/design/core.md:200
-#: manual/design/debruijn.md:275
+#: manual/design/core.md:212
+#: manual/design/debruijn.md:366
 #: manual/design/eval.md:240
 #: manual/design/rewrite.md:224
 #: manual/design/stlc.md:425
-#: manual/design/substitution.md:350
-#: manual/design/syntax.md:323
+#: manual/design/substitution.md:400
+#: manual/design/syntax.md:413
 #: manual/design/utlc/lambda.md:243
-#: manual/design/utlc/nbe.md:374
+#: manual/design/utlc/nbe.md:422
 msgid "Boundaries"
 msgstr ""
 
@@ -1808,55 +1836,63 @@ msgstr ""
 msgid "A renaming that maps two names to one target is useful (it identifies variables) and is allowed. The capture-avoiding operations therefore do not rely on injectivity: they freshen a binder whenever it is a target, see the [syntax design](syntax.md)."
 msgstr ""
 
+#: manual/design/core.md:170
+msgid "Flat values need no work stack"
+msgstr ""
+
 #: manual/design/core.md:172
-msgid "`fresh_name(h, U) ∉ U`, and `fresh_name(h, U) = h` when `h ∉ U` (freshness lemma)."
-msgstr ""
-
-#: manual/design/core.md:173
-msgid "`Renaming::set` keeps at most one entry per source, and because the type is abstract no other code can add an entry; `apply` therefore denotes a function."
-msgstr ""
-
-#: manual/design/core.md:176
-msgid "`r.then(s)` denotes $\\sigma \\circ \\rho$ (composition lemma); `empty` is a two-sided identity for `then` as functions."
-msgstr ""
-
-#: manual/design/core.md:178
-msgid "`r.without(x).apply(x) == x` and `r.without(x).apply(n) == r.apply(n)` for `n != x`."
-msgstr ""
-
-#: manual/design/core.md:180
-msgid "Every operation returns a new value; no argument is mutated, and no array stored in a value is handed out, so a value cannot change after it is built."
+msgid "The library promises that its operations use a constant amount of host stack in the nesting depth of their input (issue #13); the traversals of terms keep their pending work on the heap, see the [syntax design](syntax.md). `core` has no nested values to traverse: a `Name` is a string, and `Context`, `Telescope` and `Renaming` are flat arrays. Every operation is a loop over such an array, and `fresh_name` a loop over suffixes, so each runs in constant host stack whatever the input; the derived `Eq`, `Compare`, `Hash` and `Debug` of these types recurse only into names and arrays of names, never into terms."
 msgstr ""
 
 #: manual/design/core.md:184
+msgid "`fresh_name(h, U) ∉ U`, and `fresh_name(h, U) = h` when `h ∉ U` (freshness lemma)."
+msgstr ""
+
+#: manual/design/core.md:185
+msgid "`Renaming::set` keeps at most one entry per source, and because the type is abstract no other code can add an entry; `apply` therefore denotes a function."
+msgstr ""
+
+#: manual/design/core.md:188
+msgid "`r.then(s)` denotes $\\sigma \\circ \\rho$ (composition lemma); `empty` is a two-sided identity for `then` as functions."
+msgstr ""
+
+#: manual/design/core.md:190
+msgid "`r.without(x).apply(x) == x` and `r.without(x).apply(n) == r.apply(n)` for `n != x`."
+msgstr ""
+
+#: manual/design/core.md:192
+msgid "Every operation returns a new value; no argument is mutated, and no array stored in a value is handed out, so a value cannot change after it is built."
+msgstr ""
+
+#: manual/design/core.md:196
 msgid "These laws are exercised by the tests in `src/core/core_test.mbt` and by every capture-avoidance test of the higher packages."
 msgstr ""
 
-#: manual/design/core.md:189
+#: manual/design/core.md:201
 msgid "**De Bruijn indices everywhere.** Indices remove the need for names in the kernel, and the [debruijn package](debruijn.md) provides them, but downstream ASTs (polynomials, numeric expressions) are written and printed with names. Names stay the shared interface; indices are an internal representation chosen per algorithm."
 msgstr ""
 
-#: manual/design/core.md:194
+#: manual/design/core.md:206
 msgid "**Locally nameless or nominal types with name abstraction.** These need a richer type system or a library-wide change of representation, while the string-based design lets any downstream AST adopt the library by implementing one trait."
 msgstr ""
 
-#: manual/design/core.md:198
+#: manual/design/core.md:210
 msgid "**A global fresh-name counter.** Rejected as hidden state, see above."
 msgstr ""
 
-#: manual/design/core.md:202
+#: manual/design/core.md:214
 msgid "`Name` has no scope, kind or sort. Distinguishing term variables from type variables, or variables of different downstream sorts, is left to the syntax that contains them."
 msgstr ""
 
-#: manual/design/core.md:205
+#: manual/design/core.md:217
 msgid "`Context` and `Telescope` do not check well-formedness: they neither reject duplicates nor check what annotations mention."
 msgstr ""
 
-#: manual/design/core.md:207
+#: manual/design/core.md:219
 msgid "`Renaming::equal` compares representations, not the denoted functions."
 msgstr ""
 
-#: manual/design/core.md:208
+#: manual/design/core.md:220
 msgid "`fresh_name` guarantees freshness only with respect to the set it is given. Supplying a complete set of used names is the caller's responsibility."
 msgstr ""
 
@@ -1897,7 +1933,7 @@ msgid "A term is *well scoped at depth $n$* when every index under $k$ binders i
 msgstr ""
 
 #: manual/design/debruijn.md:44
-#: manual/design/syntax.md:217
+#: manual/design/syntax.md:218
 msgid "N. G. de Bruijn, \"Lambda calculus notation with nameless dummies\", Indagationes Mathematicae 34, 1972."
 msgstr ""
 
@@ -2053,64 +2089,112 @@ msgstr ""
 msgid "`Apply(head, args)` is a curried spine: `Apply(Bind(t), [a, ..rest])` is the redex $(\\lambda.\\,t)\\,a$ applied to `rest`, and a step contracts only the first argument. An empty spine `Apply(h, [])` stands for $h$ itself, so empty applications around the `Bind` are looked through when a redex is matched. `reduce_once` searches root, head, arguments, and enters binders: it is the normal-order strategy of the [eval design](eval.md) on nameless terms, so the normalization theorem applies to `normalize`."
 msgstr ""
 
+#: manual/design/debruijn.md:242
+msgid "Explicit stacks instead of host recursion"
+msgstr ""
+
 #: manual/design/debruijn.md:244
+msgid "**Problem.** Every operation above is defined by structural recursion on the term, and a direct implementation keeps one host stack frame per level of nesting. Terms from users and downstream ASTs can be deep (a long spine $f\\,(f\\,(f \\cdots))$, a long chain of binders), and the js, wasm and wasm-gc stacks overflow at a depth of a few thousand, so the same call returned a result on native and crashed on the other backends."
+msgstr ""
+
+#: manual/design/debruijn.md:251
+msgid "**Choice.** Each operation runs as a loop over an explicit stack in a heap array, and visits the subterms in exactly the order of its recursive definition, so its results, including the error it reports, are unchanged. The host stack depth is constant; the heap stacks hold at most one entry per node of the term."
+msgstr ""
+
+#: manual/design/debruijn.md:257
+msgid "*Checks.* `validate` and `==` keep a stack of the subterms (or pairs of subterms) still to visit. Write $\\mathrm{pre}(t)$ for the nodes of $t$ in pre-order, head before arguments and arguments from left to right:"
+msgstr ""
+
+#: manual/design/debruijn.md:266
+msgid "and $\\mathrm{pre}(a) = a$ for a leaf $a$. The loop pops the top entry, checks it if it is a leaf, and otherwise pushes its children, $u_m$ first and the head $t$ last. With the stack $t_1 \\cdots t_r$ (top first) it maintains"
+msgstr ""
+
+#: manual/design/debruijn.md:274
+msgid "since popping $t\\,u_1 \\cdots u_m$ and pushing its children replaces $\\mathrm{pre}(t\\,\\vec u)$ by its tail. So the leaves are checked in pre-order. The recursive `validate` returns the first error of its head, else of its arguments from left to right, which by induction is also the first error in pre-order. Both return the same error. An index is checked against the number of binders above it, which the stack stores with each entry."
+msgstr ""
+
+#: manual/design/debruijn.md:281
+msgid "*Translations.* `shift`, `substitute_bound` (both through one rebuilding traversal that applies a function to each `Bound(i)` and its binder count), `from_named` and `to_named` produce a term. They keep a stack of tasks, $\\mathsf{visit}(t, k)$ and $\\mathsf{build}_@(m)$ / $\\mathsf{build}_\\lambda$, and a stack of results. Visiting a leaf pushes its translation; visiting $t\\,u_1 \\cdots u_m$ pushes $\\mathsf{build}_@(m)$ and above it the visits of $u_m, \\dots, u_1, t$; $\\mathsf{build}_@(m)$ pops the $m + 1$ translations and pushes the application of the first to the others. By induction on $t$, running the tasks pushed for $\\mathsf{visit}(t, k)$ pushes exactly one result, the recursive translation of $t$ under $k$ binders, and leaves the rest of both stacks untouched. Leaves are visited in pre-order as above; errors arise only at leaves, and both versions stop at the first one, so they return the same `Err`. In `substitute_bound` the replacement at an occurrence is shifted by the same loop, run to its end before the traversal continues."
+msgstr ""
+
+#: manual/design/debruijn.md:297
+msgid "`from_named` keeps, for each name, the levels of the enclosing binders of that name, and maps an occurrence under $n$ binders to $n - 1 - \\ell$ for the innermost level $\\ell$, the index of the nearest binder of that name. `to_named` names a binder with the first name of $x, x_1, x_2, \\dots$ that is neither free in the term ($F$) nor the name of an enclosing binder. Let $c_0, c_1, \\dots$ be the names of that sequence not in $F$. By induction on the level, the enclosing binders of a binder at level $n$ are named $c_0, \\dots, c_{n-1}$, so it gets $c_n$: the name depends only on the level and is computed once. Both translations are therefore linear in the size of the term (up to hashing), where a copy of the binder stack at each binder and a rescan of the candidate names made a chain of $n$ binders cost $O(n^2)$."
+msgstr ""
+
+#: manual/design/debruijn.md:310
+msgid "*Reduction.* The recursive search of `reduce_once` tries a node, then its head, then its arguments from left to right, and enters binder bodies, and it contracts the first redex it meets: the first redex in pre-order. The loop walks the term in pre-order and keeps the path from the root, each ancestor with the child it descended into; when a leaf ends a branch it returns to the nearest application with an argument left. When it meets a redex it contracts it, then rebuilds the ancestors from the innermost outwards and prepends one frame per ancestor to the reduction path, which is the order in which the recursive calls return. The steps, their paths and their counts in `normalize` are therefore unchanged."
+msgstr ""
+
+#: manual/design/debruijn.md:321
+msgid "The tests in `src/debruijn/deep_test.mbt` run every operation on terms nested to depth 100 000 (application chains in head and in argument position, binder chains with indices that reach the outermost binder, and mixtures of these, well scoped and ill scoped) on every backend; before the change each of them overflowed the stack on js, wasm and wasm-gc."
+msgstr ""
+
+#: manual/design/debruijn.md:329
 msgid "`validate(from_named(t)) == Ok(())` for every named $t$."
 msgstr ""
 
-#: manual/design/debruijn.md:245
+#: manual/design/debruijn.md:330
 msgid "Round trips (1)–(3) above; `==` on well-scoped `DbTerm` is alpha-equivalence."
 msgstr ""
 
-#: manual/design/debruijn.md:246
+#: manual/design/debruijn.md:331
 msgid "Lemma 2: on well-scoped input `instantiate` succeeds and preserves scope; `reduce_once` never returns `ScopeFailure`, and every reduct is well scoped. On ill-scoped input `reduce_once` and `normalize` return `ScopeFailure` with the error `validate` reports."
 msgstr ""
 
-#: manual/design/debruijn.md:250
+#: manual/design/debruijn.md:335
 msgid "`reduce_once` satisfies the one-redex contract of [rewrite](rewrite.md), with rule name `\"beta\"`."
 msgstr ""
 
-#: manual/design/debruijn.md:252
+#: manual/design/debruijn.md:337
 msgid "`shift(t, 0, c) == Ok(t)` for every `t` without negative indices, and shifts with one cutoff compose (Lemma 1)."
 msgstr ""
 
-#: manual/design/debruijn.md:254
+#: manual/design/debruijn.md:339
 msgid "`shift` never turns a free index into a bound one: if a free index would fall below its cutoff, it returns `Err(NegativeShift)`, and it rejects a negative cutoff, which would free bound indices, with `Err(NegativeCutoff)`."
 msgstr ""
 
-#: manual/design/debruijn.md:258
-msgid "Cost: `shift` and `validate` are linear in the term size. `substitute_bound` costs $O(|t| + m \\cdot |s|)$ for $m$ occurrences of the index, because each inserted copy is shifted. A `reduce_once` step costs one search plus one `instantiate`."
+#: manual/design/debruijn.md:343
+msgid "Cost: `shift`, `validate`, `from_named` and `to_named` are linear in the term size (the translations up to hashing of names). `substitute_bound` costs $O(|t| + m \\cdot |s|)$ for $m$ occurrences of the index, because each inserted copy is shifted. A `reduce_once` step costs one search plus one `instantiate`, plus building the reduction path, which has one frame per ancestor of the redex and is built with `@rewrite.ReductionPath::prepend`."
 msgstr ""
 
-#: manual/design/debruijn.md:265
+#: manual/design/debruijn.md:350
+msgid "Stack: every operation uses a constant depth of host stack, whatever the nesting depth of the term; its pending work is kept in heap arrays with at most one entry per node."
+msgstr ""
+
+#: manual/design/debruijn.md:356
 msgid "**Levels instead of indices in syntax.** Levels make weakening free but substitution under binders more complex; indices are the standard for syntax, and levels are used where they help (NbE)."
 msgstr ""
 
-#: manual/design/debruijn.md:268
+#: manual/design/debruijn.md:359
 msgid "**Fully nameless free variables.** Free variables are kept as names so that open terms from users and downstream ASTs need no global variable numbering, and so that `to_named` can restore them exactly."
 msgstr ""
 
-#: manual/design/debruijn.md:271
+#: manual/design/debruijn.md:362
 msgid "**Explicit substitutions.** A calculus with suspended substitutions avoids repeated shifting but complicates every consumer; the NbE package provides the efficient path instead."
 msgstr ""
 
-#: manual/design/debruijn.md:277
+#: manual/design/debruijn.md:368
 msgid "Binder names are not preserved: `to_named` chooses `x`, `x_1`, …."
 msgstr ""
 
-#: manual/design/debruijn.md:278
+#: manual/design/debruijn.md:369
 msgid "`shift`, `substitute_bound` and `instantiate` operate on open terms and do not detect dangling indices; the reducers and `validate` do."
 msgstr ""
 
-#: manual/design/debruijn.md:280
+#: manual/design/debruijn.md:371
 msgid "An empty application `Apply(h, [])` is read as `h` when a redex is matched, so it never hides a redex, but `reduce_once` leaves the node in place, whereas [utlc/nbe](utlc/nbe.md) drops it from its normal forms."
 msgstr ""
 
-#: manual/design/debruijn.md:283
+#: manual/design/debruijn.md:374
 msgid "Only beta is implemented; there is no eta rule for De Bruijn terms."
 msgstr ""
 
-#: manual/design/debruijn.md:284
+#: manual/design/debruijn.md:375
 msgid "Values are opaque; their contents are never shifted."
+msgstr ""
+
+#: manual/design/debruijn.md:376
+msgid "The derived `Debug` of `DbTerm` (and of the result types that contain one) recurses over the term, so printing a deeply nested term can overflow the host stack on js, wasm and wasm-gc. Every other operation, `==` included, handles any nesting depth."
 msgstr ""
 
 #: manual/design/eval.md:1
@@ -3046,42 +3130,75 @@ msgid "Cost"
 msgstr ""
 
 #: manual/design/substitution.md:319
-msgid "At each binder, `apply` computes the free variables of the body and of the replacements that are inserted into it, and removes one entry from the substitution. For a term of size $n$ and binder depth $d$ this is $O(n \\cdot d)$ hash-set operations, plus $O(|\\sigma|)$ work and the free variables of the relevant replacements per binder, plus one traversal of the body for each renamed binder. `then` costs one `apply` and one `set` per entry of `self`, so $O(k^2)$ entry copies for $k$ entries besides the applications."
+msgid "`apply` computes the free variables of every replacement once. At each binder it removes one entry from the substitution and looks for entries whose replacement has the binder free; only if there is one does it compute the free variables of the body (see the capture test below). So a term of size $n$ costs $O(n \\cdot |\\sigma|)$ besides the free variables of the replacements, and each binder that is a candidate for capture adds one traversal of its body, each renamed binder one more. `then` costs one `apply` and one `set` per entry of `self`, so $O(k^2)$ entry copies for $k$ entries besides the applications."
 msgstr ""
 
-#: manual/design/substitution.md:328
+#: manual/design/substitution.md:329
 msgid "Generic substitution"
 msgstr ""
 
-#: manual/design/substitution.md:330
+#: manual/design/substitution.md:331
 msgid "`GenericSubstitution::apply_once` is the same definition with every constructor replaced by its `BindingSyntax` counterpart. Reading a node through its view gives a named term, so Lemmas 0–3 hold for any implementation that satisfies the view laws of the [adapter design](adapter.md). On `Term[T]` the two algorithms coincide."
 msgstr ""
 
-#: manual/design/substitution.md:338
-msgid "**The Barendregt variable convention.** Assuming that bound names are distinct from all free names would remove the renaming case, but terms come from users and from other algorithms, and the convention is not preserved by reduction. The library renames explicitly instead."
+#: manual/design/substitution.md:337
+#: manual/design/syntax.md:287
+msgid "Traversal with an explicit work stack"
 msgstr ""
 
-#: manual/design/substitution.md:342
-msgid "**Substitution on De Bruijn terms only.** Index-based substitution needs no renaming and is provided by [debruijn](debruijn.md), but the shared interface for downstream ASTs is named, so named substitution must be correct on its own."
+#: manual/design/substitution.md:339
+msgid "**Problem.** The definition of $t\\sigma$ is a structural recursion, and run as host recursion it overflows the js, wasm and wasm-gc stacks on terms nested a few thousand levels deep."
 msgstr ""
 
-#: manual/design/substitution.md:346
-msgid "**Iterated substitution.** Repeating until no domain variable occurs can diverge ($x \\mapsto f(x)$) and has no composition law. Callers that want a fixed point iterate explicitly."
-msgstr ""
-
-#: manual/design/substitution.md:352
-msgid "No unification, matching or occurs check: substitutions are given, not solved for."
-msgstr ""
-
-#: manual/design/substitution.md:354
-msgid "`GenericSubstitution` has no `then` or `restrict`; compose generic substitutions by applying them in turn."
+#: manual/design/substitution.md:343
+msgid "**Choice.** `Substitution::apply` and `GenericSubstitution::apply_once` are one private loop, `substitute`, over the view of the generic substitution above. It is an instance of the rebuild scheme of the [syntax design](syntax.md) with the context $c = \\sigma$ and"
 msgstr ""
 
 #: manual/design/substitution.md:356
+msgid "with $\\sigma' = \\sigma \\setminus x$ and $x'$ as in the definition. By the rebuild lemma the loop computes exactly $t\\sigma$, the same term and the same fresh names as the recursion, using a constant amount of host stack; the analyses it calls ($\\mathrm{FV}$, $\\mathrm{names}$ and the checked bound renaming) are stack-safe as well. On `Term[T]`, `Value` and the variables outside the domain are returned as they are instead of being rebuilt, which gives an equal term."
+msgstr ""
+
+#: manual/design/substitution.md:364
+msgid "**The capture test.** The condition $x \\in R_{\\sigma'}(\\mathrm{FV}(t))$ is decided in a cheaper order. Unfolding $R$,"
+msgstr ""
+
+#: manual/design/substitution.md:374
+msgid "where $C = \\{z \\in \\operatorname{dom}\\sigma' \\mid x \\in \\mathrm{FV}(\\sigma'(z))\\}$ is the set of *candidates*. The sets $\\mathrm{FV}(\\sigma(z))$ are computed once per call, and since $\\sigma' \\subseteq \\sigma$ as a set of entries they serve every binder. If $C = \\varnothing$ the condition is false without looking at $t$; otherwise $\\mathrm{FV}(t)$ is computed once. The boolean is the same, so the result is too, but a chain of $n$ binders none of which can capture now costs $O(n)$ instead of $O(n^2)$."
+msgstr ""
+
+#: manual/design/substitution.md:382
+msgid "The tests in `src/substitution/stack_safety_test.mbt` run substitution, freshening at the outermost binder, deep replacements, composition and the generic substitution on terms nested 100 000 levels deep, on every backend."
+msgstr ""
+
+#: manual/design/substitution.md:388
+msgid "**The Barendregt variable convention.** Assuming that bound names are distinct from all free names would remove the renaming case, but terms come from users and from other algorithms, and the convention is not preserved by reduction. The library renames explicitly instead."
+msgstr ""
+
+#: manual/design/substitution.md:392
+msgid "**Substitution on De Bruijn terms only.** Index-based substitution needs no renaming and is provided by [debruijn](debruijn.md), but the shared interface for downstream ASTs is named, so named substitution must be correct on its own."
+msgstr ""
+
+#: manual/design/substitution.md:396
+msgid "**Iterated substitution.** Repeating until no domain variable occurs can diverge ($x \\mapsto f(x)$) and has no composition law. Callers that want a fixed point iterate explicitly."
+msgstr ""
+
+#: manual/design/substitution.md:402
+msgid "No unification, matching or occurs check: substitutions are given, not solved for."
+msgstr ""
+
+#: manual/design/substitution.md:404
+msgid "`GenericSubstitution` has no `then` or `restrict`; compose generic substitutions by applying them in turn."
+msgstr ""
+
+#: manual/design/substitution.md:406
 msgid "Results are equal to the textbook definition only up to $=_\\alpha$; use `@syntax.alpha_equal` to compare them."
 msgstr ""
 
-#: manual/design/substitution.md:358
+#: manual/design/substitution.md:408
+msgid "Stack safety is in the nesting depth, not in the cost: a chain of $n$ binders every one of which is renamed still costs $O(n^2)$, because each renaming traverses the body below it."
+msgstr ""
+
+#: manual/design/substitution.md:411
 msgid "Values are never entered, so a `Value` payload that contains variables is not substituted into."
 msgstr ""
 
@@ -3226,40 +3343,40 @@ msgid ""
 msgstr ""
 
 #: manual/design/syntax.md:213
-msgid "Each node is visited once. A variable lookup scans the environment, and each binder copies it, both in $O(d)$ for binder depth $d$, so the comparison costs $O(n \\cdot d)$ for terms of size $n$."
+msgid "Each node is visited once. The environments are persistent hash maps, so a variable lookup and the extension at a binder are one map operation each, the extension shares the outer environment instead of copying it, and the comparison costs $O(n)$ map operations for terms of size $n$."
 msgstr ""
 
-#: manual/design/syntax.md:219
+#: manual/design/syntax.md:220
 msgid "IEEE Std 754-2019, *IEEE Standard for Floating-Point Arithmetic*, §5.11: every NaN compares unordered with everything, itself included, and $+0 = -0$."
 msgstr ""
 
-#: manual/design/syntax.md:221
+#: manual/design/syntax.md:222
 msgid "Capture-avoiding renaming of free variables"
 msgstr ""
 
-#: manual/design/syntax.md:223
+#: manual/design/syntax.md:224
 msgid "**Problem.** Applying a renaming $\\rho$ under a binder can capture: renaming $x \\mapsto y$ in $\\beta y.\\,x$ naively gives $\\beta y.\\,y$."
 msgstr ""
 
-#: manual/design/syntax.md:226
+#: manual/design/syntax.md:227
 msgid "**Choice.** `rename_free` implements"
 msgstr ""
 
-#: manual/design/syntax.md:239
+#: manual/design/syntax.md:240
 msgid "with $x' = \\operatorname{fresh}(x,\\ \\mathrm{names}(t) \\cup \\operatorname{supp}(\\rho \\setminus x) \\cup \\{x\\})$."
 msgstr ""
 
-#: manual/design/syntax.md:241
+#: manual/design/syntax.md:242
 msgid "**Lemma (free variables of a renaming).** $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$."
 msgstr ""
 
-#: manual/design/syntax.md:244
+#: manual/design/syntax.md:245
 msgid ""
 "The only interesting case is the binder without freshening. Let $\\rho' = \\rho \\setminus x$ with $x \\n"
 "otin \\operatorname{tgt}\\rho'$. By induction $\\mathrm{FV}(t\\rho') = \\rho'(\\mathrm{FV}(t))$, so"
 msgstr ""
 
-#: manual/design/syntax.md:257
+#: manual/design/syntax.md:258
 msgid ""
 "The second step uses $\\rho(n) \\n"
 "e x$ for $n \\n"
@@ -3267,87 +3384,147 @@ msgid ""
 "e x$. In the freshened case the same computation applies to $t\\{x \\mapsto x'\\}$ and $x'$, since $x'$ is outside $\\operatorname{supp}\\rho'$ and so neither a source nor a target. The lemma says exactly that no free variable was captured."
 msgstr ""
 
-#: manual/design/syntax.md:264
+#: manual/design/syntax.md:265
 msgid ""
 "The test $x \\n"
 "otin \\operatorname{tgt}(\\rho \\setminus x)$ is conservative: it also renames the binder when the offending entry's source does not occur in $t$. The result is still alpha-equivalent to the minimal one. The lemma shows that no variable is captured; that the result is the intended term up to $=_\\alpha$ follows from the translation lemma of the [substitution design](substitution.md), which covers renamings as well."
 msgstr ""
 
-#: manual/design/syntax.md:271
+#: manual/design/syntax.md:272
 msgid "Checked bound renaming"
 msgstr ""
 
-#: manual/design/syntax.md:273
+#: manual/design/syntax.md:274
 msgid ""
 "`alpha_rename_bound(t, x, y)` computes $t\\{x \\mapsto y\\}$, the body of the alpha step above, and returns `None` unless $y \\n"
 "otin \\mathrm{names}(t)$ (or $x = y$). Under that side condition the alpha axiom gives directly"
 msgstr ""
 
-#: manual/design/syntax.md:281
+#: manual/design/syntax.md:282
 msgid "The check is stronger than necessary (an occurrence of $y$ under an inner binder for $y$ would be harmless), but it is cheap and it is all the substitution algorithms need, because they always call it with a name chosen fresh for the body."
 msgstr ""
 
-#: manual/design/syntax.md:288
-msgid "$\\mathrm{FV}(t) \\subseteq \\mathrm{names}(t)$; `map_values` preserves both."
-msgstr ""
-
 #: manual/design/syntax.md:289
-msgid "`alpha_equal` decides the lifting of `T`'s `==` to nameless terms, and coincides with $=_\\alpha$ when that `==` is the identity (theorem above). It is reflexive, symmetric and transitive exactly when `==` is (corollary above). Reflexivity for `Int` payloads is checked by a QuickCheck property in `src/syntax/syntax_wbtest.mbt`, and a test there records that a `NaN` payload is not alpha-equal to itself."
+msgid "**Problem.** Every definition above is a structural recursion. Run as host recursion, a term nested $n$ levels deep (a chain of `Apply` heads, of `Apply` arguments, or of binders) needs $n$ host frames. The js, wasm and wasm-gc stacks overflow after a few thousand levels, native at $10^5$ levels in the tests, and nothing in the definitions bounds the nesting depth of an input."
 msgstr ""
 
 #: manual/design/syntax.md:295
-msgid "`rename_free` satisfies $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$ and is invariant under $=_\\alpha$: alpha-equivalent inputs give alpha-equivalent outputs."
-msgstr ""
-
-#: manual/design/syntax.md:298
-msgid "`alpha_rename_bound(t, x, y) = Some(t')` implies $\\beta x.\\,t =_\\alpha \\beta y.\\,t'$."
+msgid "**Choice.** Every operation of the package is a loop over a heap `Array` of pending work. The host stack depth is constant in the nesting depth, and the heap holds $O(n)$ pending items for a term of size $n$. There are two schemes, one for folds and one for rebuilds."
 msgstr ""
 
 #: manual/design/syntax.md:300
+msgid "*Folds.* `free_variables`, `all_names`, `==` and `alpha_equal` have the form"
+msgstr ""
+
+#: manual/design/syntax.md:306
+msgid "where $\\operatorname{ch}(t, c)$ lists the children of $t$ with the context the recursive call receives (the bound set $B$, extended to $B \\cup \\{x\\}$ under $\\beta x$; for `alpha_equal`, the environments and the depth), $\\ell$ is the contribution of the node itself, and $\\oplus$ is $\\cup$ for the name sets and $\\wedge$ for the comparisons; for a comparison a node is a pair of subterms, and a mismatch of constructors, names or arities makes $\\ell$ false. Both operations are associative and commutative with a unit ($\\varnothing$, true). The loop keeps an accumulator $A$ and a multiset $W$ of pending pairs, with the invariant"
+msgstr ""
+
+#: manual/design/syntax.md:320
+msgid "It holds initially with $A$ the unit and $W = \\{(t_0, c_0)\\}$. Taking $(t, c)$ out of $W$, adding $\\ell(t, c)$ to $A$ and putting $\\operatorname{ch}(t, c)$ into $W$ unfolds one equation of $F$, so the invariant is preserved; every pair is put into $W$ once, so the loop stops, and then $A = F(t_0, c_0)$. For $\\wedge$ the loop returns as soon as $A$ is false, because $\\text{false} \\wedge b = \\text{false}$. The contexts are persistent values (`HashSet`, `HashMap`), so pushing the children of a node shares the context instead of copying it."
+msgstr ""
+
+#: manual/design/syntax.md:329
+msgid "*Rebuilds.* `map_values`, `rename_free`, `alpha_rename_bound` and the substitutions of the [substitution design](substitution.md) have the form"
+msgstr ""
+
+#: manual/design/syntax.md:339
+msgid "with $R$ given directly on values and variables. A private `rebuild` runs it with a stack of tasks and a stack of results. `Visit(t, c)` of a leaf pushes its result. `Visit` of an application pushes `BuildApply(n)`, then `Visit` of the arguments from last to first, then `Visit` of the head; `Visit` of a binder calls $\\operatorname{binder}$ and pushes `BuildBind(x')` and `Visit(t', c')`. `BuildApply(n)` pops $n + 1$ results and pushes their application, and `BuildBind(x')` wraps the top result in a binder."
+msgstr ""
+
+#: manual/design/syntax.md:347
+msgid "**Lemma (rebuild).** Started on a result stack $S$, the tasks that a `Visit(t, c)` puts on the task stack leave $S \\cdot R(t, c)$ when they are done, and leave the task stack below them unchanged."
+msgstr ""
+
+#: manual/design/syntax.md:351
+msgid "*Proof.* By induction on $t$. A leaf pushes $R(t, c)$. For an application, the tasks run in the order `Visit(t)`, `Visit(u_1)`, …, `Visit(u_n)`, `BuildApply(n)`; by induction they leave $S \\cdot R(t, c) \\cdot R(u_1, c) \\cdots R(u_n, c)$ before `BuildApply(n)`, which turns the top $n + 1$ results into $R(t, c)(R(u_1, c), \\dots)$. A binder is the same with one child. $\\square$"
+msgstr ""
+
+#: manual/design/syntax.md:358
+msgid "Applied to the root, the lemma gives the result stack $[R(t_0, c_0)]$. The callbacks run in the order of the recursive definition: `project`, the `binder` step and `map_values`'s function in pre-order, head first and then the arguments from left to right, and the constructors of `BindingSyntax` in post-order. So the result is the recursive one, even for an impure function passed to `map_values`."
+msgstr ""
+
+#: manual/design/syntax.md:365
+msgid "**Equality.** A derived `Eq` is itself a structural recursion, so `Term` implements `Eq` by hand as a fold with $\\wedge$: the same constructors, the same names, the same arities, and payloads related by `T`'s `==`. It has no shortcut for physically equal subterms, because the derived `==` has none: a term with a `NaN` payload is not `==` to itself in either."
+msgstr ""
+
+#: manual/design/syntax.md:371
+msgid "The tests in `src/syntax/stack_safety_wbtest.mbt` run every operation on the three chains and a mixture of them, 100 000 levels deep, on every backend."
+msgstr ""
+
+#: manual/design/syntax.md:376
+msgid "$\\mathrm{FV}(t) \\subseteq \\mathrm{names}(t)$; `map_values` preserves both."
+msgstr ""
+
+#: manual/design/syntax.md:377
+msgid "`alpha_equal` decides the lifting of `T`'s `==` to nameless terms, and coincides with $=_\\alpha$ when that `==` is the identity (theorem above). It is reflexive, symmetric and transitive exactly when `==` is (corollary above). Reflexivity for `Int` payloads is checked by a QuickCheck property in `src/syntax/syntax_wbtest.mbt`, and a test there records that a `NaN` payload is not alpha-equal to itself."
+msgstr ""
+
+#: manual/design/syntax.md:383
+msgid "`rename_free` satisfies $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$ and is invariant under $=_\\alpha$: alpha-equivalent inputs give alpha-equivalent outputs."
+msgstr ""
+
+#: manual/design/syntax.md:386
+msgid "`alpha_rename_bound(t, x, y) = Some(t')` implies $\\beta x.\\,t =_\\alpha \\beta y.\\,t'$."
+msgstr ""
+
+#: manual/design/syntax.md:388
 msgid "On `Term[T]` every `generic_*` function equals its specialised counterpart."
 msgstr ""
 
-#: manual/design/syntax.md:302
-msgid "Cost: `free_variables` and `all_names` make $O(n)$ hash-set operations for a term of size $n$; each union costs up to the size of the sets involved. `alpha_rename_bound` adds one traversal to `all_names`. `rename_free` removes one entry and computes the targets of the renaming at every binder, so it costs $O(n \\cdot |\\rho|)$ when no binder is renamed; each freshened binder adds `all_names` and one renaming traversal of its body."
+#: manual/design/syntax.md:389
+msgid "Every operation, `==` included, uses a constant amount of host stack in the nesting depth of its input (traversal with an explicit work stack, above)."
 msgstr ""
 
-#: manual/design/syntax.md:311
+#: manual/design/syntax.md:392
+msgid "Cost: `free_variables` and `all_names` make $O(n)$ hash-set insertions for a term of size $n$. `alpha_rename_bound` adds one traversal to `all_names`. `rename_free` removes one entry and computes the targets of the renaming at every binder, so it costs $O(n \\cdot |\\rho|)$ when no binder is renamed; each freshened binder adds `all_names` and one renaming traversal of its body."
+msgstr ""
+
+#: manual/design/syntax.md:401
 msgid "**Variables inside values.** Letting `T` contain names would require a traversal trait on `T` as well. Such ASTs implement `BindingSyntax` directly, which covers the same need with one trait."
 msgstr ""
 
-#: manual/design/syntax.md:314
+#: manual/design/syntax.md:404
 msgid "**Multi-variable binders.** A binder for several names at once is expressed as nested `Bind` nodes. This keeps the view small and the proofs per binder."
 msgstr ""
 
-#: manual/design/syntax.md:316
+#: manual/design/syntax.md:406
 msgid "**Unchecked bound renaming.** A version without the `None` case would make a capture silent. The checked form makes the precondition visible in the type."
 msgstr ""
 
-#: manual/design/syntax.md:319
+#: manual/design/syntax.md:409
 msgid "**Alpha-equivalence by conversion.** Converting both terms to De Bruijn form and comparing would allocate two new terms; the lockstep algorithm is the same comparison without the allocation."
 msgstr ""
 
-#: manual/design/syntax.md:325
+#: manual/design/syntax.md:415
 msgid "`Value` payloads are never inspected. A payload that contains variables is outside the contract."
 msgstr ""
 
-#: manual/design/syntax.md:327
+#: manual/design/syntax.md:417
 msgid "`==` on terms is structural, not alpha-equivalence."
 msgstr ""
 
-#: manual/design/syntax.md:328
+#: manual/design/syntax.md:418
+msgid "`Debug` on terms (`@debug.to_string`, `Repr`, the messages of `assert_eq` and `inspect`) is derived and recursive, so formatting a term nested tens of thousands of levels deep can still overflow the host stack."
+msgstr ""
+
+#: manual/design/syntax.md:421
+msgid "The generic algorithms are stack-safe when the `BindingSyntax` methods of the downstream type are: `project` and the three constructors should look at one layer of a node and not recurse into it."
+msgstr ""
+
+#: manual/design/syntax.md:424
 msgid "`alpha_equal` compares payloads with `T`'s `==` and adds no reflexivity of its own: with a non-reflexive `==` (such as `Double` and `NaN`) a term can fail to be alpha-equal to itself."
 msgstr ""
 
-#: manual/design/syntax.md:331
+#: manual/design/syntax.md:427
 msgid "No sorts, scopes or types: every name is a term variable of the same kind."
 msgstr ""
 
-#: manual/design/syntax.md:332
+#: manual/design/syntax.md:428
 msgid "The package does not check that a `BindingSyntax` implementation obeys its laws; [adapter](adapter.md) describes how to test them."
 msgstr ""
 
-#: manual/design/syntax.md:334
+#: manual/design/syntax.md:430
 msgid "Substitution lives in [substitution](substitution.md), traversal and rewriting in [rewrite](rewrite.md)."
 msgstr ""
 
@@ -3666,122 +3843,138 @@ msgid "These are the readback equations above, with the head of a neutral read b
 msgstr ""
 
 #: manual/design/utlc/nbe.md:260
-msgid "M. Felleisen and D. P. Friedman, \"Control operators, the SECD-machine, and the λ-calculus\", 1986, for the CEK machine; M. S. Ager, D. Biernacki, O. Danvy and J. Midtgaard, \"A functional correspondence between evaluators and abstract machines\", PPDP 2003, for deriving it from an evaluator by CPS transformation and defunctionalization."
+msgid "*Deep input terms.* The same machines make the host stack independent of the nesting depth of the input. The rule for $\\mathsf{ev}(t\\,\\vec u, \\rho)$ pushes a frame and continues with the head, so a long chain of applications in head position grows $K$, not the host stack; arguments are delayed, and a chain nested in argument position is evaluated one level per $\\mathsf{fo}$ step, when readback forces the argument. A binder is a closure, and readback opens it with one $\\mathsf{bind}$ frame. Every frame is paid for by a unit, so the bound $|K| \\le f_0 + 1$ above covers deep input as well. Before evaluating, `eval` and `normalize` validate the input with `@debruijn.validate`, which keeps its pending subterms on a heap stack (see the [debruijn design](../debruijn.md)). On every backend, the depth of the input therefore costs fuel and heap, not host stack."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:262
-msgid "Laziness without sharing"
-msgstr ""
-
-#: manual/design/utlc/nbe.md:264
-msgid "**Problem.** Strict evaluation (call by value) diverges on $(\\lambda.\\,7)\\,\\Omega$, although the term has the normal form $7$."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:267
-msgid "**Choice.** Arguments are delayed. Together with readback, which evaluates the head of every neutral first and its arguments afterwards, and enters closures only after their head is known, this realizes normal-order (leftmost-outermost) reduction, the normalizing strategy of the [eval design](../eval.md). Call by need would share delayed results; it is not used because it needs mutable thunks, and the budget keeps the cost of recomputation bounded and visible."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:275
-msgid "Opaque semantic values"
-msgstr ""
-
-#: manual/design/utlc/nbe.md:277
-msgid "`Semantic[T]` is a struct around a private enum. Callers can create neutral values (`reflect_free`, `reflect_level`), evaluate, and quote, but cannot build closures with ill-scoped environments. This keeps the invariant that every closure environment matches the scope of its body, which is why `eval` validates its input once and can then trust every index lookup."
+#: manual/design/utlc/nbe.md:273
+msgid "*Shared environments.* Opening a binder extends an environment: $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$ evaluates $t$ in $e \\cdot \\rho$, and readback of $\\mathsf{clo}(t, \\rho)$ under $n$ binders evaluates $t$ in $\\mathsf{lvl}(n) \\cdot \\rho$. Copying $\\rho$ for each extension makes a term with $n$ nested binders cost"
 msgstr ""
 
 #: manual/design/utlc/nbe.md:283
-msgid "Unary applications in normal forms"
+msgid "element copies, tens of seconds for $n = 100\\,000$. Environments are therefore persistent lists stored in shared arrays: an environment is a pair $(a, \\ell)$ of an array and a length, with $\\rho_i = a[\\ell - 1 - i]$, outermost entry first. No environment ever changes $a[0..\\ell)$, so"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:285
-msgid "Readback produces $R_n(\\mathsf{app}(d, e)) = R_n(d)\\,R_n(e)$ as a unary `Apply`, so the spine $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`. The small-step reducer keeps the n-ary `Apply(f, [a, b])` of its input. Both denote the same curried application; comparisons between the two normalizers must flatten spines first."
+#: manual/design/utlc/nbe.md:297
+msgid "leaves every other environment that shares $a$ unchanged: they read only their own prefixes, which the push does not touch. A chain of binders extends each environment once, at the end of its array, so it costs $O(n)$; lookup stays $O(1)$; an environment extended twice, as when one closure is applied to two arguments, copies as before. Values, the order of the steps and the fuel spent are the same as with copied environments."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:293
-msgid "**Theorem (soundness).** If `normalize(t, fuel)` returns `NormalForm(u, _)`, then $u$ is beta-normal and $t =_\\beta u$ (up to spine flattening)."
+#: manual/design/utlc/nbe.md:304
+msgid "M. Felleisen and D. P. Friedman, \"Control operators, the SECD-machine, and the λ-calculus\", 1986, for the CEK machine; M. S. Ager, D. Biernacki, O. Danvy and J. Midtgaard, \"A functional correspondence between evaluators and abstract machines\", PPDP 2003, for deriving it from an evaluator by CPS transformation and defunctionalization."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:296
-msgid "*Sketch.* Define the *denotation* $\\lfloor d \\rfloor_n$ of a value under $n$ binders as the term it stands for: $\\lfloor \\mathsf{clo}(t, \\rho) \\rfloor_n = \\lambda.\\,t[\\rho]$, $\\lfloor \\mathsf{delay}(t, \\rho) \\rfloor_n = t[\\rho]$, $\\lfloor \\mathsf{lvl}(\\ell) \\rfloor_n = n - 1 - \\ell$, and so on, where $t[\\rho]$ substitutes the denotations of $\\rho$ for the free indices of $t$. By induction on evaluation, $t[\\rho] \\to_\\beta^{*} \\lfloor \\llbracket t \\rrbracket\\rho \\rfloor_n$: the only non-trivial case is $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$, which is the beta step $(\\lambda.\\,t[\\rho])\\,\\lfloor e \\rfloor \\to_\\beta t[\\lfloor e \\rfloor \\cdot \\rho]$ (substitution lemma of the [debruijn attachment](../../../attachments/design_debruijn_index-lemmas.typ)). Readback inserts only beta steps under binders, so $t \\to_\\beta^{*} u$. For normality: $R$ produces $\\lambda$ only from closures, and applications only from $\\mathsf{app}(d, e)$, whose head $d$ is a neutral or a constant, never a closure (application of a closure is evaluated, not stored). Hence the output follows the grammar"
+#: manual/design/utlc/nbe.md:306
+msgid "Laziness without sharing"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:315
-msgid "which contains no redex $(\\lambda.\\,t)\\,u$. $\\square$"
+#: manual/design/utlc/nbe.md:308
+msgid "**Problem.** Strict evaluation (call by value) diverges on $(\\lambda.\\,7)\\,\\Omega$, although the term has the normal form $7$."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:317
-msgid "**Completeness (sketch).** If $t$ has a beta normal form, `normalize` returns it for sufficient fuel. Evaluation computes the weak head normal form by call by name, and readback recursively normalizes the body of a closure and the arguments of a neutral after its head: this is the leftmost-outermost strategy decomposed into head and arguments. By the normalization theorem (Barendregt 13.2.2) this strategy terminates on every term with a normal form, and by confluence the normal form is unique.[^nbe]"
+#: manual/design/utlc/nbe.md:311
+msgid "**Choice.** Arguments are delayed. Together with readback, which evaluates the head of every neutral first and its arguments afterwards, and enters closures only after their head is known, this realizes normal-order (leftmost-outermost) reduction, the normalizing strategy of the [eval design](../eval.md). Call by need would share delayed results; it is not used because it needs mutable thunks, and the budget keeps the cost of recomputation bounded and visible."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:325
-msgid "For untyped NbE see K. Aehlig and F. Joachimski, \"Operational aspects of untyped normalisation by evaluation\", Mathematical Structures in Computer Science 14, 2004; for strong reduction by evaluation, B. Grégoire and X. Leroy, \"A compiled implementation of strong reduction\", ICFP 2002."
+#: manual/design/utlc/nbe.md:319
+msgid "Opaque semantic values"
+msgstr ""
+
+#: manual/design/utlc/nbe.md:321
+msgid "`Semantic[T]` is a struct around a private enum. Callers can create neutral values (`reflect_free`, `reflect_level`), evaluate, and quote, but cannot build closures with ill-scoped environments. This keeps the invariant that every closure environment matches the scope of its body, which is why `eval` validates its input once and can then trust every index lookup."
 msgstr ""
 
 #: manual/design/utlc/nbe.md:327
-msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices. Further tests run $\\Omega$, a divergent term whose head grows, and two terms with infinite normal forms with budgets of thirty million units on every backend, and pin the exact cost of Church numeral arithmetic together with its reproducibility at `consumed` and `consumed - 1`."
+msgid "Unary applications in normal forms"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:342
-msgid "Other invariants:"
+#: manual/design/utlc/nbe.md:329
+msgid "Readback produces $R_n(\\mathsf{app}(d, e)) = R_n(d)\\,R_n(e)$ as a unary `Apply`, so the spine $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`. The small-step reducer keeps the n-ary `Apply(f, [a, b])` of its input. Both denote the same curried application; comparisons between the two normalizers must flatten spines first."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:344
-msgid "With positive fuel, `eval` and `normalize` reject ill-scoped input with `ScopeFailure` and `consumed=0` before doing any work; with fuel `<= 0` they return `FuelExhausted(consumed=0)` without looking at the term."
+#: manual/design/utlc/nbe.md:337
+msgid "**Theorem (soundness).** If `normalize(t, fuel)` returns `NormalForm(u, _)`, then $u$ is beta-normal and $t =_\\beta u$ (up to spine flattening)."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:347
-msgid "`quote(value, n, _)` returns `ScopeFailure` only when $n < 0$ or a level variable is not below $n$. Values produced by `eval` contain no level variables, so quoting them at any level $n \\ge 0$ never fails this way."
+#: manual/design/utlc/nbe.md:340
+msgid "*Sketch.* Define the *denotation* $\\lfloor d \\rfloor_n$ of a value under $n$ binders as the term it stands for: $\\lfloor \\mathsf{clo}(t, \\rho) \\rfloor_n = \\lambda.\\,t[\\rho]$, $\\lfloor \\mathsf{delay}(t, \\rho) \\rfloor_n = t[\\rho]$, $\\lfloor \\mathsf{lvl}(\\ell) \\rfloor_n = n - 1 - \\ell$, and so on, where $t[\\rho]$ substitutes the denotations of $\\rho$ for the free indices of $t$. By induction on evaluation, $t[\\rho] \\to_\\beta^{*} \\lfloor \\llbracket t \\rrbracket\\rho \\rfloor_n$: the only non-trivial case is $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$, which is the beta step $(\\lambda.\\,t[\\rho])\\,\\lfloor e \\rfloor \\to_\\beta t[\\lfloor e \\rfloor \\cdot \\rho]$ (substitution lemma of the [debruijn attachment](../../../attachments/design_debruijn_index-lemmas.typ)). Readback inserts only beta steps under binders, so $t \\to_\\beta^{*} u$. For normality: $R$ produces $\\lambda$ only from closures, and applications only from $\\mathsf{app}(d, e)$, whose head $d$ is a neutral or a constant, never a closure (application of a closure is evaluated, not stored). Hence the output follows the grammar"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:350
-msgid "Fuel: `consumed` never exceeds the fuel given; the determinism property above holds."
+#: manual/design/utlc/nbe.md:359
+msgid "which contains no redex $(\\lambda.\\,t)\\,u$. $\\square$"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:352
-msgid "Stack: evaluation and readback use a constant depth of host stack; their frame stacks live in the heap and are bounded by the budget."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:357
-msgid "**Typed or eta-long readback.** Untyped readback cannot know where to eta-expand; eta-long normal forms are provided for typed terms by [stlc](../stlc.md)."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:360
-msgid "**Host-language closures (HOAS).** Representing $\\mathsf{clo}$ as a MoonBit function would be faster but makes fuel accounting and inspection of values impossible, and the values could not be quoted without a fresh-variable trick on the host side. A first-order closure keeps everything observable."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:364
-msgid "**Named environments.** Indexing the environment by De Bruijn index makes lookup positional and needs no fresh names during evaluation."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:366
-msgid "**Direct recursion with a larger stack.** The js and wasm hosts fix the stack size, and any fixed stack is exhausted by some budget, so the outcome would depend on the backend."
+#: manual/design/utlc/nbe.md:361
+msgid "**Completeness (sketch).** If $t$ has a beta normal form, `normalize` returns it for sufficient fuel. Evaluation computes the weak head normal form by call by name, and readback recursively normalizes the body of a closure and the arguments of a neutral after its head: this is the leftmost-outermost strategy decomposed into head and arguments. By the normalization theorem (Barendregt 13.2.2) this strategy terminates on every term with a normal form, and by confluence the normal form is unique.[^nbe]"
 msgstr ""
 
 #: manual/design/utlc/nbe.md:369
+msgid "For untyped NbE see K. Aehlig and F. Joachimski, \"Operational aspects of untyped normalisation by evaluation\", Mathematical Structures in Computer Science 14, 2004; for strong reduction by evaluation, B. Grégoire and X. Leroy, \"A compiled implementation of strong reduction\", ICFP 2002."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:371
+msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices. Further tests run $\\Omega$, a divergent term whose head grows, and two terms with infinite normal forms with budgets of thirty million units on every backend, and pin the exact cost of Church numeral arithmetic together with its reproducibility at `consumed` and `consumed - 1`. The tests in `src/utlc/nbe/deep_test.mbt` evaluate, read back and normalize terms nested to depth 100 000, normal and with redexes, on every backend."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:388
+msgid "Other invariants:"
+msgstr ""
+
+#: manual/design/utlc/nbe.md:390
+msgid "With positive fuel, `eval` and `normalize` reject ill-scoped input with `ScopeFailure` and `consumed=0` before doing any work; with fuel `<= 0` they return `FuelExhausted(consumed=0)` without looking at the term."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:393
+msgid "`quote(value, n, _)` returns `ScopeFailure` only when $n < 0$ or a level variable is not below $n$. Values produced by `eval` contain no level variables, so quoting them at any level $n \\ge 0$ never fails this way."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:396
+msgid "Fuel: `consumed` never exceeds the fuel given; the determinism property above holds."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:398
+msgid "Stack: validation, evaluation and readback use a constant depth of host stack, whatever the budget and the nesting depth of the input; their frame stacks live in the heap and are bounded by the budget (validation's by the size of the input)."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:405
+msgid "**Typed or eta-long readback.** Untyped readback cannot know where to eta-expand; eta-long normal forms are provided for typed terms by [stlc](../stlc.md)."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:408
+msgid "**Host-language closures (HOAS).** Representing $\\mathsf{clo}$ as a MoonBit function would be faster but makes fuel accounting and inspection of values impossible, and the values could not be quoted without a fresh-variable trick on the host side. A first-order closure keeps everything observable."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:412
+msgid "**Named environments.** Indexing the environment by De Bruijn index makes lookup positional and needs no fresh names during evaluation."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:414
+msgid "**Direct recursion with a larger stack.** The js and wasm hosts fix the stack size, and any fixed stack is exhausted by some budget, so the outcome would depend on the backend."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:417
 msgid "**Trampolining through host closures.** Returning a closure for the rest of the computation also bounds the stack, but allocates a host function per step and hides the pending work. First-order frames keep the machine observable, for the same reason as first-order semantic closures."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:376
+#: manual/design/utlc/nbe.md:424
 msgid "Beta only: no eta, no reduction of constants."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:377
+#: manual/design/utlc/nbe.md:425
 msgid "Not total: `FuelExhausted` is the expected outcome for divergent terms and does not prove divergence."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:379
+#: manual/design/utlc/nbe.md:427
 msgid "No sharing of delayed arguments."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:380
-msgid "Only evaluation and readback have a bounded host stack. `eval` and `normalize` first validate their input with `@debruijn.validate`, which recurses over the term, so the stack depth they need still grows with the nesting depth of the input term."
+#: manual/design/utlc/nbe.md:428
+msgid "The derived `Debug` of `NbeResult` recurses over the term it contains, so printing a deeply nested normal form can overflow the host stack on js, wasm and wasm-gc; `==` handles any depth."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:384
+#: manual/design/utlc/nbe.md:431
 msgid "Normal forms use unary applications."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:385
+#: manual/design/utlc/nbe.md:432
 msgid "Input must be De Bruijn syntax; convert named terms with `@debruijn.from_named` and results back with `@debruijn.to_named`."
 msgstr ""
 
