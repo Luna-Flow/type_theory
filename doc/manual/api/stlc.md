@@ -12,6 +12,14 @@ type annotation), `Apply` is application, `Variable` a variable, and `Value`
 holds an `Atom`. The typing rules and the NbE algorithm are given in the
 [stlc design](../design/stlc.md).
 
+Every function of the package, `==` on types included, is stack-safe in the
+nesting depth of terms and types: type checking, evaluation and readback run
+as loops that keep pending work in heap arrays and use a constant amount of
+host stack. Terms nested 100 000 levels deep (binders, argument positions,
+curried spines, nested redexes) and types nested as deep (in codomains or in
+domains) are handled on every backend. `Debug` of such a term, type or error
+is not stack-safe.
+
 ## Importing
 
 Add the package, and the packages whose types appear in its signatures, to
@@ -66,14 +74,16 @@ pub(all) enum Ty {
   Base(@core.Name)
   Unit
   Arrow(Ty, Ty)
-} derive(Eq, @debug.Debug)
+} derive(@debug.Debug)
+pub impl Eq for Ty
 pub fn Ty::equal(Self, Self) -> Bool
 ```
 
 `Base(b)` is an uninterpreted base type, `Unit` the unit type, and
 `Arrow(a, b)` the function type $a \to b$. Types are compared structurally
 (`Ty::equal`, the promoted `Eq` implementation); for simple types this is
-exactly type equality. `Atom::equal` likewise compares constants by name.
+exactly type equality. The implementation is written by hand rather than
+derived so that it is stack-safe; it has the semantics of the derived one. `Atom::equal` likewise compares constants by name.
 
 ## Signatures and contexts
 
@@ -106,7 +116,9 @@ lists.
 `TypeContext` assigns types to free variables.
 
 ```mbti
-type TypeContext derive(Eq, @debug.Debug)
+type TypeContext
+pub impl Eq for TypeContext
+pub impl @debug.Debug for TypeContext
 pub fn TypeContext::empty() -> Self
 #alias(extend, deprecated)
 pub fn TypeContext::extend_with(Self, @core.Name, Ty) -> Self
@@ -118,7 +130,12 @@ pub fn TypeContext::equal(Self, Self) -> Bool
 
 The functions behave as those of `Signature`, with the same shadowing rule:
 the type checker extends the context when it enters a lambda, so the nearest
-binder of a name wins.
+binder of a name wins. `extend_with` takes amortized constant time when it
+extends the longest context built so far from the same empty context, as the
+checker does under nested lambdas, so checking under $n$ binders costs $O(n)$
+for the extensions; extending a context that has already been extended copies
+its entries. `Eq` and `Debug` are written by hand; they compare and show the
+entries in insertion order, as before.
 
 ```moonbit
 test "signatures and contexts" {

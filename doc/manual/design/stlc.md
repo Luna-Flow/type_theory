@@ -383,6 +383,91 @@ environments, and the names already introduced on the path. Generated names
 are therefore distinct from each other along a path and from all names of the
 input, and a neutral variable is never captured by a binder introduced later.
 
+### A bounded host stack
+
+**Problem.** Written as host functions, the checker (`infer`, `check`, their
+spine versions and the loop over the arguments of $\textsc{App}$), typed
+evaluation, readback and the derived equality of types recurse once per level
+of the term, of the type or of the normal form. The js, wasm and wasm-gc
+stacks overflow at a depth of a few thousand, so deep binders, deep argument
+positions, long curried spines, nested redexes and types nested in their
+domains crashed the package (issue #13).
+
+**Choice.** Each of the three algorithms runs as one loop over an explicit
+continuation, like the untyped evaluator of [utlc/nbe](utlc/nbe.md): a
+control says what to compute next, and a stack of frames in the heap holds
+the rest of the callers. A call in tail position replaces the control; a
+call whose result is still needed first pushes a frame for the rest of its
+caller. For the checker, the controls and frames are
+
+$$
+\begin{aligned}
+c \;&::=\; \mathsf{inf}(\Gamma, t) \mid \mathsf{chk}(\Gamma, t, \tau) \mid \mathsf{inf}^{*}(\Gamma, h, \vec a) \mid \mathsf{chk}^{*}(\Gamma, h, \vec a, \tau) \mid \mathsf{ret}(\tau) \mid \mathsf{ok}, \\
+k \;&::=\; \mathsf{head}(\Gamma, \vec a) \mid \mathsf{arg}(\Gamma, \vec a, i, \tau) \mid \mathsf{cmp}(\tau) \mid \mathsf{redex}(\Gamma, x', b', \vec a, m), \qquad m \in \{{\Rightarrow}\} \cup \{{\Leftarrow}\,\tau\},
+\end{aligned}
+$$
+
+(`CheckControl` and `CheckFrame` in the code). $\textsc{Lam}$ and the
+flattening of a spine are tail calls. $\textsc{Sub}$ pushes
+$\mathsf{cmp}(\tau)$ and infers; $\textsc{App}$ pushes
+$\mathsf{head}(\Gamma, \vec a)$ and infers $h$, and the inferred type
+$\tau_1 \to \cdots$ meeting $\mathsf{head}$ checks $a_1$ against $\tau_1$
+under $\mathsf{arg}(\Gamma, \vec a, 1, \tau_2 \to \cdots)$, and so on;
+$\textsc{Redex}$ and $\textsc{Redex}^{\Leftarrow}$ rename the parameter
+apart, push $\mathsf{redex}(\Gamma, x', b\{x \mapsto x'\}, \vec a, m)$ and
+infer $a_1$; the type $\sigma$ meeting that frame flattens
+$b\{x \mapsto x'\}\,a_2 \cdots a_n$ and continues with
+$\mathsf{inf}^{*}$ or $\mathsf{chk}^{*}$ under $\Gamma, x'{:}\sigma$.
+Typed evaluation has controls for evaluating a term at a type, applying a
+value and returning a value, and frames for the rest of a spine and for an
+argument being evaluated; applying a closure to the last argument of a spine
+pushes nothing, as in [utlc/nbe](utlc/nbe.md). Readback has controls for
+$\downarrow^\tau$, for $\mathrm{quote}$ and for returning a term, and frames
+for a binder to wrap around a body, an argument still to read back and a
+function waiting for its argument. The head type of a redex spine,
+defined by recursion on the remaining spine and built while returning,
+
+$$
+H(\Gamma, \lambda x.\,b, \vec a, \tau) =
+\begin{cases}
+\sigma \to \tau & \text{if the remaining spine is empty}, \\
+\sigma \to \mathrm{drop}_{|\vec b|}\big(H(\Gamma', h', \vec b\,a_2 \cdots a_n, \tau)\big) & \text{otherwise},
+\end{cases}
+$$
+
+(where $b$ flattens to $h'\,\vec b$), is computed by two loops: the first
+takes the redex steps down the spine and keeps them in a heap array, the
+second applies the $\sigma \to \mathrm{drop}(-)$ steps from the innermost
+outwards.
+
+*Same results, same errors.* Read a frame as the function that the rest of
+its caller applies to the returned value, and a state as the stack applied to
+the value of its control. Every transition is one equation of the recursive
+definition, so it preserves that reading, and a run ends with the value the
+recursive functions return. The machines make the calls of the definition in
+its order, and no rule of the definition catches an error: every `Err`
+propagates unchanged to the top. The result of the recursive functions is
+therefore the first error met in that order, and the machines stop at the
+same one; which `TypeError` is reported does not change.
+
+*Equality of types.* `Ty` has a hand-written `Eq` that compares a heap array
+of pending pairs, and skips a pair of physically equal types, which is sound
+because the equality is reflexive.
+
+*Linear time.* Two hidden quadratic costs would dominate at depth
+$100\,000$, so they are removed without changing results. Contexts and
+environments built from one another share an append-only array and read only
+their own prefix, so entering $n$ binders costs $O(n)$ instead of $O(n^2)$.
+Readback chooses binder names with $\operatorname{fresh}(x, U)$, the first
+of the candidates $c_0 = x$, $c_1 = x\_1$, $c_2 = x\_2$, … not in $U$, and
+eta-expanding at a type nested $n$ levels deep would retry the $n$ names
+chosen before. It carries, with $U$, a position $p$ such that every $c_q$
+with $q < p$ is in $U$, and starts the search there. If $c_{p'}$ is chosen,
+every $c_q$ with $q \le p'$ is in $U \cup \{c_{p'}\}$, so $p' + 1$ is a valid
+position for the extended set; readback only ever adds names to $U$, so the
+position stays valid along the path, and the name found is the one
+$\operatorname{fresh}$ returns.
+
 ## Correctness and invariants
 
 - `check` and `infer` terminate; on success, the term is declaratively typable
@@ -398,6 +483,9 @@ input, and a neutral variable is never captured by a binder introduced later.
 - `normalize_checked` returns `Err` before any reduction for ill-typed input.
 - `NormalizationError` signals a violated internal invariant and is not
   produced for checked input.
+- `check`, `infer`, `normalize_checked`, `normalize_eta_long` and `==` on
+  types use a constant host stack depth; terms and types nested 100 000
+  levels deep are handled on every backend (`src/stlc/deep_test.mbt`).
 
 The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing,
 eta expansion of open variables and of constants (including nested arrow
@@ -430,3 +518,8 @@ in checking mode, and ill-typed variants that are still rejected.
 - Constants are opaque: there are no delta rules.
 - `normalize_checked` is bounded by a step limit because it reuses the untyped
   reducer.
+- `normalize_eta_long` is stack-safe but takes time quadratic in the depth of
+  redexes and applications nested in argument positions: typed evaluation
+  checks each argument again before evaluating it, and infers the first
+  argument of each redex again to type its head.
+- `Debug` of a deep term, type or error recurses and can overflow the stack.
