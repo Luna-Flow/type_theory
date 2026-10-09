@@ -1,6 +1,10 @@
 ///|
 /// A finite, simultaneous renaming. Unmapped names remain unchanged.
-pub struct Renaming {
+///
+/// The type is abstract: its entries are not accessible outside the package,
+/// so each source name has at most one image. Use `apply`, `length`, and
+/// `to_array` to read it.
+struct Renaming {
   entries : Array[(Name, Name)]
 } derive(Eq, Debug)
 
@@ -31,6 +35,19 @@ pub fn Renaming::set(self : Renaming, from : Name, to_ : Name) -> Renaming {
     entries.push((from, to_))
   }
   { entries, }
+}
+
+///|
+/// Returns the number of mapped source names.
+pub fn Renaming::length(self : Renaming) -> Int {
+  self.entries.length()
+}
+
+///|
+/// Returns the `(from, to)` entries in insertion order as a fresh array.
+/// Changing the returned array does not change `self`.
+pub fn Renaming::to_array(self : Renaming) -> Array[(Name, Name)] {
+  self.entries.copy()
 }
 
 ///|

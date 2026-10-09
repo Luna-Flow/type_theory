@@ -12,9 +12,7 @@ pub fn fresh_name(Name, @hashset.HashSet[Name]) -> Name
 // Errors
 
 // Types and methods
-pub struct Context {
-  names : Array[Name]
-} derive(Eq, @debug.Debug)
+type Context derive(Eq, @debug.Debug)
 pub fn Context::contains(Self, Name) -> Bool
 pub fn Context::empty() -> Self
 pub fn Context::equal(Self, Self) -> Bool
@@ -33,22 +31,20 @@ pub fn Name::hash(Self) -> Int
 pub fn Name::new(String) -> Self
 pub fn Name::text(Self) -> String
 
-pub struct Renaming {
-  entries : Array[(Name, Name)]
-} derive(Eq, @debug.Debug)
+type Renaming derive(Eq, @debug.Debug)
 pub fn Renaming::apply(Self, Name) -> Name
 pub fn Renaming::empty() -> Self
 pub fn Renaming::equal(Self, Self) -> Bool
+pub fn Renaming::length(Self) -> Int
 pub fn Renaming::set(Self, Name, Name) -> Self
 pub fn Renaming::singleton(Name, Name) -> Self
 pub fn Renaming::support(Self) -> @hashset.HashSet[Name]
 pub fn Renaming::targets(Self) -> @hashset.HashSet[Name]
 pub fn Renaming::then(Self, Self) -> Self
+pub fn Renaming::to_array(Self) -> Array[(Name, Name)]
 pub fn Renaming::without(Self, Name) -> Self
 
-pub struct Telescope[T] {
-  entries : Array[(Name, T)]
-}
+type Telescope[T]
 pub fn[T] Telescope::empty() -> Self[T]
 #alias(extend, deprecated)
 pub fn[T] Telescope::extend_with(Self[T], Name, T) -> Self[T]

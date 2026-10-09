@@ -1,6 +1,10 @@
 ///|
 /// An ordered collection of names in scope.
-pub struct Context {
+///
+/// The type is abstract: its storage is not accessible outside the package,
+/// so a `Context` cannot be changed after it is built. Use `length`,
+/// `contains`, and `to_array` to read it.
+struct Context {
   names : Array[Name]
 } derive(Eq, Debug)
 
@@ -33,13 +37,18 @@ pub fn Context::length(self : Context) -> Int {
 }
 
 ///|
+/// Returns the names in order as a fresh array. Changing the returned array
+/// does not change `self`.
 pub fn Context::to_array(self : Context) -> Array[Name] {
   self.names.copy()
 }
 
 ///|
 /// A telescope records binders in dependency order.
-pub struct Telescope[T] {
+///
+/// The type is abstract: its storage is not accessible outside the package.
+/// Use `length` and `to_array` to read it.
+struct Telescope[T] {
   entries : Array[(Name, T)]
 }
 
@@ -66,6 +75,8 @@ pub fn[T] Telescope::length(self : Telescope[T]) -> Int {
 }
 
 ///|
+/// Returns the entries in dependency order as a fresh array. Changing the
+/// returned array does not change `self`.
 pub fn[T] Telescope::to_array(self : Telescope[T]) -> Array[(Name, T)] {
   self.entries.copy()
 }
