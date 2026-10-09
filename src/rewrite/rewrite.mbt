@@ -42,7 +42,10 @@ pub(all) enum ReductionFrame {
 
 ///|
 /// Root-to-redex path. The empty path identifies the root.
-pub struct ReductionPath {
+///
+/// The type is abstract: its frames are not accessible outside the package.
+/// Use `length` and `to_array` to read it.
+struct ReductionPath {
   frames : Array[ReductionFrame]
 } derive(Eq, Debug)
 
@@ -62,6 +65,14 @@ pub fn ReductionPath::prepend(
 }
 
 ///|
+/// Returns the number of frames. The root path has length zero.
+pub fn ReductionPath::length(self : ReductionPath) -> Int {
+  self.frames.length()
+}
+
+///|
+/// Returns the frames from the root to the redex as a fresh array. Changing
+/// the returned array does not change `self`.
 pub fn ReductionPath::to_array(self : ReductionPath) -> Array[ReductionFrame] {
   self.frames.copy()
 }
@@ -87,7 +98,10 @@ pub(all) enum NormalizationResult[T] {
 
 ///|
 /// A complete bounded operational trace.
-pub struct ReductionTrace[T] {
+///
+/// The type is abstract: its fields are not accessible outside the package.
+/// Use `initial`, `steps`, and `result` to read it.
+struct ReductionTrace[T] {
   initial : @syntax.Term[T]
   steps : Array[StepResult[T]]
   result : NormalizationResult[T]
@@ -99,6 +113,8 @@ pub fn[T] ReductionTrace::initial(self : ReductionTrace[T]) -> @syntax.Term[T] {
 }
 
 ///|
+/// Returns the successful steps in order as a fresh array. Changing the
+/// returned array does not change `self`.
 pub fn[T] ReductionTrace::steps(
   self : ReductionTrace[T],
 ) -> Array[StepResult[T]] {
