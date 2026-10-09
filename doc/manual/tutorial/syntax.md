@@ -199,6 +199,9 @@ test "rename the variable of a binder" {
 - **`==` is not alpha-equivalence.** Results of substitution and
   normalization may have renamed binders such as `y_1`. Compare them with
   `alpha_equal`.
+- **Payloads are compared with their own `==`.** `alpha_equal` inherits it:
+  with `Term[Double]`, a term containing `Value(0.0 / 0.0)` (NaN) is not
+  alpha-equal to itself, and `Value(0.0)` equals `Value(-0.0)`.
 - **Variables inside values.** `Value(T)` is never inspected. If your
   constants contain variables, implement `BindingSyntax` for your AST instead
   of wrapping it in `Term`.
