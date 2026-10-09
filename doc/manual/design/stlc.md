@@ -518,8 +518,9 @@ in checking mode, and ill-typed variants that are still rejected.
 - Constants are opaque: there are no delta rules.
 - `normalize_checked` is bounded by a step limit because it reuses the untyped
   reducer.
-- `normalize_eta_long` is stack-safe but takes time quadratic in the depth of
-  redexes and applications nested in argument positions: typed evaluation
-  checks each argument again before evaluating it, and infers the first
-  argument of each redex again to type its head.
+- `normalize_eta_long` is stack-safe. Its typed evaluator reuses the complete
+  check performed before evaluation, so it does not check each application
+  argument a second time. Deep redexes can still take quadratic time because
+  `head_type_for_application` infers the first argument of each redex again
+  while reconstructing the head type; issue #27 tracks that remaining cost.
 - `Debug` of a deep term, type or error recurses and can overflow the stack.
