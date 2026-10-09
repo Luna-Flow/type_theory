@@ -56,13 +56,17 @@ for beta and realizes the same normalizing strategy
 the beta normal forms of these three coincide after conversion and after
 flattening application spines.
 
-`@lambda.normalize` also contracts eta redexes, so its result is the eta
-normal form of that common beta normal form, not the beta normal form itself:
-$\lambda x.\,f\,x$ normalizes to $f$ there and to $\lambda.\,f\,0$ in the
-other two ([utlc/lambda design](design/utlc/lambda.md)). All normalizers
-read an empty application `Apply(h, [])` as $h$; NbE drops the node, the
-small-step reducers keep it, so spine flattening also drops empty
-applications ([eval design](design/eval.md)).
+`@lambda.normalize` also contracts eta redexes, so its result is not the
+beta normal form itself: $\lambda x.\,f\,x$ normalizes to $f$ there and to
+$\lambda.\,f\,0$ in the other two. All normalizers read an empty
+application `Apply(h, [])` as $h$; NbE drops the node, the small-step
+reducers keep it, so spine flattening also drops empty applications
+([eval design](design/eval.md)). For a term whose applications have at most
+one argument, the result of `@lambda.normalize` is the eta normal form of
+that common beta normal form modulo `Apply(h, [])` $= h$: the two agree up
+to $=_\alpha$ once empty applications are erased, but not literally, since
+eta can fire earlier in `normalize` by reading an empty application as its
+head ([utlc/lambda design](design/utlc/lambda.md)).
 
 For typed terms, [stlc](design/stlc.md) adds a fourth normalizer:
 type-directed NbE, which needs no bound and returns beta-normal, eta-long
