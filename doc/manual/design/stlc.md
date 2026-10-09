@@ -418,27 +418,13 @@ apart, push $\mathsf{redex}(\Gamma, x', b\{x \mapsto x'\}, \vec a, m)$ and
 infer $a_1$; the type $\sigma$ meeting that frame flattens
 $b\{x \mapsto x'\}\,a_2 \cdots a_n$ and continues with
 $\mathsf{inf}^{*}$ or $\mathsf{chk}^{*}$ under $\Gamma, x'{:}\sigma$.
-Typed evaluation has controls for evaluating a term at a type, applying a
-value and returning a value, and frames for the rest of a spine and for an
-argument being evaluated; applying a closure to the last argument of a spine
-pushes nothing, as in [utlc/nbe](utlc/nbe.md). Readback has controls for
-$\downarrow^\tau$, for $\mathrm{quote}$ and for returning a term, and frames
-for a binder to wrap around a body, an argument still to read back and a
-function waiting for its argument. The head type of a redex spine,
-defined by recursion on the remaining spine and built while returning,
-
-$$
-H(\Gamma, \lambda x.\,b, \vec a, \tau) =
-\begin{cases}
-\sigma \to \tau & \text{if the remaining spine is empty}, \\
-\sigma \to \mathrm{drop}_{|\vec b|}\big(H(\Gamma', h', \vec b\,a_2 \cdots a_n, \tau)\big) & \text{otherwise},
-\end{cases}
-$$
-
-(where $b$ flattens to $h'\,\vec b$), is computed by two loops: the first
-takes the redex steps down the spine and keeps them in a heap array, the
-second applies the $\sigma \to \mathrm{drop}(-)$ steps from the innermost
-outwards.
+Typed evaluation runs a private typed plan rather than reconstructing types
+from source terms. Its controls evaluate a plan, apply a semantic value, or
+return a value; its frames wait for a function, an operand, or a strict-let
+argument. Applying a closure and entering a strict-let body are tail calls.
+Readback retains controls for $\downarrow^\tau$, for $\mathrm{quote}$ and
+for returning a term, and frames for a binder, an argument still to read back,
+and a function waiting for its argument.
 
 *Same results, same errors.* Read a frame as the function that the rest of
 its caller applies to the returned value, and a state as the stack applied to
@@ -467,6 +453,69 @@ every $c_q$ with $q \le p'$ is in $U \cup \{c_{p'}\}$, so $p' + 1$ is a valid
 position for the extended set; readback only ever adds names to $U$, so the
 position stays valid along the path, and the name found is the one
 $\operatorname{fresh}$ returns.
+
+### Checking once for evaluation (issue #27)
+
+The former evaluator reconstructed the type of each redex head by inferring
+its first argument again. For nested identity redexes in argument position,
+that revisited suffixes of sizes $n, n-1, \ldots, 1$, even after the initial
+check succeeded. Removing repeated argument checks in PR #30 left this second
+source of quadratic traversal.
+
+`build_typed_plan` now performs the bidirectional checking rules while
+recording a private `TypedPlan`. Values and variables record their inferred
+type; lambdas record their expected arrow and checked body; each application
+records its domain and checked operand. The redex rule records a strict let:
+first evaluate the inferred argument, bind the renamed parameter, then run
+the plan for the body joined with the trailing arguments. The public syntax,
+`check` and `infer` APIs are unchanged. Evaluation and closure application
+execute these plans and never call `check` or `infer`.
+
+**Error correspondence.** Erase the plan returned by each control to its type
+(for inference) or successful check (for checking). `PlanHead`, `PlanArgument`
+and `PlanCompare` perform the same head inference, argument check and type
+comparison as their checker counterparts. `PlanRedexFirst` renames before
+inferring the first argument, calls `redex_finish` only after it succeeds,
+and continues the remaining spine in the original inference/checking mode.
+`PlanBindBody` and `PlanRedexRest` only assemble successful plans; neither can
+fail. Induction over machine transitions therefore gives the same acceptance
+and first `TypeError` as `check`. The public checker remains an independent
+implementation used for comparison.
+
+**Semantic correspondence.** A planned application evaluates its function,
+then its operand, then applies the value. A planned redex implements
+$(\lambda x.b)\,a_1\,a_2\cdots a_n$ by evaluating $a_1$ and continuing
+$b\,a_2\cdots a_n$ under its value. The existing capture-avoidance step
+renames $x$ away from the free variables of every trailing argument; adding
+that binding therefore leaves their meanings unchanged (environment
+weakening). Induction on the successful typing derivation relates the plan
+to the source term in the same STLC semantic domain. Readback is unchanged.
+Environment entries retain both the internal lookup name and its source
+name: internal capture-avoidance names must not occupy additional output
+binder candidates. Source names are already in the initial avoidance set.
+These are structural arguments, not machine-checked proofs.
+
+**Cost and limits.** Each successful typing visit creates a constant number of
+plan nodes; $p$ such visits add $O(p)$ plan storage and $O(d)$ pending frames
+at traversal depth $d$. The retained plan can live as long as a closure.
+Evaluation traverses plans without the repeated type-inference suffixes. For
+the nested identity-redex regression with fixed signature and empty initial
+context, checking, plan construction and evaluation take $O(n)$ work and
+$O(n)$ heap storage. This is not a linear-time bound for arbitrary STLC
+normalization: reduction can duplicate work and normal forms can grow;
+context lookup, branch-prefix copies, type equality, spine copying and name
+analysis retain their existing costs. In particular, capture avoidance may
+scan trailing arguments at multiple redexes, and name collection for closure
+readback is unchanged.
+
+**Evidence.** `src/stlc/issue27_test.mbt` covers 100,000 nested identity redexes,
+100,000 neutral argument positions, first-error ordering and a capture case
+with exact binder-name comparison. `python3 tools/verify_stlc_plan.py --target
+all` compares 43,120 bounded term/type combinations per backend with the
+frozen PR #30 implementation at `db53d775e9248e8712a240adc8327be72675c80f`,
+including exact output names and error values. It requires that Git object
+locally and removes its temporary oracle afterward. The corpus is finite;
+it supports compatibility but does not establish a universal theorem.
 
 ## Correctness and invariants
 
@@ -518,9 +567,8 @@ in checking mode, and ill-typed variants that are still rejected.
 - Constants are opaque: there are no delta rules.
 - `normalize_checked` is bounded by a step limit because it reuses the untyped
   reducer.
-- `normalize_eta_long` is stack-safe. Its typed evaluator reuses the complete
-  check performed before evaluation, so it does not check each application
-  argument a second time. Deep redexes can still take quadratic time because
-  `head_type_for_application` infers the first argument of each redex again
-  while reconstructing the head type; issue #27 tracks that remaining cost.
+- `normalize_eta_long` executes a plan produced by one checking pass, with no
+  type inference during evaluation (#27). It does not promise linear time
+  for arbitrary terms: reduction, context lookup, capture avoidance, spine
+  copying and readback can still require more work than the input size.
 - `Debug` of a deep term, type or error recurses and can overflow the stack.

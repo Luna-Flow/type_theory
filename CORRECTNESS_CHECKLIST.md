@@ -15,7 +15,7 @@ Last audited: 2026-10-09
 | De Bruijn small-step | Correct | path, normalization and empty-application tests (#2) | leftmost-outermost beta; `Apply(h, [])` is read as `h` |
 | UTLC untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests, 30M-unit divergence tests on every backend and exact-cost tests (#12) | beta-normalization may exhaust fuel; evaluation and readback use a constant host stack |
 | STLC bidirectional typechecking | Correct | typing, rejection, shadowing and trailing-argument capture tests (#1); checking-mode redex tests on curried and flat spines, nested redexes, capture and ill-typed variants (#8); 100,000-level term and type tests on every backend (#13) | inference is syntax-directed and lambdas check against arrows; a redex is typed in either mode by inferring its first argument, and a checked redex checks the rest of its spine against the expected type; a redex parameter is renamed apart from trailing arguments; checking uses a constant host stack |
-| STLC typed eta-long NbE | Correct | eta-expansion, open neutral, beta/eta, curried redex spine tests (#7), and redexes returning a lambda (#8); 100,000-level term and type tests on every backend (#13) | well-typed STLC terms normalize by type-directed readback; accepts exactly the terms `check` accepts; evaluation and readback use a constant host stack |
+| STLC typed eta-long NbE | Correct | eta-expansion, open neutral, beta/eta, curried redex spine tests (#7), and redexes returning a lambda (#8); 100,000-level term and type tests on every backend (#13); typed-plan deep-argument regressions and 43,120 bounded baseline comparisons per backend (#27) | well-typed STLC terms normalize by type-directed readback; accepts exactly the terms `check` accepts; evaluation and readback use a constant host stack |
 | Custom AST integration | Contract tested | mock downstream AST | domain canonicalization remains downstream |
 
 ## Known Boundaries
@@ -24,9 +24,11 @@ Last audited: 2026-10-09
 - `Debug`/`Repr` of deeply nested terms, types and errors is recursive and can
   overflow the host stack; the #13 contract covers the algorithms, not derived
   formatting (#28).
-- `normalize_eta_long` can still take quadratic time on deeply nested redexes
-  because head-type reconstruction re-infers each redex's first argument
-  (#27). Evaluation no longer repeats the complete check for every argument.
+- `normalize_eta_long` builds a private typed plan during checking and executes
+  it without repeating inference (#27). This removes the nested argument
+  suffix traversals, but is not a linear-time guarantee for arbitrary STLC
+  terms: context lookup, capture avoidance, spine copying and readback retain
+  their costs, and normalization can expand the output.
 - `alpha_equal` is the payload equality lifted through binders. With a
   non-reflexive `==`, such as `Double` with `NaN`, a term is not alpha-equal
   to itself.
@@ -50,9 +52,8 @@ Last audited: 2026-10-09
 
 Open:
 
-None in this checklist. `normalize_eta_long` performance (#27) and deep
-`Debug` formatting (#28) remain explicit boundaries above; they are not
-claimed as fixed by #13.
+Deep `Debug` formatting (#28) remains unresolved. The algorithmic stack-safety
+contract of #13 does not cover formatting.
 
 Fixed on 2026-10-09:
 

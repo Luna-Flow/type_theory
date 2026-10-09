@@ -56,18 +56,20 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
 
 ### Fixed
 
-- **#27:** typed eta-long evaluation now relies on the complete check already
-  performed by `normalize_eta_long` instead of checking each application
-  argument again. This removes one repeated traversal while preserving the
-  accepted terms, normalized output and first type error; head-type
-  reconstruction for nested redexes remains tracked in #27.
+- **#27:** `normalize_eta_long` now builds a private typed execution plan during
+  checking. Evaluation and closure application reuse it instead of inferring
+  nested redex arguments again. The regression suite normalizes 100,000 nested
+  redex and neutral argument positions; bounded differential checks preserve
+  exact outputs and first errors against PR #30. The public syntax and APIs
+  are unchanged. Arbitrary normalization, capture avoidance and context/name
+  operations retain their existing complexity limits.
+
 - **#13:** `rewrite`, `eval`, `utlc/lambda` and `stlc` now keep traversal,
   type-checking, typed evaluation and readback work in heap arrays instead of
   recursive host calls. The regression suite covers terms and types nested
   100,000 levels deep on JS, wasm, wasm-gc and native. This does not make
-  derived `Debug` stack-safe (#28); `normalize_eta_long` also retains the
-  quadratic argument-spine behavior tracked in #27 and documented in the STLC
-  design page.
+  derived `Debug` stack-safe (#28). The remaining argument-spine performance
+  limitation is addressed by the typed-plan change for #27 described above.
 - `stlc`: `infer` and `check` typed the trailing arguments `a2 ... an` of a
   redex `(λx. b) a1 a2 ... an` with the parameter `x` in scope, so a free `x`
   in those arguments was captured and the checker could accept a wrong type.
