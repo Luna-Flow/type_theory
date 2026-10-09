@@ -212,3 +212,40 @@ test "upward shift is unchanged" {
   assert_true(@debruijn.shift(deep, 3, 0) == Ok(Bind(Bind(Bound(5)))))
   assert_true(@debruijn.shift(deep, 0, 0) == Ok(deep))
 }
+
+///|
+test "shift rejects a negative cutoff" {
+  // issue #10: a negative cutoff is rejected up front, whatever the term
+  let x = @core.Name::new("x")
+  // λ. 0 must not become λ. 1
+  let identity : @debruijn.DbTerm[Int] = Bind(Bound(0))
+  assert_true(
+    @debruijn.shift(identity, 1, -1) == Err(NegativeCutoff(cutoff=-1)),
+  )
+  assert_true(
+    @debruijn.shift(identity, 0, -1) == Err(NegativeCutoff(cutoff=-1)),
+  )
+  assert_true(
+    @debruijn.shift(identity, -1, -1) == Err(NegativeCutoff(cutoff=-1)),
+  )
+  // closed and open terms alike
+  let closed : @debruijn.DbTerm[Int] = Bind(Bind(Apply(Bound(1), [Bound(0)])))
+  assert_true(@debruijn.shift(closed, 2, -3) == Err(NegativeCutoff(cutoff=-3)))
+  let open_term : @debruijn.DbTerm[Int] = Apply(Bound(0), [Bound(1)])
+  assert_true(
+    @debruijn.shift(open_term, 1, -1) == Err(NegativeCutoff(cutoff=-1)),
+  )
+  // terms without any index
+  let value : @debruijn.DbTerm[Int] = Value(7)
+  assert_true(@debruijn.shift(value, 0, -1) == Err(NegativeCutoff(cutoff=-1)))
+  let free : @debruijn.DbTerm[Int] = Apply(Free(x), [Value(1)])
+  assert_true(@debruijn.shift(free, -1, -2) == Err(NegativeCutoff(cutoff=-2)))
+  // the cutoff is checked before the indices of the term
+  let negative : @debruijn.DbTerm[Int] = Bound(-1)
+  assert_true(
+    @debruijn.shift(negative, 1, -1) == Err(NegativeCutoff(cutoff=-1)),
+  )
+  // a zero cutoff is still accepted
+  assert_true(@debruijn.shift(identity, 1, 0) == Ok(identity))
+  assert_true(@debruijn.shift(value, 0, 0) == Ok(value))
+}

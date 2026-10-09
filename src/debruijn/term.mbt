@@ -14,6 +14,7 @@ pub(all) enum ScopeError {
   UnboundIndex(index~ : Int, depth~ : Int)
   NegativeIndex(index~ : Int)
   NegativeShift(index~ : Int, delta~ : Int, cutoff~ : Int)
+  NegativeCutoff(cutoff~ : Int)
 } derive(Eq, Debug)
 
 ///|
@@ -209,13 +210,18 @@ fn[T] shift_visit(
 }
 
 ///|
-/// Shifts free bound indices `>= cutoff` by `delta`. Fails with
-/// `NegativeShift` if a shifted index would fall below the cutoff.
+/// Shifts free bound indices `>= cutoff` by `delta`. Requires
+/// `cutoff >= 0` and fails with `NegativeCutoff` otherwise, whatever the term.
+/// Fails with `NegativeShift` if a shifted index would fall below the cutoff.
 pub fn[T] shift(
   term : DbTerm[T],
   delta : Int,
   cutoff : Int,
 ) -> Result[DbTerm[T], ScopeError] {
+  // A negative cutoff would treat indices bound inside the term as free.
+  if cutoff < 0 {
+    return Err(NegativeCutoff(cutoff~))
+  }
   shift_visit(term, delta, cutoff, 0)
 }
 
