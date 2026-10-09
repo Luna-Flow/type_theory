@@ -99,10 +99,11 @@ fn drop_domains(ty : Ty, count : Int) -> Result[Ty, TypeError] {
 /// (issue #8); this covers a body that is a lambda, which cannot be inferred.
 /// Any other head is inferred.
 ///
-/// The definition recurses on the remaining spine and builds the type while
-/// returning. It is run as two loops (issue #13): the first takes redex steps
-/// down the spine and keeps them in a heap array, the second builds the type
-/// from the innermost step outwards. Errors are met in the same order.
+/// The definition expands each lambda redex, infers its first argument, and
+/// recurses on the body joined with the trailing arguments; it builds the type
+/// while returning. It is run as two loops (issue #13): the first takes redex
+/// steps down the spine and keeps them in a heap array, the second builds the
+/// type from the innermost step outwards. Errors are met in the same order.
 fn head_type_for_application(
   sig : Signature,
   ctx : TypeContext,
@@ -205,10 +206,11 @@ fn continue_spine(
   }
   match current_type {
     Ty::Arrow(domain, codomain) => {
-      match check(sig, ctx, arguments[next], domain) {
-        Ok(_) => ()
-        Err(error) => return Err(error)
-      }
+      // `normalize_eta_long` checks the complete source term before evaluation.
+      // Lambda bodies and every argument are subterms covered by that check,
+      // so checking an argument again here repeats work that its own evaluation
+      // will also repeat for any nested application. The environment invariant
+      // established by the checker supplies the same `domain` here.
       frames.push(
         Argument(
           sig, ctx, arguments, environment, next, function, domain, codomain,

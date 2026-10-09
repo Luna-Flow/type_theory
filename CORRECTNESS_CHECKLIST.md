@@ -24,8 +24,9 @@ Last audited: 2026-10-09
 - `Debug`/`Repr` of deeply nested terms, types and errors is recursive and can
   overflow the host stack; the #13 contract covers the algorithms, not derived
   formatting (#28).
-- `normalize_eta_long` can take quadratic time on deeply nested redexes and
-  argument spines (#27).
+- `normalize_eta_long` can still take quadratic time on deeply nested redexes
+  because head-type reconstruction re-infers each redex's first argument
+  (#27). Evaluation no longer repeats the complete check for every argument.
 - `alpha_equal` is the payload equality lifted through binders. With a
   non-reflexive `==`, such as `Double` with `NaN`, a term is not alpha-equal
   to itself.

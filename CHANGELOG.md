@@ -56,6 +56,11 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
 
 ### Fixed
 
+- **#27:** typed eta-long evaluation now relies on the complete check already
+  performed by `normalize_eta_long` instead of checking each application
+  argument again. This removes one repeated traversal while preserving the
+  accepted terms, normalized output and first type error; head-type
+  reconstruction for nested redexes remains tracked in #27.
 - **#13:** `rewrite`, `eval`, `utlc/lambda` and `stlc` now keep traversal,
   type-checking, typed evaluation and readback work in heap arrays instead of
   recursive host calls. The regression suite covers terms and types nested
