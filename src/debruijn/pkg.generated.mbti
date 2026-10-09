@@ -48,8 +48,9 @@ pub(all) enum DbTerm[T] {
   Bound(Int)
   Apply(DbTerm[T], Array[DbTerm[T]])
   Bind(DbTerm[T])
-} derive(Eq, @debug.Debug)
+} derive(@debug.Debug)
 pub fn[T : Eq] DbTerm::equal(Self[T], Self[T]) -> Bool
+pub impl[T : Eq] Eq for DbTerm[T]
 
 pub(all) enum ScopeError {
   UnboundIndex(index~ : Int, depth~ : Int)

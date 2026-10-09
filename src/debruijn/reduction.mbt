@@ -20,33 +20,14 @@ pub(all) enum DbNormalizationResult[T] {
 } derive(Eq, Debug)
 
 ///|
-fn[T] lift_db_step(
-  before : DbTerm[T],
-  result : DbStepResult[T],
-  frame : @rewrite.ReductionFrame,
-  rebuild : (DbTerm[T]) -> DbTerm[T],
-) -> DbStepResult[T] {
-  match result {
-    NoStep => NoStep
-    ScopeFailure(error) => ScopeFailure(error)
-    Reduced(after=child_after, rule~, path~, ..) =>
-      Reduced(
-        before~,
-        after=rebuild(child_after),
-        rule~,
-        path=path.prepend(frame),
-      )
-  }
-}
-
-///|
 /// Removes empty applications `Apply(h, [])` around a term; an application
 /// with no arguments is read as its head.
 fn[T] strip_empty_applications(term : DbTerm[T]) -> DbTerm[T] {
-  match term {
-    Apply(head, []) => strip_empty_applications(head)
-    _ => term
+  let mut current = term
+  while current is Apply(head, []) {
+    current = head
   }
+  current
 }
 
 ///|
@@ -77,59 +58,99 @@ pub fn[T] reduce_once(term : DbTerm[T]) -> DbStepResult[T] {
 
 ///|
 /// One leftmost-outermost beta step on a term that is well scoped at some
-/// depth. Subterms under binders are visited with this function, not with
+/// depth. Subterms under binders are searched as part of this term, not with
 /// `reduce_once`, because their indices may point at the enclosing binders.
+///
+/// The recursive definition tries the node itself, then searches the head
+/// and the arguments from left to right, and enters binder bodies: the
+/// contracted redex is the first redex in pre-order. The search walks the
+/// term in that order, keeping the path from the root to the current node in
+/// a heap array, and the reduct is rebuilt along the path, innermost frame
+/// first, as the recursive calls would rebuild it on return.
 fn[T] reduce_valid(term : DbTerm[T]) -> DbStepResult[T] {
-  match (term, redex_body(term)) {
-    (Apply(_, arguments), Some(body)) =>
-      match instantiate(body, arguments[0]) {
-        Err(error) => ScopeFailure(error)
-        Ok(reduced) => {
-          let after = if arguments.length() == 1 {
-            reduced
-          } else {
-            Apply(reduced, arguments[1:].to_owned())
-          }
-          Reduced(
-            before=term,
-            after~,
-            rule=@rewrite.RuleName::unsafe_new("beta"),
-            path=@rewrite.ReductionPath::root(),
-          )
-        }
+  // the ancestors of `current`, outermost first, with the child taken:
+  // -1 for the head of an application, `i` for its argument `i`, 0 for the
+  // body of a binder
+  let ancestors : Array[(DbTerm[T], Int)] = []
+  let mut current = term
+  while true {
+    if redex_body(current) is Some(body) && current is Apply(_, arguments) {
+      return contract(term, ancestors, body, arguments)
+    }
+    match current {
+      Bind(body) => {
+        ancestors.push((current, 0))
+        current = body
       }
-    (Value(_) | Free(_) | Bound(_), _) => NoStep
-    (Bind(body), _) =>
-      lift_db_step(term, reduce_valid(body), BinderBody, fn(next) { Bind(next) })
-    (Apply(head, arguments), None) => {
-      let head_step = reduce_valid(head)
-      match head_step {
-        Reduced(_) =>
-          lift_db_step(term, head_step, ApplyHead, fn(next) {
-            Apply(next, arguments)
-          })
-        ScopeFailure(error) => ScopeFailure(error)
-        NoStep => {
-          for i in 0..<arguments.length() {
-            let argument_step = reduce_valid(arguments[i])
-            match argument_step {
-              Reduced(_) =>
-                return lift_db_step(term, argument_step, ApplyArgument(i), fn(
-                  next,
-                ) {
-                  let next_arguments = arguments.copy()
-                  next_arguments[i] = next
-                  Apply(head, next_arguments)
-                })
-              ScopeFailure(error) => return ScopeFailure(error)
-              NoStep => continue
+      Apply(head, _) => {
+        ancestors.push((current, -1))
+        current = head
+      }
+      Value(_) | Free(_) | Bound(_) =>
+        // the subtree of `current` has no redex: go on with the next
+        // argument of the nearest application with one left
+        while true {
+          match ancestors.pop() {
+            None => return NoStep
+            Some((Apply(_, arguments) as parent, child)) if child + 1 <
+              arguments.length() => {
+              ancestors.push((parent, child + 1))
+              current = arguments[child + 1]
+              break
             }
+            Some(_) => continue
           }
-          NoStep
         }
-      }
     }
   }
+  NoStep
+}
+
+///|
+/// Contracts the redex with binder body `body` and arguments `arguments`
+/// found below `ancestors` in `term`, and rebuilds the term around the reduct.
+fn[T] contract(
+  term : DbTerm[T],
+  ancestors : Array[(DbTerm[T], Int)],
+  body : DbTerm[T],
+  arguments : Array[DbTerm[T]],
+) -> DbStepResult[T] {
+  let reduced = match instantiate(body, arguments[0]) {
+    Err(error) => return ScopeFailure(error)
+    Ok(reduced) => reduced
+  }
+  let mut after = if arguments.length() == 1 {
+    reduced
+  } else {
+    Apply(reduced, arguments[1:].to_owned())
+  }
+  let mut path = @rewrite.ReductionPath::root()
+  for i = ancestors.length() - 1; i >= 0; i = i - 1 {
+    let (parent, child) = ancestors[i]
+    match parent {
+      Bind(_) => {
+        after = Bind(after)
+        path = path.prepend(BinderBody)
+      }
+      Apply(head, parent_arguments) =>
+        if child < 0 {
+          after = Apply(after, parent_arguments)
+          path = path.prepend(ApplyHead)
+        } else {
+          let next_arguments = parent_arguments.copy()
+          next_arguments[child] = after
+          after = Apply(head, next_arguments)
+          path = path.prepend(ApplyArgument(child))
+        }
+      Value(_) | Free(_) | Bound(_) => abort("an ancestor has children")
+    }
+  }
+  Reduced(
+    before=term,
+    after~,
+    rule=@rewrite.RuleName::unsafe_new("beta"),
+    path~,
+  )
 }
 
 ///|
