@@ -249,8 +249,8 @@ msgstr "它是提升的 `Eq` 实现；新代码中请使用 `==`。"
 
 #: manual/api/core.md:332
 #: manual/api/core.md:334
-#: manual/api/stlc.md:296
-#: manual/api/stlc.md:298
+#: manual/api/stlc.md:330
+#: manual/api/stlc.md:332
 #: manual/api/syntax.md:346
 #: manual/api/syntax.md:348
 #: manual/index.md:103
@@ -258,7 +258,7 @@ msgid "Deprecated"
 msgstr "已弃用"
 
 #: manual/api/core.md:334
-#: manual/api/stlc.md:298
+#: manual/api/stlc.md:332
 #: manual/api/syntax.md:348
 msgid "Replacement"
 msgstr "替代项"
@@ -860,36 +860,40 @@ msgid "`check` verifies a term against a type."
 msgstr "`check` 将项对照类型进行检验。"
 
 #: manual/api/stlc.md:194
-msgid "A lambda checks against an arrow type by checking its body against the codomain, with the parameter given the domain. Every other term is inferred and compared with `==`; a difference gives `TypeMismatch`."
-msgstr "lambda 对照箭头类型进行检查时，会以定义域作为参数的类型，将体对照陪域进行检查。其他所有项都先推断类型，再用 `==` 比较；若不同则给出 `TypeMismatch`。"
+msgid "A lambda checks against an arrow type by checking its body against the codomain, with the parameter given the domain. A lambda applied directly to arguments, $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$, is checked as `infer` types it, except that $b\\,a_2 \\cdots a_n$ is checked against the expected type instead of inferred: the type of $a_1$ is still inferred, and the parameter is renamed apart from $a_2, \\dots, a_n$ in the same way. So a redex whose result is a lambda, such as $(\\lambda x.\\,\\lambda y.\\,y)\\,()$, checks against an arrow type, also when it is the argument of a function. Every other term is inferred and compared with `==`; a difference gives `TypeMismatch`. An argument that is given to a lambda, such as $a_1$, must be inferable: a lambda there gives `CannotInferLambda`."
+msgstr "lambda 对照箭头类型进行检查时，会以定义域作为参数的类型，将体对照陪域进行检查。直接作用于参数的 lambda，即 $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$，按 `infer` 为其定型的方式检查，只是 $b\\,a_2 \\cdots a_n$ 对照期望类型进行检查，而不是被推断：$a_1$ 的类型仍然被推断，形参也以同样的方式改名，使其与 $a_2, \\dots, a_n$ 不冲突。因此，结果为 lambda 的可约式，例如 $(\\lambda x.\\,\\lambda y.\\,y)\\,()$，可以对照箭头类型通过检查，作为函数的参数时也是如此。其他所有项都先推断类型，再用 `==` 比较；若不同则给出 `TypeMismatch`。交给 lambda 的参数（如 $a_1$）必须可推断：该位置上的 lambda 会给出 `CannotInferLambda`。"
 
-#: manual/api/stlc.md:217
+#: manual/api/stlc.md:225
+msgid "A redex whose result is a lambda is checked against the expected arrow:"
+msgstr "结果为 lambda 的可约式会对照期望的箭头类型进行检查："
+
+#: manual/api/stlc.md:251
 msgid "The trailing arguments of a redex are typed in the context of the redex, not under its parameter:"
 msgstr "可约式的后续参数在可约式的上下文中定型，而不是在其形参之下："
 
-#: manual/api/stlc.md:240
+#: manual/api/stlc.md:274
 #: manual/api/utlc/lambda.md:123
 #: manual/api/utlc/nbe.md:186
 msgid "Normalization"
 msgstr "范式化"
 
-#: manual/api/stlc.md:244
+#: manual/api/stlc.md:278
 msgid "`normalize_checked` checks a term against a type and then normalizes it with the untyped beta-eta reducer."
 msgstr "`normalize_checked` 将项对照类型进行检查，然后用无类型的 β-η 归约器对其范式化。"
 
-#: manual/api/stlc.md:251
+#: manual/api/stlc.md:285
 msgid "On a type error it returns `Err` without reducing. Otherwise it returns `Ok(@lambda.normalize(term, max_steps))`: normal-order beta-eta reduction with a step limit. Its normal forms are beta-normal and eta-*short* (for unary applications, see [`@lambda.eta_rule`](utlc/lambda.md)). Because every well-typed term is strongly normalizing, a large enough `max_steps` always gives `NormalForm`."
 msgstr "遇到类型错误时，它返回 `Err` 而不进行归约。否则返回 `Ok(@lambda.normalize(term, max_steps))`：带步数上限的正规序 β-η 归约。其范式是 β-范式且 η-*短*的（针对一元应用，见 [`@lambda.eta_rule`](utlc/lambda.md)）。由于每个良类型项都是强范式化的，足够大的 `max_steps` 总会得到 `NormalForm`。"
 
-#: manual/api/stlc.md:260
+#: manual/api/stlc.md:294
 msgid "`normalize_eta_long` checks a term against a type and returns its beta-normal, eta-long form, computed by typed normalization by evaluation."
 msgstr "`normalize_eta_long` 将项对照类型进行检查，并返回其 β-范式、η-长形式，该形式通过带类型的求值范式化计算得到。"
 
-#: manual/api/stlc.md:267
+#: manual/api/stlc.md:301
 msgid "In the result, every subterm of arrow type is a lambda, and every application has a variable or a constant at its head. Variables of the context and constants of the signature are kept as they are and eta-expanded according to their types. No step limit is needed: well-typed terms always normalize. New binder names are `x`, `x_1`, … chosen to avoid every name of the term and the context."
 msgstr "在结果中，每个箭头类型的子项都是 lambda，每个应用的头部都是变量或常量。上下文中的变量和签名中的常量保持原样，并按其类型进行 η-展开。不需要步数上限：良类型的项总能范式化。新的绑定子名称为 `x`、`x_1`、…，其选取会避开项和上下文中的所有名字。"
 
-#: manual/api/stlc.md:303
+#: manual/api/stlc.md:337
 msgid "The hidden method forms `not_equal` and `to_repr` on the types of this package are deprecated; use `!=` and `Repr(x)`."
 msgstr "本包中各类型上隐藏的方法形式 `not_equal` 和 `to_repr` 已弃用；请使用 `!=` 和 `Repr(x)`。"
 
@@ -1519,7 +1523,7 @@ msgstr "下游变量类型通过单射（不同变量映射到不同名）转换
 #: manual/design/debruijn.md:242
 #: manual/design/eval.md:203
 #: manual/design/rewrite.md:182
-#: manual/design/stlc.md:332
+#: manual/design/stlc.md:386
 #: manual/design/substitution.md:130
 #: manual/design/syntax.md:286
 #: manual/design/utlc/lambda.md:205
@@ -1572,7 +1576,7 @@ msgstr "下游 adapter 应为自己的节点种类添加 (V1)–(V5) 的测试�
 #: manual/design/debruijn.md:263
 #: manual/design/eval.md:226
 #: manual/design/rewrite.md:207
-#: manual/design/stlc.md:353
+#: manual/design/stlc.md:412
 #: manual/design/substitution.md:329
 #: manual/design/syntax.md:309
 #: manual/design/utlc/lambda.md:232
@@ -1597,7 +1601,7 @@ msgstr "**在运行时检查定律。** 这些定律是关于所有节点的等�
 #: manual/design/debruijn.md:275
 #: manual/design/eval.md:240
 #: manual/design/rewrite.md:219
-#: manual/design/stlc.md:366
+#: manual/design/stlc.md:425
 #: manual/design/substitution.md:343
 #: manual/design/syntax.md:323
 #: manual/design/utlc/lambda.md:243
@@ -2554,175 +2558,191 @@ msgstr "**问题。** 若 lambda 上没有标注，$\\lambda x.\\,x$ 的类型�
 msgid "**Choice.** Two mutually recursive judgements: inference $\\Gamma \\vdash t \\Rightarrow \\tau$ (`infer`) and checking $\\Gamma \\vdash t \\Leftarrow \\tau$ (`check`). Information flows from the expected type into lambdas, and from variables and constants out of applications.[^bidir] The implemented rules are"
 msgstr "**选择。** 两个相互递归的判断：推断 $\\Gamma \\vdash t \\Rightarrow \\tau$（`infer`）与检查 $\\Gamma \\vdash t \\Leftarrow \\tau$（`check`）。信息从期望类型流入 lambda，并从变量和常量流出到应用。[^bidir] 实现的规则为"
 
-#: manual/design/stlc.md:108
-msgid "In $\\textsc{App}$ the spine is flattened first, so nested `Apply` nodes are one application $h\\,a_1 \\cdots a_n$; if $h$ has fewer arrows than arguments the result is `ExpectedFunction`, and an `Apply` node of the spine without arguments gives `EmptyApplication`. In $\\textsc{Redex}$ the parameter is renamed apart from the trailing arguments:"
-msgstr "在 $\\textsc{App}$ 中先展平脊，使嵌套的 `Apply` 节点成为一个应用 $h\\,a_1 \\cdots a_n$；若 $h$ 的箭头数少于参数个数，结果为 `ExpectedFunction`，而脊中没有参数的 `Apply` 节点给出 `EmptyApplication`。在 $\\textsc{Redex}$ 中，形参被改名，使其与后续参数不冲突："
-
-#: manual/design/stlc.md:122
-msgid ""
-"with $b\\{x \\mapsto x'\\}$ the checked bound renaming of the [syntax design](syntax.md); in both cases $\\lambda x.\\,b =_\\alpha \\lambda x'.\\,b\\{x \\mapsto x'\\}$ and $x' \\n"
-"otin \\mathrm{FV}(a_2, \\dots, a_n)$. With $n = 1$ there is nothing to rename and the second premise is $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$. $\\textsc{Sub}$ applies to every term except a lambda checked against an arrow; a lambda in inference position fails with `CannotInferLambda`. Type equality in $\\textsc{Sub}$ is syntactic, which is exact for simple types."
-msgstr ""
-"其中 $b\\{x \\mapsto x'\\}$ 是 [syntax 设计](syntax.md) 中带检查的约束改名；两种情况下都有 $\\lambda x.\\,b =_\\alpha \\lambda x'.\\,b\\{x \\mapsto x'\\}$ 且 $x' \\n"
-"otin \\mathrm{FV}(a_2, \\dots, a_n)$。当 $n = 1$ 时无需改名，第二个前提为 $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$。$\\textsc{Sub}$ 适用于除对箭头类型检查的 lambda 之外的所有项；处于推断位置的 lambda 以 `CannotInferLambda` 失败。$\\textsc{Sub}$ 中的类型相等是语法相等，对简单类型而言是精确的。"
+#: manual/design/stlc.md:115
+msgid "In $\\textsc{App}$ the spine is flattened first, so nested `Apply` nodes are one application $h\\,a_1 \\cdots a_n$; if $h$ has fewer arrows than arguments the result is `ExpectedFunction`, and an `Apply` node of the spine without arguments gives `EmptyApplication`. $\\textsc{Redex}$ and $\\textsc{Redex}^{\\Leftarrow}$ differ only in the mode of the second premise; in both the spine is flattened in the same way and the parameter is renamed apart from the trailing arguments:"
+msgstr "在 $\\textsc{App}$ 中先展平脊，使嵌套的 `Apply` 节点成为一个应用 $h\\,a_1 \\cdots a_n$；若 $h$ 的箭头数少于参数个数，结果为 `ExpectedFunction`，而脊中没有参数的 `Apply` 节点给出 `EmptyApplication`。$\\textsc{Redex}$ 与 $\\textsc{Redex}^{\\Leftarrow}$ 只在第二个前提的模式上不同；两者都以同样的方式展平脊，并把形参改名，使其与后续参数不冲突："
 
 #: manual/design/stlc.md:131
+msgid ""
+"with $b\\{x \\mapsto x'\\}$ the checked bound renaming of the [syntax design](syntax.md); in both cases $\\lambda x.\\,b =_\\alpha \\lambda x'.\\,b\\{x \\mapsto x'\\}$ and $x' \\n"
+"otin \\mathrm{FV}(a_2, \\dots, a_n)$. With $n = 1$ there is nothing to rename and the second premise is $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$, or $\\Gamma, x{:}\\sigma \\vdash b \\Leftarrow \\tau$ for $\\textsc{Redex}^{\\Leftarrow}$. `check` uses $\\textsc{Redex}^{\\Leftarrow}$ for every application whose flattened head is a lambda, and $\\textsc{Sub}$ for every other term except a lambda checked against an arrow; a lambda in inference position fails with `CannotInferLambda`. Type equality in $\\textsc{Sub}$ is syntactic, which is exact for simple types."
+msgstr ""
+"其中 $b\\{x \\mapsto x'\\}$ 是 [syntax 设计](syntax.md) 中带检查的约束改名；两种情况下都有 $\\lambda x.\\,b =_\\alpha \\lambda x'.\\,b\\{x \\mapsto x'\\}$ 且 $x' \\n"
+"otin \\mathrm{FV}(a_2, \\dots, a_n)$。当 $n = 1$ 时无需改名，第二个前提为 $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$，对 $\\textsc{Redex}^{\\Leftarrow}$ 则为 $\\Gamma, x{:}\\sigma \\vdash b \\Leftarrow \\tau$。`check` 对展平后头部为 lambda 的每个应用使用 $\\textsc{Redex}^{\\Leftarrow}$，对除对照箭头类型检查的 lambda 之外的其他所有项使用 $\\textsc{Sub}$；处于推断位置的 lambda 以 `CannotInferLambda` 失败。$\\textsc{Sub}$ 中的类型相等是语法相等，对简单类型而言是精确的。"
+
+#: manual/design/stlc.md:143
 msgid "J. Dunfield and N. Krishnaswami, \"Bidirectional typing\", ACM Computing Surveys 54(5), 2021."
 msgstr "J. Dunfield 与 N. Krishnaswami，\"Bidirectional typing\"，ACM Computing Surveys 54(5)，2021。"
 
-#: manual/design/stlc.md:133
+#: manual/design/stlc.md:145
 msgid "**Why the extra $\\textsc{Redex}$ rule.** Plain bidirectional typing cannot infer $(\\lambda x.\\,b)\\,a$, because the head is a lambda. The rule treats the redex like $\\mathsf{let}\\ x = a\\ \\mathsf{in}\\ b$: the argument's type is inferred and given to the parameter. It makes terms produced by substitution-style programming, such as $(\\lambda x.\\,x)\\,()$, checkable without annotations."
 msgstr "**为何需要额外的 $\\textsc{Redex}$ 规则。** 普通的双向类型检查无法推断 $(\\lambda x.\\,b)\\,a$，因为头部是 lambda。该规则把可约式当作 $\\mathsf{let}\\ x = a\\ \\mathsf{in}\\ b$ 处理：推断参数的类型并赋给形参。它使得由代换式编程产生的项（如 $(\\lambda x.\\,x)\\,()$）无需标注即可检查。"
 
-#: manual/design/stlc.md:140
+#: manual/design/stlc.md:152
+msgid "**Why a checking-mode $\\textsc{Redex}^{\\Leftarrow}$.** $\\textsc{Redex}$ alone reaches $\\textsc{Sub}$ when a redex is checked, so the rest of the spine must be inferred. When the redex returns a lambda, as in $(\\lambda x.\\,\\lambda y.\\,y)\\;()$ checked against $\\mathsf{Unit} \\to \\mathsf{Unit}$, that rest is the lambda $\\lambda y.\\,y$, and inference fails with `CannotInferLambda` although the expected type is known. $\\textsc{Redex}^{\\Leftarrow}$ passes the expected type on to the rest of the spine instead, as checking $\\mathsf{let}\\ x = a\\ \\mathsf{in}\\ b$ against $\\tau$ checks $b$ against $\\tau$. It accepts everything that $\\textsc{Redex}$ followed by $\\textsc{Sub}$ accepts: by induction on the spine, its last step reaches either a non-lambda head, where `check` infers the rest of the spine as $\\textsc{Redex}$ would, or a spine without arguments, which is checked directly. Versions before the fix had only $\\textsc{Redex}$ and rejected such terms, also as arguments, as in $f\\,((\\lambda x.\\,\\lambda y.\\,y)\\;())$ with $f : (A \\to A) \\to A$."
+msgstr "**为何需要检查模式的 $\\textsc{Redex}^{\\Leftarrow}$。** 仅有 $\\textsc{Redex}$ 时，检查一个可约式会落到 $\\textsc{Sub}$，因此脊的其余部分必须被推断。当可约式返回 lambda 时，例如对照 $\\mathsf{Unit} \\to \\mathsf{Unit}$ 检查 $(\\lambda x.\\,\\lambda y.\\,y)\\;()$，其余部分就是 lambda $\\lambda y.\\,y$，尽管期望类型已知，推断仍以 `CannotInferLambda` 失败。$\\textsc{Redex}^{\\Leftarrow}$ 则把期望类型传给脊的其余部分，正如对照 $\\tau$ 检查 $\\mathsf{let}\\ x = a\\ \\mathsf{in}\\ b$ 就是对照 $\\tau$ 检查 $b$。凡是 $\\textsc{Redex}$ 后接 $\\textsc{Sub}$ 所接受的项，它都接受：对脊作归纳，它的最后一步要么到达非 lambda 的头部，此时 `check` 像 $\\textsc{Redex}$ 那样推断脊的其余部分，要么到达没有参数的脊，此时直接检查。修复之前的版本只有 $\\textsc{Redex}$，会拒绝这样的项，作为参数时也是如此，例如 $f : (A \\to A) \\to A$ 时的 $f\\,((\\lambda x.\\,\\lambda y.\\,y)\\;())$。"
+
+#: manual/design/stlc.md:169
 msgid "Soundness of the checker"
 msgstr "检查器的可靠性"
 
-#: manual/design/stlc.md:142
+#: manual/design/stlc.md:171
 msgid "**Theorem (soundness).** If `check(Σ, Γ, t, τ)` succeeds, then $\\Gamma \\vdash t : \\tau$; if `infer(Σ, Γ, t)` returns $\\tau$, then $\\Gamma \\vdash t : \\tau$."
 msgstr "**定理（可靠性）。** 若 `check(Σ, Γ, t, τ)` 成功，则 $\\Gamma \\vdash t : \\tau$；若 `infer(Σ, Γ, t)` 返回 $\\tau$，则 $\\Gamma \\vdash t : \\tau$。"
 
-#: manual/design/stlc.md:146
-msgid "*Proof sketch.* Induction on the algorithmic derivation. $\\textsc{Lam}$ and the axioms map to their declarative counterparts; $\\textsc{Sub}$ is immediate; $\\textsc{App}$ is $n$ uses of the declarative application rule. For $\\textsc{Redex}$, write $b' = b\\{x \\mapsto x'\\}$. The second premise is a derivation for the smaller term $b'\\,a_2 \\cdots a_n$, so by induction $\\Gamma, x'{:}\\sigma \\vdash b'\\,a_2 \\cdots a_n : \\tau$, and the generation lemma for application gives types $\\tau_2, \\dots, \\tau_n$ with $\\Gamma, x'{:}\\sigma \\vdash b' : \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$ and $\\Gamma, x'{:}\\sigma \\vdash a_i : \\tau_i$ for $i \\ge 2$. Then"
-msgstr "*证明梗概。* 对算法推导作归纳。$\\textsc{Lam}$ 与公理对应到各自的声明式规则；$\\textsc{Sub}$ 是直接的；$\\textsc{App}$ 是对声明式应用规则的 $n$ 次使用。对于 $\\textsc{Redex}$，记 $b' = b\\{x \\mapsto x'\\}$。第二个前提是更小项 $b'\\,a_2 \\cdots a_n$ 的推导，因此由归纳假设得 $\\Gamma, x'{:}\\sigma \\vdash b'\\,a_2 \\cdots a_n : \\tau$，再由应用的生成引理得到类型 $\\tau_2, \\dots, \\tau_n$，使得 $\\Gamma, x'{:}\\sigma \\vdash b' : \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$，且对 $i \\ge 2$ 有 $\\Gamma, x'{:}\\sigma \\vdash a_i : \\tau_i$。于是"
+#: manual/design/stlc.md:175
+msgid "*Proof sketch.* Induction on the algorithmic derivation. $\\textsc{Lam}$ and the axioms map to their declarative counterparts; $\\textsc{Sub}$ is immediate; $\\textsc{App}$ is $n$ uses of the declarative application rule. For $\\textsc{Redex}$ and $\\textsc{Redex}^{\\Leftarrow}$, write $b' = b\\{x \\mapsto x'\\}$. The second premise is an inference or a checking derivation for the smaller term $b'\\,a_2 \\cdots a_n$, so in both cases by induction $\\Gamma, x'{:}\\sigma \\vdash b'\\,a_2 \\cdots a_n : \\tau$, and the generation lemma for application gives types $\\tau_2, \\dots, \\tau_n$ with $\\Gamma, x'{:}\\sigma \\vdash b' : \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$ and $\\Gamma, x'{:}\\sigma \\vdash a_i : \\tau_i$ for $i \\ge 2$. Then"
+msgstr "*证明梗概。* 对算法推导作归纳。$\\textsc{Lam}$ 与公理对应到各自的声明式规则；$\\textsc{Sub}$ 是直接的；$\\textsc{App}$ 是对声明式应用规则的 $n$ 次使用。对于 $\\textsc{Redex}$ 与 $\\textsc{Redex}^{\\Leftarrow}$，记 $b' = b\\{x \\mapsto x'\\}$。第二个前提是更小项 $b'\\,a_2 \\cdots a_n$ 的推断推导或检查推导，因此两种情况下由归纳假设都得 $\\Gamma, x'{:}\\sigma \\vdash b'\\,a_2 \\cdots a_n : \\tau$，再由应用的生成引理得到类型 $\\tau_2, \\dots, \\tau_n$，使得 $\\Gamma, x'{:}\\sigma \\vdash b' : \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$，且对 $i \\ge 2$ 有 $\\Gamma, x'{:}\\sigma \\vdash a_i : \\tau_i$。于是"
 
-#: manual/design/stlc.md:168
+#: manual/design/stlc.md:197
+msgid "The argument does not use the mode of the second premise, so it proves both rules; for $n = 1$ only the first three lines are needed, with $b'$ of type $\\tau$, which may be an arrow when $b'$ is a lambda. $\\square$"
+msgstr "这一论证不依赖第二个前提的模式，因此同时证明了两条规则；当 $n = 1$ 时只需前三行，其中 $b'$ 的类型为 $\\tau$，当 $b'$ 是 lambda 时它可以是箭头类型。$\\square$"
+
+#: manual/design/stlc.md:201
 msgid "The strengthening step is where the renaming is needed. For $\\Gamma = x{:}B$ the term"
 msgstr "加强这一步正是需要改名的地方。对于 $\\Gamma = x{:}B$，项"
 
-#: manual/design/stlc.md:175
-msgid "has declarative type $B$ and no other. Without the renaming, the trailing $x$ would be typed in $\\Gamma, x{:}\\mathsf{Unit}$ and the checker would answer `Unit`; versions before the fix did exactly that, and `check` accepted the term at `Unit`. With $x' = x_1$ the trailing $x$ keeps its type $B$, and `infer` returns $B$."
-msgstr "具有声明式类型 $B$，且没有其他类型。若不改名，后续的 $x$ 会在 $\\Gamma, x{:}\\mathsf{Unit}$ 中定型，检查器就会回答 `Unit`；修复之前的版本正是如此，`check` 曾在 `Unit` 下接受该项。取 $x' = x_1$ 后，后续的 $x$ 保持其类型 $B$，`infer` 返回 $B$。"
+#: manual/design/stlc.md:208
+msgid "has declarative type $B$ and no other. Without the renaming, the trailing $x$ would be typed in $\\Gamma, x{:}\\mathsf{Unit}$ and the checker would answer `Unit`; versions before the fix did exactly that, and `check` accepted the term at `Unit`. With $x' = x_1$ the trailing $x$ keeps its type $B$, and `infer` returns $B$. $\\textsc{Redex}^{\\Leftarrow}$ renames in the same way, so $(\\lambda x.\\,\\lambda y.\\,\\lambda z.\\,y)\\;()\\;x$ checks against $A \\to B$ and not against $A \\to \\mathsf{Unit}$."
+msgstr "具有声明式类型 $B$，且没有其他类型。若不改名，后续的 $x$ 会在 $\\Gamma, x{:}\\mathsf{Unit}$ 中定型，检查器就会回答 `Unit`；修复之前的版本正是如此，`check` 曾在 `Unit` 下接受该项。取 $x' = x_1$ 后，后续的 $x$ 保持其类型 $B$，`infer` 返回 $B$。$\\textsc{Redex}^{\\Leftarrow}$ 以同样的方式改名，因此 $(\\lambda x.\\,\\lambda y.\\,\\lambda z.\\,y)\\;()\\;x$ 能对照 $A \\to B$ 通过检查，而不能对照 $A \\to \\mathsf{Unit}$ 通过检查。"
 
-#: manual/design/stlc.md:181
-msgid "The typed evaluator walks a spine the same way. It flattens nested `Apply` nodes before typing the head, so the curried $((\\lambda x.\\,\\lambda y.\\,y)\\;())\\;x$ is the same spine as the term above. A lambda head cannot be inferred, so its type is rebuilt from the premises of $\\textsc{Redex}$ and the expected type $\\tau$ of the whole application. Write $b' = h\\,c_1 \\cdots c_k$ with $h$ not an application ($k = 0$ if $b'$ is not one). The head gets the type $\\sigma \\to \\rho$, where $\\sigma$ is inferred for $a_1$ and $\\rho$, the type of $b'$, is computed recursively: take the head type of the flattened spine $h\\,c_1 \\cdots c_k\\,a_2 \\cdots a_n$ under $\\Gamma, x'{:}\\sigma$ and remove its first $k$ domains ($\\rho = \\tau$ if that spine is empty). Any other head is inferred. A redex body that consumes the outer arguments, as in $(\\lambda x.\\,(\\lambda y.\\,\\lambda z.\\,z)\\,x)\\;()\\;v$, is therefore handled as `infer` handles it, and `normalize_eta_long` accepts the same terms as `check`. Versions before the fix only recognised a bare lambda head and rejected both terms with `CannotInferLambda`."
-msgstr "带类型的求值器以同样的方式遍历脊柱。它在为头部定型之前先展平嵌套的 `Apply` 节点，因此柯里化形式 $((\\lambda x.\\,\\lambda y.\\,y)\\;())\\;x$ 与上面的项是同一条脊柱。lambda 头部无法推断，因此它的类型由 $\\textsc{Redex}$ 的前提和整个应用的期望类型 $\\tau$ 重建。记 $b' = h\\,c_1 \\cdots c_k$，其中 $h$ 不是应用（若 $b'$ 不是应用则 $k = 0$）。头部得到类型 $\\sigma \\to \\rho$，其中 $\\sigma$ 是为 $a_1$ 推断出的类型，而 $b'$ 的类型 $\\rho$ 递归地计算：在 $\\Gamma, x'{:}\\sigma$ 下求展平后的脊柱 $h\\,c_1 \\cdots c_k\\,a_2 \\cdots a_n$ 的头部类型，再去掉它的前 $k$ 个定义域（若该脊柱为空，则 $\\rho = \\tau$）。其他头部则直接推断。因此，像 $(\\lambda x.\\,(\\lambda y.\\,\\lambda z.\\,z)\\,x)\\;()\\;v$ 这样消耗外层参数的可约式体，会按照 `infer` 的方式处理，`normalize_eta_long` 与 `check` 接受相同的项。修复之前的版本只识别裸的 lambda 头部，会以 `CannotInferLambda` 拒绝这两个项。"
+#: manual/design/stlc.md:216
+msgid "The typed evaluator walks a spine the same way. It flattens nested `Apply` nodes before typing the head, so the curried $((\\lambda x.\\,\\lambda y.\\,y)\\;())\\;x$ is the same spine as the term above. A lambda head cannot be inferred, so its type is rebuilt from the premises of $\\textsc{Redex}$ or $\\textsc{Redex}^{\\Leftarrow}$ and the expected type $\\tau$ of the whole application. Write $b' = h\\,c_1 \\cdots c_k$ with $h$ not an application ($k = 0$ if $b'$ is not one). The head gets the type $\\sigma \\to \\rho$, where $\\sigma$ is inferred for $a_1$ and $\\rho$, the type of $b'$, is computed recursively: take the head type of the flattened spine $h\\,c_1 \\cdots c_k\\,a_2 \\cdots a_n$ under $\\Gamma, x'{:}\\sigma$ and remove its first $k$ domains. If that spine is empty, $b'$ is in checking position as in $\\textsc{Redex}^{\\Leftarrow}$ and $\\rho = \\tau$; this covers a body that is a lambda, such as $\\lambda y.\\,y$ in $(\\lambda x.\\,\\lambda y.\\,y)\\;()$ at $\\mathsf{Unit} \\to \\mathsf{Unit}$. Any other head is inferred. A redex body that consumes the outer arguments, as in $(\\lambda x.\\,(\\lambda y.\\,\\lambda z.\\,z)\\,x)\\;()\\;v$, is therefore handled as `infer` handles it, and `normalize_eta_long` accepts the same terms as `check`. Versions before the fix only recognised a bare lambda head and rejected both terms with `CannotInferLambda`."
+msgstr "带类型的求值器以同样的方式遍历脊柱。它在为头部定型之前先展平嵌套的 `Apply` 节点，因此柯里化形式 $((\\lambda x.\\,\\lambda y.\\,y)\\;())\\;x$ 与上面的项是同一条脊柱。lambda 头部无法推断，因此它的类型由 $\\textsc{Redex}$ 或 $\\textsc{Redex}^{\\Leftarrow}$ 的前提和整个应用的期望类型 $\\tau$ 重建。记 $b' = h\\,c_1 \\cdots c_k$，其中 $h$ 不是应用（若 $b'$ 不是应用则 $k = 0$）。头部得到类型 $\\sigma \\to \\rho$，其中 $\\sigma$ 是为 $a_1$ 推断出的类型，而 $b'$ 的类型 $\\rho$ 递归地计算：在 $\\Gamma, x'{:}\\sigma$ 下求展平后的脊柱 $h\\,c_1 \\cdots c_k\\,a_2 \\cdots a_n$ 的头部类型，再去掉它的前 $k$ 个定义域。若该脊柱为空，则 $b'$ 处于检查位置，与 $\\textsc{Redex}^{\\Leftarrow}$ 中一样，$\\rho = \\tau$；这涵盖了体为 lambda 的情形，例如在 $\\mathsf{Unit} \\to \\mathsf{Unit}$ 下的 $(\\lambda x.\\,\\lambda y.\\,y)\\;()$ 中的 $\\lambda y.\\,y$。其他头部则直接推断。因此，像 $(\\lambda x.\\,(\\lambda y.\\,\\lambda z.\\,z)\\,x)\\;()\\;v$ 这样消耗外层参数的可约式体，会按照 `infer` 的方式处理，`normalize_eta_long` 与 `check` 接受相同的项。修复之前的版本只识别裸的 lambda 头部，会以 `CannotInferLambda` 拒绝这两个项。"
 
-#: manual/design/stlc.md:197
-msgid "**Completeness for normal forms.** If $t$ is beta-normal and $\\Gamma \\vdash t : \\tau$, then `check(Σ, Γ, t, τ)` succeeds. A beta-normal term is either a lambda, handled by $\\textsc{Lam}$, or a spine whose head is a variable, a constant or $()$; its type is determined by $\\Gamma$ or $\\Sigma$ and its arguments are again normal, so $\\textsc{App}$ and induction apply. Terms with redexes are accepted when each redex's first argument is inferable; $(\\lambda f.\\,f\\,())\\,(\\lambda y.\\,y)$ is rejected with `CannotInferLambda` although it is typable."
-msgstr "**对范式的完备性。** 若 $t$ 是 beta 范式且 $\\Gamma \\vdash t : \\tau$，则 `check(Σ, Γ, t, τ)` 成功。beta 范式的项要么是由 $\\textsc{Lam}$ 处理的 lambda，要么是头部为变量、常量或 $()$ 的脊柱；其类型由 $\\Gamma$ 或 $\\Sigma$ 决定，其参数也是范式，因此可以应用 $\\textsc{App}$ 和归纳。当每个可约式的第一个参数都可推断时，含可约式的项会被接受；$(\\lambda f.\\,f\\,())\\,(\\lambda y.\\,y)$ 虽然可定型，却会以 `CannotInferLambda` 被拒绝。"
+#: manual/design/stlc.md:235
+msgid "**Completeness for normal forms.** If $t$ is beta-normal and $\\Gamma \\vdash t : \\tau$, then `check(Σ, Γ, t, τ)` succeeds. A beta-normal term is either a lambda, handled by $\\textsc{Lam}$, or a spine whose head is a variable, a constant or $()$; its type is determined by $\\Gamma$ or $\\Sigma$ and its arguments are again normal, so $\\textsc{App}$ and induction apply."
+msgstr "**对范式的完备性。** 若 $t$ 是 beta 范式且 $\\Gamma \\vdash t : \\tau$，则 `check(Σ, Γ, t, τ)` 成功。beta 范式的项要么是由 $\\textsc{Lam}$ 处理的 lambda，要么是头部为变量、常量或 $()$ 的脊柱；其类型由 $\\Gamma$ 或 $\\Sigma$ 决定，其参数也是范式，因此可以应用 $\\textsc{App}$ 和归纳。"
 
-#: manual/design/stlc.md:206
-msgid "The checker terminates. Measure a call by the size of its term, and break ties by counting a `check` call above an `infer` call. $\\textsc{Sub}$ goes from `check` to `infer` on the same term, which lowers the measure; every other recursive call is on a strictly smaller term ($\\textsc{Redex}$ recurses on $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$, which lacks the binder and $a_1$; renaming does not change the size)."
-msgstr "检查器会终止。以调用所处理项的大小作为度量，大小相同时把 `check` 调用计为高于 `infer` 调用。$\\textsc{Sub}$ 在同一项上从 `check` 转到 `infer`，度量下降；其他每个递归调用都作用于严格更小的项（$\\textsc{Redex}$ 在 $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ 上递归，它少了绑定子和 $a_1$；改名不改变大小）。"
+#: manual/design/stlc.md:241
+msgid ""
+"Terms with redexes are accepted when every argument that the spine walk gives to a lambda head is inferable: $a_1$ in each spine $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$, and then, recursively, the arguments that $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ gives to a lambda head. This holds whether the redex returns a lambda or not, and at every type of the term. The proof extends the one above. An inferable term has exactly one declarative type (by induction on the inference derivation: the head of $\\textsc{App}$ and the argument of $\\textsc{Redex}$ have unique types), so a derivation of $\\Gamma \\vdash (\\lambda x.\\,b)\\,a_1 \\cdots a_n : \\tau$ gives the parameter the type $\\sigma$ that `infer` returns for $a_1$, and, by weakening with $x' \\n"
+"otin \\mathrm{FV}(a_2, \\dots, a_n)$, $\\Gamma, x'{:}\\sigma \\vdash b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n : \\tau$; $\\textsc{Redex}^{\\Leftarrow}$ and induction on the size of the term apply. The condition is needed: both $(\\lambda f.\\,f\\,())\\,(\\lambda y.\\,y)$ and $(\\lambda x.\\,\\lambda y.\\,y)\\;()\\;(\\lambda z.\\,z)$ are typable and rejected with `CannotInferLambda`, the second because the walk gives $\\lambda z.\\,z$ to the lambda head $\\lambda y.\\,y$."
+msgstr ""
+"当脊的遍历交给 lambda 头部的每个参数都可推断时，含可约式的项会被接受：即每条脊 $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$ 中的 $a_1$，以及递归地，$b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ 交给 lambda 头部的参数。无论可约式是否返回 lambda，这都成立，并且对该项的每个类型都成立。证明是对上述证明的扩展。可推断的项恰有一个声明式类型（对推断推导作归纳：$\\textsc{App}$ 的头部与 $\\textsc{Redex}$ 的参数都有唯一的类型），因此 $\\Gamma \\vdash (\\lambda x.\\,b)\\,a_1 \\cdots a_n : \\tau$ 的推导给形参的类型正是 `infer` 为 $a_1$ 返回的 $\\sigma$，并且由 $x' \\n"
+"otin \\mathrm{FV}(a_2, \\dots, a_n)$ 的弱化得 $\\Gamma, x'{:}\\sigma \\vdash b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n : \\tau$；于是可以应用 $\\textsc{Redex}^{\\Leftarrow}$ 和对项大小的归纳。这一条件是必要的：$(\\lambda f.\\,f\\,())\\,(\\lambda y.\\,y)$ 与 $(\\lambda x.\\,\\lambda y.\\,y)\\;()\\;(\\lambda z.\\,z)$ 都可定型，却都以 `CannotInferLambda` 被拒绝，后者是因为遍历把 $\\lambda z.\\,z$ 交给了 lambda 头部 $\\lambda y.\\,y$。"
 
-#: manual/design/stlc.md:213
+#: manual/design/stlc.md:259
+msgid "The checker terminates. Measure a call by the size of its term, and break ties by counting a `check` call above an `infer` call. $\\textsc{Sub}$ goes from `check` to `infer` on the same term, which lowers the measure; every other recursive call is on a strictly smaller term ($\\textsc{Redex}$ and $\\textsc{Redex}^{\\Leftarrow}$ recurse on $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$, which lacks the binder and $a_1$; renaming does not change the size)."
+msgstr "检查器会终止。以调用所处理项的大小作为度量，大小相同时把 `check` 调用计为高于 `infer` 调用。$\\textsc{Sub}$ 在同一项上从 `check` 转到 `infer`，度量下降；其他每个递归调用都作用于严格更小的项（$\\textsc{Redex}$ 与 $\\textsc{Redex}^{\\Leftarrow}$ 在 $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ 上递归，它少了绑定子和 $a_1$；改名不改变大小）。"
+
+#: manual/design/stlc.md:267
 msgid "Two normalizers with different jobs"
 msgstr "职责不同的两个范式化器"
 
-#: manual/design/stlc.md:215
+#: manual/design/stlc.md:269
 msgid "`normalize_checked` reuses the untyped normal-order beta-eta reducer of [utlc/lambda](utlc/lambda.md) after checking the type. Its value is that it is the *reference* semantics, with traces and step counts; it is step-bounded only because it is shared with the untyped calculus. By strong normalization it always ends in `NormalForm` for a large enough limit. Its normal forms are eta-*short*."
 msgstr "`normalize_checked` 在检查类型之后，复用 [utlc/lambda](utlc/lambda.md) 中无类型的正规序 β-η 归约器。它的价值在于它是*参考*语义，带有归约轨迹和步数统计；它之所以有步数上限，只是因为它与无类型演算共用。由强范式化性，只要上限足够大，它总会以 `NormalForm` 结束。它给出的范式是 η-*短*的。"
 
-#: manual/design/stlc.md:222
+#: manual/design/stlc.md:276
 msgid "`normalize_eta_long` is typed normalization by evaluation. It needs no limit, and it returns the canonical representative of the $\\beta\\eta$ class, so two well-typed terms are $\\beta\\eta$-equal iff their eta-long normal forms are alpha-equivalent: the normalizer decides conversion."
 msgstr "`normalize_eta_long` 是带类型的求值范式化（normalization by evaluation）。它不需要上限，并返回 $\\beta\\eta$ 等价类的规范代表元，因此两个良类型项 $\\beta\\eta$-相等当且仅当它们的 η-长范式 α-等价：该范式化器判定了可转换性。"
 
-#: manual/design/stlc.md:227
+#: manual/design/stlc.md:281
 msgid "Beta-normal, eta-long forms"
 msgstr "β-范式、η-长形式"
 
-#: manual/design/stlc.md:229
+#: manual/design/stlc.md:283
 msgid "Normal forms $\\mathit{Nf}^\\tau$ and neutral terms $\\mathit{Ne}$ are defined by type:"
 msgstr "范式 $\\mathit{Nf}^\\tau$ 与中性项 $\\mathit{Ne}$ 按类型定义："
 
-#: manual/design/stlc.md:241
+#: manual/design/stlc.md:295
 msgid "Every term of arrow type is a lambda (eta-long), and every application has a variable or a constant at its head (beta-normal). Neutral terms of type $\\mathsf{Unit}$ are kept: the eta law for the unit type ($t = ()$ for every $t : \\mathsf{Unit}$) is not implemented, so for $f : \\mathsf{Unit} \\to \\mathsf{Unit}$ and $u : \\mathsf{Unit}$ the terms $f\\,u$ and $f\\,()$ have different normal forms."
 msgstr "每个箭头类型的项都是 lambda（η-长），每个应用的头部都是变量或常量（β-范式）。$\\mathsf{Unit}$ 类型的中性项会被保留：单位类型的 η 律（对每个 $t : \\mathsf{Unit}$ 有 $t = ()$）没有实现，因此对 $f : \\mathsf{Unit} \\to \\mathsf{Unit}$ 和 $u : \\mathsf{Unit}$，项 $f\\,u$ 与 $f\\,()$ 的范式不同。"
 
-#: manual/design/stlc.md:248
+#: manual/design/stlc.md:302
 msgid "Typed normalization by evaluation"
 msgstr "带类型的求值范式化"
 
-#: manual/design/stlc.md:250
+#: manual/design/stlc.md:304
 msgid "The semantic domain interprets each type:"
 msgstr "语义域对每个类型的解释为："
 
-#: manual/design/stlc.md:256
+#: manual/design/stlc.md:310
 msgid "where a closure stores a lambda body with its environment and its type, and a semantic neutral is a free variable, a constant, or a neutral applied to a value together with the value's type. Evaluation $\\llbracket t \\rrbracket\\rho$ maps variables through the environment, lambdas to closures, constants to neutrals, and applies closures by evaluating their bodies (call by value, which is safe because evaluation of typed terms terminates). Reflection $\\uparrow^\\tau$ embeds a neutral as a value; here it is the identity on neutrals, because all eta expansion is deferred to reification. Reification $\\downarrow^\\tau : V_\\tau \\to \\mathit{Nf}^\\tau$ is"
 msgstr "其中闭包保存 lambda 体及其环境和类型，语义中性项是自由变量、常量，或者作用于某个值的中性项（同时记录该值的类型）。求值 $\\llbracket t \\rrbracket\\rho$ 通过环境映射变量，把 lambda 映射为闭包、常量映射为中性项，并通过对闭包体求值来应用闭包（按值调用；这是安全的，因为带类型项的求值必然终止）。反射 $\\uparrow^\\tau$ 把中性项嵌入为值；这里它在中性项上是恒等映射，因为所有 η-展开都推迟到具体化（reification）时进行。具体化 $\\downarrow^\\tau : V_\\tau \\to \\mathit{Nf}^\\tau$ 定义为"
 
-#: manual/design/stlc.md:276
+#: manual/design/stlc.md:330
 msgid "and the normal form of $\\Gamma \\vdash t : \\tau$ is $\\downarrow^\\tau \\llbracket t \\rrbracket \\rho_\\Gamma$, where $\\rho_\\Gamma$ maps each $x{:}\\sigma \\in \\Gamma$ to $\\uparrow^\\sigma x$. Reifying at an arrow type applies the value to a fresh variable, which performs eta expansion; a neutral application records the domain type of its argument so that the argument can be reified at the right type later.[^bs]"
 msgstr "而 $\\Gamma \\vdash t : \\tau$ 的范式是 $\\downarrow^\\tau \\llbracket t \\rrbracket \\rho_\\Gamma$，其中 $\\rho_\\Gamma$ 把每个 $x{:}\\sigma \\in \\Gamma$ 映射为 $\\uparrow^\\sigma x$。在箭头类型上具体化时，会把值应用于一个新鲜变量，这就完成了 η-展开；中性应用会记录其参数的定义域类型，以便之后能在正确的类型上具体化该参数。[^bs]"
 
-#: manual/design/stlc.md:283
+#: manual/design/stlc.md:337
 msgid "U. Berger and H. Schwichtenberg, \"An inverse of the evaluation functional for typed λ-calculus\", LICS 1991. The type-directed presentation follows A. Abel, *Normalization by Evaluation: Dependent Types and Impredicativity*, habilitation thesis, 2013."
 msgstr "U. Berger and H. Schwichtenberg, \"An inverse of the evaluation functional for typed λ-calculus\", LICS 1991. 按类型制导的表述遵循 A. Abel, *Normalization by Evaluation: Dependent Types and Impredicativity*, habilitation thesis, 2013."
 
-#: manual/design/stlc.md:285
+#: manual/design/stlc.md:339
 msgid "**Correctness (sketch).** Define a Kripke logical relation $t \\mathrel{R_\\tau} d$ between terms and values, monotone under context extension:"
 msgstr "**正确性（证明概要）。** 在项与值之间定义一个 Kripke 逻辑关系 $t \\mathrel{R_\\tau} d$，它在上下文扩展下单调："
 
-#: manual/design/stlc.md:297
+#: manual/design/stlc.md:351
 msgid "By induction on $\\tau$ one proves two lemmas together: *reflection* ($t =_{\\beta\\eta} \\mathrm{quote}(n)$ implies $t \\mathrel{R_\\tau} \\uparrow^\\tau n$) and *reification* ($t \\mathrel{R_\\tau} d$ implies $t =_{\\beta\\eta} \\downarrow^\\tau d$). The arrow case of reification is the eta step:"
 msgstr "对 $\\tau$ 归纳，同时证明两个引理：*反射*（$t =_{\\beta\\eta} \\mathrm{quote}(n)$ 蕴含 $t \\mathrel{R_\\tau} \\uparrow^\\tau n$）与*具体化*（$t \\mathrel{R_\\tau} d$ 蕴含 $t =_{\\beta\\eta} \\downarrow^\\tau d$）。具体化的箭头情形就是 η 步骤："
 
-#: manual/design/stlc.md:307
+#: manual/design/stlc.md:361
 msgid "using $x \\mathrel{R_\\sigma} \\uparrow^\\sigma x$ (reflection) and the definition of $R_{\\sigma \\to \\tau}$. The *fundamental lemma* states that $\\Gamma \\vdash t : \\tau$ and $\\gamma \\mathrel{R_\\Gamma} \\rho$ imply $t[\\gamma] \\mathrel{R_\\tau} \\llbracket t \\rrbracket \\rho$; it is proved by induction on the typing derivation, the lambda case using that beta-reduction is in $=_{\\beta\\eta}$. With $\\gamma$ the identity and $\\rho_\\Gamma$ (related by reflection), reification gives $t =_{\\beta\\eta} \\mathrm{nf}(t)$ (soundness). Completeness, that $\\beta\\eta$-equal terms have alpha-equivalent normal forms, needs a second argument: a partial equivalence relation on values, defined by induction on types like $R$, under which $\\llbracket t \\rrbracket$ and $\\llbracket t' \\rrbracket$ are related whenever $t =_{\\beta\\eta} t'$ (beta is function application in the model, and eta holds because reification always expands), and related values reify to the same normal form; Abel's thesis, cited above, gives the details. The relation $R$, read as a computability predicate, also shows that evaluation terminates on well-typed terms, which is why no fuel is needed."
 msgstr "这里用到了 $x \\mathrel{R_\\sigma} \\uparrow^\\sigma x$（反射）以及 $R_{\\sigma \\to \\tau}$ 的定义。*基本引理*指出：$\\Gamma \\vdash t : \\tau$ 且 $\\gamma \\mathrel{R_\\Gamma} \\rho$ 蕴含 $t[\\gamma] \\mathrel{R_\\tau} \\llbracket t \\rrbracket \\rho$；它对类型推导归纳证明，其中 lambda 情形用到 β-归约包含于 $=_{\\beta\\eta}$。取 $\\gamma$ 为恒等代换并取 $\\rho_\\Gamma$（二者通过反射相关），具体化给出 $t =_{\\beta\\eta} \\mathrm{nf}(t)$（可靠性）。完备性，即 $\\beta\\eta$-相等的项具有 α-等价的范式，需要另一个论证：值上的一个偏等价关系，像 $R$ 一样对类型归纳定义；在该关系下，只要 $t =_{\\beta\\eta} t'$，$\\llbracket t \\rrbracket$ 与 $\\llbracket t' \\rrbracket$ 就相关（β 是模型中的函数应用，η 成立是因为具体化总会展开），并且相关的值具体化为同一个范式；细节见上文引用的 Abel 的博士论文。关系 $R$ 作为可计算性谓词来解读，还表明在良类型项上求值必然终止，这就是不需要燃料（fuel）的原因。"
 
-#: manual/design/stlc.md:324
+#: manual/design/stlc.md:378
 msgid "Fresh names in readback"
 msgstr "读回中的新鲜名字"
 
-#: manual/design/stlc.md:326
+#: manual/design/stlc.md:380
 msgid "Readback invents binder names with `fresh_name(\"x\", used)`, where `used` contains every name of the input term and context, the names in closure environments, and the names already introduced on the path. Generated names are therefore distinct from each other along a path and from all names of the input, and a neutral variable is never captured by a binder introduced later."
 msgstr "读回通过 `fresh_name(\"x\", used)` 生成绑定子名字，其中 `used` 包含输入项与上下文中的所有名字、闭包环境中的名字，以及路径上已经引入的名字。因此生成的名字在同一路径上彼此不同，也与输入的所有名字不同，中性变量永远不会被之后引入的绑定子捕获。"
 
-#: manual/design/stlc.md:334
+#: manual/design/stlc.md:388
 msgid "`check` and `infer` terminate; on success, the term is declaratively typable at the reported type (soundness theorem). The regression tests include redexes whose parameter occurs free in a trailing argument."
 msgstr "`check` 与 `infer` 会终止；成功时，该项在所报告的类型下是声明式可定型的（可靠性定理）。回归测试包含形参在后续参数中自由出现的可约式。"
 
-#: manual/design/stlc.md:337
-msgid "`check` accepts every well-typed beta-normal term."
-msgstr "`check` 接受每个良类型的 β-范式项。"
+#: manual/design/stlc.md:391
+msgid "`check` accepts every well-typed beta-normal term, and every well-typed term in which each argument given to a lambda head is inferable, including redexes that return a lambda."
+msgstr "`check` 接受每个良类型的 beta 范式项，以及每个交给 lambda 头部的参数都可推断的良类型项，包括返回 lambda 的可约式。"
 
-#: manual/design/stlc.md:338
+#: manual/design/stlc.md:394
 msgid "`normalize_eta_long` returns `Ok` exactly for terms that `check` accepts; its result is in $\\mathit{Nf}^\\tau$, is $\\beta\\eta$-equal to the input, and is the same (up to $=_\\alpha$) for $\\beta\\eta$-equal inputs."
 msgstr "`normalize_eta_long` 恰好对 `check` 接受的项返回 `Ok`；其结果属于 $\\mathit{Nf}^\\tau$，与输入 $\\beta\\eta$-相等，并且对 $\\beta\\eta$-相等的输入结果相同（在 $=_\\alpha$ 意义下）。"
 
-#: manual/design/stlc.md:342
+#: manual/design/stlc.md:398
 msgid "`normalize_checked` returns `Err` before any reduction for ill-typed input."
 msgstr "对于类型不正确的输入，`normalize_checked` 会在任何归约之前返回 `Err`。"
 
-#: manual/design/stlc.md:343
+#: manual/design/stlc.md:399
 msgid "`NormalizationError` signals a violated internal invariant and is not produced for checked input."
 msgstr "`NormalizationError` 表示内部不变式被违反，对已检查的输入不会产生。"
 
-#: manual/design/stlc.md:346
-msgid "The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing, eta expansion of open variables and of constants (including nested arrow types and higher-order arguments), agreement of the two normalizers on small terms, and agreement of `check` and `normalize_eta_long` on redexes with curried heads, mixed flat and nested spines, and bodies that consume the outer arguments."
-msgstr "`src/stlc/stlc_test.mbt` 中的测试覆盖了类型化与拒绝、遮蔽、开放变量和常量的 η-展开（包括嵌套箭头类型和高阶参数）、两个范式化器在小项上的一致性，以及 `check` 与 `normalize_eta_long` 在可约式上的一致性，这些可约式包括柯里化的头部、扁平与嵌套混合的脊柱，以及消耗外层参数的体。"
+#: manual/design/stlc.md:402
+msgid "The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing, eta expansion of open variables and of constants (including nested arrow types and higher-order arguments), agreement of the two normalizers on small terms, and agreement of `check` and `normalize_eta_long` on redexes with curried heads, mixed flat and nested spines, and bodies that consume the outer arguments. They also cover redexes checked against an arrow ($\\textsc{Redex}^{\\Leftarrow}$): redexes that return a lambda, alone and as arguments, in curried and flat spines, nested ones, the renaming shape above in checking mode, and ill-typed variants that are still rejected."
+msgstr "`src/stlc/stlc_test.mbt` 中的测试覆盖了类型化与拒绝、遮蔽、开放变量和常量的 η-展开（包括嵌套箭头类型和高阶参数）、两个范式化器在小项上的一致性，以及 `check` 与 `normalize_eta_long` 在可约式上的一致性，这些可约式包括柯里化的头部、扁平与嵌套混合的脊柱，以及消耗外层参数的体。测试还覆盖了对照箭头类型检查的可约式（$\\textsc{Redex}^{\\Leftarrow}$）：返回 lambda 的可约式（单独出现以及作为参数）、柯里化与扁平的脊柱、嵌套的可约式、检查模式下上述的改名情形，以及仍被拒绝的类型错误变体。"
 
-#: manual/design/stlc.md:355
+#: manual/design/stlc.md:414
 msgid "**Church-style annotated lambdas.** Annotations would make inference complete but change the shared `Term` syntax; the bidirectional checker keeps terms unannotated."
 msgstr "**Church 风格的带标注 lambda。** 标注会使类型推断完备，但会改变共享的 `Term` 语法；双向检查器使项保持无标注。"
 
-#: manual/design/stlc.md:358
+#: manual/design/stlc.md:417
 msgid "**Hindley–Milner inference.** Unification would infer types of unannotated lambdas, but polymorphism and type variables are beyond this calculus."
 msgstr "**Hindley–Milner 推断。** 合一可以推断无标注 lambda 的类型，但多态与类型变量超出了本演算的范围。"
 
-#: manual/design/stlc.md:360
+#: manual/design/stlc.md:419
 msgid "**Fuel for typed NbE.** Unnecessary by strong normalization; the untyped [utlc/nbe](utlc/nbe.md) keeps fuel because it needs it."
 msgstr "**带类型 NbE 的燃料。** 由强范式化性可知不必要；无类型的 [utlc/nbe](utlc/nbe.md) 保留燃料，是因为它确实需要。"
 
-#: manual/design/stlc.md:362
+#: manual/design/stlc.md:421
 msgid "**Eta for the unit type.** Implementable by reifying every neutral of type $\\mathsf{Unit}$ as $()$; not done, so that neutrals stay observable. The decided equality is $\\beta\\eta$ for arrows only."
 msgstr "**单位类型的 η。** 可以通过把每个 $\\mathsf{Unit}$ 类型的中性项具体化为 $()$ 来实现；之所以没有这样做，是为了让中性项保持可观察。所判定的相等只是箭头类型上的 $\\beta\\eta$。"
 
-#: manual/design/stlc.md:368
+#: manual/design/stlc.md:427
 msgid "Types are $b$, $\\mathsf{Unit}$ and arrows: no products, sums, polymorphism or dependent types."
 msgstr "类型只有 $b$、$\\mathsf{Unit}$ 和箭头：没有积、和、多态或依赖类型。"
 
-#: manual/design/stlc.md:370
+#: manual/design/stlc.md:429
 msgid "No unit eta; normal forms are eta-long for arrow types only."
 msgstr "没有单位类型的 η；范式只在箭头类型上是 η-长的。"
 
-#: manual/design/stlc.md:371
+#: manual/design/stlc.md:430
 msgid "Constants are opaque: there are no delta rules."
 msgstr "常量是不透明的：没有 δ 规则。"
 
-#: manual/design/stlc.md:372
+#: manual/design/stlc.md:431
 msgid "`normalize_checked` is bounded by a step limit because it reuses the untyped reducer."
 msgstr "`normalize_checked` 受步数上限约束，因为它复用了无类型归约器。"
 
@@ -4333,7 +4353,7 @@ msgstr "`generic_alpha_rename_bound` 重命名绑定子体中的变量，并拒�
 #: manual/tutorial/debruijn.md:136
 #: manual/tutorial/eval.md:161
 #: manual/tutorial/rewrite.md:191
-#: manual/tutorial/stlc.md:209
+#: manual/tutorial/stlc.md:230
 #: manual/tutorial/substitution.md:134
 #: manual/tutorial/syntax.md:146
 #: manual/tutorial/utlc/lambda.md:142
@@ -4370,7 +4390,7 @@ msgstr "如果你的 AST 有自己的变量类型，请在 `project` 中将其�
 #: manual/tutorial/debruijn.md:175
 #: manual/tutorial/eval.md:217
 #: manual/tutorial/rewrite.md:212
-#: manual/tutorial/stlc.md:241
+#: manual/tutorial/stlc.md:262
 #: manual/tutorial/substitution.md:198
 #: manual/tutorial/syntax.md:197
 #: manual/tutorial/utlc/lambda.md:179
@@ -4399,7 +4419,7 @@ msgstr "**期望重复代换。** `apply_once` 只代换一次；如果替换项
 #: manual/tutorial/debruijn.md:189
 #: manual/tutorial/eval.md:229
 #: manual/tutorial/rewrite.md:225
-#: manual/tutorial/stlc.md:253
+#: manual/tutorial/stlc.md:274
 #: manual/tutorial/substitution.md:209
 #: manual/tutorial/syntax.md:214
 #: manual/tutorial/utlc/lambda.md:191
@@ -5037,70 +5057,74 @@ msgid "Lambdas are checked, not inferred: give the expected type and the checker
 msgstr "lambda 是被检查的，而不是被推断的：给出期望类型，检查器会把它推入函数体。"
 
 #: manual/tutorial/stlc.md:155
+msgid "A redex is checked in the same way when it returns a lambda: the checker infers the type of the argument, gives it to the parameter, and checks the returned lambda against the expected type."
+msgstr "可约式返回 lambda 时也以同样的方式检查：检查器推断参数的类型，把它赋给形参，再把返回的 lambda 对照期望类型进行检查。"
+
+#: manual/tutorial/stlc.md:176
 msgid "Normalize a well-typed term"
 msgstr "范式化良类型项"
 
-#: manual/tutorial/stlc.md:157
+#: manual/tutorial/stlc.md:178
 msgid "`normalize_eta_long` returns the canonical form: beta-normal, and every function-typed subterm written as a lambda."
 msgstr "`normalize_eta_long` 返回规范形式：beta 范式，且每个函数类型的子项都写成 lambda。"
 
-#: manual/tutorial/stlc.md:175
+#: manual/tutorial/stlc.md:196
 msgid "The redex $(\\lambda h.\\,h)\\,g$ is inferred by giving `h` the type of `g`."
 msgstr "可约式 $(\\lambda h.\\,h)\\,g$ 的类型通过给 `h` 赋予 `g` 的类型来推断。"
 
-#: manual/tutorial/stlc.md:177
+#: manual/tutorial/stlc.md:198
 msgid "Decide beta-eta equality"
 msgstr "判定 beta-eta 相等"
 
-#: manual/tutorial/stlc.md:179
+#: manual/tutorial/stlc.md:200
 msgid "Two well-typed terms of the same type are $\\beta\\eta$-equal exactly when their eta-long normal forms are alpha-equivalent:"
 msgstr "两个同类型的良类型项 $\\beta\\eta$-相等，当且仅当它们的 η-长形式范式 α-等价："
 
-#: manual/tutorial/stlc.md:211
+#: manual/tutorial/stlc.md:232
 msgid "Operational normalization with a trace"
 msgstr "带轨迹的操作式范式化"
 
-#: manual/tutorial/stlc.md:213
+#: manual/tutorial/stlc.md:234
 msgid "`normalize_checked` type-checks and then runs the untyped normal-order beta-eta reducer, which gives eta-*short* results and step counts. Use it when you want the reference semantics:"
 msgstr "`normalize_checked` 先做类型检查，再运行无类型的正规序 beta-eta 归约器，它给出 eta-*短*的结果和步数。需要参考语义时使用它："
 
-#: manual/tutorial/stlc.md:230
+#: manual/tutorial/stlc.md:251
 msgid "For a full trace, check the term and call `@eval.trace` with `@lambda.beta_eta_rule` yourself."
 msgstr "要获得完整轨迹，请自行检查项，并用 `@lambda.beta_eta_rule` 调用 `@eval.trace`。"
 
-#: manual/tutorial/stlc.md:233
+#: manual/tutorial/stlc.md:254
 msgid "Use the substrate on typed terms"
 msgstr "在带类型的项上使用底层库"
 
-#: manual/tutorial/stlc.md:235
+#: manual/tutorial/stlc.md:256
 msgid "Because `@stlc.Term` is `@syntax.Term[@stlc.Atom]`, substitution, free variables and rewriting work unchanged. Substituting a well-typed term of the right type for a variable preserves typing (the substitution lemma of typed calculi), so you can instantiate a typed template with `@substitution.Substitution` and re-check it."
 msgstr "由于 `@stlc.Term` 就是 `@syntax.Term[@stlc.Atom]`，代换、自由变量和重写都可原样使用。用类型正确的良类型项代换变量会保持类型（类型化演算的代换引理），因此你可以用 `@substitution.Substitution` 实例化带类型的模板，再重新检查。"
 
-#: manual/tutorial/stlc.md:243
+#: manual/tutorial/stlc.md:264
 msgid "**Inferring a lambda.** `infer` on a lambda fails with `CannotInferLambda`. Use `check` with the expected type."
 msgstr "**推断 lambda。** 对 lambda 调用 `infer` 会以 `CannotInferLambda` 失败。请用带期望类型的 `check`。"
 
-#: manual/tutorial/stlc.md:245
+#: manual/tutorial/stlc.md:266
 msgid "**Unit eta.** A neutral term of type `Unit`, such as a variable `u : Unit`, is not replaced by `()`. `f u` and `f ()` have different normal forms."
 msgstr "**Unit 的 eta。** `Unit` 类型的中性项（例如变量 `u : Unit`）不会被替换为 `()`。`f u` 和 `f ()` 的范式不同。"
 
-#: manual/tutorial/stlc.md:247
+#: manual/tutorial/stlc.md:268
 msgid "**Empty applications.** `Apply(f, [])` is rejected with `EmptyApplication`, also inside a spine such as `Apply(Apply(f, []), [a])`. Build applications with at least one argument."
 msgstr "**空应用。** `Apply(f, [])` 会以 `EmptyApplication` 被拒绝，包括出现在脊内部的情形，例如 `Apply(Apply(f, []), [a])`。构造应用时至少给一个参数。"
 
-#: manual/tutorial/stlc.md:250
+#: manual/tutorial/stlc.md:271
 msgid "**Comparing normal forms with `==`.** Generated binders are `x`, `x_1`, …; compare with `@syntax.alpha_equal`."
 msgstr "**用 `==` 比较范式。** 生成的绑定子是 `x`、`x_1`、…；请用 `@syntax.alpha_equal` 比较。"
 
-#: manual/tutorial/stlc.md:255
+#: manual/tutorial/stlc.md:276
 msgid "[stlc API](../api/stlc.md) for all types, errors and functions."
 msgstr "[stlc API](../api/stlc.md)：所有类型、错误和函数。"
 
-#: manual/tutorial/stlc.md:256
+#: manual/tutorial/stlc.md:277
 msgid "[stlc design](../design/stlc.md) for the typing rules, the eta-long normal forms and the correctness argument of typed NbE."
 msgstr "[stlc 设计](../design/stlc.md)：定型规则、η-长形式范式，以及带类型 NbE 的正确性论证。"
 
-#: manual/tutorial/stlc.md:258
+#: manual/tutorial/stlc.md:279
 msgid "[utlc/nbe tutorial](utlc/nbe.md) for the untyped, fuel-bounded counterpart."
 msgstr "[utlc/nbe 教程](utlc/nbe.md)：无类型、受燃料限制的对应物。"
 
@@ -5607,6 +5631,12 @@ msgstr "[utlc/nbe 设计](../../design/utlc/nbe.md)：语义域与可靠性论�
 #: manual/tutorial/utlc/nbe.md:203
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc 教程](../stlc.md)：带类型的 η-长形式 NbE。"
+
+#~ msgid "A lambda checks against an arrow type by checking its body against the codomain, with the parameter given the domain. Every other term is inferred and compared with `==`; a difference gives `TypeMismatch`."
+#~ msgstr "lambda 对照箭头类型进行检查时，会以定义域作为参数的类型，将体对照陪域进行检查。其他所有项都先推断类型，再用 `==` 比较；若不同则给出 `TypeMismatch`。"
+
+#~ msgid "`check` accepts every well-typed beta-normal term."
+#~ msgstr "`check` 接受每个良类型的 β-范式项。"
 
 #~ msgid "**Divergence.** Untyped terms need not normalize, so every phase must be bounded."
 #~ msgstr "**发散。** 无类型项不一定能范式化，因此每个阶段都必须有界。"
