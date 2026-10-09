@@ -1503,7 +1503,7 @@ msgstr "下流の変数型は単射（異なる変数を異なる名前へ写す
 #: manual/design/debruijn.md:240
 #: manual/design/eval.md:134
 #: manual/design/rewrite.md:171
-#: manual/design/stlc.md:318
+#: manual/design/stlc.md:332
 #: manual/design/substitution.md:130
 #: manual/design/syntax.md:234
 #: manual/design/utlc/lambda.md:116
@@ -1556,7 +1556,7 @@ msgstr "下流の adapter は自身のノード種別について (V1)–(V5) �
 #: manual/design/debruijn.md:260
 #: manual/design/eval.md:151
 #: manual/design/rewrite.md:196
-#: manual/design/stlc.md:337
+#: manual/design/stlc.md:353
 #: manual/design/substitution.md:329
 #: manual/design/syntax.md:254
 #: manual/design/utlc/lambda.md:142
@@ -1581,7 +1581,7 @@ msgstr "**実行時に法則を検査する。** 法則はすべてのノード�
 #: manual/design/debruijn.md:272
 #: manual/design/eval.md:165
 #: manual/design/rewrite.md:208
-#: manual/design/stlc.md:350
+#: manual/design/stlc.md:366
 #: manual/design/substitution.md:343
 #: manual/design/syntax.md:268
 #: manual/design/utlc/lambda.md:153
@@ -2519,134 +2519,138 @@ msgid "The strengthening step is where the renaming is needed. For $\\Gamma = x{
 msgstr "強化のステップが名前替えの必要な箇所である。$\\Gamma = x{:}B$ について、項"
 
 #: manual/design/stlc.md:175
-msgid "has declarative type $B$ and no other. Without the renaming, the trailing $x$ would be typed in $\\Gamma, x{:}\\mathsf{Unit}$ and the checker would answer `Unit`; versions before the fix did exactly that, and `check` accepted the term at `Unit`. With $x' = x_1$ the trailing $x$ keeps its type $B$, and `infer` returns $B$. The typed evaluator computes the type of a redex head with the same rule, so `normalize_eta_long` accepts the same terms as `check`."
-msgstr "は宣言的な型 $B$ を持ち、それ以外の型は持たない。名前替えがなければ、後続の $x$ は $\\Gamma, x{:}\\mathsf{Unit}$ で型付けされ、検査器は `Unit` と答えてしまう。修正前の版はまさにそうしており、`check` はこの項を `Unit` で受理していた。$x' = x_1$ とすれば後続の $x$ は型 $B$ を保ち、`infer` は $B$ を返す。型付き評価器は簡約基の先頭の型を同じ規則で計算するので、`normalize_eta_long` は `check` と同じ項を受理する。"
+msgid "has declarative type $B$ and no other. Without the renaming, the trailing $x$ would be typed in $\\Gamma, x{:}\\mathsf{Unit}$ and the checker would answer `Unit`; versions before the fix did exactly that, and `check` accepted the term at `Unit`. With $x' = x_1$ the trailing $x$ keeps its type $B$, and `infer` returns $B$."
+msgstr "は宣言的な型 $B$ を持ち、それ以外の型は持たない。名前替えがなければ、後続の $x$ は $\\Gamma, x{:}\\mathsf{Unit}$ で型付けされ、検査器は `Unit` と答えてしまう。修正前の版はまさにそうしており、`check` はこの項を `Unit` で受理していた。$x' = x_1$ とすれば後続の $x$ は型 $B$ を保ち、`infer` は $B$ を返す。"
 
-#: manual/design/stlc.md:183
+#: manual/design/stlc.md:181
+msgid "The typed evaluator walks a spine the same way. It flattens nested `Apply` nodes before typing the head, so the curried $((\\lambda x.\\,\\lambda y.\\,y)\\;())\\;x$ is the same spine as the term above. A lambda head cannot be inferred, so its type is rebuilt from the premises of $\\textsc{Redex}$ and the expected type $\\tau$ of the whole application. Write $b' = h\\,c_1 \\cdots c_k$ with $h$ not an application ($k = 0$ if $b'$ is not one). The head gets the type $\\sigma \\to \\rho$, where $\\sigma$ is inferred for $a_1$ and $\\rho$, the type of $b'$, is computed recursively: take the head type of the flattened spine $h\\,c_1 \\cdots c_k\\,a_2 \\cdots a_n$ under $\\Gamma, x'{:}\\sigma$ and remove its first $k$ domains ($\\rho = \\tau$ if that spine is empty). Any other head is inferred. A redex body that consumes the outer arguments, as in $(\\lambda x.\\,(\\lambda y.\\,\\lambda z.\\,z)\\,x)\\;()\\;v$, is therefore handled as `infer` handles it, and `normalize_eta_long` accepts the same terms as `check`. Versions before the fix only recognised a bare lambda head and rejected both terms with `CannotInferLambda`."
+msgstr "型付き評価器も同じ方法でスパインをたどる。先頭の型を求める前に入れ子の `Apply` ノードを平坦化するので、カリー化された $((\\lambda x.\\,\\lambda y.\\,y)\\;())\\;x$ は上の項と同じスパインになる。ラムダの先頭は推論できないため、その型は $\\textsc{Redex}$ の前提と適用全体の期待される型 $\\tau$ から組み立て直される。$h$ を適用でない項として $b' = h\\,c_1 \\cdots c_k$ と書く（$b'$ が適用でなければ $k = 0$）。先頭は型 $\\sigma \\to \\rho$ を得る。ここで $\\sigma$ は $a_1$ について推論された型であり、$b'$ の型 $\\rho$ は再帰的に計算される。すなわち、$\\Gamma, x'{:}\\sigma$ のもとで平坦化したスパイン $h\\,c_1 \\cdots c_k\\,a_2 \\cdots a_n$ の先頭の型を求め、その最初の $k$ 個の定義域を取り除く（そのスパインが空なら $\\rho = \\tau$）。それ以外の先頭は推論される。したがって $(\\lambda x.\\,(\\lambda y.\\,\\lambda z.\\,z)\\,x)\\;()\\;v$ のように外側の引数を消費する簡約基の本体も `infer` と同じように扱われ、`normalize_eta_long` は `check` と同じ項を受理する。修正前の版は裸のラムダの先頭しか認識せず、この二つの項を `CannotInferLambda` で拒否していた。"
+
+#: manual/design/stlc.md:197
 msgid "**Completeness for normal forms.** If $t$ is beta-normal and $\\Gamma \\vdash t : \\tau$, then `check(Σ, Γ, t, τ)` succeeds. A beta-normal term is either a lambda, handled by $\\textsc{Lam}$, or a spine whose head is a variable, a constant or $()$; its type is determined by $\\Gamma$ or $\\Sigma$ and its arguments are again normal, so $\\textsc{App}$ and induction apply. Terms with redexes are accepted when each redex's first argument is inferable; $(\\lambda f.\\,f\\,())\\,(\\lambda y.\\,y)$ is rejected with `CannotInferLambda` although it is typable."
 msgstr "**正規形に対する完全性。** $t$ が β 正規で $\\Gamma \\vdash t : \\tau$ ならば、`check(Σ, Γ, t, τ)` は成功する。β 正規な項は、$\\textsc{Lam}$ が扱うラムダであるか、ヘッドが変数・定数・$()$ であるスパインである。その型は $\\Gamma$ または $\\Sigma$ によって決まり、引数もまた正規形であるので、$\\textsc{App}$ と帰納法が適用できる。簡約基を含む項は、各簡約基の最初の引数が推論可能であれば受理される。$(\\lambda f.\\,f\\,())\\,(\\lambda y.\\,y)$ は型が付くにもかかわらず `CannotInferLambda` で拒否される。"
 
-#: manual/design/stlc.md:192
+#: manual/design/stlc.md:206
 msgid "The checker terminates. Measure a call by the size of its term, and break ties by counting a `check` call above an `infer` call. $\\textsc{Sub}$ goes from `check` to `infer` on the same term, which lowers the measure; every other recursive call is on a strictly smaller term ($\\textsc{Redex}$ recurses on $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$, which lacks the binder and $a_1$; renaming does not change the size)."
 msgstr "検査器は停止する。呼び出しをその項の大きさで測り、同じ大きさでは `check` 呼び出しを `infer` 呼び出しより上に数える。$\\textsc{Sub}$ は同じ項について `check` から `infer` に移り、測度を下げる。それ以外の再帰呼び出しはすべて真に小さな項に対するものである（$\\textsc{Redex}$ は束縛子と $a_1$ を除いた $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ について再帰する。名前替えは大きさを変えない）。"
 
-#: manual/design/stlc.md:199
+#: manual/design/stlc.md:213
 msgid "Two normalizers with different jobs"
 msgstr "役割の異なる二つの正規化器"
 
-#: manual/design/stlc.md:201
+#: manual/design/stlc.md:215
 msgid "`normalize_checked` reuses the untyped normal-order beta-eta reducer of [utlc/lambda](utlc/lambda.md) after checking the type. Its value is that it is the *reference* semantics, with traces and step counts; it is step-bounded only because it is shared with the untyped calculus. By strong normalization it always ends in `NormalForm` for a large enough limit. Its normal forms are eta-*short*."
 msgstr "`normalize_checked` は型を検査した後、[utlc/lambda](utlc/lambda.md) の型なし正規順序 βη 簡約器を再利用する。その価値は、トレースとステップ数を伴う*参照*意味論である点にある。ステップ数に上限があるのは型なし計算と共有しているためにすぎない。強正規化性により、上限が十分大きければ必ず `NormalForm` で終わる。その正規形は η *短*形である。"
 
-#: manual/design/stlc.md:208
+#: manual/design/stlc.md:222
 msgid "`normalize_eta_long` is typed normalization by evaluation. It needs no limit, and it returns the canonical representative of the $\\beta\\eta$ class, so two well-typed terms are $\\beta\\eta$-equal iff their eta-long normal forms are alpha-equivalent: the normalizer decides conversion."
 msgstr "`normalize_eta_long` は型付きの評価による正規化（normalization by evaluation）である。上限を必要とせず、$\\beta\\eta$ 同値類の標準的な代表元を返すので、二つの well-typed な項が $\\beta\\eta$ 等しいのは、それらの η 長正規形が α同値であるとき、かつそのときに限る。すなわちこの正規化器は変換可能性を決定する。"
 
-#: manual/design/stlc.md:213
+#: manual/design/stlc.md:227
 msgid "Beta-normal, eta-long forms"
 msgstr "β正規・η長形式"
 
-#: manual/design/stlc.md:215
+#: manual/design/stlc.md:229
 msgid "Normal forms $\\mathit{Nf}^\\tau$ and neutral terms $\\mathit{Ne}$ are defined by type:"
 msgstr "正規形 $\\mathit{Nf}^\\tau$ と中立項 $\\mathit{Ne}$ は型ごとに定義される。"
 
-#: manual/design/stlc.md:227
+#: manual/design/stlc.md:241
 msgid "Every term of arrow type is a lambda (eta-long), and every application has a variable or a constant at its head (beta-normal). Neutral terms of type $\\mathsf{Unit}$ are kept: the eta law for the unit type ($t = ()$ for every $t : \\mathsf{Unit}$) is not implemented, so for $f : \\mathsf{Unit} \\to \\mathsf{Unit}$ and $u : \\mathsf{Unit}$ the terms $f\\,u$ and $f\\,()$ have different normal forms."
 msgstr "矢印型の項はすべてラムダであり（η 長）、すべての適用は頭部に変数または定数を持つ（β 正規）。$\\mathsf{Unit}$ 型の中立項はそのまま残される。unit 型の η 法則（すべての $t : \\mathsf{Unit}$ について $t = ()$）は実装されていないため、$f : \\mathsf{Unit} \\to \\mathsf{Unit}$ と $u : \\mathsf{Unit}$ に対して項 $f\\,u$ と $f\\,()$ は異なる正規形を持つ。"
 
-#: manual/design/stlc.md:234
+#: manual/design/stlc.md:248
 msgid "Typed normalization by evaluation"
 msgstr "型付きの評価による正規化"
 
-#: manual/design/stlc.md:236
+#: manual/design/stlc.md:250
 msgid "The semantic domain interprets each type:"
 msgstr "意味領域は各型を次のように解釈する。"
 
-#: manual/design/stlc.md:242
+#: manual/design/stlc.md:256
 msgid "where a closure stores a lambda body with its environment and its type, and a semantic neutral is a free variable, a constant, or a neutral applied to a value together with the value's type. Evaluation $\\llbracket t \\rrbracket\\rho$ maps variables through the environment, lambdas to closures, constants to neutrals, and applies closures by evaluating their bodies (call by value, which is safe because evaluation of typed terms terminates). Reflection $\\uparrow^\\tau$ embeds a neutral as a value; here it is the identity on neutrals, because all eta expansion is deferred to reification. Reification $\\downarrow^\\tau : V_\\tau \\to \\mathit{Nf}^\\tau$ is"
 msgstr "ここでクロージャはラムダ本体をその環境と型とともに保持し、意味的な中立項は自由変数、定数、または中立項を値に適用したもの（その値の型も併せて保持する）である。評価 $\\llbracket t \\rrbracket\\rho$ は変数を環境を通じて写し、ラムダをクロージャに、定数を中立項に写し、クロージャはその本体を評価することで適用する（値呼び。型付き項の評価は停止するので安全である）。反映 $\\uparrow^\\tau$ は中立項を値として埋め込む。ここでは中立項上の恒等写像である。η展開はすべて具象化（reification）まで遅延されるからである。具象化 $\\downarrow^\\tau : V_\\tau \\to \\mathit{Nf}^\\tau$ は次のとおりである。"
 
-#: manual/design/stlc.md:262
+#: manual/design/stlc.md:276
 msgid "and the normal form of $\\Gamma \\vdash t : \\tau$ is $\\downarrow^\\tau \\llbracket t \\rrbracket \\rho_\\Gamma$, where $\\rho_\\Gamma$ maps each $x{:}\\sigma \\in \\Gamma$ to $\\uparrow^\\sigma x$. Reifying at an arrow type applies the value to a fresh variable, which performs eta expansion; a neutral application records the domain type of its argument so that the argument can be reified at the right type later.[^bs]"
 msgstr "そして $\\Gamma \\vdash t : \\tau$ の正規形は $\\downarrow^\\tau \\llbracket t \\rrbracket \\rho_\\Gamma$ である。ここで $\\rho_\\Gamma$ は各 $x{:}\\sigma \\in \\Gamma$ を $\\uparrow^\\sigma x$ に写す。矢印型での具象化は値を新しい変数に適用し、これが η展開を行う。中立な適用は引数の定義域の型を記録しておき、後でその引数を正しい型で具象化できるようにする。[^bs]"
 
-#: manual/design/stlc.md:269
+#: manual/design/stlc.md:283
 msgid "U. Berger and H. Schwichtenberg, \"An inverse of the evaluation functional for typed λ-calculus\", LICS 1991. The type-directed presentation follows A. Abel, *Normalization by Evaluation: Dependent Types and Impredicativity*, habilitation thesis, 2013."
 msgstr "U. Berger and H. Schwichtenberg, \"An inverse of the evaluation functional for typed λ-calculus\", LICS 1991. 型主導の提示は A. Abel, *Normalization by Evaluation: Dependent Types and Impredicativity*, habilitation thesis, 2013 に従う。"
 
-#: manual/design/stlc.md:271
+#: manual/design/stlc.md:285
 msgid "**Correctness (sketch).** Define a Kripke logical relation $t \\mathrel{R_\\tau} d$ between terms and values, monotone under context extension:"
 msgstr "**正しさ（証明の概略）。** 項と値の間の Kripke 論理関係 $t \\mathrel{R_\\tau} d$ を、文脈の拡張について単調なものとして定義する。"
 
-#: manual/design/stlc.md:283
+#: manual/design/stlc.md:297
 msgid "By induction on $\\tau$ one proves two lemmas together: *reflection* ($t =_{\\beta\\eta} \\mathrm{quote}(n)$ implies $t \\mathrel{R_\\tau} \\uparrow^\\tau n$) and *reification* ($t \\mathrel{R_\\tau} d$ implies $t =_{\\beta\\eta} \\downarrow^\\tau d$). The arrow case of reification is the eta step:"
 msgstr "$\\tau$ に関する帰納法で二つの補題を同時に証明する。*反映*（$t =_{\\beta\\eta} \\mathrm{quote}(n)$ ならば $t \\mathrel{R_\\tau} \\uparrow^\\tau n$）と*具象化*（$t \\mathrel{R_\\tau} d$ ならば $t =_{\\beta\\eta} \\downarrow^\\tau d$）である。具象化の矢印型の場合が η ステップである。"
 
-#: manual/design/stlc.md:293
+#: manual/design/stlc.md:307
 msgid "using $x \\mathrel{R_\\sigma} \\uparrow^\\sigma x$ (reflection) and the definition of $R_{\\sigma \\to \\tau}$. The *fundamental lemma* states that $\\Gamma \\vdash t : \\tau$ and $\\gamma \\mathrel{R_\\Gamma} \\rho$ imply $t[\\gamma] \\mathrel{R_\\tau} \\llbracket t \\rrbracket \\rho$; it is proved by induction on the typing derivation, the lambda case using that beta-reduction is in $=_{\\beta\\eta}$. With $\\gamma$ the identity and $\\rho_\\Gamma$ (related by reflection), reification gives $t =_{\\beta\\eta} \\mathrm{nf}(t)$ (soundness). Completeness, that $\\beta\\eta$-equal terms have alpha-equivalent normal forms, needs a second argument: a partial equivalence relation on values, defined by induction on types like $R$, under which $\\llbracket t \\rrbracket$ and $\\llbracket t' \\rrbracket$ are related whenever $t =_{\\beta\\eta} t'$ (beta is function application in the model, and eta holds because reification always expands), and related values reify to the same normal form; Abel's thesis, cited above, gives the details. The relation $R$, read as a computability predicate, also shows that evaluation terminates on well-typed terms, which is why no fuel is needed."
 msgstr "ここでは $x \\mathrel{R_\\sigma} \\uparrow^\\sigma x$（反映）と $R_{\\sigma \\to \\tau}$ の定義を用いる。*基本補題*は、$\\Gamma \\vdash t : \\tau$ かつ $\\gamma \\mathrel{R_\\Gamma} \\rho$ ならば $t[\\gamma] \\mathrel{R_\\tau} \\llbracket t \\rrbracket \\rho$ であることを主張する。これは型導出に関する帰納法で証明され、ラムダの場合には β簡約が $=_{\\beta\\eta}$ に含まれることを用いる。$\\gamma$ を恒等代入とし $\\rho_\\Gamma$ を取ると（両者は反映によって関係づけられる）、具象化により $t =_{\\beta\\eta} \\mathrm{nf}(t)$（健全性）が得られる。完全性、すなわち $\\beta\\eta$ 等しい項が α 同値な正規形を持つことには、第二の論証が必要である：値の上の部分同値関係を $R$ と同様に型に関する帰納法で定義し、$t =_{\\beta\\eta} t'$ ならば $\\llbracket t \\rrbracket$ と $\\llbracket t' \\rrbracket$ が関係づけられ（β はモデルにおける関数適用であり、η は具象化が常に展開するので成り立つ）、関係づけられた値は同じ正規形に具象化されることを示す。詳細は上で引用した Abel の論文にある。関係 $R$ を計算可能性述語として読めば、well-typed な項上で評価が停止することも示され、これが燃料（fuel）を必要としない理由である。"
 
-#: manual/design/stlc.md:310
+#: manual/design/stlc.md:324
 msgid "Fresh names in readback"
 msgstr "読み戻しにおける新しい名前"
 
-#: manual/design/stlc.md:312
+#: manual/design/stlc.md:326
 msgid "Readback invents binder names with `fresh_name(\"x\", used)`, where `used` contains every name of the input term and context, the names in closure environments, and the names already introduced on the path. Generated names are therefore distinct from each other along a path and from all names of the input, and a neutral variable is never captured by a binder introduced later."
 msgstr "読み戻しは `fresh_name(\"x\", used)` によって束縛子の名前を生成する。ここで `used` は入力項と文脈のすべての名前、クロージャ環境内の名前、そして経路上ですでに導入された名前を含む。したがって生成された名前は同じ経路上で互いに異なり、入力のすべての名前とも異なるので、中立変数が後から導入される束縛子に捕獲されることはない。"
 
-#: manual/design/stlc.md:320
+#: manual/design/stlc.md:334
 msgid "`check` and `infer` terminate; on success, the term is declaratively typable at the reported type (soundness theorem). The regression tests include redexes whose parameter occurs free in a trailing argument."
 msgstr "`check` と `infer` は停止する。成功した場合、その項は報告された型で宣言的に型付け可能である（健全性定理）。回帰テストには、パラメータが後続の引数に自由に現れる簡約基が含まれる。"
 
-#: manual/design/stlc.md:323
+#: manual/design/stlc.md:337
 msgid "`check` accepts every well-typed beta-normal term."
 msgstr "`check` は well-typed な β 正規項をすべて受理する。"
 
-#: manual/design/stlc.md:324
+#: manual/design/stlc.md:338
 msgid "`normalize_eta_long` returns `Ok` exactly for terms that `check` accepts; its result is in $\\mathit{Nf}^\\tau$, is $\\beta\\eta$-equal to the input, and is the same (up to $=_\\alpha$) for $\\beta\\eta$-equal inputs."
 msgstr "`normalize_eta_long` はちょうど `check` が受理する項に対して `Ok` を返す。その結果は $\\mathit{Nf}^\\tau$ に属し、入力と $\\beta\\eta$ 等しく、$\\beta\\eta$ 等しい入力に対しては（$=_\\alpha$ を除いて）同じである。"
 
-#: manual/design/stlc.md:328
+#: manual/design/stlc.md:342
 msgid "`normalize_checked` returns `Err` before any reduction for ill-typed input."
 msgstr "型の誤った入力に対して、`normalize_checked` は簡約を行う前に `Err` を返す。"
 
-#: manual/design/stlc.md:329
+#: manual/design/stlc.md:343
 msgid "`NormalizationError` signals a violated internal invariant and is not produced for checked input."
 msgstr "`NormalizationError` は内部不変条件の違反を示し、検査済みの入力に対しては生じない。"
 
-#: manual/design/stlc.md:332
-msgid "The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing, eta expansion of open variables and of constants (including nested arrow types and higher-order arguments), and agreement of the two normalizers on small terms."
-msgstr "`src/stlc/stlc_test.mbt` のテストは、型付けと拒否、シャドーイング、開いた変数および定数の η展開（入れ子の矢印型や高階の引数を含む）、そして小さな項における二つの正規化器の一致を扱う。"
+#: manual/design/stlc.md:346
+msgid "The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing, eta expansion of open variables and of constants (including nested arrow types and higher-order arguments), agreement of the two normalizers on small terms, and agreement of `check` and `normalize_eta_long` on redexes with curried heads, mixed flat and nested spines, and bodies that consume the outer arguments."
+msgstr "`src/stlc/stlc_test.mbt` のテストは、型付けと拒否、シャドーイング、開いた変数および定数の η展開（入れ子の矢印型や高階の引数を含む）、小さな項における二つの正規化器の一致、そしてカリー化された先頭、平坦なスパインと入れ子のスパインの混在、外側の引数を消費する本体を持つ簡約基における `check` と `normalize_eta_long` の一致を扱う。"
 
-#: manual/design/stlc.md:339
+#: manual/design/stlc.md:355
 msgid "**Church-style annotated lambdas.** Annotations would make inference complete but change the shared `Term` syntax; the bidirectional checker keeps terms unannotated."
 msgstr "**Church 流の注釈付きラムダ。** 注釈があれば型推論は完全になるが、共有の `Term` 構文を変えてしまう。双方向型検査器は項を注釈なしのまま保つ。"
 
-#: manual/design/stlc.md:342
+#: manual/design/stlc.md:358
 msgid "**Hindley–Milner inference.** Unification would infer types of unannotated lambdas, but polymorphism and type variables are beyond this calculus."
 msgstr "**Hindley–Milner 型推論。** 単一化により注釈なしラムダの型を推論できるが、多相性と型変数はこの計算の範囲外である。"
 
-#: manual/design/stlc.md:344
+#: manual/design/stlc.md:360
 msgid "**Fuel for typed NbE.** Unnecessary by strong normalization; the untyped [utlc/nbe](utlc/nbe.md) keeps fuel because it needs it."
 msgstr "**型付き NbE の燃料。** 強正規化性により不要である。型なしの [utlc/nbe](utlc/nbe.md) が燃料を保持するのは、それが必要だからである。"
 
-#: manual/design/stlc.md:346
+#: manual/design/stlc.md:362
 msgid "**Eta for the unit type.** Implementable by reifying every neutral of type $\\mathsf{Unit}$ as $()$; not done, so that neutrals stay observable. The decided equality is $\\beta\\eta$ for arrows only."
 msgstr "**unit 型の η。** $\\mathsf{Unit}$ 型のすべての中立項を $()$ として具象化すれば実装できるが、中立項を観測可能に保つため行っていない。決定される等価性は矢印型に対する $\\beta\\eta$ のみである。"
 
-#: manual/design/stlc.md:352
+#: manual/design/stlc.md:368
 msgid "Types are $b$, $\\mathsf{Unit}$ and arrows: no products, sums, polymorphism or dependent types."
 msgstr "型は $b$、$\\mathsf{Unit}$、矢印型のみである。直積、直和、多相性、依存型はない。"
 
-#: manual/design/stlc.md:354
+#: manual/design/stlc.md:370
 msgid "No unit eta; normal forms are eta-long for arrow types only."
 msgstr "unit 型の η はない。正規形が η 長であるのは矢印型についてのみである。"
 
-#: manual/design/stlc.md:355
+#: manual/design/stlc.md:371
 msgid "Constants are opaque: there are no delta rules."
 msgstr "定数は不透明である。δ 規則はない。"
 
-#: manual/design/stlc.md:356
+#: manual/design/stlc.md:372
 msgid "`normalize_checked` is bounded by a step limit because it reuses the untyped reducer."
 msgstr "`normalize_checked` は型なし簡約器を再利用するため、ステップ数の上限に縛られる。"
 
