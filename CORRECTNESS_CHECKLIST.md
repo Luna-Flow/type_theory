@@ -12,6 +12,8 @@ Last audited: 2026-10-09
 | Named/De Bruijn conversion | Correct | both round-trip laws | named round trip is alpha-equivalent |
 | De Bruijn scope | Correct | dangling and negative index tests, reducer scope regressions (#3) | invalid indices return `ScopeError`; `reduce_once` and `normalize` validate their input |
 | Shift and instantiation | Correct | nested binder beta tests, downward-shift capture regressions (#9) | standard cutoff-based shifting; a free index that would fall below the cutoff returns `NegativeShift` |
+| De Bruijn scope | Correct | dangling and negative index tests, reducer scope regressions (#3, #16) | invalid indices return `ScopeError`; `reduce_once` and `normalize` validate their input before any step |
+| Shift and instantiation | Correct | nested binder beta tests | standard cutoff-based shifting |
 | De Bruijn small-step | Correct | path, normalization and empty-application tests (#2) | leftmost-outermost beta; `Apply(h, [])` is read as `h` |
 | UTLC untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests | beta-normalization may exhaust fuel |
 | STLC bidirectional typechecking | Correct | typing, rejection, shadowing and trailing-argument capture tests (#1) | inference is syntax-directed and lambdas check against arrows; a redex parameter is renamed apart from trailing arguments |
@@ -34,6 +36,9 @@ Last audited: 2026-10-09
 - UTLC NbE reads applications back as unary `Apply` nodes, while the De Bruijn
   small-step reducer keeps n-ary spines; agreement holds after spine
   flattening.
+- The small-step reducers keep empty applications `Apply(h, [])`. Eta
+  normalizing the beta normal form agrees with `@lambda.normalize` only after
+  they are erased, and only for terms with unary spines (#16).
 - STLC typed NbE is eta-long for arrow types only; the eta law for `Unit` is
   not implemented.
 

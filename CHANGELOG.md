@@ -92,3 +92,9 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   exactly when that `==` is one, and it is alpha-equivalence when `==` is the
   identity; with `Double`, a `NaN` payload is not alpha-equal to itself
   (#15).
+- `utlc/lambda`, `debruijn`: the manual no longer claims that eta-normalizing
+  the beta normal form gives a term alpha-equivalent to `@lambda.normalize`.
+  The two agree modulo `Apply(h, []) = h` for terms with unary spines, now
+  stated and proved in the design note, but not literally. `ScopeFailure` of
+  `DbStepResult` is described as the result of input validation, not of an
+  error met while contracting a redex (#16).
