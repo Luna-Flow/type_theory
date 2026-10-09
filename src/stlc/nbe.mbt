@@ -106,9 +106,12 @@ fn drop_domains(ty : Ty, count : Int) -> Result[Ty, TypeError] {
 /// A lambda head cannot be inferred, so its type is rebuilt from the redex
 /// rule: the first argument gives the domain, and the codomain is the type of
 /// the remaining spine `b a2 ... an`, computed recursively by the same
-/// `redex_step` that `infer` uses. A body that is itself an application joins
-/// that spine, and its own arguments are dropped from the result to obtain the
-/// type of the body. Any other head is inferred.
+/// `redex_step` that `infer` and `check` use. A body that is itself an
+/// application joins that spine, and its own arguments are dropped from the
+/// result to obtain the type of the body. When the spine runs out of arguments
+/// the body is in checking position and its type is `expected`, as in the
+/// checking-mode redex rule (issue #8); this covers a body that is a lambda,
+/// which cannot be inferred. Any other head is inferred.
 fn head_type_for_application(
   sig : Signature,
   ctx : TypeContext,

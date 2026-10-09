@@ -167,6 +167,45 @@ fn infer_spine(
 }
 
 ///|
+/// Checks the flattened application `head arguments` against `expected`, where
+/// `head` is not an `Apply`. An empty spine checks `head` alone.
+///
+/// A lambda head takes one step of the redex rule in checking mode (issue #8):
+/// the first argument is inferred, and the rest of the spine `b a2 ... an` is
+/// checked against `expected` under the parameter, so a redex whose result is
+/// a lambda is checked against the expected arrow instead of being inferred.
+/// Any other head is inferred and its result compared with `expected`.
+fn check_spine(
+  sig : Signature,
+  ctx : TypeContext,
+  head : Term,
+  arguments : Array[Term],
+  expected : Ty,
+) -> Result[Unit, TypeError] {
+  if arguments.length() == 0 {
+    return check(sig, ctx, head, expected)
+  }
+  match head {
+    @syntax.Bind(parameter, body) =>
+      match redex_step(sig, ctx, parameter, body, arguments) {
+        Ok(step) =>
+          check_spine(sig, step.ctx, step.head, step.arguments, expected)
+        Err(error) => Err(error)
+      }
+    _ =>
+      match infer_spine(sig, ctx, head, arguments) {
+        Ok(actual) =>
+          if actual == expected {
+            Ok(())
+          } else {
+            Err(TypeError::TypeMismatch(expected~, actual~))
+          }
+        Err(error) => Err(error)
+      }
+  }
+}
+
+///|
 pub fn infer(
   sig : Signature,
   ctx : TypeContext,
@@ -203,6 +242,12 @@ pub fn check(
   match (term, expected) {
     (@syntax.Bind(name, body), Ty::Arrow(domain, codomain)) =>
       check(sig, ctx.extend_with(name, domain), body, codomain)
+    (@syntax.Apply(_, _), _) =>
+      match application_spine(term) {
+        Ok((head, arguments)) =>
+          check_spine(sig, ctx, head, arguments, expected)
+        Err(error) => Err(error)
+      }
     (_, _) =>
       match infer(sig, ctx, term) {
         Ok(actual) =>
