@@ -11,6 +11,13 @@ In a lambda term, `Bind(x, b)` is $\lambda x.\,b$, `Apply(f, [a])` is
 $f\,a$, and `Value(v)` is an opaque constant. The rules are explained in the
 [utlc/lambda design](../../design/utlc/lambda.md).
 
+Every function of the package is stack-safe in the nesting depth of the
+term: the rules look through empty applications and search for free
+occurrences with loops, `beta_rule` substitutes with the stack-safe
+[substitution](../substitution.md), and `normalize` repeats the stack-safe
+normal-order step of [eval](../eval.md). A term nested 100 000 levels deep is
+handled on every backend. `Debug` of such a term is not stack-safe.
+
 ## Importing
 
 Add the package, and the packages whose types appear in its signatures, to
@@ -92,7 +99,8 @@ For `Bind(x, Apply(f, [Variable(x)]))` with `x` not free in `f` it returns
 `Bind(x, Apply(f, [a, Variable(x)]))` is not contracted. Empty applications
 around the body or the argument are read as their head, so
 `Bind(x, Apply(Apply(f, [Apply(Variable(x), [])]), []))` is contracted to
-`f` as well.
+`f` as well. The side condition is decided by searching `f` for a free
+occurrence of `x`, which stops at the first one and builds no set.
 
 ### `beta_eta_rule`
 
