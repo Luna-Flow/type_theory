@@ -92,65 +92,14 @@ pub fn[T] Substitution::restrict(
 }
 
 ///|
-fn[T] Substitution::relevant_range_free_variables(
-  self : Substitution[T],
-  body_free : @hashset.HashSet[@core.Name],
-) -> @hashset.HashSet[@core.Name] {
-  let mut result = @hashset.new()
-  for entry in self.entries {
-    if body_free.contains(entry.0) {
-      result = result.union(@syntax.free_variables(entry.1))
-    }
-  }
-  result
-}
-
-///|
-/// Names mentioned by the substitution domain or any replacement term.
-fn[T] Substitution::support(
-  self : Substitution[T],
-) -> @hashset.HashSet[@core.Name] {
-  let mut result = @hashset.new()
-  for entry in self.entries {
-    result = result.add(entry.0).union(@syntax.all_names(entry.1))
-  }
-  result
-}
-
-///|
 /// Applies a simultaneous, capture-avoiding substitution.
+///
+/// Stack-safe in the nesting depth of the term and of the replacements.
 pub fn[T] Substitution::apply(
   self : Substitution[T],
   term : @syntax.Term[T],
 ) -> @syntax.Term[T] {
-  match term {
-    Value(value) => Value(value)
-    Variable(name) => self.get(name).unwrap_or(Variable(name))
-    Apply(head, arguments) =>
-      Apply(
-        self.apply(head),
-        arguments.map(fn(argument) { self.apply(argument) }),
-      )
-    Bind(name, body) => {
-      let under_binder = self.without(name)
-      let body_free = @syntax.free_variables(body)
-      let range_free = under_binder.relevant_range_free_variables(body_free)
-      if range_free.contains(name) {
-        let used = under_binder
-          .support()
-          .union(@syntax.all_names(body))
-          .add(name)
-        let fresh = @core.fresh_name(name, used)
-        match body.alpha_rename_bound(name, fresh) {
-          Some(renamed_body) =>
-            Bind(fresh, under_binder.without(fresh).apply(renamed_body))
-          None => abort("fresh name unexpectedly occurs in substitution body")
-        }
-      } else {
-        Bind(name, under_binder.apply(body))
-      }
-    }
-  }
+  substitute(self.entries, term)
 }
 
 ///|
