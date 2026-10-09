@@ -104,7 +104,9 @@ fn[T : Eq] alpha_equal_visit(
 }
 
 ///|
-/// Alpha-equivalence compares values and free names literally, and binders by scope.
+/// Alpha-equivalence compares free names literally, binders by scope, and
+/// values with `T`'s `==`. It is an equivalence relation exactly when `T`'s
+/// `==` is one; for example a `Double` NaN payload is not equal to itself.
 pub fn[T : Eq] alpha_equal(left : Term[T], right : Term[T]) -> Bool {
   alpha_equal_visit(left, right, [], [], 0)
 }
