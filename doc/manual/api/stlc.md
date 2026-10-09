@@ -192,8 +192,16 @@ pub fn check(Signature, TypeContext, @syntax.Term[Atom], Ty) -> Result[Unit, Typ
 ```
 
 A lambda checks against an arrow type by checking its body against the
-codomain, with the parameter given the domain. Every other term is inferred
-and compared with `==`; a difference gives `TypeMismatch`.
+codomain, with the parameter given the domain. A lambda applied directly to
+arguments, $(\lambda x.\,b)\,a_1 \cdots a_n$, is checked as `infer` types it,
+except that $b\,a_2 \cdots a_n$ is checked against the expected type instead
+of inferred: the type of $a_1$ is still inferred, and the parameter is renamed
+apart from $a_2, \dots, a_n$ in the same way. So a redex whose result is a
+lambda, such as $(\lambda x.\,\lambda y.\,y)\,()$, checks against an arrow
+type, also when it is the argument of a function. Every other term is inferred
+and compared with `==`; a difference gives `TypeMismatch`. An argument that
+is given to a lambda, such as $a_1$, must be inferable: a lambda there gives
+`CannotInferLambda`.
 
 ```moonbit
 test "infer and check" {
@@ -211,6 +219,32 @@ test "infer and check" {
     @stlc.infer(sig, ctx_f, bad),
     Err(@stlc.TypeError::TypeMismatch(expected=a, actual=@stlc.Ty::Unit)),
   )
+}
+```
+
+A redex whose result is a lambda is checked against the expected arrow:
+
+```moonbit
+test "check a redex that returns a lambda" {
+  let x = @core.Name::new("x")
+  let y = @core.Name::new("y")
+  let f = @core.Name::new("f")
+  let a = @stlc.Ty::Base(@core.Name::new("A"))
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty()
+  // (λx. λy. y) ()
+  let redex : @stlc.Term = Apply(Bind(x, Bind(y, Variable(y))), [
+    Value(@stlc.Atom::UnitLit),
+  ])
+  let unit_to_unit = @stlc.Ty::Arrow(@stlc.Ty::Unit, @stlc.Ty::Unit)
+  assert_eq(@stlc.check(sig, ctx, redex, unit_to_unit), Ok(()))
+  assert_eq(@stlc.infer(sig, ctx, redex), Err(@stlc.TypeError::CannotInferLambda))
+  // f ((λx. λy. y) ()) with f : (A -> A) -> A
+  let ctx_f = ctx.extend_with(
+    f,
+    @stlc.Ty::Arrow(@stlc.Ty::Arrow(a, a), a),
+  )
+  assert_eq(@stlc.infer(sig, ctx_f, Apply(Variable(f), [redex])), Ok(a))
 }
 ```
 

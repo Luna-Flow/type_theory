@@ -98,6 +98,13 @@ $$
 \frac{\Gamma \vdash a_1 \Rightarrow \sigma \qquad \Gamma, x'{:}\sigma \vdash b\{x \mapsto x'\}\,a_2 \cdots a_n \Rightarrow \tau}
      {\Gamma \vdash (\lambda x.\,b)\,a_1\,a_2 \cdots a_n \Rightarrow \tau}
 \qquad
+\textsc{Redex}^{\Leftarrow}\;
+\frac{\Gamma \vdash a_1 \Rightarrow \sigma \qquad \Gamma, x'{:}\sigma \vdash b\{x \mapsto x'\}\,a_2 \cdots a_n \Leftarrow \tau}
+     {\Gamma \vdash (\lambda x.\,b)\,a_1\,a_2 \cdots a_n \Leftarrow \tau}
+\quad (n \ge 1)
+$$
+
+$$
 \textsc{Lam}\;
 \frac{\Gamma, x{:}\sigma \vdash b \Leftarrow \tau}{\Gamma \vdash \lambda x.\,b \Leftarrow \sigma \to \tau}
 \qquad
@@ -108,8 +115,10 @@ $$
 In $\textsc{App}$ the spine is flattened first, so nested `Apply` nodes are one
 application $h\,a_1 \cdots a_n$; if $h$ has fewer arrows than arguments the
 result is `ExpectedFunction`, and an `Apply` node of the spine without
-arguments gives `EmptyApplication`. In $\textsc{Redex}$ the parameter is
-renamed apart from the trailing arguments:
+arguments gives `EmptyApplication`. $\textsc{Redex}$ and
+$\textsc{Redex}^{\Leftarrow}$ differ only in the mode of the second premise;
+in both the spine is flattened in the same way and the parameter is renamed
+apart from the trailing arguments:
 
 $$
 x' =
@@ -123,10 +132,13 @@ with $b\{x \mapsto x'\}$ the checked bound renaming of the
 [syntax design](syntax.md); in both cases
 $\lambda x.\,b =_\alpha \lambda x'.\,b\{x \mapsto x'\}$ and
 $x' \notin \mathrm{FV}(a_2, \dots, a_n)$. With $n = 1$ there is nothing to
-rename and the second premise is $\Gamma, x{:}\sigma \vdash b \Rightarrow \tau$. $\textsc{Sub}$
-applies to every term except a lambda checked against an arrow; a lambda in
-inference position fails with `CannotInferLambda`. Type equality in
-$\textsc{Sub}$ is syntactic, which is exact for simple types.
+rename and the second premise is $\Gamma, x{:}\sigma \vdash b \Rightarrow \tau$,
+or $\Gamma, x{:}\sigma \vdash b \Leftarrow \tau$ for $\textsc{Redex}^{\Leftarrow}$. `check` uses
+$\textsc{Redex}^{\Leftarrow}$ for every application whose flattened head is a
+lambda, and $\textsc{Sub}$ for every other term except a lambda checked
+against an arrow; a lambda in inference position fails with
+`CannotInferLambda`. Type equality in $\textsc{Sub}$ is syntactic, which is
+exact for simple types.
 
 [^bidir]: J. Dunfield and N. Krishnaswami, "Bidirectional typing", ACM Computing Surveys 54(5), 2021.
 
@@ -137,6 +149,23 @@ inferred and given to the parameter. It makes terms produced by
 substitution-style programming, such as $(\lambda x.\,x)\,()$, checkable
 without annotations.
 
+**Why a checking-mode $\textsc{Redex}^{\Leftarrow}$.** $\textsc{Redex}$ alone
+reaches $\textsc{Sub}$ when a redex is checked, so the rest of the spine must
+be inferred. When the redex returns a lambda, as in
+$(\lambda x.\,\lambda y.\,y)\;()$ checked against
+$\mathsf{Unit} \to \mathsf{Unit}$, that rest is the lambda $\lambda y.\,y$,
+and inference fails with `CannotInferLambda` although the expected type is
+known. $\textsc{Redex}^{\Leftarrow}$ passes the expected type on to the rest
+of the spine instead, as checking $\mathsf{let}\ x = a\ \mathsf{in}\ b$
+against $\tau$ checks $b$ against $\tau$. It accepts everything that
+$\textsc{Redex}$ followed by $\textsc{Sub}$ accepts: by induction on the
+spine, its last step reaches either a non-lambda head, where `check` infers
+the rest of the spine as $\textsc{Redex}$ would, or a spine without
+arguments, which is checked directly. Versions before the fix had only
+$\textsc{Redex}$ and rejected such terms, also as arguments, as in
+$f\,((\lambda x.\,\lambda y.\,y)\;())$ with
+$f : (A \to A) \to A$.
+
 ### Soundness of the checker
 
 **Theorem (soundness).** If `check(Σ, Γ, t, τ)` succeeds, then
@@ -146,8 +175,10 @@ $\Gamma \vdash t : \tau$.
 *Proof sketch.* Induction on the algorithmic derivation. $\textsc{Lam}$ and the
 axioms map to their declarative counterparts; $\textsc{Sub}$ is immediate;
 $\textsc{App}$ is $n$ uses of the declarative application rule. For
-$\textsc{Redex}$, write $b' = b\{x \mapsto x'\}$. The second premise is a
-derivation for the smaller term $b'\,a_2 \cdots a_n$, so by induction
+$\textsc{Redex}$ and $\textsc{Redex}^{\Leftarrow}$, write
+$b' = b\{x \mapsto x'\}$. The second premise is an inference or a checking
+derivation for the smaller term $b'\,a_2 \cdots a_n$, so in both cases by
+induction
 $\Gamma, x'{:}\sigma \vdash b'\,a_2 \cdots a_n : \tau$, and the generation
 lemma for application gives types $\tau_2, \dots, \tau_n$ with
 $\Gamma, x'{:}\sigma \vdash b' : \tau_2 \to \cdots \to \tau_n \to \tau$ and
@@ -163,7 +194,9 @@ $$
 \end{aligned}
 $$
 
-$\square$
+The argument does not use the mode of the second premise, so it proves both
+rules; for $n = 1$ only the first three lines are needed, with $b'$ of type
+$\tau$, which may be an arrow when $b'$ is a lambda. $\square$
 
 The strengthening step is where the renaming is needed. For
 $\Gamma = x{:}B$ the term
@@ -176,19 +209,24 @@ has declarative type $B$ and no other. Without the renaming, the trailing
 $x$ would be typed in $\Gamma, x{:}\mathsf{Unit}$ and the checker would
 answer `Unit`; versions before the fix did exactly that, and `check` accepted
 the term at `Unit`. With $x' = x_1$ the trailing $x$ keeps its type $B$, and
-`infer` returns $B$.
+`infer` returns $B$. $\textsc{Redex}^{\Leftarrow}$ renames in the same way, so
+$(\lambda x.\,\lambda y.\,\lambda z.\,y)\;()\;x$ checks against $A \to B$ and
+not against $A \to \mathsf{Unit}$.
 
 The typed evaluator walks a spine the same way. It flattens nested `Apply`
 nodes before typing the head, so the curried
 $((\lambda x.\,\lambda y.\,y)\;())\;x$ is the same spine as the term above.
 A lambda head cannot be inferred, so its type is rebuilt from the premises of
-$\textsc{Redex}$ and the expected type $\tau$ of the whole application. Write
+$\textsc{Redex}$ or $\textsc{Redex}^{\Leftarrow}$ and the expected type $\tau$ of the whole application. Write
 $b' = h\,c_1 \cdots c_k$ with $h$ not an application ($k = 0$ if $b'$ is not
 one). The head gets the type $\sigma \to \rho$, where $\sigma$ is inferred
 for $a_1$ and $\rho$, the type of $b'$, is computed recursively: take the
 head type of the flattened spine $h\,c_1 \cdots c_k\,a_2 \cdots a_n$ under
-$\Gamma, x'{:}\sigma$ and remove its first $k$ domains ($\rho = \tau$ if
-that spine is empty). Any other head is inferred. A redex body that consumes
+$\Gamma, x'{:}\sigma$ and remove its first $k$ domains. If that spine is
+empty, $b'$ is in checking position as in $\textsc{Redex}^{\Leftarrow}$ and
+$\rho = \tau$; this covers a body that is a lambda, such as $\lambda y.\,y$ in
+$(\lambda x.\,\lambda y.\,y)\;()$ at $\mathsf{Unit} \to \mathsf{Unit}$. Any
+other head is inferred. A redex body that consumes
 the outer arguments, as in $(\lambda x.\,(\lambda y.\,\lambda z.\,z)\,x)\;()\;v$,
 is therefore handled as `infer` handles it, and `normalize_eta_long` accepts
 the same terms as `check`. Versions before the fix only recognised a bare
@@ -199,14 +237,30 @@ $\Gamma \vdash t : \tau$, then `check(Σ, Γ, t, τ)` succeeds. A beta-normal
 term is either a lambda, handled by $\textsc{Lam}$, or a spine whose head is a
 variable, a constant or $()$; its type is determined by $\Gamma$ or $\Sigma$
 and its arguments are again normal, so $\textsc{App}$ and induction apply.
-Terms with redexes are accepted when each redex's first argument is
-inferable; $(\lambda f.\,f\,())\,(\lambda y.\,y)$ is rejected with
-`CannotInferLambda` although it is typable.
+
+Terms with redexes are accepted when every argument that the spine walk gives
+to a lambda head is inferable: $a_1$ in each spine
+$(\lambda x.\,b)\,a_1 \cdots a_n$, and then, recursively, the arguments that
+$b\{x \mapsto x'\}\,a_2 \cdots a_n$ gives to a lambda head. This holds whether
+the redex returns a lambda or not, and at every type of the term. The proof
+extends the one above. An inferable term has exactly one declarative type (by
+induction on the inference derivation: the head of $\textsc{App}$ and the
+argument of $\textsc{Redex}$ have unique types), so a derivation of
+$\Gamma \vdash (\lambda x.\,b)\,a_1 \cdots a_n : \tau$ gives the parameter the
+type $\sigma$ that `infer` returns for $a_1$, and, by weakening with
+$x' \notin \mathrm{FV}(a_2, \dots, a_n)$,
+$\Gamma, x'{:}\sigma \vdash b\{x \mapsto x'\}\,a_2 \cdots a_n : \tau$; $\textsc{Redex}^{\Leftarrow}$
+and induction on the size of the term apply. The condition is needed: both
+$(\lambda f.\,f\,())\,(\lambda y.\,y)$ and
+$(\lambda x.\,\lambda y.\,y)\;()\;(\lambda z.\,z)$ are typable and rejected
+with `CannotInferLambda`, the second because the walk gives $\lambda z.\,z$
+to the lambda head $\lambda y.\,y$.
 
 The checker terminates. Measure a call by the size of its term, and break
 ties by counting a `check` call above an `infer` call. $\textsc{Sub}$ goes
 from `check` to `infer` on the same term, which lowers the measure; every
-other recursive call is on a strictly smaller term ($\textsc{Redex}$ recurses
+other recursive call is on a strictly smaller term ($\textsc{Redex}$ and
+$\textsc{Redex}^{\Leftarrow}$ recurse
 on $b\{x \mapsto x'\}\,a_2 \cdots a_n$, which lacks the binder and $a_1$;
 renaming does not change the size).
 
@@ -334,7 +388,9 @@ input, and a neutral variable is never captured by a binder introduced later.
 - `check` and `infer` terminate; on success, the term is declaratively typable
   at the reported type (soundness theorem). The regression tests include
   redexes whose parameter occurs free in a trailing argument.
-- `check` accepts every well-typed beta-normal term.
+- `check` accepts every well-typed beta-normal term, and every well-typed
+  term in which each argument given to a lambda head is inferable, including
+  redexes that return a lambda.
 - `normalize_eta_long` returns `Ok` exactly for terms that `check` accepts;
   its result is in
   $\mathit{Nf}^\tau$, is $\beta\eta$-equal to the input, and is the same (up to
@@ -348,7 +404,10 @@ eta expansion of open variables and of constants (including nested arrow
 types and higher-order arguments), agreement of the two normalizers on
 small terms, and agreement of `check` and `normalize_eta_long` on redexes with
 curried heads, mixed flat and nested spines, and bodies that consume the outer
-arguments.
+arguments. They also cover redexes checked against an arrow
+($\textsc{Redex}^{\Leftarrow}$): redexes that return a lambda, alone and as
+arguments, in curried and flat spines, nested ones, the renaming shape above
+in checking mode, and ill-typed variants that are still rejected.
 
 ## Alternatives rejected
 

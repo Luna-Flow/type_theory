@@ -69,6 +69,15 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   now flattens the application spine before typing its head and follows redex
   bodies the same way `infer` does, so it accepts exactly the terms `check`
   accepts (#7).
+- `stlc`: `check` rejected with `CannotInferLambda` well-typed redexes whose
+  result is a lambda in checking position, such as `(λx. λy. y) ()` at
+  `Unit -> Unit` and `f ((λx. λy. y) ())` at `A` under
+  `f : (A -> A) -> A`: the redex rule existed only in inference mode, so the
+  lambda left after the arguments were used up had to be inferred. `check`
+  now has a checking-mode redex rule: it infers the first argument, renames
+  the parameter apart from the trailing arguments as in #1, and checks the
+  rest of the spine against the expected type. `normalize_checked` and
+  `normalize_eta_long` accept the same terms (#8).
 - `eval`: `ApplicativeOrder` now reads application spines curried, so it
   takes the same steps on `Apply(f, [a1, a2])` and on
   `Apply(Apply(f, [a1]), [a2])`. Before, it was `@rewrite.bottom_up_once`,

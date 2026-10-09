@@ -152,6 +152,27 @@ test "check a higher-order function" {
 }
 ```
 
+A redex is checked in the same way when it returns a lambda: the checker
+infers the type of the argument, gives it to the parameter, and checks the
+returned lambda against the expected type.
+
+```moonbit
+test "check a redex that returns a lambda" {
+  let a = base("A")
+  let empty_sig = @stlc.Signature::empty()
+  let empty_ctx = @stlc.TypeContext::empty()
+  // (λk. λx. x) k : A → A, with k : A in the context
+  let ctx = empty_ctx.extend_with(sn("k"), a)
+  let redex = tapp(tlam("k", tlam("x", tv("x"))), [tv("k")])
+  assert_eq(@stlc.check(empty_sig, ctx, redex, arrow(a, a)), Ok(()))
+  // the argument given to the lambda must be inferable
+  let lambda_argument = tapp(tlam("k", tlam("x", tv("x"))), [tlam("z", tv("z"))])
+  assert_true(
+    @stlc.check(empty_sig, empty_ctx, lambda_argument, arrow(a, a)) is Err(CannotInferLambda),
+  )
+}
+```
+
 ### Normalize a well-typed term
 
 `normalize_eta_long` returns the canonical form: beta-normal, and every
