@@ -7,73 +7,105 @@ pub(all) enum Strategy {
   FullNormal
 } derive(Eq, Debug)
 
+// Bounded-stack traversals (issue #13).
+//
+// The searches of this file are specified recursively, like the traversals of
+// `@rewrite`: a step found at depth `d` rebuilds the `d` nodes above it while
+// the recursion returns. They run instead as loops that keep the ancestors of
+// the current position in a heap array, root first, so the host stack depth
+// is constant whatever the nesting depth of the term. The rule is tried at the
+// same positions in the same order as by the recursive definition, so the
+// chosen redex, the rebuilt term and the path are unchanged.
+
 ///|
+/// One ancestor of the position being searched: a parent node with its
+/// fields, and the child of it on the way to the position.
+priv enum Ancestor[T] {
+  /// The body of the binder `parent = Bind(name, body)`.
+  BodyOf(@syntax.Term[T], @core.Name)
+  /// The head of the application `parent = Apply(head, arguments)`.
+  HeadOf(@syntax.Term[T], @syntax.Term[T], Array[@syntax.Term[T]])
+  /// Argument `index` of the application `parent = Apply(head, arguments)`.
+  /// `root_failed` records that the rule has already been tried at `parent`
+  /// and did not apply (see `applicative_once`).
+  ArgumentOf(
+    @syntax.Term[T],
+    @syntax.Term[T],
+    Array[@syntax.Term[T]],
+    Int,
+    Bool
+  )
+}
+
+///|
+/// Builds the step that rewrites, in `before`, the position reached through
+/// `ancestors` (root first) to `after`.
+///
+/// The ancestors are rebuilt from the innermost outwards and the path is
+/// prepended one frame per level, as the recursive search did while returning.
+fn[T] rebuild_step(
+  before : @syntax.Term[T],
+  ancestors : Array[Ancestor[T]],
+  after : @syntax.Term[T],
+  rule_name : @rewrite.RuleName,
+) -> @rewrite.StepResult[T] {
+  let mut node = after
+  let mut path = @rewrite.ReductionPath::root()
+  for i = ancestors.length() - 1; i >= 0; i = i - 1 {
+    match ancestors[i] {
+      BodyOf(_, name) => {
+        node = Bind(name, node)
+        path = path.prepend(BinderBody)
+      }
+      HeadOf(_, _, arguments) => {
+        node = Apply(node, arguments)
+        path = path.prepend(ApplyHead)
+      }
+      ArgumentOf(_, head, arguments, index, _) => {
+        let next_arguments = arguments.copy()
+        next_arguments[index] = node
+        node = Apply(head, next_arguments)
+        path = path.prepend(ApplyArgument(index))
+      }
+    }
+  }
+  Reduced(before~, after=node, rule=rule_name, path~)
+}
+
+///|
+/// Weak-head search: the rule is tried at the root, then along the chain of
+/// application heads, and nowhere else.
 fn[T] weak_head_once(
   term : @syntax.Term[T],
   rule_name : @rewrite.RuleName,
   rule : (@syntax.Term[T]) -> @syntax.Term[T]?,
 ) -> @rewrite.StepResult[T] {
-  match rule(term) {
-    Some(after) =>
-      Reduced(
-        before=term,
-        after~,
-        rule=rule_name,
-        path=@rewrite.ReductionPath::root(),
-      )
-    None =>
-      match term {
-        Apply(head, arguments) =>
-          match weak_head_once(head, rule_name, rule) {
-            Reduced(after=next_head, rule~, path~, ..) =>
-              Reduced(
-                before=term,
-                after=Apply(next_head, arguments),
-                rule~,
-                path=path.prepend(ApplyHead),
-              )
-            NoStep => NoStep
+  let ancestors : Array[Ancestor[T]] = []
+  for current = term {
+    match rule(current) {
+      Some(after) => break rebuild_step(term, ancestors, after, rule_name)
+      None =>
+        match current {
+          Apply(head, arguments) => {
+            ancestors.push(HeadOf(current, head, arguments))
+            continue head
           }
-        _ => NoStep
-      }
+          _ => break NoStep
+        }
+    }
   }
 }
 
 ///|
-fn[T] root_step(
-  term : @syntax.Term[T],
-  rule_name : @rewrite.RuleName,
-  rule : (@syntax.Term[T]) -> @syntax.Term[T]?,
-) -> @rewrite.StepResult[T] {
-  match rule(term) {
-    Some(after) =>
-      Reduced(
-        before=term,
-        after~,
-        rule=rule_name,
-        path=@rewrite.ReductionPath::root(),
-      )
-    None => NoStep
-  }
-}
-
-///|
-fn[T] lift_child_step(
-  before : @syntax.Term[T],
-  result : @rewrite.StepResult[T],
-  frame : @rewrite.ReductionFrame,
-  rebuild : (@syntax.Term[T]) -> @syntax.Term[T],
-) -> @rewrite.StepResult[T] {
-  match result {
-    NoStep => NoStep
-    Reduced(after=child_after, rule~, path~, ..) =>
-      Reduced(
-        before~,
-        after=rebuild(child_after),
-        rule~,
-        path=path.prepend(frame),
-      )
-  }
+/// The next step of the applicative-order search.
+priv enum Walk[T] {
+  /// Search the subtree rooted at this term; its ancestors are on the stack.
+  Enter(@syntax.Term[T])
+  /// The subtree just searched contains no step.
+  Leave
+  /// Every position strictly below this term has been searched without
+  /// success; try the rule at the term itself.
+  Exit(@syntax.Term[T])
 }
 
 ///|
@@ -87,57 +119,71 @@ fn[T] lift_child_step(
 /// tried on the whole application at this point instead of after the last
 /// argument. The reported step is therefore always the rule applied at a real
 /// position, and every position is still tried.
+///
+/// If that early attempt fails, the whole application is not tried again: the
+/// `ArgumentOf` entry carries this as `root_failed`, and the search leaves the
+/// application without a step after its last argument.
 fn[T] applicative_once(
   term : @syntax.Term[T],
   rule_name : @rewrite.RuleName,
   rule : (@syntax.Term[T]) -> @syntax.Term[T]?,
 ) -> @rewrite.StepResult[T] {
-  match term {
-    Value(_) | Variable(_) => root_step(term, rule_name, rule)
-    Bind(name, body) =>
-      match applicative_once(body, rule_name, rule) {
-        Reduced(_) as body_step =>
-          lift_child_step(term, body_step, BinderBody, fn(next) {
-            Bind(name, next)
-          })
-        NoStep => root_step(term, rule_name, rule)
-      }
-    Apply(head, arguments) => {
-      match applicative_once(head, rule_name, rule) {
-        Reduced(_) as head_step =>
-          return lift_child_step(term, head_step, ApplyHead, fn(next) {
-            Apply(next, arguments)
-          })
-        NoStep => ()
-      }
-      let last = arguments.length() - 1
-      let mut root_failed = false
-      for i in 0..<arguments.length() {
-        match applicative_once(arguments[i], rule_name, rule) {
-          Reduced(_) as argument_step =>
-            return lift_child_step(term, argument_step, ApplyArgument(i), fn(
-              next,
-            ) {
-              let next_arguments = arguments.copy()
-              next_arguments[i] = next
-              Apply(head, next_arguments)
-            })
-          NoStep => ()
-        }
-        if i < last &&
-          !root_failed &&
-          rule(Apply(head, arguments[0:i + 1].to_owned())) is Some(_) {
-          match root_step(term, rule_name, rule) {
-            Reduced(_) as step => return step
-            NoStep => root_failed = true
+  let ancestors : Array[Ancestor[T]] = []
+  for walk = Enter(term) {
+    match walk {
+      Enter(current) =>
+        match current {
+          Value(_) | Variable(_) => continue Exit(current)
+          Bind(name, body) => {
+            ancestors.push(BodyOf(current, name))
+            continue Enter(body)
+          }
+          Apply(head, arguments) => {
+            ancestors.push(HeadOf(current, head, arguments))
+            continue Enter(head)
           }
         }
-      }
-      if root_failed {
-        NoStep
-      } else {
-        root_step(term, rule_name, rule)
-      }
+      Exit(current) =>
+        match rule(current) {
+          Some(after) => break rebuild_step(term, ancestors, after, rule_name)
+          None => continue Leave
+        }
+      Leave =>
+        match ancestors.pop() {
+          None => break NoStep
+          Some(BodyOf(parent, _)) => continue Exit(parent)
+          Some(HeadOf(parent, head, arguments)) =>
+            if arguments.length() > 0 {
+              ancestors.push(ArgumentOf(parent, head, arguments, 0, false))
+              continue Enter(arguments[0])
+            } else {
+              continue Exit(parent)
+            }
+          Some(ArgumentOf(parent, head, arguments, index, root_failed)) => {
+            // argument `index` has no step: try the whole application early
+            // if the prefix ending at this argument is a redex
+            let mut root_failed = root_failed
+            if index < arguments.length() - 1 &&
+              !root_failed &&
+              rule(Apply(head, arguments[0:index + 1].to_owned())) is Some(_) {
+              match rule(parent) {
+                Some(after) =>
+                  break rebuild_step(term, ancestors, after, rule_name)
+                None => root_failed = true
+              }
+            }
+            if index + 1 < arguments.length() {
+              ancestors.push(
+                ArgumentOf(parent, head, arguments, index + 1, root_failed),
+              )
+              continue Enter(arguments[index + 1])
+            } else if root_failed {
+              continue Leave
+            } else {
+              continue Exit(parent)
+            }
+          }
+        }
     }
   }
 }
