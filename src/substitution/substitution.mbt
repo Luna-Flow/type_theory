@@ -1,6 +1,10 @@
 ///|
 /// A finite simultaneous substitution. Unmapped variables remain variables.
-pub struct Substitution[T] {
+///
+/// The type is abstract: its entries are not accessible outside the package,
+/// so each variable has at most one replacement. Use `get`, `length`, and
+/// `to_array` to read it.
+struct Substitution[T] {
   entries : Array[(@core.Name, @syntax.Term[T])]
 }
 
@@ -50,6 +54,23 @@ pub fn[T] Substitution::get(
     }
   }
   None
+}
+
+///|
+/// Returns the number of variables in the substitution domain.
+pub fn[T] Substitution::length(self : Substitution[T]) -> Int {
+  self.entries.length()
+}
+
+///|
+/// Returns the `(name, replacement)` entries in insertion order as a fresh
+/// array. Changing the returned array does not change `self`. The
+/// replacement terms are shared, not copied; treat their `Apply` argument
+/// arrays as immutable.
+pub fn[T] Substitution::to_array(
+  self : Substitution[T],
+) -> Array[(@core.Name, @syntax.Term[T])] {
+  self.entries.copy()
 }
 
 ///|

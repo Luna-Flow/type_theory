@@ -1,6 +1,10 @@
 ///|
 /// Finite simultaneous substitution for a downstream binding-aware AST.
-pub struct GenericSubstitution[N] {
+///
+/// The type is abstract: its entries are not accessible outside the package,
+/// so each variable has at most one replacement. Use `get`, `length`, and
+/// `to_array` to read it.
+struct GenericSubstitution[N] {
   entries : Array[(@core.Name, N)]
 }
 
@@ -50,6 +54,22 @@ pub fn[N] GenericSubstitution::get(
     }
   }
   None
+}
+
+///|
+/// Returns the number of variables in the substitution domain.
+pub fn[N] GenericSubstitution::length(self : GenericSubstitution[N]) -> Int {
+  self.entries.length()
+}
+
+///|
+/// Returns the `(name, replacement)` entries in insertion order as a fresh
+/// array. Changing the returned array does not change `self`. The
+/// replacement nodes are shared, not copied.
+pub fn[N] GenericSubstitution::to_array(
+  self : GenericSubstitution[N],
+) -> Array[(@core.Name, N)] {
+  self.entries.copy()
 }
 
 ///|

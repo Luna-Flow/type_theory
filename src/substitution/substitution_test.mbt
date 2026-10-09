@@ -99,3 +99,49 @@ test "fresh binders avoid the substitution domain" {
   )
   assert_true(substitution.apply(term) == expected)
 }
+
+///|
+test "substitution to_array returns a copy" {
+  let x = @core.Name::new("x")
+  let s : @substitution.Substitution[Int] = @substitution.Substitution::singleton(
+    x,
+    Value(1),
+  )
+  let entries = s.to_array()
+  entries.push((x, Value(2)))
+  entries[0] = (x, Value(3))
+  let v : @syntax.Term[Int] = Variable(x)
+  assert_eq(s.length(), 1)
+  assert_true(s.apply(v) == Value(1))
+  assert_true(s.then(@substitution.Substitution::empty()).apply(v) == Value(1))
+  assert_true(s.to_array() == [(x, Value(1))])
+}
+
+///|
+test "substitution length counts each variable once" {
+  let x = @core.Name::new("x")
+  let y = @core.Name::new("y")
+  let s : @substitution.Substitution[Int] = @substitution.Substitution::empty()
+    .set(x, Value(1))
+    .set(y, Value(2))
+    .set(x, Value(3))
+  assert_eq(s.length(), 2)
+  assert_true(s.to_array() == [(x, Value(3)), (y, Value(2))])
+  assert_eq(s.without(x).length(), 1)
+  assert_eq(s.restrict(@hashset.HashSet([y])).length(), 1)
+}
+
+///|
+test "generic substitution to_array returns a copy" {
+  let x = @core.Name::new("x")
+  let y = @core.Name::new("y")
+  let s : @substitution.GenericSubstitution[Int] = @substitution.GenericSubstitution::singleton(
+    x, 1,
+  ).set(y, 2)
+  let entries = s.to_array()
+  entries.push((x, 4))
+  entries[0] = (x, 5)
+  assert_eq(s.length(), 2)
+  assert_true(s.get(x) == Some(1))
+  assert_true(s.to_array() == [(x, 1), (y, 2)])
+}
