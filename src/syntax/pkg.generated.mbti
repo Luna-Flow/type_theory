@@ -35,12 +35,13 @@ pub(all) enum Term[T] {
   Variable(@core.Name)
   Apply(Term[T], Array[Term[T]])
   Bind(@core.Name, Term[T])
-} derive(Eq, @debug.Debug)
+} derive(@debug.Debug)
 pub fn[T] Term::alpha_rename_bound(Self[T], @core.Name, @core.Name) -> Self[T]?
 pub fn[T : Eq] Term::equal(Self[T], Self[T]) -> Bool
 pub fn[T, U] Term::map_values(Self[T], (T) -> U) -> Self[U]
 pub fn[T] Term::rename_free(Self[T], @core.Renaming) -> Self[T]
 pub impl[T] BindingSyntax for Term[T]
+pub impl[T : Eq] Eq for Term[T]
 
 // Type aliases
 
