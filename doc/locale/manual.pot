@@ -243,7 +243,7 @@ msgid "`Renaming::equal` compares two renamings entry by entry."
 msgstr ""
 
 #: manual/api/core.md:330
-#: manual/api/eval.md:65
+#: manual/api/eval.md:77
 msgid "It is the promoted `Eq` implementation; use `==` in new code."
 msgstr ""
 
@@ -491,7 +491,7 @@ msgid "yes"
 msgstr ""
 
 #: manual/api/eval.md:49
-msgid "leftmost-innermost redex (`@rewrite.bottom_up_once`)"
+msgid "leftmost-innermost redex, spines read curried"
 msgstr ""
 
 #: manual/api/eval.md:50
@@ -510,39 +510,43 @@ msgstr ""
 msgid "`FullNormal` currently selects the same traversal as `NormalOrder`; it names the intent \"reduce to full normal form\" and may diverge from `NormalOrder` if another full-normalization traversal is added."
 msgstr ""
 
-#: manual/api/eval.md:59
-msgid "`Strategy::equal` compares two strategies."
-msgstr ""
-
-#: manual/api/eval.md:67
-msgid "Running a strategy"
+#: manual/api/eval.md:57
+msgid "Positions are compared on the curried reading of application spines: `Apply(f, [a1, a2])` is $(f\\,a_1)\\,a_2$. `ApplicativeOrder` therefore differs from `@rewrite.bottom_up_once`, which is post-order on the n-ary tree. It visits the head of `Apply(h, [a1, …, an])`, then the arguments from left to right; after argument `ai` with `i < n` it tries the rule on the whole application if the rule applies to the prefix `Apply(h, [a1, …, ai])`, and after `an` in any case. A prefix is never rewritten on its own, since it is not a position of the term. With `@lambda.beta_rule` every strategy takes the same steps on `Apply(f, [a1, a2])` and on `Apply(Apply(f, [a1]), [a2])`; a rule that matches applications of one arity only sees the n-ary post-order of `bottom_up_once`."
 msgstr ""
 
 #: manual/api/eval.md:71
+msgid "`Strategy::equal` compares two strategies."
+msgstr ""
+
+#: manual/api/eval.md:79
+msgid "Running a strategy"
+msgstr ""
+
+#: manual/api/eval.md:83
 msgid "`reduce_once` performs at most one reduction step with a strategy."
 msgstr ""
 
-#: manual/api/eval.md:77
+#: manual/api/eval.md:89
 msgid "The result follows the contract of `@rewrite.StepResult`: `Reduced` reports one rewritten position and its path. For `NormalOrder`, `FullNormal` and `ApplicativeOrder`, `NoStep` means the rule applies nowhere. For `WeakHead`, `NoStep` means the rule applies neither at the root nor at any head position of the application spine; the term is then in weak head normal form for the rule, but may contain redexes under binders or in arguments."
 msgstr ""
 
-#: manual/api/eval.md:84
+#: manual/api/eval.md:96
 msgid "With `@lambda.beta_rule`, a redex is an `Apply` with a non-empty argument array whose head is a `Bind`, possibly wrapped in empty applications `Apply(h, [])`, which are read as `h`. Every strategy therefore contracts $(\\lambda x.\\,b)\\,a$ in `Apply(Apply(Bind(x, b), []), [a])`, at the root."
 msgstr ""
 
-#: manual/api/eval.md:110
+#: manual/api/eval.md:151
 msgid "`evaluate` normalizes a term by repeating `reduce_once` with one strategy."
 msgstr ""
 
-#: manual/api/eval.md:116
+#: manual/api/eval.md:157
 msgid "`evaluate(term, name, rule, strategy, max_steps)` is `@rewrite.normalize(term, t => reduce_once(t, name, rule, strategy), max_steps)`, with the same step-count contract: at most `max_steps` steps, and `NormalForm` only for a term on which the strategy finds no step."
 msgstr ""
 
-#: manual/api/eval.md:143
+#: manual/api/eval.md:184
 msgid "`trace` normalizes like `evaluate` and records every step."
 msgstr ""
 
-#: manual/api/eval.md:149
+#: manual/api/eval.md:190
 msgid "It is `@rewrite.trace` with the step function of the strategy. Every strategy reports its own input as `before`, so the trace satisfies the chaining invariants of `@rewrite.ReductionTrace`."
 msgstr ""
 
@@ -659,71 +663,71 @@ msgid "`bottom_up_once` rewrites the first position, in post-order, at which the
 msgstr ""
 
 #: manual/api/rewrite.md:221
-msgid "Children are tried before their parent, in the same left-to-right order. The chosen position is the leftmost-innermost redex. `NoStep` again means that the rule applies nowhere."
-msgstr ""
-
-#: manual/api/rewrite.md:254
-msgid "Repeating steps on `Term`"
+msgid "Children are tried before their parent, in the same left-to-right order. The chosen position is the leftmost-innermost redex of the n-ary tree: an application `Apply(h, [a1, …, an])` is one node, tried after all of its arguments. `NoStep` again means that the rule applies nowhere. The lambda calculus reads such a node as the curried spine $h\\,a_1 \\cdots a_n$, in which the beta redex $(\\lambda x.\\,b)\\,a_1$ does not contain $a_2, \\dots, a_n$; the `ApplicativeOrder` strategy of [eval](eval.md) follows that reading."
 msgstr ""
 
 #: manual/api/rewrite.md:258
+msgid "Repeating steps on `Term`"
+msgstr ""
+
+#: manual/api/rewrite.md:262
 msgid "`NormalizationResult[T]` is the outcome of bounded repetition of a step function."
 msgstr ""
 
-#: manual/api/rewrite.md:269
+#: manual/api/rewrite.md:273
 msgid "`NormalForm(term, steps)`: the step function returns `NoStep` on `term`, which was reached after `steps` steps. `StepLimitReached(term, steps)`: the limit of `steps` steps was used up and `term` can still be reduced."
 msgstr ""
 
-#: manual/api/rewrite.md:275
+#: manual/api/rewrite.md:279
 msgid "`normalize` applies a step function until it returns `NoStep` or a step limit is reached."
 msgstr ""
 
-#: manual/api/rewrite.md:282
+#: manual/api/rewrite.md:286
 msgid "`normalize(term, step, max_steps)` performs at most `max_steps` successful steps and calls `step` at most `max_steps + 1` times: after the last allowed step it calls `step` once more to decide between `NormalForm` and `StepLimitReached`. With `max_steps <= 0` it performs no step and only classifies `term`. The step function decides the strategy; see [eval](eval.md) for ready-made ones."
 msgstr ""
 
-#: manual/api/rewrite.md:291
+#: manual/api/rewrite.md:295
 msgid "`ReductionTrace[T]` records a bounded run: the initial term, every successful step and the final result."
 msgstr ""
 
-#: manual/api/rewrite.md:306
+#: manual/api/rewrite.md:310
 msgid "`initial()`, `steps()` and `result()` read the three fields; `steps()` returns a copy, and `equal` is the promoted `Eq` implementation. Every element of `steps` is a `Reduced` value, and `steps().length()` equals the `steps` count of `result`. When the step function keeps the contract of `StepResult` (it reports its own input as `before`, as every traversal of this package and of [eval](eval.md) does), consecutive steps chain: the first `before` is `initial`, and the `after` of one step is the `before` of the next. `trace` stores whatever the step function returns, so a hand-written step that reports another `before` breaks the chain."
 msgstr ""
 
-#: manual/api/rewrite.md:318
+#: manual/api/rewrite.md:322
 msgid "`trace` runs the same loop as `normalize` and records every step."
 msgstr ""
 
-#: manual/api/rewrite.md:346
+#: manual/api/rewrite.md:350
 #: manual/api/syntax.md:239
 msgid "Binding-aware ASTs"
 msgstr ""
 
-#: manual/api/rewrite.md:350
+#: manual/api/rewrite.md:354
 msgid "`GenericStepResult[N]` is `StepResult` for a downstream AST `N`."
 msgstr ""
 
-#: manual/api/rewrite.md:362
+#: manual/api/rewrite.md:366
 msgid "`generic_top_down_once` is `top_down_once` for any `BindingSyntax` AST."
 msgstr ""
 
-#: manual/api/rewrite.md:368
+#: manual/api/rewrite.md:372
 msgid "The traversal uses `BindingSyntax::project` to find children and the trait constructors to rebuild the parents of the rewritten node. `Opaque` and variable nodes have no children; the rule is still tried on them."
 msgstr ""
 
-#: manual/api/rewrite.md:374
+#: manual/api/rewrite.md:378
 msgid "`GenericNormalizationResult[N]` is `NormalizationResult` for a downstream AST."
 msgstr ""
 
-#: manual/api/rewrite.md:387
+#: manual/api/rewrite.md:391
 msgid "`generic_normalize` repeats `generic_top_down_once` with one rule until no step applies or the step limit is reached."
 msgstr ""
 
-#: manual/api/rewrite.md:394
+#: manual/api/rewrite.md:398
 msgid "It has the same step-count contract as `normalize`, with the top-down strategy fixed."
 msgstr ""
 
-#: manual/api/rewrite.md:409
+#: manual/api/rewrite.md:413
 msgid "For a downstream AST see the [adapter tutorial](../tutorial/adapter.md)."
 msgstr ""
 
@@ -1383,7 +1387,7 @@ msgstr ""
 #: manual/design/adapter.md:20
 #: manual/design/core.md:21
 #: manual/design/debruijn.md:21
-#: manual/design/eval.md:18
+#: manual/design/eval.md:23
 #: manual/design/rewrite.md:21
 #: manual/design/stlc.md:20
 #: manual/design/substitution.md:23
@@ -1444,7 +1448,7 @@ msgstr ""
 #: manual/design/adapter.md:81
 #: manual/design/core.md:125
 #: manual/design/debruijn.md:110
-#: manual/design/eval.md:89
+#: manual/design/eval.md:134
 #: manual/design/rewrite.md:78
 #: manual/design/stlc.md:67
 #: manual/design/substitution.md:62
@@ -1505,12 +1509,12 @@ msgstr ""
 #: manual/design/adapter.md:132
 #: manual/design/core.md:168
 #: manual/design/debruijn.md:240
-#: manual/design/eval.md:134
-#: manual/design/rewrite.md:171
+#: manual/design/eval.md:203
+#: manual/design/rewrite.md:182
 #: manual/design/stlc.md:332
 #: manual/design/substitution.md:130
 #: manual/design/syntax.md:286
-#: manual/design/utlc/lambda.md:198
+#: manual/design/utlc/lambda.md:205
 #: manual/design/utlc/nbe.md:145
 msgid "Correctness and invariants"
 msgstr ""
@@ -1558,12 +1562,12 @@ msgstr ""
 #: manual/design/adapter.md:147
 #: manual/design/core.md:182
 #: manual/design/debruijn.md:260
-#: manual/design/eval.md:151
-#: manual/design/rewrite.md:196
+#: manual/design/eval.md:226
+#: manual/design/rewrite.md:207
 #: manual/design/stlc.md:353
 #: manual/design/substitution.md:329
 #: manual/design/syntax.md:309
-#: manual/design/utlc/lambda.md:221
+#: manual/design/utlc/lambda.md:232
 #: manual/design/utlc/nbe.md:203
 msgid "Alternatives rejected"
 msgstr ""
@@ -1583,12 +1587,12 @@ msgstr ""
 #: manual/design/adapter.md:158
 #: manual/design/core.md:195
 #: manual/design/debruijn.md:272
-#: manual/design/eval.md:165
-#: manual/design/rewrite.md:208
+#: manual/design/eval.md:240
+#: manual/design/rewrite.md:219
 #: manual/design/stlc.md:366
 #: manual/design/substitution.md:343
 #: manual/design/syntax.md:323
-#: manual/design/utlc/lambda.md:232
+#: manual/design/utlc/lambda.md:243
 #: manual/design/utlc/nbe.md:215
 msgid "Boundaries"
 msgstr ""
@@ -2057,150 +2061,202 @@ msgid "**Strategies are data.** A strategy must be a value that can be stored, c
 msgstr ""
 
 #: manual/design/eval.md:15
-msgid "**No new semantics.** Every strategy is a traversal of [rewrite](rewrite.md), so it inherits the one-redex contract, the step-count contract and traces."
+msgid "**No new semantics.** Every strategy is a single-step function in the sense of [rewrite](rewrite.md): it rewrites one position of the term with the rule, so it inherits the one-redex contract, the step-count contract and traces."
 msgstr ""
 
-#: manual/design/eval.md:20
-msgid "The strategies are defined for any rule $r$; the classical results are stated for the beta rule of the lambda calculus, $(\\lambda x.\\,b)\\,a \\to_\\beta b[x := a]$, where `Apply` is read as a curried spine and `Bind` as $\\lambda$."
+#: manual/design/eval.md:19
+msgid "**One meaning per term.** An n-ary spine `Apply(f, [a1, a2])` and the nested `Apply(Apply(f, [a1]), [a2])` both denote $f\\,a_1\\,a_2$; a named strategy must take the same steps on both."
 msgstr ""
 
 #: manual/design/eval.md:25
+msgid "The strategies are defined for any rule $r$; the classical results are stated for the beta rule of the lambda calculus, $(\\lambda x.\\,b)\\,a \\to_\\beta b[x := a]$, where `Apply` is read as a curried spine and `Bind` as $\\lambda$."
+msgstr ""
+
+#: manual/design/eval.md:30
 msgid "Reduction contexts"
 msgstr ""
 
-#: manual/design/eval.md:27
+#: manual/design/eval.md:32
 msgid "A strategy is described by the contexts in which it may contract a redex, together with an order among them. Writing $\\Box$ for the hole:"
 msgstr ""
 
-#: manual/design/eval.md:37
+#: manual/design/eval.md:42
 msgid "**Normal order** contracts the leftmost-outermost redex among all full contexts $C$."
 msgstr ""
 
-#: manual/design/eval.md:39
+#: manual/design/eval.md:44
 msgid "**Applicative order** contracts the leftmost-innermost redex among all full contexts $C$."
 msgstr ""
 
-#: manual/design/eval.md:41
+#: manual/design/eval.md:46
 msgid "**Weak head** reduction contracts the redex at the root if there is one, and otherwise looks only in the head position $H$; it never enters a binder or an argument."
 msgstr ""
 
-#: manual/design/eval.md:45
+#: manual/design/eval.md:50
 msgid "A term on which weak head reduction finds no beta redex is in *weak head normal form*: an abstraction $\\lambda x.\\,t$, or a spine $h\\,u_1 \\cdots u_n$ whose head $h$ is a variable or a value."
 msgstr ""
 
-#: manual/design/eval.md:49
+#: manual/design/eval.md:54
 msgid "The n-ary encoding adds one degenerate case, the empty spine `Apply(h, [])`, whose curried reading is $h$ itself. The beta rule of [utlc/lambda](utlc/lambda.md) reads it that way: it looks through empty applications around the head, so `Apply(Apply(Bind(x, b), []), [a])` is the redex $(\\lambda x.\\,b)\\,a$ for every strategy. The node itself is not removed, so the characterization above holds up to empty applications: a weak head normal form is, after dropping them, an abstraction or a spine with a variable or a value at its head."
 msgstr ""
 
-#: manual/design/eval.md:58
-msgid "Classical results for beta"
+#: manual/design/eval.md:63
+msgid "\"Leftmost\", \"outermost\" and \"innermost\" refer to the curried reading of the term, in which $t(u_1, \\dots, u_n)$ stands for $(\\cdots((t\\,u_1)\\,u_2)\\cdots)\\,u_n$ and the partial applications $t\\,u_1 \\cdots u_i$ are subterms as well. For beta this matters: in $(\\lambda x.\\,b)\\,a_1\\,a_2$ the redex is the prefix $(\\lambda x.\\,b)\\,a_1$, which does not contain $a_2$, so applicative order contracts it before any redex inside $a_2$."
 msgstr ""
 
-#: manual/design/eval.md:60
-msgid "**Standardization and normalization.** If a term has a beta normal form, normal order reduction reaches it.[^normal] Normal order is therefore a *normalizing* strategy, which is why it is the default of the lambda calculus packages."
+#: manual/design/eval.md:71
+msgid "Curried prefixes and n-ary positions"
 msgstr ""
 
-#: manual/design/eval.md:65
-msgid "Curry and Feys, *Combinatory Logic I*, 1958; see Barendregt, *The Lambda Calculus*, Theorem 13.2.2."
+#: manual/design/eval.md:73
+msgid "A prefix $t\\,u_1 \\cdots u_i$ with $i < n$ is not a position of the n-ary tree, so a step cannot be reported there. The beta rule does not need one: it contracts a spine with its first argument and keeps the rest, so that for $n \\ge 2$"
 msgstr ""
 
-#: manual/design/eval.md:67
-msgid "**Applicative order is not normalizing.** Let $\\Omega = (\\lambda w.\\,w\\,w)(\\lambda w.\\,w\\,w)$, which reduces only to itself. For $t = (\\lambda x.\\,y)\\,\\Omega$:"
+#: manual/design/eval.md:82
+msgid "and the left side is defined exactly when the right side is. A beta step at the prefix $t\\,u_1$ is therefore the step at the whole spine, reported at the spine's position. The strategies use this in one direction only: a prefix decides *when* the whole application is tried, never *what* is rewritten."
 msgstr ""
 
-#: manual/design/eval.md:78
-msgid "**Agreement.** Beta reduction is confluent (Church–Rosser), so whenever two strategies both reach a beta normal form, the normal forms are alpha-equivalent.[^cr] A strategy can fail to terminate, but it cannot produce a *different* normal form."
-msgstr ""
-
-#: manual/design/eval.md:83
-msgid "Church and Rosser, \"Some properties of conversion\", Transactions of the AMS 39, 1936."
-msgstr ""
-
-#: manual/design/eval.md:85
-msgid "**Weak head reduction** computes the weak head normal form when one exists; it is the evaluation order of call-by-name languages and of the lazy evaluator in [utlc/nbe](utlc/nbe.md)."
+#: manual/design/eval.md:87
+msgid "Normal order and weak head try the whole application before its head and arguments. The prefixes lie between the two, and a beta redex at a prefix is a redex at the whole application, so the n-ary order already agrees with the curried one."
 msgstr ""
 
 #: manual/design/eval.md:91
-msgid "Strategies as an enum"
+msgid "Applicative order tries the head, then the arguments from left to right. After argument $u_i$ with $i < n$, it tries the rule on the whole application if the rule applies to the prefix $t(u_1, \\dots, u_i)$, and after $u_n$ in any case. For beta this is post-order on the curried reading."
 msgstr ""
 
-#: manual/design/eval.md:93
-msgid "**Problem.** Callers need to select, record and compare strategies, for example in a test that checks two strategies against each other."
-msgstr ""
-
-#: manual/design/eval.md:96
-msgid "**Options.** Pass a step function; pass a trait object; select from an enum."
-msgstr ""
-
-#: manual/design/eval.md:98
-msgid "**Choice.** `Strategy` is a plain enum with `Eq` and `Debug`, interpreted by `reduce_once`. Custom strategies remain possible: any step function can be given to `@rewrite.normalize` and `@rewrite.trace` directly. The enum covers the named strategies only."
+#: manual/design/eval.md:97
+msgid "A rule that matches applications of one arity only, such as `Apply(Value(\"+\"), [Value(\"0\"), x])`, never applies to a shorter prefix, so for it applicative order is post-order on the n-ary tree. A rule that applies to a prefix but not to the whole application rewrites nothing there: the prefix is not a position."
 msgstr ""
 
 #: manual/design/eval.md:103
-msgid "Each strategy is one traversal of rewrite"
+msgid "Classical results for beta"
 msgstr ""
 
-#: manual/design/eval.md:113
-msgid "Pre-order search returns the first redex that no other redex contains, scanning head before arguments and arguments left to right; this is the leftmost-outermost redex, and the normal-form lemma of the [rewrite design](rewrite.md) shows that `NoStep` means \"normal\". Post-order search returns a redex that contains no other redex, the leftmost-innermost one. Weak head search follows only the spine, so its `NoStep` means \"weak head normal\" and nothing more."
+#: manual/design/eval.md:105
+msgid "**Standardization and normalization.** If a term has a beta normal form, normal order reduction reaches it.[^normal] Normal order is therefore a *normalizing* strategy, which is why it is the default of the lambda calculus packages."
 msgstr ""
 
-#: manual/design/eval.md:121
-msgid "`evaluate` and `trace` add no reduction logic of their own: they pass the strategy's step function to `@rewrite.normalize` and `@rewrite.trace`. As a result, every strategy has a trace, and the step-count contract is the same for all of them."
+#: manual/design/eval.md:110
+msgid "Curry and Feys, *Combinatory Logic I*, 1958; see Barendregt, *The Lambda Calculus*, Theorem 13.2.2."
 msgstr ""
 
-#: manual/design/eval.md:126
-msgid "`FullNormal` as a separate name"
+#: manual/design/eval.md:112
+msgid "**Applicative order is not normalizing.** Let $\\Omega = (\\lambda w.\\,w\\,w)(\\lambda w.\\,w\\,w)$, which reduces only to itself. For $t = (\\lambda x.\\,y)\\,\\Omega$:"
+msgstr ""
+
+#: manual/design/eval.md:123
+msgid "**Agreement.** Beta reduction is confluent (Church–Rosser), so whenever two strategies both reach a beta normal form, the normal forms are alpha-equivalent.[^cr] A strategy can fail to terminate, but it cannot produce a *different* normal form."
 msgstr ""
 
 #: manual/design/eval.md:128
-msgid "`FullNormal` maps to the same traversal as `NormalOrder` today. The distinction is one of intent: `NormalOrder` promises the order of steps (leftmost-outermost), `FullNormal` only promises a full normal form. Keeping two names lets a faster full normalizer replace `FullNormal` later without changing the meaning of `NormalOrder`."
+msgid "Church and Rosser, \"Some properties of conversion\", Transactions of the AMS 39, 1936."
+msgstr ""
+
+#: manual/design/eval.md:130
+msgid "**Weak head reduction** computes the weak head normal form when one exists; it is the evaluation order of call-by-name languages and of the lazy evaluator in [utlc/nbe](utlc/nbe.md)."
 msgstr ""
 
 #: manual/design/eval.md:136
-msgid "`reduce_once` satisfies the one-redex contract of [rewrite](rewrite.md) for every strategy; the reported path of a `WeakHead` step consists of `ApplyHead` frames only."
+msgid "Strategies as an enum"
 msgstr ""
 
-#: manual/design/eval.md:139
-msgid "For `NormalOrder`, `FullNormal` and `ApplicativeOrder`, `NoStep` means the rule applies nowhere; for `WeakHead`, nowhere on the head spine."
+#: manual/design/eval.md:138
+msgid "**Problem.** Callers need to select, record and compare strategies, for example in a test that checks two strategies against each other."
 msgstr ""
 
 #: manual/design/eval.md:141
-msgid "With the beta rule, `evaluate(t, _, beta, NormalOrder, k)` returns `NormalForm` for every $t$ that has a beta normal form, provided $k$ is at least the length of the normal-order reduction (normalization theorem)."
+msgid "**Options.** Pass a step function; pass a trait object; select from an enum."
 msgstr ""
 
-#: manual/design/eval.md:144
-msgid "If two strategies both return `NormalForm` for a confluent rule, the terms are alpha-equivalent (Church–Rosser)."
+#: manual/design/eval.md:143
+msgid "**Choice.** `Strategy` is a plain enum with `Eq` and `Debug`, interpreted by `reduce_once`. Custom strategies remain possible: any step function can be given to `@rewrite.normalize` and `@rewrite.trace` directly. The enum covers the named strategies only."
 msgstr ""
 
-#: manual/design/eval.md:147
-msgid "The library's tests check named and De Bruijn beta steps against each other (`src/utlc/lambda/lambda_test.mbt`), and normal order against the NbE normalizer (`src/utlc/nbe/nbe_test.mbt`)."
+#: manual/design/eval.md:148
+msgid "Each strategy is one traversal"
 msgstr ""
 
-#: manual/design/eval.md:153
-msgid "**Call-by-value evaluation to values.** The usual call-by-value strategy does not reduce under binders and treats abstractions as values. It is expressible as a custom step function, but it is not one of the full or head strategies the packages need, so it is not in the enum."
-msgstr ""
-
-#: manual/design/eval.md:157
-msgid "**Head reduction under binders.** Head reduction (reducing $\\lambda \\bar x.\\,(\\lambda y.\\,b)\\,a\\,\\bar u$ under the outer binders) can be written as a custom step function; the enum keeps to the strategies that are used."
-msgstr ""
-
-#: manual/design/eval.md:161
-msgid "**Strategy-specific result types.** All strategies share `NormalizationResult`, so callers can switch strategies without changing their code."
+#: manual/design/eval.md:158
+msgid "Pre-order search returns the first redex that no other redex contains, scanning head before arguments and arguments left to right; this is the leftmost-outermost redex, and the normal-form lemma of the [rewrite design](rewrite.md) shows that `NoStep` means \"normal\". Post-order search on the curried reading returns, for beta and for rules of one arity, a redex that contains no other redex, the leftmost-innermost one; it tries the rule at every position, so its `NoStep` also means \"normal\". Weak head search follows only the spine, so its `NoStep` means \"weak head normal\" and nothing more."
 msgstr ""
 
 #: manual/design/eval.md:167
-msgid "Strategies only choose positions; they never rename, share or memoize. Repeated subterms are reduced separately."
+msgid "Applicative order reads spines curried"
 msgstr ""
 
 #: manual/design/eval.md:169
+msgid "**Problem.** `@rewrite.bottom_up_once` is post-order on the n-ary tree: it tries every argument of `Apply(h, [a1, …, an])` before the application. For beta it reduces inside $a_2$ before the redex $(\\lambda x.\\,b)\\,a_1$, while the nested encoding contracts that redex first. The normal form is the same, but the steps, paths and traces depend on how the term was built."
+msgstr ""
+
+#: manual/design/eval.md:175
+msgid "**Options.** Keep `bottom_up_once` and document the dependence; rewrite the prefix `Apply(h, [a1, …, ai])` on its own; let the prefix only decide when the whole application is tried."
+msgstr ""
+
+#: manual/design/eval.md:179
+msgid "**Choice.** The last. Rewriting a prefix would report a step at a position that does not exist, against the path contract of [rewrite](rewrite.md). Trying the whole application early keeps every step a rule application at a real position, and for beta it yields exactly the curried order (previous section). The traversal lives in `eval`, next to the weak head one; `@rewrite.bottom_up_once` stays post-order on the n-ary tree, because for the symbolic ASTs that `rewrite` serves, an n-ary operator application is one node, not a curried spine. The cost is one extra rule attempt per argument of a spine, on a prefix built for the attempt."
+msgstr ""
+
+#: manual/design/eval.md:190
+msgid "`evaluate` and `trace` add no reduction logic of their own: they pass the strategy's step function to `@rewrite.normalize` and `@rewrite.trace`. As a result, every strategy has a trace, and the step-count contract is the same for all of them."
+msgstr ""
+
+#: manual/design/eval.md:195
+msgid "`FullNormal` as a separate name"
+msgstr ""
+
+#: manual/design/eval.md:197
+msgid "`FullNormal` maps to the same traversal as `NormalOrder` today. The distinction is one of intent: `NormalOrder` promises the order of steps (leftmost-outermost), `FullNormal` only promises a full normal form. Keeping two names lets a faster full normalizer replace `FullNormal` later without changing the meaning of `NormalOrder`."
+msgstr ""
+
+#: manual/design/eval.md:205
+msgid "`reduce_once` satisfies the one-redex contract of [rewrite](rewrite.md) for every strategy; the reported path of a `WeakHead` step consists of `ApplyHead` frames only."
+msgstr ""
+
+#: manual/design/eval.md:208
+msgid "With the beta rule, every strategy takes the same steps on a term and on its curried form, in which every `Apply(f, [a1, …, an])` with $n > 0$ is nested into unary applications: after each step the two terms are again a term and its curried form, up to alpha-equivalence."
+msgstr ""
+
+#: manual/design/eval.md:212
+msgid "For `NormalOrder`, `FullNormal` and `ApplicativeOrder`, `NoStep` means the rule applies nowhere; for `WeakHead`, nowhere on the head spine."
+msgstr ""
+
+#: manual/design/eval.md:214
+msgid "With the beta rule, `evaluate(t, _, beta, NormalOrder, k)` returns `NormalForm` for every $t$ that has a beta normal form, provided $k$ is at least the length of the normal-order reduction (normalization theorem)."
+msgstr ""
+
+#: manual/design/eval.md:217
+msgid "If two strategies both return `NormalForm` for a confluent rule, the terms are alpha-equivalent (Church–Rosser)."
+msgstr ""
+
+#: manual/design/eval.md:220
+msgid "The library's tests check named and De Bruijn beta steps against each other and every strategy on random terms against their curried forms (`src/utlc/lambda/lambda_test.mbt`), applicative order with rules of fixed arity (`src/eval/eval_test.mbt`), and normal order against the NbE normalizer (`src/utlc/nbe/nbe_test.mbt`)."
+msgstr ""
+
+#: manual/design/eval.md:228
+msgid "**Call-by-value evaluation to values.** The usual call-by-value strategy does not reduce under binders and treats abstractions as values. It is expressible as a custom step function, but it is not one of the full or head strategies the packages need, so it is not in the enum."
+msgstr ""
+
+#: manual/design/eval.md:232
+msgid "**Head reduction under binders.** Head reduction (reducing $\\lambda \\bar x.\\,(\\lambda y.\\,b)\\,a\\,\\bar u$ under the outer binders) can be written as a custom step function; the enum keeps to the strategies that are used."
+msgstr ""
+
+#: manual/design/eval.md:236
+msgid "**Strategy-specific result types.** All strategies share `NormalizationResult`, so callers can switch strategies without changing their code."
+msgstr ""
+
+#: manual/design/eval.md:242
+msgid "Strategies only choose positions; they never rename, share or memoize. Repeated subterms are reduced separately."
+msgstr ""
+
+#: manual/design/eval.md:244
 msgid "No call-by-value, call-by-need or head strategy is provided as a named case."
 msgstr ""
 
-#: manual/design/eval.md:171
+#: manual/design/eval.md:246
 msgid "Termination is bounded by `max_steps`, not decided."
 msgstr ""
 
-#: manual/design/eval.md:172
+#: manual/design/eval.md:247
 msgid "`eval` works on `Term[T]` only; downstream ASTs use `@rewrite.generic_normalize`, which is top-down."
 msgstr ""
 
@@ -2301,106 +2357,110 @@ msgid "`top_down_once` tries the rule at a node before its children, children in
 msgstr ""
 
 #: manual/design/rewrite.md:111
+msgid "\"Contains\" refers to positions of the n-ary tree, where `Apply(h, [a1, …, an])` is one node above all of its arguments. This is the reading of the symbolic ASTs the package serves, where an operator applied to several arguments is one node. The lambda calculus reads the node as the curried spine $h\\,a_1 \\cdots a_n$, in which a beta redex $(\\lambda x.\\,b)\\,a_1$ is a prefix that does not contain $a_2$; there, `bottom_up_once` reduces inside $a_2$ before that redex, and the nested encoding does not. The `ApplicativeOrder` strategy of [eval](eval.md) therefore uses its own traversal, which follows the curried reading and still rewrites only positions of the n-ary tree."
+msgstr ""
+
+#: manual/design/rewrite.md:122
 msgid "**Lemma (normal forms).** For both traversals, `NoStep` on $t$ iff $t$ is a normal form of $\\to_r$."
 msgstr ""
 
-#: manual/design/rewrite.md:114
+#: manual/design/rewrite.md:125
 msgid "Both traversals visit every position of $t$ (they enter binder bodies, the head and all arguments) and try $r$ there. They return `NoStep` only after every attempt returned `None`, so no position is a redex; conversely, if some position is a redex, the traversal reaches it unless it returns earlier with another step. $\\square$"
 msgstr ""
 
-#: manual/design/rewrite.md:120
+#: manual/design/rewrite.md:131
 msgid "Hence `normalize` with either traversal returns `NormalForm(t, n)` only when $t$ is $\\to_r$-normal. Other strategies, such as weak-head reduction in [eval](eval.md), visit fewer positions; for them `NoStep` only means \"no redex at a position the strategy considers\"."
 msgstr ""
 
-#: manual/design/rewrite.md:125
+#: manual/design/rewrite.md:136
 msgid "Bounded repetition with an exact count"
 msgstr ""
 
-#: manual/design/rewrite.md:127
+#: manual/design/rewrite.md:138
 msgid "`normalize(t, step, k)` computes the sequence $t_0 = t$, $t_{i+1} = \\mathit{after}(\\mathit{step}(t_i))$ and stops at the first $n$ with $\\mathit{step}(t_n) = \\texttt{NoStep}$ or at $n = k$:"
 msgstr ""
 
-#: manual/design/rewrite.md:139
+#: manual/design/rewrite.md:150
 msgid "The extra call at $n = k$ distinguishes \"normal after exactly $k$ steps\" from \"limit reached\", so the result never claims a normal form that it has not checked. A limit $k \\le 0$ behaves like $k = 0$: no step is taken and $t$ is only classified. A step limit is necessary because termination is not decidable for arbitrary rules (and fails for the untyped lambda calculus); it is a parameter, not a global setting."
 msgstr ""
 
-#: manual/design/rewrite.md:146
+#: manual/design/rewrite.md:157
 msgid "Rules are named, not registered"
 msgstr ""
 
-#: manual/design/rewrite.md:148
+#: manual/design/rewrite.md:159
 msgid "**Problem.** Rewriting systems usually have several rules."
 msgstr ""
 
-#: manual/design/rewrite.md:150
+#: manual/design/rewrite.md:161
 msgid "**Options.** A rule registry inside the package; a list of rules per call; one rule function per call."
 msgstr ""
 
-#: manual/design/rewrite.md:153
+#: manual/design/rewrite.md:164
 msgid "**Choice.** One rule function with one `RuleName` per call. A system with several rules is either combined into one rule (as `beta_eta_rule` in [lambda](utlc/lambda.md), which tries beta before eta at each position), or expressed as a step function that tries several single-rule traversals in turn. The two choices give different strategies: the first picks the outermost position at which *any* rule applies, the second prefers the first rule anywhere in the term. Keeping that choice with the caller avoids fixing one priority scheme for every language."
 msgstr ""
 
-#: manual/design/rewrite.md:162
+#: manual/design/rewrite.md:173
 msgid "Generic traversal through the view"
 msgstr ""
 
-#: manual/design/rewrite.md:164
+#: manual/design/rewrite.md:175
 msgid "`generic_top_down_once` is `top_down_once` with `project` for pattern matching and the trait constructors for rebuilding. It needs no knowledge of the downstream AST beyond the [view laws](adapter.md), so a polynomial or numeric-expression AST gets positions and traces for free. Only the top-down strategy is provided generically, because it is the one downstream simplifiers use and because it makes the normal-form lemma available."
 msgstr ""
 
-#: manual/design/rewrite.md:173
+#: manual/design/rewrite.md:184
 msgid "One step rewrites at most one position, and the reported `path` addresses it in `before` (contract above). Tested by \"structured step records rule and root path\" and the path tests of [debruijn](debruijn.md)."
 msgstr ""
 
-#: manual/design/rewrite.md:176
+#: manual/design/rewrite.md:187
 msgid "`NoStep` from `top_down_once`, `bottom_up_once` or `generic_top_down_once` means the term is normal for the rule (normal-form lemma)."
 msgstr ""
 
-#: manual/design/rewrite.md:178
+#: manual/design/rewrite.md:189
 msgid "`normalize` and `trace` perform at most `max_steps` steps and call `step` at most `max_steps + 1` times; `NormalForm(t, n)` implies `step(t) = NoStep`."
 msgstr ""
 
-#: manual/design/rewrite.md:180
+#: manual/design/rewrite.md:191
 msgid "In a `ReductionTrace` the final term of `result` is the last `after` (or `initial` when there are no steps), and the number of recorded steps is the count in `result`. If the step function reports its input as `before`, as every traversal of this package and of [eval](eval.md) does, then also `steps[0].before = initial` and `steps[i].after = steps[i+1].before`. `trace` records what the step function returns and does not check this."
 msgstr ""
 
-#: manual/design/rewrite.md:187
+#: manual/design/rewrite.md:198
 msgid "**What is not checked.** The package does not decide termination or confluence of a rule. When the rule is confluent, every terminating strategy reaches the same normal form; when it is not, different strategies can legitimately return different normal forms, and the trace shows why."
 msgstr ""
 
-#: manual/design/rewrite.md:192
+#: manual/design/rewrite.md:203
 msgid "Cost: one step costs $O(n)$ rule attempts for a term of size $n$, plus rebuilding the path; normalizing in $k$ steps costs $O(k \\cdot n)$ rule attempts."
 msgstr ""
 
-#: manual/design/rewrite.md:198
+#: manual/design/rewrite.md:209
 msgid "**In-place or memoized rewriting.** Faster, but loses `before` and the path, and conflicts with immutable terms."
 msgstr ""
 
-#: manual/design/rewrite.md:200
+#: manual/design/rewrite.md:211
 msgid "**A fixed rule language (patterns with variables).** A pattern language would need matching and an occurs check; a rule as a MoonBit function can use pattern matching of the host language and any side condition."
 msgstr ""
 
-#: manual/design/rewrite.md:203
+#: manual/design/rewrite.md:214
 msgid "**Capture-aware traversal.** The traversal could rename binders before passing an open subterm to a rule. Rules that need binding-aware behaviour use [substitution](substitution.md), which already renames; renaming in the traversal would change binder names behind the rule's back."
 msgstr ""
 
-#: manual/design/rewrite.md:210
+#: manual/design/rewrite.md:221
 msgid "Rules see subterms under binders as open terms; the traversal neither renames nor reports which binders are in scope. A rule must be correct on open terms."
 msgstr ""
 
-#: manual/design/rewrite.md:213
+#: manual/design/rewrite.md:224
 msgid "No matching modulo associativity, commutativity or alpha-equivalence; a rule matches with MoonBit patterns on the term as it is."
 msgstr ""
 
-#: manual/design/rewrite.md:215
+#: manual/design/rewrite.md:226
 msgid "No termination, confluence or critical-pair analysis."
 msgstr ""
 
-#: manual/design/rewrite.md:216
+#: manual/design/rewrite.md:227
 msgid "Generic versions exist only for the top-down strategy and for normalization without a trace."
 msgstr ""
 
-#: manual/design/rewrite.md:218
+#: manual/design/rewrite.md:229
 msgid "The bound `max_steps` counts steps, not time or memory."
 msgstr ""
 
@@ -3281,108 +3341,116 @@ msgid "A redex is `Apply(Bind(x, b), [a, ..rest])`. It contracts with the first 
 msgstr ""
 
 #: manual/design/utlc/lambda.md:100
+msgid "The redex $(\\lambda x.\\,b)\\,a$ is a prefix of the spine but is reported at the spine's position, the only position the n-ary tree has for it. The strategies of [eval](../eval.md) account for this, so each of them takes the same steps on `Apply(f, [a1, a2])` and on `Apply(Apply(f, [a1]), [a2])`; in particular, applicative order contracts the prefix before any redex inside `a2`."
+msgstr ""
+
+#: manual/design/utlc/lambda.md:107
 msgid "Eta only on unary applications"
 msgstr ""
 
-#: manual/design/utlc/lambda.md:102
+#: manual/design/utlc/lambda.md:109
 msgid "`eta_rule` matches `Bind(x, Apply(f, [Variable(x)]))`. On the curried reading, $\\lambda x.\\,f\\,a\\,x$ (written `Apply(f, [a, x])`) is also an eta redex, but recognising it would require splitting the spine and rebuilding `Apply(f, [a])`. The rule stays syntactic; callers who build spines n-ary and need eta can normalize spines to unary form first."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:108
+#: manual/design/utlc/lambda.md:115
 msgid "Normal order with one combined rule"
 msgstr ""
 
-#: manual/design/utlc/lambda.md:110
+#: manual/design/utlc/lambda.md:117
 msgid "`normalize` runs `beta_eta_rule` with the `NormalOrder` strategy, so each step contracts the leftmost-outermost redex of either kind. The combined rule has one name, `\"beta_eta\"`; traces show positions but not which of the two rules fired. Because beta and eta redexes have different root constructors, the priority inside `beta_eta_rule` never changes the outcome of a step."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:116
+#: manual/design/utlc/lambda.md:123
 msgid "Beta then eta versus `normalize`"
 msgstr ""
 
-#: manual/design/utlc/lambda.md:118
+#: manual/design/utlc/lambda.md:125
 msgid "**Problem.** A caller may compute the beta normal form $N$ first, with `@eval.evaluate(t, _, beta_rule, NormalOrder, _)`, and then its eta normal form $M$, with `eta_rule`. Does $M$ agree with the result $L$ of `normalize(t, _)`?"
 msgstr ""
 
-#: manual/design/utlc/lambda.md:123
+#: manual/design/utlc/lambda.md:130
 msgid "**Not literally.** The rules read `Apply(h, [])` as $h$ when they match a redex, but no rule removes the node. On $t = \\lambda z.\\,(\\lambda y.\\,y)\\,(z\\,())$, where $z\\,()$ is `Apply(Variable(z), [])`, beta alone gives $N = \\lambda z.\\,z\\,()$, and $\\lambda z.\\,z\\,()$ is no eta redex because its body is not an application to $z$; so $M = N$. `normalize` instead contracts the eta redex at the root first, reading the argument $z\\,()$ as $z$, and returns $L = \\lambda y.\\,y$. $M$ and $L$ are not alpha-equivalent."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:132
+#: manual/design/utlc/lambda.md:139
 msgid "**Agreement modulo empty applications.** Let $\\lfloor \\cdot \\rfloor$ erase every empty application:"
 msgstr ""
 
-#: manual/design/utlc/lambda.md:145
+#: manual/design/utlc/lambda.md:152
 msgid "Call a term *unary* when each of its `Apply` nodes has at most one argument; terms built with `application` are unary. On a unary term, $\\lfloor \\cdot \\rfloor$ gives an ordinary lambda term with binary application."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:150
+#: manual/design/utlc/lambda.md:157
 msgid "**Theorem.** Let $t$ be unary. If `@eval.evaluate(t, _, beta_rule, NormalOrder, _)` returns `NormalForm(N, _)`, `@eval.evaluate(N, _, eta_rule, NormalOrder, _)` returns `NormalForm(M, _)`, and `normalize(t, _)` returns `NormalForm(L, _)`, then $\\lfloor M \\rfloor =_\\alpha \\lfloor L \\rfloor$."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:156
+#: manual/design/utlc/lambda.md:163
 msgid ""
 "*Proof.* (1) *Unary terms are closed under the rules.* Beta on a unary redex `Apply(h, [a])` returns $b[x := a]$ with no remaining spine; substitution copies the unary term $a$ into the unary term $b$; eta returns a subterm. (2) *Erasure is a step-by-step simulation on unary terms.* Erasure keeps every name, so it commutes with capture-avoiding substitution up to $=_\\alpha$: $\\lfloor b[x := a] \\rfloor =_\\alpha \\lfloor b \\rfloor[x := \\lfloor a \\rfloor]$. `beta_rule` fires on `Apply(h, [a])` exactly when $h$ is a `Bind` wrapped in empty applications, that is, when $\\lfloor \\texttt{Apply}(h, [a]) \\rfloor = (\\lambda x.\\,\\lfloor b \\rfloor)\\,\\lfloor a \\rfloor$ is a beta redex, and the contractum erases to its contractum. `eta_rule` fires on `Bind(x, B)` exactly when $B$ is `Apply(f, [a])` up to empty applications with $a$ a wrapped `Variable(x)` and $x \\n"
 "otin \\mathrm{FV}(f)$, that is, when $\\lambda x.\\,\\lfloor B \\rfloor = \\lambda x.\\,\\lfloor f \\rfloor\\,x$ is an eta redex. No rule fires on an empty application itself, and the redexes of $\\lfloor u \\rfloor$ are the images of the redexes of $u$, where an empty application contributes the redexes of its head. Hence a rule step $u \\to u'$ is a step $\\lfloor u \\rfloor \\to \\lfloor u' \\rfloor$ of the same kind up to $=_\\alpha$, and a term with no redex for the rules erases to a term with no redex. (3) By (2), $\\lfloor t \\rfloor \\to_\\beta^{*} \\lfloor N \\rfloor$ with $\\lfloor N \\rfloor$ beta-normal, then $\\lfloor N \\rfloor \\to_\\eta^{*} \\lfloor M \\rfloor$ with $\\lfloor M \\rfloor$ eta-normal. Eta steps keep a term beta-normal: a new beta redex would need $(\\lambda x.\\,f\\,x)\\,a$ or $\\lambda x.\\,(\\lambda y.\\,b)\\,x$ in the term, both beta redexes already. So $\\lfloor M \\rfloor$ is beta-eta normal and $\\lfloor t \\rfloor \\to_{\\beta\\eta}^{*} \\lfloor M \\rfloor$. Likewise $\\lfloor t \\rfloor \\to_{\\beta\\eta}^{*} \\lfloor L \\rfloor$ with $\\lfloor L \\rfloor$ beta-eta normal. By confluence of $\\to_{\\beta\\eta}$ the two normal forms are alpha-equivalent. $\\square$"
 msgstr ""
 
-#: manual/design/utlc/lambda.md:187
+#: manual/design/utlc/lambda.md:194
 msgid "On the example, $\\lfloor M \\rfloor = \\lambda z.\\,z$ and $\\lfloor L \\rfloor = \\lambda y.\\,y$. Equivalently, $M$ and $L$ are equal in the least congruence containing $=_\\alpha$ and `Apply(h, [])` $= h$; in particular their nameless, spine-flattened forms are equal."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:192
+#: manual/design/utlc/lambda.md:199
 msgid "The unary hypothesis is needed for eta only. On the curried reading, `Bind(x, Apply(f, [a, Variable(x)]))` is the eta redex $\\lambda x.\\,(f\\,a)\\,x$, which `eta_rule` does not recognise (see \"Eta only on unary applications\" above), so for terms with longer spines step (2) fails and no agreement is claimed."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:200
+#: manual/design/utlc/lambda.md:207
 msgid "`beta_rule(t) = Some(u)` implies $t \\to_\\beta u$ at the root; `eta_rule` likewise for $\\eta$, with the side condition checked by `@syntax.free_variables`."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:203
+#: manual/design/utlc/lambda.md:210
 msgid "`normalize` returns `NormalForm(u, n)` only for $u$ with no (unary) $\\beta$ or $\\eta$ redex anywhere ([rewrite](../rewrite.md) normal-form lemma)."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:206
+#: manual/design/utlc/lambda.md:213
 msgid "By confluence of beta, the beta normal forms computed by `@eval.evaluate` with `beta_rule`, by [debruijn](../debruijn.md) and by [utlc/nbe](nbe.md) coincide after conversion and spine flattening. The test \"named and debruijn beta reduction agree modulo alpha\" checks a step that requires renaming."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:211
+#: manual/design/utlc/lambda.md:218
+msgid "Every strategy of [eval](../eval.md) with `beta_rule` takes the same steps on a term and on its curried form, up to alpha-equivalence; the test \"every strategy takes the same steps on a term and its curried form\" checks this on 1000 random terms."
+msgstr ""
+
+#: manual/design/utlc/lambda.md:222
 msgid "`normalize` returns a beta-eta normal form, which is in general *not* the beta normal form of the other normalizers: $\\lambda x.\\,f\\,x$ is beta-normal and normalizes to $f$ here. The two are related by eta alone, but only modulo empty applications and for unary spines, as the theorem in \"Beta then eta versus `normalize`\" above states."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:216
+#: manual/design/utlc/lambda.md:227
 msgid "With beta and eta combined, normal order is used as the strategy; that it reaches the $\\beta\\eta$ normal form of every normalizing term rests on the normalization theorem for beta and eta postponement, and is checked by tests rather than proved here."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:223
+#: manual/design/utlc/lambda.md:234
 msgid "**A separate lambda AST.** Using `Term[T]` keeps the calculus inside the shared substrate: the same analyses, substitution and traces apply, and domain values ride along unchanged."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:226
+#: manual/design/utlc/lambda.md:237
 msgid "**Separate beta and eta normalizers.** Offered indirectly: pass `beta_rule` or `eta_rule` to [`@eval.evaluate`](../../api/eval.md) with any strategy."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:229
+#: manual/design/utlc/lambda.md:240
 msgid "**Iterated substitution in beta.** Beta substitutes once; the argument is not re-substituted, as the calculus requires."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:234
+#: manual/design/utlc/lambda.md:245
 msgid "No types: ill-behaved terms such as $\\Omega$ are accepted and end with `StepLimitReached`."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:236
+#: manual/design/utlc/lambda.md:247
 msgid "No sharing: a duplicated argument is reduced once per copy. Use [utlc/nbe](nbe.md) for efficient normalization."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:238
+#: manual/design/utlc/lambda.md:249
 msgid "Eta recognises unary applications only."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:239
+#: manual/design/utlc/lambda.md:250
 msgid "An empty application `Apply(h, [])` is read as $h$ when a redex is matched, but it is not removed from the term (see the [eval design](../eval.md)). Results of different reduction orders, such as beta then eta and `normalize`, therefore agree only after empty applications are erased."
 msgstr ""
 
-#: manual/design/utlc/lambda.md:244
+#: manual/design/utlc/lambda.md:255
 msgid "Constants (`Value`) have no reduction rules here; add domain rules with [rewrite](../rewrite.md) or [eval](../eval.md)."
 msgstr ""
 
