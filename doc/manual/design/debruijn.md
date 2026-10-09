@@ -239,6 +239,91 @@ applications around the `Bind` are looked through when a redex is matched. `redu
 is the normal-order strategy of the [eval design](eval.md) on nameless terms,
 so the normalization theorem applies to `normalize`.
 
+### Explicit stacks instead of host recursion
+
+**Problem.** Every operation above is defined by structural recursion on
+the term, and a direct implementation keeps one host stack frame per level
+of nesting. Terms from users and downstream ASTs can be deep (a long spine
+$f\,(f\,(f \cdots))$, a long chain of binders), and the js, wasm and wasm-gc
+stacks overflow at a depth of a few thousand, so the same call returned a
+result on native and crashed on the other backends.
+
+**Choice.** Each operation runs as a loop over an explicit stack in a heap
+array, and visits the subterms in exactly the order of its recursive
+definition, so its results, including the error it reports, are unchanged.
+The host stack depth is constant; the heap stacks hold at most one entry per
+node of the term.
+
+*Checks.* `validate` and `==` keep a stack of the subterms (or pairs of
+subterms) still to visit. Write $\mathrm{pre}(t)$ for the nodes of $t$ in
+pre-order, head before arguments and arguments from left to right:
+
+$$
+\mathrm{pre}(\lambda.\,t) = \lambda \cdot \mathrm{pre}(t), \qquad
+\mathrm{pre}(t\,u_1 \cdots u_m) = @ \cdot \mathrm{pre}(t) \cdot \mathrm{pre}(u_1) \cdots \mathrm{pre}(u_m),
+$$
+
+and $\mathrm{pre}(a) = a$ for a leaf $a$. The loop pops the top entry, checks
+it if it is a leaf, and otherwise pushes its children, $u_m$ first and the
+head $t$ last. With the stack $t_1 \cdots t_r$ (top first) it maintains
+
+$$
+\mathrm{pre}(t_1) \cdots \mathrm{pre}(t_r) \;=\; \text{the nodes of the input not visited yet, in pre-order},
+$$
+
+since popping $t\,u_1 \cdots u_m$ and pushing its children replaces
+$\mathrm{pre}(t\,\vec u)$ by its tail. So the leaves are checked in pre-order.
+The recursive `validate` returns the first error of its head, else of its
+arguments from left to right, which by induction is also the first error in
+pre-order. Both return the same error. An index is checked against the
+number of binders above it, which the stack stores with each entry.
+
+*Translations.* `shift`, `substitute_bound` (both through one rebuilding
+traversal that applies a function to each `Bound(i)` and its binder count),
+`from_named` and `to_named` produce a term. They keep a stack of tasks,
+$\mathsf{visit}(t, k)$ and $\mathsf{build}_@(m)$ / $\mathsf{build}_\lambda$,
+and a stack of results. Visiting a leaf pushes its translation; visiting
+$t\,u_1 \cdots u_m$ pushes $\mathsf{build}_@(m)$ and above it the visits of
+$u_m, \dots, u_1, t$; $\mathsf{build}_@(m)$ pops the $m + 1$ translations
+and pushes the application of the first to the others. By induction on $t$,
+running the tasks pushed for $\mathsf{visit}(t, k)$ pushes exactly one
+result, the recursive translation of $t$ under $k$ binders, and leaves the
+rest of both stacks untouched. Leaves are visited in pre-order as above;
+errors arise only at leaves, and both versions stop at the first one, so
+they return the same `Err`. In `substitute_bound` the replacement at an
+occurrence is shifted by the same loop, run to its end before the
+traversal continues.
+
+`from_named` keeps, for each name, the levels of the enclosing binders of
+that name, and maps an occurrence under $n$ binders to $n - 1 - \ell$ for
+the innermost level $\ell$, the index of the nearest binder of that name.
+`to_named` names a binder with the first name of $x, x_1, x_2, \dots$ that
+is neither free in the term ($F$) nor the name of an enclosing binder. Let
+$c_0, c_1, \dots$ be the names of that sequence not in $F$. By induction on
+the level, the enclosing binders of a binder at level $n$ are named
+$c_0, \dots, c_{n-1}$, so it gets $c_n$: the name depends only on the level
+and is computed once. Both translations are therefore linear in the size of
+the term (up to hashing), where a copy of the binder stack at each binder
+and a rescan of the candidate names made a chain of $n$ binders cost
+$O(n^2)$.
+
+*Reduction.* The recursive search of `reduce_once` tries a node, then its
+head, then its arguments from left to right, and enters binder bodies, and
+it contracts the first redex it meets: the first redex in pre-order. The
+loop walks the term in pre-order and keeps the path from the root, each
+ancestor with the child it descended into; when a leaf ends a branch it
+returns to the nearest application with an argument left. When it meets a
+redex it contracts it, then rebuilds the ancestors from the innermost
+outwards and prepends one frame per ancestor to the reduction path, which is
+the order in which the recursive calls return. The steps, their paths and
+their counts in `normalize` are therefore unchanged.
+
+The tests in `src/debruijn/deep_test.mbt` run every operation on terms
+nested to depth 100 000 (application chains in head and in argument
+position, binder chains with indices that reach the outermost binder, and
+mixtures of these, well scoped and ill scoped) on every backend; before the
+change each of them overflowed the stack on js, wasm and wasm-gc.
+
 ## Correctness and invariants
 
 - `validate(from_named(t)) == Ok(())` for every named $t$.
@@ -255,10 +340,16 @@ so the normalization theorem applies to `normalize`.
   fall below its cutoff, it returns `Err(NegativeShift)`, and it rejects a
   negative cutoff, which would free bound indices, with `Err(NegativeCutoff)`.
 
-Cost: `shift` and `validate` are linear in the term size. `substitute_bound`
+Cost: `shift`, `validate`, `from_named` and `to_named` are linear in the term
+size (the translations up to hashing of names). `substitute_bound`
 costs $O(|t| + m \cdot |s|)$ for $m$ occurrences of the index, because each
 inserted copy is shifted. A `reduce_once` step costs one search plus one
-`instantiate`.
+`instantiate`, plus building the reduction path, which has one frame per
+ancestor of the redex and is built with `@rewrite.ReductionPath::prepend`.
+
+Stack: every operation uses a constant depth of host stack, whatever the
+nesting depth of the term; its pending work is kept in heap arrays with at
+most one entry per node.
 
 ## Alternatives rejected
 
@@ -282,3 +373,7 @@ inserted copy is shifted. A `reduce_once` step costs one search plus one
   whereas [utlc/nbe](utlc/nbe.md) drops it from its normal forms.
 - Only beta is implemented; there is no eta rule for De Bruijn terms.
 - Values are opaque; their contents are never shifted.
+- The derived `Debug` of `DbTerm` (and of the result types that contain one)
+  recurses over the term, so printing a deeply nested term can overflow the
+  host stack on js, wasm and wasm-gc. Every other operation, `==` included,
+  handles any nesting depth.
