@@ -46,7 +46,6 @@ Open:
 
 - Deeply nested input terms overflow the host stack on js, wasm and wasm-gc
   (#13).
-- Public array fields let callers mutate values documented as immutable (#14).
 
 Fixed on 2026-10-09:
 
@@ -84,3 +83,8 @@ Fixed on 2026-10-09:
   returning `FuelExhausted` when a divergent term was given a large budget
   (#12). Evaluation and readback now keep pending work on a heap stack, so the
   host stack no longer grows with the fuel spent.
+- Public array fields let callers mutate values documented as immutable: a
+  blackbox caller could push a second entry for a name onto a substitution, so
+  `s` and `s.then(empty)` disagreed (#14). The types that hold arrays are now
+  abstract and return copies, so their values cannot change after they are
+  built.

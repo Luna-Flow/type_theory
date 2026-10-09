@@ -153,7 +153,9 @@ are in the used set and are skipped.
 ### Persistent values by copying
 
 `Context`, `Telescope` and `Renaming` are immutable records over arrays.
-Every update copies the array, which costs $O(n)$. The alternative, a
+The types are abstract, so the arrays can be reached only inside the
+package: `from_array` copies its argument, `to_array` returns a copy, and
+every update builds a new array, which costs $O(n)$. The alternative, a
 persistent list or tree, would make updates cheaper but the sizes involved are
 the number of binders in scope, which is small for the intended use. Copying
 keeps the representation simple and the values safe to share.
@@ -168,13 +170,16 @@ rely on injectivity: they freshen a binder whenever it is a target, see the
 ## Correctness and invariants
 
 - `fresh_name(h, U) ∉ U`, and `fresh_name(h, U) = h` when `h ∉ U` (freshness lemma).
-- `Renaming::set` keeps at most one entry per source; `apply` therefore
-  denotes a function.
+- `Renaming::set` keeps at most one entry per source, and because the type
+  is abstract no other code can add an entry; `apply` therefore denotes a
+  function.
 - `r.then(s)` denotes $\sigma \circ \rho$ (composition lemma); `empty` is a
   two-sided identity for `then` as functions.
 - `r.without(x).apply(x) == x` and `r.without(x).apply(n) == r.apply(n)` for
   `n != x`.
-- Every operation returns a new value; no argument is mutated.
+- Every operation returns a new value; no argument is mutated, and no array
+  stored in a value is handed out, so a value cannot change after it is
+  built.
 
 These laws are exercised by the tests in `src/core/core_test.mbt` and by every
 capture-avoidance test of the higher packages.
