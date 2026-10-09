@@ -1,5 +1,8 @@
 ///|
 /// Lambda syntax with bound variables represented by De Bruijn indices.
+///
+/// Terms are shared, not copied. Treat the argument array of `Apply` as
+/// immutable; build a new term instead of changing it in place.
 pub(all) enum DbTerm[T] {
   Value(T)
   Free(@core.Name)
