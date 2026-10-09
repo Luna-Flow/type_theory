@@ -120,3 +120,89 @@ test "reducers report ill-scoped input" {
     NormalForm(term=Bind(Apply(Bound(0), [Value(2)])), steps=1),
   )
 }
+
+///|
+test "downward shift rejects capture by an enclosing binder" {
+  // issue #9
+  let f = @core.Name::new("f")
+  // λ. (free 0): the free variable must not become the parameter
+  let under_binder : @debruijn.DbTerm[Int] = Bind(Bound(1))
+  assert_true(
+    @debruijn.shift(under_binder, -1, 0) ==
+    Err(NegativeShift(index=1, delta=-1, cutoff=1)),
+  )
+  // a free index at the cutoff must not drop below it
+  let at_cutoff : @debruijn.DbTerm[Int] = Bound(1)
+  assert_true(
+    @debruijn.shift(at_cutoff, -1, 1) ==
+    Err(NegativeShift(index=1, delta=-1, cutoff=1)),
+  )
+  // deeper binders and a larger delta
+  let deep : @debruijn.DbTerm[Int] = Bind(Bind(Bound(3)))
+  assert_true(
+    @debruijn.shift(deep, -2, 0) ==
+    Err(NegativeShift(index=3, delta=-2, cutoff=2)),
+  )
+  let deep_cutoff : @debruijn.DbTerm[Int] = Bind(Bound(3))
+  assert_true(
+    @debruijn.shift(deep_cutoff, -2, 2) ==
+    Err(NegativeShift(index=3, delta=-2, cutoff=3)),
+  )
+  // the capture is found inside an application spine
+  let spine : @debruijn.DbTerm[Int] = Apply(Free(f), [Bound(2), Bind(Bound(1))])
+  assert_true(
+    @debruijn.shift(spine, -1, 0) ==
+    Err(NegativeShift(index=1, delta=-1, cutoff=1)),
+  )
+  let head : @debruijn.DbTerm[Int] = Apply(Bind(Apply(Bound(0), [Bound(1)])), [
+    Value(1),
+  ])
+  assert_true(
+    @debruijn.shift(head, -1, 0) ==
+    Err(NegativeShift(index=1, delta=-1, cutoff=1)),
+  )
+  // a shift below zero is still rejected
+  let top : @debruijn.DbTerm[Int] = Bound(0)
+  assert_true(
+    @debruijn.shift(top, -1, 0) ==
+    Err(NegativeShift(index=0, delta=-1, cutoff=0)),
+  )
+}
+
+///|
+test "downward shift keeps free indices at or above the cutoff" {
+  // issue #9: i + d == c is the boundary that must succeed
+  let f = @core.Name::new("f")
+  let under_binder : @debruijn.DbTerm[Int] = Bind(Bound(2))
+  assert_true(@debruijn.shift(under_binder, -1, 0) == Ok(Bind(Bound(1))))
+  let at_cutoff : @debruijn.DbTerm[Int] = Bound(2)
+  assert_true(@debruijn.shift(at_cutoff, -1, 1) == Ok(Bound(1)))
+  let deep : @debruijn.DbTerm[Int] = Bind(Bind(Apply(Bound(4), [Bound(1)])))
+  assert_true(
+    @debruijn.shift(deep, -2, 0) == Ok(Bind(Bind(Apply(Bound(2), [Bound(1)])))),
+  )
+  let spine : @debruijn.DbTerm[Int] = Apply(Free(f), [
+    Bound(1),
+    Bind(Apply(Bound(0), [Bound(2)])),
+  ])
+  assert_true(
+    @debruijn.shift(spine, -1, 0) ==
+    Ok(Apply(Free(f), [Bound(0), Bind(Apply(Bound(0), [Bound(1)]))])),
+  )
+  // indices bound inside the term are untouched by any delta
+  let closed : @debruijn.DbTerm[Int] = Bind(Bind(Apply(Bound(1), [Bound(0)])))
+  assert_true(@debruijn.shift(closed, -5, 0) == Ok(closed))
+}
+
+///|
+test "upward shift is unchanged" {
+  let open_term : @debruijn.DbTerm[Int] = Bind(Apply(Bound(0), [Bound(1)]))
+  assert_true(
+    @debruijn.shift(open_term, 2, 0) == Ok(Bind(Apply(Bound(0), [Bound(3)]))),
+  )
+  let below : @debruijn.DbTerm[Int] = Apply(Bound(0), [Bound(1)])
+  assert_true(@debruijn.shift(below, 1, 1) == Ok(Apply(Bound(0), [Bound(2)])))
+  let deep : @debruijn.DbTerm[Int] = Bind(Bind(Bound(2)))
+  assert_true(@debruijn.shift(deep, 3, 0) == Ok(Bind(Bind(Bound(5)))))
+  assert_true(@debruijn.shift(deep, 0, 0) == Ok(deep))
+}

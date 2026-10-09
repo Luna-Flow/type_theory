@@ -175,7 +175,9 @@ fn[T] shift_visit(
       }
       if index >= cutoff + depth {
         let shifted = index + delta
-        if shifted < 0 {
+        // A free index must stay free: below `cutoff + depth` it would be
+        // captured by an enclosing binder, and below zero it is invalid.
+        if shifted < cutoff + depth || shifted < 0 {
           Err(NegativeShift(index~, delta~, cutoff=cutoff + depth))
         } else {
           Ok(Bound(shifted))
@@ -207,7 +209,8 @@ fn[T] shift_visit(
 }
 
 ///|
-/// Shifts free bound indices `>= cutoff` by `delta`.
+/// Shifts free bound indices `>= cutoff` by `delta`. Fails with
+/// `NegativeShift` if a shifted index would fall below the cutoff.
 pub fn[T] shift(
   term : DbTerm[T],
   delta : Int,
