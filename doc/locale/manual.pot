@@ -339,106 +339,106 @@ msgid "`NegativeIndex(index)`: a negative index."
 msgstr ""
 
 #: manual/api/debruijn.md:82
-msgid "`NegativeShift(index, delta, cutoff)`: shifting `Bound(index)` by `delta` would make it negative; `cutoff` is the effective cutoff at the occurrence."
+msgid "`NegativeShift(index, delta, cutoff)`: shifting the free `Bound(index)` by `delta` would move it below `cutoff`, the effective cutoff at the occurrence, where it would be captured by an enclosing binder or become negative."
 msgstr ""
 
-#: manual/api/debruijn.md:85
+#: manual/api/debruijn.md:87
 msgid "Conversion and validation"
 msgstr ""
 
-#: manual/api/debruijn.md:89
+#: manual/api/debruijn.md:91
 msgid "`from_named` converts named syntax to De Bruijn syntax."
 msgstr ""
 
-#: manual/api/debruijn.md:95
+#: manual/api/debruijn.md:97
 msgid "A variable bound by an enclosing `Bind` becomes `Bound(i)`, where `i` counts the binders between the occurrence and its binder (the nearest binder of that name wins). Free variables become `Free`. The result is always well scoped, and alpha-equivalent named terms give equal results."
 msgstr ""
 
-#: manual/api/debruijn.md:102
+#: manual/api/debruijn.md:104
 msgid "`to_named` converts De Bruijn syntax back to named syntax with deterministic binder names."
 msgstr ""
 
-#: manual/api/debruijn.md:109
+#: manual/api/debruijn.md:111
 msgid "Binders are named `x`, `x_1`, `x_2`, …: each one gets the first name of that sequence that is neither a free name of the term nor the name of an enclosing binder. Returns `Err(NegativeIndex)` or `Err(UnboundIndex)` for an ill-scoped term. For a well-scoped `d`, `from_named(to_named(d))` is `d`; for a named `t`, `to_named(from_named(t))` is alpha-equivalent to `t`."
 msgstr ""
 
-#: manual/api/debruijn.md:132
+#: manual/api/debruijn.md:134
 msgid "The binder becomes `x_1` because `x` is a free name of the term."
 msgstr ""
 
-#: manual/api/debruijn.md:136
+#: manual/api/debruijn.md:138
 msgid "`validate` checks that every bound index refers to an enclosing binder."
 msgstr ""
 
-#: manual/api/debruijn.md:142
+#: manual/api/debruijn.md:144
 msgid "Returns `Ok(())` for a well-scoped term and otherwise the first error found in pre-order."
 msgstr ""
 
-#: manual/api/debruijn.md:154
+#: manual/api/debruijn.md:156
 msgid "Index operations"
 msgstr ""
 
-#: manual/api/debruijn.md:158
+#: manual/api/debruijn.md:160
 msgid "`shift` adds `delta` to every index that is free relative to a cutoff."
 msgstr ""
 
-#: manual/api/debruijn.md:164
-msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. Returns `Err(NegativeShift)` if an index would become negative and `Err(NegativeIndex)` if the input contains a negative index."
+#: manual/api/debruijn.md:166
+msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. The shift is defined when no such index falls below the cutoff, that is, there is no `i >= cutoff + k` with `i + delta < cutoff + k`. Returns `Err(NegativeShift)` if an index would fall below the cutoff, where it would be captured by an enclosing binder or become negative, and `Err(NegativeIndex)` if the input contains a negative index."
 msgstr ""
 
-#: manual/api/debruijn.md:171
+#: manual/api/debruijn.md:176
 msgid "`substitute_bound` replaces a free index by a term."
 msgstr ""
 
-#: manual/api/debruijn.md:177
+#: manual/api/debruijn.md:182
 msgid "`substitute_bound(t, j, s)` is $[j \\mapsto s]\\,t$: under `k` binders, `Bound(j + k)` is replaced by `s` shifted up by `k`, so that the free indices of `s` keep pointing at the same binders. Other indices are unchanged; the binder count of the result is not adjusted. Returns `Err(NegativeIndex)` for a negative `j` or a negative index in `t`. It does not check for unbound indices; use `validate` for that."
 msgstr ""
 
-#: manual/api/debruijn.md:186
+#: manual/api/debruijn.md:191
 msgid "`instantiate` opens a binder body with an argument."
 msgstr ""
 
-#: manual/api/debruijn.md:192
+#: manual/api/debruijn.md:197
 msgid "`instantiate(body, arg)` computes $\\uparrow^{-1}_0\\big([0 \\mapsto \\uparrow^{1}_0 arg]\\,body\\big)$, the result of the beta step $(\\lambda.\\,body)\\,arg$. On well-scoped input it never returns an error."
 msgstr ""
 
-#: manual/api/debruijn.md:219
+#: manual/api/debruijn.md:230
 msgid "Reduction"
 msgstr ""
 
-#: manual/api/debruijn.md:223
+#: manual/api/debruijn.md:234
 msgid "`DbStepResult[T]` is the outcome of one De Bruijn reduction attempt."
 msgstr ""
 
-#: manual/api/debruijn.md:234
+#: manual/api/debruijn.md:245
 msgid "`NoStep` and `Reduced` have the meaning of `@rewrite.StepResult`; the rule name is always `\"beta\"`. `ScopeFailure` reports an index error met while contracting a redex."
 msgstr ""
 
-#: manual/api/debruijn.md:240
+#: manual/api/debruijn.md:251
 msgid "`reduce_once` performs one leftmost-outermost beta step."
 msgstr ""
 
-#: manual/api/debruijn.md:246
+#: manual/api/debruijn.md:257
 msgid "A redex is `Apply(Bind(body), [a, ..rest])`; it becomes `instantiate(body, a)`, applied to `rest` if `rest` is not empty. An empty application `Apply(h, [])` is read as `h`, so a head wrapped in empty applications, as in `Apply(Apply(Bind(body), []), [a])`, still forms a redex; `Apply(Bind(body), [])` alone has no argument and is not one. The search order is the root, then the head, then the arguments from left to right, and binder bodies are entered."
 msgstr ""
 
-#: manual/api/debruijn.md:254
+#: manual/api/debruijn.md:265
 msgid "`reduce_once` validates the whole term first, as `validate` does: an ill-scoped term gives `ScopeFailure` with the first error in pre-order, wherever the bad index is, for example `ScopeFailure(NegativeIndex(index=-1))` for `Bind(Bound(-1))` and `ScopeFailure(UnboundIndex(index=5, depth=1))` for `(λ. 5) 1`. A well-scoped term never gives `ScopeFailure`."
 msgstr ""
 
-#: manual/api/debruijn.md:262
+#: manual/api/debruijn.md:273
 msgid "`DbNormalizationResult[T]` is the outcome of bounded De Bruijn normalization."
 msgstr ""
 
-#: manual/api/debruijn.md:273
+#: manual/api/debruijn.md:284
 msgid "`ScopeFailure` carries the term that was found ill scoped, the error and the number of steps taken before it; `normalize` reports it only for its input, with `steps=0`."
 msgstr ""
 
-#: manual/api/debruijn.md:279
+#: manual/api/debruijn.md:290
 msgid "`normalize` repeats `reduce_once` until no step applies, a step fails, or a step limit is reached."
 msgstr ""
 
-#: manual/api/debruijn.md:286
+#: manual/api/debruijn.md:297
 msgid "It has the step-count contract of `@rewrite.normalize`: at most `max_steps` steps, and one extra step attempt to classify the final term. It validates the input once: an ill-scoped term gives `ScopeFailure(term, error, steps=0)` without any step. Reducts of a well-scoped term are well scoped (see the [debruijn design](../design/debruijn.md)), so the later steps are not validated again, and the result is `ScopeFailure` exactly when the input is ill scoped."
 msgstr ""
 
@@ -1439,7 +1439,7 @@ msgstr ""
 
 #: manual/design/adapter.md:81
 #: manual/design/core.md:125
-#: manual/design/debruijn.md:105
+#: manual/design/debruijn.md:110
 #: manual/design/eval.md:89
 #: manual/design/rewrite.md:78
 #: manual/design/stlc.md:67
@@ -1500,7 +1500,7 @@ msgstr ""
 
 #: manual/design/adapter.md:132
 #: manual/design/core.md:168
-#: manual/design/debruijn.md:231
+#: manual/design/debruijn.md:240
 #: manual/design/eval.md:134
 #: manual/design/rewrite.md:171
 #: manual/design/stlc.md:318
@@ -1553,7 +1553,7 @@ msgstr ""
 
 #: manual/design/adapter.md:147
 #: manual/design/core.md:182
-#: manual/design/debruijn.md:249
+#: manual/design/debruijn.md:260
 #: manual/design/eval.md:151
 #: manual/design/rewrite.md:196
 #: manual/design/stlc.md:337
@@ -1578,7 +1578,7 @@ msgstr ""
 
 #: manual/design/adapter.md:158
 #: manual/design/core.md:195
-#: manual/design/debruijn.md:261
+#: manual/design/debruijn.md:272
 #: manual/design/eval.md:165
 #: manual/design/rewrite.md:208
 #: manual/design/stlc.md:350
@@ -1849,186 +1849,194 @@ msgid "$\\uparrow^{d}_{c}\\,t$ adds $d$ to every index of $t$ that is free relat
 msgstr ""
 
 #: manual/design/debruijn.md:76
-msgid "`shift(t, d, c)` implements it by carrying the binder depth $k$ and testing $i \\ge c + k$, which unfolds the recursion on $c$."
-msgstr ""
-
-#: manual/design/debruijn.md:79
-msgid "Substitution of an index"
+msgid "The shift is defined when no index crosses its cutoff: there is no index $i \\ge c$ with $i + d < c$, where $c$ is the cutoff at that occurrence. Such an index would be captured by an enclosing binder, or become negative. A shift with $d \\ge 0$ is always defined."
 msgstr ""
 
 #: manual/design/debruijn.md:81
+msgid "`shift(t, d, c)` implements it by carrying the binder depth $k$ and testing $i \\ge c + k$, which unfolds the recursion on $c$."
+msgstr ""
+
+#: manual/design/debruijn.md:84
+msgid "Substitution of an index"
+msgstr ""
+
+#: manual/design/debruijn.md:86
 msgid "$[j \\mapsto s]\\,t$ replaces the free index $j$ by $s$:"
 msgstr ""
 
-#: manual/design/debruijn.md:88
+#: manual/design/debruijn.md:93
 msgid "`substitute_bound` unfolds the binder case: under $k$ binders it replaces index $j + k$ by $\\uparrow^{k}_{0} s$. The two agree because shifts with the same cutoff compose (Lemma 1 below): $\\uparrow^{1}_{0}\\cdots\\uparrow^{1}_{0} s = \\uparrow^{k}_{0} s$."
 msgstr ""
 
-#: manual/design/debruijn.md:93
+#: manual/design/debruijn.md:98
 msgid "Beta reduction"
 msgstr ""
 
-#: manual/design/debruijn.md:99
+#: manual/design/debruijn.md:104
 msgid "The argument is shifted up because it moves under the binder of $t$; after the substitution the binder is removed, so all remaining free indices of the body are shifted down. This is `instantiate(t, s)`.[^tapl]"
 msgstr ""
 
-#: manual/design/debruijn.md:103
+#: manual/design/debruijn.md:108
 msgid "B. C. Pierce, *Types and Programming Languages*, MIT Press 2002, §6.2–6.3."
 msgstr ""
 
-#: manual/design/debruijn.md:107
+#: manual/design/debruijn.md:112
 msgid "Shifting is checked, not assumed"
 msgstr ""
 
-#: manual/design/debruijn.md:109
-msgid "**Problem.** A negative shift on an ill-formed term yields a negative index, which silently refers to nothing."
+#: manual/design/debruijn.md:114
+msgid "**Problem.** A downward shift can move a free index below its cutoff. Below zero the index refers to nothing; between zero and the cutoff it is captured by an enclosing binder. Either way the result is a silently wrong term."
 msgstr ""
 
-#: manual/design/debruijn.md:112
-msgid "**Choice.** `shift` returns `Err(NegativeShift)` instead, and `shift`, `substitute_bound`, `instantiate`, `validate` and `to_named` report `NegativeIndex` for any negative index they meet. The lemmas below show that the error cases are unreachable from well-scoped input, so the `Result` costs nothing for correct callers and turns a silent corruption into data for incorrect ones. This follows the library rule that expected failures at public boundaries are structured values."
+#: manual/design/debruijn.md:118
+msgid "**Choice.** `shift` returns `Err(NegativeShift)` when a free index would cross its cutoff, and `shift`, `substitute_bound`, `instantiate`, `validate` and `to_named` report `NegativeIndex` for any negative index they meet. The lemmas below show that the error cases are unreachable from well-scoped input, so the `Result` costs nothing for correct callers and turns a silent corruption into data for incorrect ones. This follows the library rule that expected failures at public boundaries are structured values."
 msgstr ""
 
-#: manual/design/debruijn.md:120
+#: manual/design/debruijn.md:127
 msgid "The index operations work on open terms, so they cannot tell a dangling (too large) index from one that points at a binder outside the term: `instantiate` shifts it like a free index. The reducers work on whole terms and validate them. `reduce_once` runs `validate` before searching and returns its error as `ScopeFailure`; `normalize` validates its input once, and Lemma 2 below shows that the later terms need no check. The search itself is a private function that is also applied to binder bodies, whose indices may point at enclosing binders."
 msgstr ""
 
-#: manual/design/debruijn.md:129
+#: manual/design/debruijn.md:136
 msgid "Instantiation never fails on well-scoped input"
 msgstr ""
 
-#: manual/design/debruijn.md:131
+#: manual/design/debruijn.md:138
 msgid "**Lemma 1 (shift composition).** For $a, b \\ge 0$: $\\uparrow^{a}_{c}\\uparrow^{b}_{c} t = \\uparrow^{a+b}_{c} t$, and $\\uparrow^{0}_{c} t = t$."
 msgstr ""
 
-#: manual/design/debruijn.md:135
+#: manual/design/debruijn.md:142
 msgid "On an index $i$ relative to the current cutoff: if $i < c$ both sides leave it; if $i \\ge c$ then $i + b \\ge c$, so"
 msgstr ""
 
-#: manual/design/debruijn.md:142
+#: manual/design/debruijn.md:149
 msgid "The binder case raises the cutoff on both sides alike. $\\square$"
 msgstr ""
 
-#: manual/design/debruijn.md:144
+#: manual/design/debruijn.md:151
 msgid "**Lemma 2 (safety of the downward shift).** Let $\\lambda.\\,t$ and $s$ be well scoped at depth $n$. Then every free index of $u = [\\,0 \\mapsto \\uparrow^{1}_{0} s\\,]\\,t$ lies in $\\{1, \\dots, n\\}$, so $\\uparrow^{-1}_{0} u$ succeeds and is well scoped at depth $n$."
 msgstr ""
 
-#: manual/design/debruijn.md:149
+#: manual/design/debruijn.md:156
 msgid "The body $t$ is well scoped at depth $n + 1$, so its free indices lie in $\\{0, \\dots, n\\}$. Follow a free occurrence in $t$ under $k$ inner binders:"
 msgstr ""
 
-#: manual/design/debruijn.md:160
-msgid "No free index $0$ remains, so the shift by $-1$ maps $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$ without a negative result. $\\square$"
+#: manual/design/debruijn.md:167
+msgid "No free index $0$ remains. Under $k$ binders the shift by $-1$ has cutoff $k$ and moves the index $k + m$ with $m \\ge 1$ to $k + m - 1 \\ge k$, so no index crosses its cutoff, and the root-relative free indices are mapped $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$. $\\square$"
 msgstr ""
 
-#: manual/design/debruijn.md:163
+#: manual/design/debruijn.md:172
 msgid "Hence `instantiate` and `reduce_once` return no `ScopeError` on well-scoped input, and a reduct of a well-scoped term is well scoped (subject reduction for scope). Together with the validation of the input, `normalize` returns `ScopeFailure` exactly when its input is ill scoped, and then with `steps=0`: `Bind(Bound(-1))` gives `NegativeIndex(index=-1)` and `(λ. 5) 1` gives `UnboundIndex(index=5, depth=1)`."
 msgstr ""
 
-#: manual/design/debruijn.md:170
+#: manual/design/debruijn.md:179
 msgid "The detailed proofs, including the commutation of shifts with different cutoffs and the De Bruijn substitution lemma, are in the attachment:"
 msgstr ""
 
-#: manual/design/debruijn.md:173
+#: manual/design/debruijn.md:182
 msgid "[Index lemmas for De Bruijn terms](../../attachments/design_debruijn_index-lemmas.typ)"
 msgstr ""
 
-#: manual/design/debruijn.md:175
+#: manual/design/debruijn.md:184
 msgid "Exact translations"
 msgstr ""
 
-#: manual/design/debruijn.md:177
+#: manual/design/debruijn.md:186
 msgid "`from_named` keeps a stack of binder names and translates an occurrence of $x$ to the distance to the nearest binder of $x$, or to `Free(x)` if there is none. `to_named` invents a binder name with `fresh_name(\"x\", U)`, where $U$ contains the free names of the term and the names of the enclosing binders."
 msgstr ""
 
-#: manual/design/debruijn.md:182
+#: manual/design/debruijn.md:191
 msgid "**Theorem (round trips).**"
 msgstr ""
 
-#: manual/design/debruijn.md:184
+#: manual/design/debruijn.md:193
 msgid "$\\texttt{to\\_named}(\\texttt{from\\_named}(t)) =_\\alpha t$ for every named $t$."
 msgstr ""
 
-#: manual/design/debruijn.md:185
+#: manual/design/debruijn.md:194
 msgid "$\\texttt{from\\_named}(\\texttt{to\\_named}(d)) = d$ for every well-scoped $d$."
 msgstr ""
 
-#: manual/design/debruijn.md:188
+#: manual/design/debruijn.md:197
 msgid "For (2): along any path from the root, the names chosen by `to_named` are pairwise distinct and distinct from all free names, because each is chosen fresh for a set that contains the free names and every enclosing binder name. An occurrence of index $i$ under $n$ binders becomes the name of the binder at level $n - 1 - i$; translating back, the nearest binder with that name is that same binder (no other enclosing binder has the name), at distance $i$. A `Free(x)` becomes $x$, which is not the name of any binder on the path, so it translates back to `Free(x)`. (3) is de Bruijn's theorem; (1) follows from (2) and (3), since $\\texttt{from\\_named}(\\texttt{to\\_named}(\\texttt{from\\_named}(t))) = \\texttt{from\\_named}(t)$."
 msgstr ""
 
-#: manual/design/debruijn.md:198
+#: manual/design/debruijn.md:207
 msgid "Named and nameless beta agree"
 msgstr ""
 
-#: manual/design/debruijn.md:200
+#: manual/design/debruijn.md:209
 msgid "For named terms, beta is $(\\lambda x.\\,b)\\,a \\to b[x := a]$ with the capture-avoiding substitution of [substitution](substitution.md). Write $\\ulcorner b \\urcorner_{x}$ for the translation of $b$ with $x$ as the innermost binder. Then"
 msgstr ""
 
-#: manual/design/debruijn.md:209
+#: manual/design/debruijn.md:218
 msgid "by induction on $b$: an occurrence of $x$ under $k$ inner binders has index $k$ and receives $\\uparrow^{k}_{0}\\ulcorner a \\urcorner$, which is the translation of $a$ placed under those $k$ binders; at the root $\\ulcorner a \\urcorner$ has no free indices, so the shift changes nothing. Renaming of binders by the named substitution is invisible after translation by (3), and the translation lemma of the [substitution design](substitution.md) makes this induction precise. Since the translation also preserves the shape of terms, the beta-only named reducer (`@eval.evaluate` with `@lambda.beta_rule` and `NormalOrder`) and `reduce_once` choose the same leftmost-outermost redex, and one step commutes with translation up to $=_\\alpha$. (`@lambda.normalize` also contracts eta redexes, so its normal forms can be eta-shorter.) The test \"named and debruijn beta reduction agree modulo alpha\" checks an instance that needs renaming on the named side."
 msgstr ""
 
-#: manual/design/debruijn.md:222
+#: manual/design/debruijn.md:231
 msgid "Spines and reduction order"
 msgstr ""
 
-#: manual/design/debruijn.md:224
+#: manual/design/debruijn.md:233
 msgid "`Apply(head, args)` is a curried spine: `Apply(Bind(t), [a, ..rest])` is the redex $(\\lambda.\\,t)\\,a$ applied to `rest`, and a step contracts only the first argument. An empty spine `Apply(h, [])` stands for $h$ itself, so empty applications around the `Bind` are looked through when a redex is matched. `reduce_once` searches root, head, arguments, and enters binders: it is the normal-order strategy of the [eval design](eval.md) on nameless terms, so the normalization theorem applies to `normalize`."
 msgstr ""
 
-#: manual/design/debruijn.md:233
+#: manual/design/debruijn.md:242
 msgid "`validate(from_named(t)) == Ok(())` for every named $t$."
 msgstr ""
 
-#: manual/design/debruijn.md:234
+#: manual/design/debruijn.md:243
 msgid "Round trips (1)–(3) above; `==` on well-scoped `DbTerm` is alpha-equivalence."
 msgstr ""
 
-#: manual/design/debruijn.md:235
+#: manual/design/debruijn.md:244
 msgid "Lemma 2: on well-scoped input `instantiate` succeeds and preserves scope; `reduce_once` never returns `ScopeFailure`, and every reduct is well scoped. On ill-scoped input `reduce_once` and `normalize` return `ScopeFailure` with the error `validate` reports."
 msgstr ""
 
-#: manual/design/debruijn.md:239
+#: manual/design/debruijn.md:248
 msgid "`reduce_once` satisfies the one-redex contract of [rewrite](rewrite.md), with rule name `\"beta\"`."
 msgstr ""
 
-#: manual/design/debruijn.md:241
+#: manual/design/debruijn.md:250
 msgid "`shift(t, 0, c) == Ok(t)` for every `t` without negative indices, and shifts with one cutoff compose (Lemma 1)."
 msgstr ""
 
-#: manual/design/debruijn.md:244
+#: manual/design/debruijn.md:252
+msgid "`shift` never turns a free index into a bound one: if a free index would fall below its cutoff, it returns `Err(NegativeShift)`."
+msgstr ""
+
+#: manual/design/debruijn.md:255
 msgid "Cost: `shift` and `validate` are linear in the term size. `substitute_bound` costs $O(|t| + m \\cdot |s|)$ for $m$ occurrences of the index, because each inserted copy is shifted. A `reduce_once` step costs one search plus one `instantiate`."
 msgstr ""
 
-#: manual/design/debruijn.md:251
+#: manual/design/debruijn.md:262
 msgid "**Levels instead of indices in syntax.** Levels make weakening free but substitution under binders more complex; indices are the standard for syntax, and levels are used where they help (NbE)."
 msgstr ""
 
-#: manual/design/debruijn.md:254
+#: manual/design/debruijn.md:265
 msgid "**Fully nameless free variables.** Free variables are kept as names so that open terms from users and downstream ASTs need no global variable numbering, and so that `to_named` can restore them exactly."
 msgstr ""
 
-#: manual/design/debruijn.md:257
+#: manual/design/debruijn.md:268
 msgid "**Explicit substitutions.** A calculus with suspended substitutions avoids repeated shifting but complicates every consumer; the NbE package provides the efficient path instead."
 msgstr ""
 
-#: manual/design/debruijn.md:263
+#: manual/design/debruijn.md:274
 msgid "Binder names are not preserved: `to_named` chooses `x`, `x_1`, …."
 msgstr ""
 
-#: manual/design/debruijn.md:264
+#: manual/design/debruijn.md:275
 msgid "`shift`, `substitute_bound` and `instantiate` operate on open terms and do not detect dangling indices; the reducers and `validate` do."
 msgstr ""
 
-#: manual/design/debruijn.md:266
+#: manual/design/debruijn.md:277
 msgid "An empty application `Apply(h, [])` is read as `h` when a redex is matched, so it never hides a redex, but `reduce_once` leaves the node in place, whereas [utlc/nbe](utlc/nbe.md) drops it from its normal forms."
 msgstr ""
 
-#: manual/design/debruijn.md:269
+#: manual/design/debruijn.md:280
 msgid "Only beta is implemented; there is no eta rule for De Bruijn terms."
 msgstr ""
 
-#: manual/design/debruijn.md:270
+#: manual/design/debruijn.md:281
 msgid "Values are opaque; their contents are never shifted."
 msgstr ""
 
