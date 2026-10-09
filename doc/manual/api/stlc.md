@@ -316,6 +316,10 @@ gives `NormalForm`.
 
 `normalize_eta_long` checks a term against a type and returns its
 beta-normal, eta-long form, computed by typed normalization by evaluation.
+The checking pass builds a private typed execution plan, so evaluation and
+closure application reuse established types without rechecking or inferring
+source subterms. Plan construction preserves the first error reported by
+`check`; the public term representation is unchanged.
 
 ```mbti
 pub fn normalize_eta_long(Signature, TypeContext, @syntax.Term[Atom], Ty) -> Result[@syntax.Term[Atom], TypeError]

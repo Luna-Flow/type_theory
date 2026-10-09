@@ -1,12 +1,8 @@
 ///|
 priv struct Closure {
-  sig : Signature
-  ctx : TypeContext
   environment : Environment
   parameter : @core.Name
-  domain : Ty
-  codomain : Ty
-  body : Term
+  body : TypedPlan
 }
 
 ///|
@@ -33,7 +29,9 @@ priv enum Value {
 /// environment only reads its first `length` entries. Entering `n` nested
 /// closures therefore takes amortized `O(n)` time instead of `O(n^2)`.
 priv struct Environment {
-  entries : Array[(@core.Name, Value)]
+  // Lookup key, semantic value, source name to avoid during readback.
+  // Internal capture-avoidance names must not perturb fresh output names.
+  entries : Array[(@core.Name, Value, @core.Name)]
   length : Int
 }
 
@@ -42,13 +40,14 @@ fn Environment::extend_with(
   self : Environment,
   name : @core.Name,
   value : Value,
+  source_name? : @core.Name = name,
 ) -> Environment {
   let entries = if self.entries.length() == self.length {
     self.entries
   } else {
     self.entries[0:self.length].to_owned()
   }
-  entries.push((name, value))
+  entries.push((name, value, source_name))
   { entries, length: self.length + 1, }
 }
 
@@ -66,224 +65,57 @@ fn Environment::lookup(self : Environment, name : @core.Name) -> Value? {
 fn Environment::names(self : Environment) -> @hashset.HashSet[@core.Name] {
   let mut used = @hashset.new()
   for i in 0..<self.length {
-    used = used.add(self.entries[i].0)
+    used = used.add(self.entries[i].2)
   }
   used
 }
 
 ///|
-/// Removes the first `count` domains from a function type: the type of a head
-/// of type `ty` once it has been applied to `count` arguments.
-fn drop_domains(ty : Ty, count : Int) -> Result[Ty, TypeError] {
-  let mut current = ty
-  for _ in 0..<count {
-    match current {
-      Ty::Arrow(_, codomain) => current = codomain
-      _ => return Err(TypeError::ExpectedFunction(current))
-    }
-  }
-  Ok(current)
-}
-
-///|
-/// Computes the type at which `head` must be evaluated so that the flattened
-/// application `head arguments` has type `expected`.
-///
-/// A lambda head cannot be inferred, so its type is rebuilt from the redex
-/// rule: the first argument gives the domain, and the codomain is the type of
-/// the remaining spine `b a2 ... an`, computed by the same `redex_step` that
-/// `infer` and `check` use. A body that is itself an application joins that
-/// spine, and its own arguments are dropped from the result to obtain the type
-/// of the body. When the spine runs out of arguments the body is in checking
-/// position and its type is `expected`, as in the checking-mode redex rule
-/// (issue #8); this covers a body that is a lambda, which cannot be inferred.
-/// Any other head is inferred.
-///
-/// The definition expands each lambda redex, infers its first argument, and
-/// recurses on the body joined with the trailing arguments; it builds the type
-/// while returning. It is run as two loops (issue #13): the first takes redex
-/// steps down the spine and keeps them in a heap array, the second builds the
-/// type from the innermost step outwards. Errors are met in the same order.
-fn head_type_for_application(
-  sig : Signature,
-  ctx : TypeContext,
-  head : Term,
-  arguments : Array[Term],
-  expected : Ty,
-) -> Result[Ty, TypeError] {
-  if arguments.length() == 0 {
-    return Err(TypeError::EmptyApplication)
-  }
-  // the redex steps whose remaining spine is not empty, outermost first
-  let steps : Array[RedexStep] = []
-  // the type computed for the innermost spine
-  let mut result = for ctx = ctx, head = head, arguments = arguments {
-    match head {
-      @syntax.Bind(parameter, body) => {
-        let step = match redex_step(sig, ctx, parameter, body, arguments) {
-          Ok(step) => step
-          Err(error) => return Err(error)
-        }
-        if step.arguments.length() == 0 {
-          break Ty::Arrow(step.domain, expected)
-        }
-        steps.push(step)
-        continue step.ctx, step.head, step.arguments
-      }
-      _ =>
-        match infer(sig, ctx, head) {
-          Ok(head_type) => break head_type
-          Err(error) => return Err(error)
-        }
-    }
-  }
-  for i = steps.length() - 1; i >= 0; i = i - 1 {
-    let body_type = match drop_domains(result, steps[i].body_arity) {
-      Ok(body_type) => body_type
-      Err(error) => return Err(error)
-    }
-    result = Ty::Arrow(steps[i].domain, body_type)
-  }
-  Ok(result)
-}
-
-// Bounded-stack typed evaluation and readback (issue #13).
-//
-// Typed evaluation is specified by two mutually recursive functions:
-// `eval_typed`, which evaluates a term at a type, and `apply_value_typed`,
-// which applies a semantic function to an argument and evaluates the body of a
-// closure. Readback is specified by `reify` (a value at a type, eta-expanding
-// at arrow types) and `quote_neutral` (a neutral, reifying the arguments of
-// its spine). Implemented as host recursion, the depth of the host stack grows
-// with the nesting depth of the term, of the types and of the normal form, and
-// the js and wasm stacks overflow at a depth of a few thousand.
-//
-// Both are run instead as loops over an explicit continuation, like the
-// untyped evaluator of `utlc/nbe` (issue #12) and the type checker of this
-// package: a control says what to do next, and the frames, the rest of the
-// callers, live in a heap `Array`. A call in tail position pushes nothing.
-// Every step happens in the order of the recursive definition, and an error is
-// never caught and replaced, so results and errors are unchanged.
-
-///|
-/// The next step of the typed evaluation machine.
+/// Evaluation of an already elaborated plan; no source typing is repeated.
 priv enum EvalControl {
-  /// `eval_typed(sig, ctx, term, ty, environment)`.
-  Evaluate(Signature, TypeContext, Term, Ty, Environment)
-  /// `apply_value_typed(function, domain, argument)`.
+  Evaluate(TypedPlan, Environment)
   ApplyValue(Value, Ty, Value)
-  /// Pass a value to the innermost frame.
   Return(Value)
 }
 
 ///|
-/// A pending step of the typed evaluation machine, waiting for a value.
 priv enum EvalFrame {
-  /// The value is the application of a spine head to the arguments before
-  /// `next`, of type `current_type`: apply it to the remaining arguments.
-  Spine(Signature, TypeContext, Array[Term], Environment, Int, Ty)
-  /// The value is argument `index` of a spine, of type `domain`: apply
-  /// `function`, the application before it, to it.
-  Argument(Signature, TypeContext, Array[Term], Environment, Int, Value, Ty, Ty)
+  PlanFunction(Ty, TypedPlan, Environment)
+  PlanOperand(Value, Ty)
+  PlanBinding(@core.Name, @core.Name, TypedPlan, Environment)
 }
 
 ///|
-/// Continues a spine whose application before argument `next` has value
-/// `function` and type `current_type`. Returns the next control after pushing
-/// the frame that waits for the value of the argument.
-fn continue_spine(
-  frames : Array[EvalFrame],
-  sig : Signature,
-  ctx : TypeContext,
-  arguments : Array[Term],
-  environment : Environment,
-  next : Int,
-  function : Value,
-  current_type : Ty,
-) -> Result[EvalControl, TypeError] {
-  if next == arguments.length() {
-    return Ok(Return(function))
-  }
-  match current_type {
-    Ty::Arrow(domain, codomain) => {
-      // `normalize_eta_long` checks the complete source term before evaluation.
-      // Lambda bodies and every argument are subterms covered by that check,
-      // so checking an argument again here repeats work that its own evaluation
-      // will also repeat for any nested application. The environment invariant
-      // established by the checker supplies the same `domain` here.
-      frames.push(
-        Argument(
-          sig, ctx, arguments, environment, next, function, domain, codomain,
-        ),
-      )
-      Ok(Evaluate(sig, ctx, arguments[next], domain, environment))
-    }
-    _ => Err(TypeError::ExpectedFunction(current_type))
-  }
-}
-
-///|
-/// Runs the typed evaluation machine from `start`. The host stack depth is
-/// constant; pending work is kept in a heap array of frames.
 fn run_evaluation(start : EvalControl) -> Result[Value, TypeError] {
   let frames : Array[EvalFrame] = []
   for control = start {
     match control {
-      Evaluate(sig, ctx, term, ty, environment) =>
-        match term {
-          @syntax.Value(Atom::UnitLit) => continue Return(VUnit)
-          @syntax.Value(Atom::Const(name)) =>
+      Evaluate(plan, environment) =>
+        match plan {
+          PlanValue(Atom::UnitLit, _) => continue Return(VUnit)
+          PlanValue(Atom::Const(name), _) =>
             continue Return(VNeutral(NConst(name)))
-          @syntax.Variable(name) =>
+          PlanVariable(name, _) =>
             match environment.lookup(name) {
               Some(value) => continue Return(value)
               None => break Err(TypeError::UnboundVariable(name))
             }
-          @syntax.Bind(parameter, body) =>
-            match ty {
-              Ty::Arrow(domain, codomain) =>
-                continue Return(
-                    VLam({
-                      sig,
-                      ctx,
-                      environment,
-                      parameter,
-                      domain,
-                      codomain,
-                      body,
-                    }),
-                  )
-              _ =>
-                break Err(
-                  TypeError::NormalizationError(
-                    message="lambda semantic value requires an arrow type",
-                  ),
-                )
-            }
-          @syntax.Apply(_, _) => {
-            let (head, arguments) = match application_spine(term) {
-              Ok(spine) => spine
-              Err(error) => break Err(error)
-            }
-            let head_type = match
-              head_type_for_application(sig, ctx, head, arguments, ty) {
-              Ok(head_type) => head_type
-              Err(error) => break Err(error)
-            }
-            // evaluate the head, then apply it to the arguments in order
-            frames.push(Spine(sig, ctx, arguments, environment, 0, head_type))
-            continue Evaluate(sig, ctx, head, head_type, environment)
+          PlanBind(parameter, _, body) =>
+            continue Return(VLam({ environment, parameter, body, }))
+          PlanApply(function, domain, argument, _) => {
+            frames.push(PlanFunction(domain, argument, environment))
+            continue Evaluate(function, environment)
+          }
+          PlanLet(parameter, original, argument, rest, _) => {
+            frames.push(PlanBinding(parameter, original, rest, environment))
+            continue Evaluate(argument, environment)
           }
         }
       ApplyValue(function, domain, argument) =>
         match function {
           VLam(closure) =>
-            // apply(clo, a) = eval_typed(body, environment · a): a tail call
             continue Evaluate(
-                closure.sig,
-                closure.ctx.extend_with(closure.parameter, closure.domain),
                 closure.body,
-                closure.codomain,
                 closure.environment.extend_with(closure.parameter, argument),
               )
           VNeutral(neutral) =>
@@ -298,36 +130,17 @@ fn run_evaluation(start : EvalControl) -> Result[Value, TypeError] {
       Return(value) =>
         match frames.pop() {
           None => break Ok(value)
-          Some(Spine(sig, ctx, arguments, environment, next, current_type)) =>
-            match
-              continue_spine(
-                frames, sig, ctx, arguments, environment, next, value, current_type,
-              ) {
-              Ok(next_control) => continue next_control
-              Err(error) => break Err(error)
-            }
-          Some(
-            Argument(
-              sig,
-              ctx,
-              arguments,
-              environment,
-              index,
-              function,
-              domain,
-              codomain
-            )
-          ) => {
-            // the application to this argument is the value of the spine
-            // before the next one; after the last argument it is the value of
-            // the whole spine, and the application is a tail call
-            if index + 1 < arguments.length() {
-              frames.push(
-                Spine(sig, ctx, arguments, environment, index + 1, codomain),
-              )
-            }
-            continue ApplyValue(function, domain, value)
+          Some(PlanFunction(domain, argument, environment)) => {
+            frames.push(PlanOperand(value, domain))
+            continue Evaluate(argument, environment)
           }
+          Some(PlanOperand(function, domain)) =>
+            continue ApplyValue(function, domain, value)
+          Some(PlanBinding(parameter, original, rest, environment)) =>
+            continue Evaluate(
+                rest,
+                environment.extend_with(parameter, value, source_name=original),
+              )
         }
     }
   }
@@ -340,17 +153,6 @@ fn apply_value_typed(
   argument : Value,
 ) -> Result[Value, TypeError] {
   run_evaluation(ApplyValue(function, domain, argument))
-}
-
-///|
-fn eval_typed(
-  sig : Signature,
-  ctx : TypeContext,
-  term : Term,
-  ty : Ty,
-  environment : Environment,
-) -> Result[Value, TypeError] {
-  run_evaluation(Evaluate(sig, ctx, term, ty, environment))
 }
 
 ///|
@@ -521,9 +323,9 @@ fn context_names(ctx : TypeContext) -> @hashset.HashSet[@core.Name] {
 
 ///|
 fn initial_environment(ctx : TypeContext) -> Environment {
-  let entries : Array[(@core.Name, Value)] = []
+  let entries : Array[(@core.Name, Value, @core.Name)] = []
   for entry in ctx.to_array() {
-    entries.push((entry.0, reflect(entry.1, NFree(entry.0))))
+    entries.push((entry.0, reflect(entry.1, NFree(entry.0)), entry.0))
   }
   { entries, length: entries.length(), }
 }
@@ -535,12 +337,12 @@ pub fn normalize_eta_long(
   term : Term,
   ty : Ty,
 ) -> Result[Term, TypeError] {
-  match check(sig, ctx, term, ty) {
-    Ok(_) => ()
+  let plan = match build_typed_plan(sig, CheckPlan(ctx, term, ty)) {
+    Ok(plan) => plan
     Err(error) => return Err(error)
   }
   let used = @syntax.all_names(term).union(context_names(ctx))
-  match eval_typed(sig, ctx, term, ty, initial_environment(ctx)) {
+  match run_evaluation(Evaluate(plan, initial_environment(ctx))) {
     Ok(value) => reify(ty, value, used)
     Err(error) => Err(error)
   }
