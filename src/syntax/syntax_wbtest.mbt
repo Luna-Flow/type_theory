@@ -53,3 +53,20 @@ test "alpha equivalence is reflexive for generated atoms" {
   }
   @qc.quick_check_fn(property)
 }
+
+///|
+test "alpha equivalence lifts the payload equality" {
+  // issue #15: values are compared with `T`'s `==`, so `alpha_equal` is
+  // reflexive only where that `==` is
+  let x = @core.Name::new("x")
+  let nan : Term[Double] = Value(0.0 / 0.0)
+  assert_false(alpha_equal(nan, nan))
+  let under_binder : Term[Double] = Bind(x, Apply(Variable(x), [nan]))
+  assert_false(alpha_equal(under_binder, under_binder))
+  // IEEE 754 equality identifies the two zeros, and so does `alpha_equal`
+  let zero : Term[Double] = Value(0.0)
+  let negative_zero : Term[Double] = Value(-0.0)
+  assert_true(alpha_equal(zero, negative_zero))
+  let ints : Term[Int] = Bind(x, Apply(Variable(x), [Value(1), Value(-1)]))
+  assert_true(alpha_equal(ints, ints))
+}
