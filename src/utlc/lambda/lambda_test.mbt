@@ -159,3 +159,147 @@ test "beta then eta agrees with normalize modulo empty applications" {
     ),
   )
 }
+
+///|
+/// Rewrites every n-ary application `Apply(f, [a1, ..., an])` with `n > 0`
+/// into the nested unary spine `Apply(...Apply(f, [a1])..., [an])`. Empty
+/// applications are kept as they are.
+fn curry(term : @syntax.Term[Int]) -> @syntax.Term[Int] {
+  match term {
+    Value(_) | Variable(_) => term
+    Bind(name, body) => Bind(name, curry(body))
+    Apply(head, []) => Apply(curry(head), [])
+    Apply(head, arguments) =>
+      arguments.fold(init=curry(head), fn(spine, argument) {
+        Apply(spine, [curry(argument)])
+      })
+  }
+}
+
+///|
+test "applicative order picks the same redex for n-ary and curried spines" {
+  // issue #11
+  let x = @core.Name::new("x")
+  let y = @core.Name::new("y")
+  let v = @core.Name::new("v")
+  let k : @syntax.Term[Int] = Bind(x, Bind(y, Variable(y)))
+  let inner : @syntax.Term[Int] = Apply(Bind(y, Variable(y)), [Variable(v)])
+  let nary : @syntax.Term[Int] = Apply(k, [Value(0), inner])
+  let nested : @syntax.Term[Int] = Apply(Apply(k, [Value(0)]), [inner])
+  let beta = @rewrite.RuleName::unsafe_new("beta")
+  // (λx. λy. y) 0 is contracted first in both encodings
+  let expected : @syntax.Term[Int] = Apply(Bind(y, Variable(y)), [inner])
+  match @eval.reduce_once(nary, beta, @lambda.beta_rule, ApplicativeOrder) {
+    Reduced(before~, after~, path~, ..) => {
+      assert_true(before == nary)
+      assert_true(after == expected)
+      assert_true(path.to_array() == [])
+    }
+    NoStep => assert_false(true)
+  }
+  match @eval.reduce_once(nested, beta, @lambda.beta_rule, ApplicativeOrder) {
+    Reduced(after~, path~, ..) => {
+      assert_true(after == expected)
+      assert_true(path.to_array() == [@rewrite.ApplyHead])
+    }
+    NoStep => assert_false(true)
+  }
+  // the generic n-ary traversal keeps plain post-order on the n-ary tree
+  match @rewrite.bottom_up_once(nary, beta, @lambda.beta_rule) {
+    Reduced(path~, ..) =>
+      assert_true(path.to_array() == [@rewrite.ApplyArgument(1)])
+    NoStep => assert_false(true)
+  }
+}
+
+///|
+/// A deterministic linear congruential generator for the property tests.
+priv struct Lcg {
+  mut state : UInt64
+}
+
+///|
+fn Lcg::below(self : Lcg, bound : Int) -> Int {
+  self.state = self.state * 6364136223846793005UL + 1442695040888963407UL
+  ((self.state >> 33) % bound.to_uint64()).to_int()
+}
+
+///|
+fn random_name(rng : Lcg) -> @core.Name {
+  @core.Name::new(["x", "y", "z"][rng.below(3)])
+}
+
+///|
+/// A random term with few names (to force renaming), many redexes and n-ary
+/// spines of length 0 to 3.
+fn random_term(rng : Lcg, depth : Int) -> @syntax.Term[Int] {
+  let choice = if depth <= 0 { rng.below(3) } else { rng.below(7) }
+  match choice {
+    0 => Value(rng.below(3))
+    1 | 2 => Variable(random_name(rng))
+    3 | 4 => Bind(random_name(rng), random_term(rng, depth - 1))
+    _ => {
+      let head : @syntax.Term[Int] = if rng.below(2) == 0 {
+        Bind(random_name(rng), random_term(rng, depth - 1))
+      } else {
+        random_term(rng, depth - 1)
+      }
+      let count = [0, 1, 2, 2, 3, 3][rng.below(6)]
+      let arguments = Array::makei(count, fn(_) { random_term(rng, depth - 1) })
+      Apply(head, arguments)
+    }
+  }
+}
+
+///|
+/// Runs `strategy` for up to `max_steps` steps on `term` and on its curried
+/// form in lockstep, and reports whether every step corresponds.
+fn same_steps_when_curried(
+  term : @syntax.Term[Int],
+  strategy : @eval.Strategy,
+  max_steps : Int,
+) -> Bool {
+  let beta = @rewrite.RuleName::unsafe_new("beta")
+  let mut nary = term
+  let mut curried = curry(term)
+  for _ in 0..<max_steps {
+    match
+      (
+        @eval.reduce_once(nary, beta, @lambda.beta_rule, strategy),
+        @eval.reduce_once(curried, beta, @lambda.beta_rule, strategy),
+      ) {
+      (NoStep, NoStep) => return true
+      (Reduced(after=nary_after, ..), Reduced(after=curried_after, ..)) => {
+        if !@syntax.alpha_equal(curry(nary_after), curried_after) {
+          return false
+        }
+        nary = nary_after
+        curried = curried_after
+      }
+      _ => return false
+    }
+  }
+  true
+}
+
+///|
+test "every strategy takes the same steps on a term and its curried form" {
+  // issue #11
+  let rng = Lcg::{ state: 11, }
+  let strategies : Array[@eval.Strategy] = [
+    NormalOrder,
+    ApplicativeOrder,
+    WeakHead,
+    FullNormal,
+  ]
+  let mismatches = strategies.map(fn(_) { 0 })
+  for _ in 0..<1000 {
+    let term = random_term(rng, 4)
+    for i, strategy in strategies {
+      if !same_steps_when_curried(term, strategy, 6) {
+        mismatches[i] = mismatches[i] + 1
+      }
+    }
+  }
+  assert_eq(mismatches, [0, 0, 0, 0])
+}
