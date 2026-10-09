@@ -9,6 +9,8 @@ that "changes" a value returns a new one and leaves its argument untouched.
 `Context`, `Telescope` and `Renaming` are abstract types, so their storage
 cannot be reached from outside the package, and every method that returns an
 array returns a fresh copy.
+None of these values is nested, so every operation, the derived `==`,
+`compare`, `hash` and `Debug` included, uses a constant amount of host stack.
 The mathematics behind these definitions is in the [core design](../design/core.md).
 
 ## Importing
