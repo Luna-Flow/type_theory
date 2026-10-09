@@ -865,7 +865,7 @@ msgstr "簡約基の後続の引数は、そのパラメータの下ではなく
 
 #: manual/api/stlc.md:240
 #: manual/api/utlc/lambda.md:123
-#: manual/api/utlc/nbe.md:170
+#: manual/api/utlc/nbe.md:186
 msgid "Normalization"
 msgstr "正規化"
 
@@ -1267,74 +1267,78 @@ msgid "Fuel is a step budget measured in units: every evaluation of a term node,
 msgstr "燃料は単位で測るステップ予算である。項ノードの評価、遅延値の強制、値の読み戻しはそれぞれ 1 単位を消費する。すべての結果は使用した単位数 `consumed` を報告する。燃料が `<= 0` の呼び出しは何もせずに `FuelExhausted(consumed=0)` を返す（`quote` はまず負のレベルを拒否する）。呼び出しの結果は、消費した分を超える燃料には依存しない。燃料 $f$ の呼び出しが $c$ 単位を消費して正規形を返すなら、燃料が $c$ 以上のどの呼び出しも同じ結果を返す。"
 
 #: manual/api/utlc/nbe.md:43
+msgid "The budget bounds the work, not the depth of the host call stack. Evaluation and readback run as a loop that keeps pending work on a stack in the heap, so the call stack does not grow with the fuel spent: a divergent term ends with `FuelExhausted` on every backend, however large the budget. The pending work is bounded by the budget."
+msgstr "予算が制限するのは仕事量であり、ホストの呼び出しスタックの深さではない。評価と読み戻しは、保留中の仕事をヒープ上のスタックに保持するループとして実行されるので、呼び出しスタックは消費した燃料とともに伸びない。発散する項は、予算がどれほど大きくても、すべてのバックエンドで `FuelExhausted` で終わる。保留中の仕事は予算によって抑えられる。"
+
+#: manual/api/utlc/nbe.md:59
 msgid "Semantic values"
 msgstr "意味値"
 
-#: manual/api/utlc/nbe.md:47
+#: manual/api/utlc/nbe.md:63
 msgid "`Semantic[T]` is an opaque semantic value."
 msgstr "`Semantic[T]` は不透明な意味値である。"
 
-#: manual/api/utlc/nbe.md:57
+#: manual/api/utlc/nbe.md:73
 msgid "A semantic value is a constant, a closure (a binder body with its environment), a delayed argument, or a neutral value (a free variable, a variable at a quote level, or a neutral value applied to an argument). The representation is private; values are produced by `eval` and the `reflect_*` functions and consumed by `quote`."
 msgstr "意味値は、定数、クロージャ（環境付きの束縛子本体）、遅延引数、または中立値（自由変数、quote レベルの変数、あるいは引数に適用された中立値）のいずれかである。表現は非公開であり、値は `eval` と `reflect_*` 関数によって生成され、`quote` によって消費される。"
 
-#: manual/api/utlc/nbe.md:65
+#: manual/api/utlc/nbe.md:81
 msgid "`reflect_free` turns a free name into a neutral semantic value."
 msgstr "`reflect_free` は自由名を中立意味値に変換する。"
 
-#: manual/api/utlc/nbe.md:71
+#: manual/api/utlc/nbe.md:87
 msgid "Quoting it gives `Free(name)`."
 msgstr "これを quote すると `Free(name)` が得られる。"
 
-#: manual/api/utlc/nbe.md:75
+#: manual/api/utlc/nbe.md:91
 msgid "`reflect_level` turns a quote level into a neutral semantic variable."
 msgstr "`reflect_level` は quote レベルを中立意味変数に変換する。"
 
-#: manual/api/utlc/nbe.md:81
+#: manual/api/utlc/nbe.md:97
 msgid "Returns `None` for a negative level. Quoting the variable of level `l` at depth `n > l` gives `Bound(n - l - 1)`."
 msgstr "負のレベルに対しては `None` を返す。レベル `l` の変数を深さ `n > l` で quote すると `Bound(n - l - 1)` が得られる。"
 
-#: manual/api/utlc/nbe.md:102
+#: manual/api/utlc/nbe.md:118
 msgid "Evaluation and readback"
 msgstr "評価と読み戻し"
 
-#: manual/api/utlc/nbe.md:106
+#: manual/api/utlc/nbe.md:122
 msgid "`EvaluationResult[T]` is the outcome of `eval`."
 msgstr "`EvaluationResult[T]` は `eval` の結果である。"
 
-#: manual/api/utlc/nbe.md:118
+#: manual/api/utlc/nbe.md:134
 msgid "`eval` evaluates a closed De Bruijn term to weak head form in the lazy semantic domain."
 msgstr "`eval` は閉じた De Bruijn 項を遅延意味領域で弱頭部形まで評価する。"
 
-#: manual/api/utlc/nbe.md:125
+#: manual/api/utlc/nbe.md:141
 msgid "The term must be well scoped (free names are allowed); otherwise the result is `ScopeFailure` with `consumed=0`. Evaluation is call by name: arguments are delayed and evaluated only when needed, and evaluation stops at a closure or a neutral value without entering binders."
 msgstr "項はスコープが正しくなければならない（自由名は許される）。そうでなければ結果は `consumed=0` の `ScopeFailure` となる。評価は名前呼びである。引数は遅延され、必要になったときにのみ評価される。評価はクロージャまたは中立値で停止し、束縛子の中には入らない。"
 
-#: manual/api/utlc/nbe.md:132
+#: manual/api/utlc/nbe.md:148
 msgid "`QuoteResult[T]` is the outcome of `quote`."
 msgstr "`QuoteResult[T]` は `quote` の結果である。"
 
-#: manual/api/utlc/nbe.md:144
+#: manual/api/utlc/nbe.md:160
 msgid "`quote` reads a semantic value back as a beta-normal De Bruijn term."
 msgstr "`quote` は意味値を beta 正規形の De Bruijn 項として読み戻す。"
 
-#: manual/api/utlc/nbe.md:150
+#: manual/api/utlc/nbe.md:166
 msgid "`quote(value, level, fuel)` reads `value` back under `level` binders. A closure is read back by applying it to a fresh variable of the current level and reading the result under one more binder; neutral applications are read back argument by argument, which forces delayed arguments. Use `level = 0` for values from `eval`. A negative `level`, or a level variable that is not below `level`, gives `ScopeFailure(NegativeIndex)`."
 msgstr "`quote(value, level, fuel)` は `value` を `level` 個の束縛子の下で読み戻す。クロージャは、現在のレベルの新しい変数に適用し、その結果を束縛子 1 つ分深い位置で読み戻すことで読み戻される。中立な適用は引数ごとに読み戻され、その際に遅延引数が強制される。`eval` から得た値には `level = 0` を使う。負の `level`、あるいは `level` 未満でないレベル変数は `ScopeFailure(NegativeIndex)` となる。"
 
-#: manual/api/utlc/nbe.md:174
+#: manual/api/utlc/nbe.md:190
 msgid "`NbeResult[T]` is the outcome of `normalize`."
 msgstr "`NbeResult[T]` は `normalize` の結果である。"
 
-#: manual/api/utlc/nbe.md:187
+#: manual/api/utlc/nbe.md:203
 msgid "`normalize` computes the beta normal form of a well-scoped De Bruijn term within a fuel budget."
 msgstr "`normalize` はスコープの正しい De Bruijn 項の beta 正規形を燃料予算内で計算する。"
 
-#: manual/api/utlc/nbe.md:194
+#: manual/api/utlc/nbe.md:210
 msgid "It validates the term, evaluates it and quotes the result at level 0, with one shared budget. `NormalForm(t, c)`: `t` is the beta normal form, reached with `c` units. `FuelExhausted(c)`: the budget ran out; the term may diverge or may need more fuel. `ScopeFailure`: the input has a dangling or negative index. The fuel test comes first, so an ill-scoped term with fuel `<= 0` gives `FuelExhausted(consumed=0)`, not `ScopeFailure`."
 msgstr "項を検証し、評価し、結果をレベル 0 で quote する。これらは 1 つの予算を共有する。`NormalForm(t, c)`：`t` は beta 正規形であり、`c` 単位で到達した。`FuelExhausted(c)`：予算が尽きた。項は発散するかもしれないし、より多くの燃料が必要なだけかもしれない。`ScopeFailure`：入力にぶら下がった、または負のインデックスがある。燃料の検査が先に行われるので、燃料が `<= 0` のときはスコープの正しくない項でも `ScopeFailure` ではなく `FuelExhausted(consumed=0)` になる。"
 
-#: manual/api/utlc/nbe.md:201
+#: manual/api/utlc/nbe.md:217
 msgid "Applications in the result are unary: a normal form $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])` evaluates to the value of `h`, so it disappears from the result; the small-step reducers also read it as `h` but leave the node in place. The two normalizers agree after spines are flattened, where flattening merges nested applications and drops empty ones."
 msgstr "結果の適用は単項である。正規形 $f\\,a\\,b$ は `Apply(Apply(f, [a]), [b])` として返されるが、`@debruijn.normalize` は入力の n 項スパイン `Apply(f, [a, b])` を保つ。空の適用 `Apply(h, [])` は `h` の値に評価されるので結果から消える。小ステップの簡約器もそれを `h` と読むが、ノードはそのまま残す。2 つの正規化器はスパインを平坦化すれば一致する。ここで平坦化とは、入れ子の適用をまとめ、空の適用を取り除くことである。"
 
@@ -1393,7 +1397,7 @@ msgstr "**法則はコンパイラが検査しない。** 契約はテストで�
 #: manual/design/substitution.md:23
 #: manual/design/syntax.md:22
 #: manual/design/utlc/lambda.md:21
-#: manual/design/utlc/nbe.md:23
+#: manual/design/utlc/nbe.md:24
 msgid "Mathematical background"
 msgstr "数学的背景"
 
@@ -1454,7 +1458,7 @@ msgstr "`generic_top_down_once` は [rewrite の設計](rewrite.md)の単一簡�
 #: manual/design/substitution.md:62
 #: manual/design/syntax.md:71
 #: manual/design/utlc/lambda.md:65
-#: manual/design/utlc/nbe.md:89
+#: manual/design/utlc/nbe.md:90
 msgid "Design decisions"
 msgstr "設計上の決定"
 
@@ -1515,7 +1519,7 @@ msgstr "下流の変数型は単射（異なる変数を異なる名前へ写す
 #: manual/design/substitution.md:130
 #: manual/design/syntax.md:286
 #: manual/design/utlc/lambda.md:205
-#: manual/design/utlc/nbe.md:145
+#: manual/design/utlc/nbe.md:291
 msgid "Correctness and invariants"
 msgstr "正しさと不変条件"
 
@@ -1568,7 +1572,7 @@ msgstr "下流の adapter は自身のノード種別について (V1)–(V5) �
 #: manual/design/substitution.md:329
 #: manual/design/syntax.md:309
 #: manual/design/utlc/lambda.md:232
-#: manual/design/utlc/nbe.md:203
+#: manual/design/utlc/nbe.md:355
 msgid "Alternatives rejected"
 msgstr "却下した代替案"
 
@@ -1593,7 +1597,7 @@ msgstr "**実行時に法則を検査する。** 法則はすべてのノード�
 #: manual/design/substitution.md:343
 #: manual/design/syntax.md:323
 #: manual/design/utlc/lambda.md:243
-#: manual/design/utlc/nbe.md:215
+#: manual/design/utlc/nbe.md:374
 msgid "Boundaries"
 msgstr "境界"
 
@@ -3503,166 +3507,238 @@ msgid "Small-step normalization repeats a search from the root for every beta st
 msgstr "スモールステップの正規化は、β ステップのたびに根から探索をやり直し、そのたびに項をコピーする。*評価による正規化*（NbE）はそうではなく、項をホスト言語の値として解釈し（そこでは β 簡約は単なる関数適用である）、その値を正規形として読み戻す。本パッケージは [De Bruijn 項](../debruijn.md)上の型なし計算に対する NbE を提供する：高速であるが、型なしの項は正規化するとは限らないため、燃料（fuel）によって制限される。操作的な簡約器が参照意味論であり続け、NbE はそれらに照らして検査される。"
 
 #: manual/design/utlc/nbe.md:16
-msgid "**Divergence.** Untyped terms need not normalize, so every phase must be bounded."
-msgstr "**発散。** 型なしの項は正規化されるとは限らないので、すべての段階に上限がなければならない。"
+msgid "**Divergence.** Untyped terms need not normalize, so every phase must be bounded, and only by the budget: a divergent run must end with `FuelExhausted` on every backend, whatever the size of the host stack."
+msgstr "**発散。** 型なしの項は正規化されるとは限らないので、すべての段階に上限がなければならず、その上限は予算だけで決まらなければならない。発散する実行は、ホストスタックの大きさにかかわらず、すべてのバックエンドで `FuelExhausted` で終わらなければならない。"
 
-#: manual/design/utlc/nbe.md:18
+#: manual/design/utlc/nbe.md:19
 msgid "**Reproducibility.** The outcome must not depend on anything but the input and the budget, and the reported cost must be exact."
 msgstr "**再現性。** 結果は入力と予算以外の何にも依存してはならず、報告されるコストは正確でなければならない。"
 
-#: manual/design/utlc/nbe.md:20
+#: manual/design/utlc/nbe.md:21
 msgid "**Encapsulation.** Callers must not be able to build semantic values that break the evaluator's scope invariant."
 msgstr "**カプセル化。** 呼び出し側が、評価器のスコープ不変条件を壊す意味値を構築できてはならない。"
 
-#: manual/design/utlc/nbe.md:25
+#: manual/design/utlc/nbe.md:26
 msgid "The semantic domain"
 msgstr "意味領域"
 
-#: manual/design/utlc/nbe.md:27
+#: manual/design/utlc/nbe.md:28
 msgid "Values are given by the following grammar, where $\\rho$ is an environment (a list of values, index $0$ first), $t$ a De Bruijn term, $x$ a free name and $\\ell$ a level:"
 msgstr "値は次の文法で与えられる。ここで $\\rho$ は環境（値のリストで、インデックス $0$ が先頭）、$t$ は De Bruijn 項、$x$ は自由な名前、$\\ell$ はレベルである："
 
-#: manual/design/utlc/nbe.md:38
+#: manual/design/utlc/nbe.md:39
 msgid "$\\mathsf{clo}(t, \\rho)$ is the value of $\\lambda.\\,t$ in $\\rho$; $\\mathsf{delay}(t, \\rho)$ is an argument not yet evaluated; neutral values $n$ are computations stuck on a variable. In the implementation, $\\mathsf{app}(d, e)$ also arises when $d$ is a constant, since a constant applied to an argument is stuck as well."
 msgstr "$\\mathsf{clo}(t, \\rho)$ は $\\rho$ における $\\lambda.\\,t$ の値であり、$\\mathsf{delay}(t, \\rho)$ はまだ評価されていない引数であり、中立値 $n$ は変数で行き詰まった計算である。実装では、$d$ が定数の場合にも $\\mathsf{app}(d, e)$ が生じる。定数を引数に適用したものもやはり行き詰まるからである。"
 
-#: manual/design/utlc/nbe.md:44
+#: manual/design/utlc/nbe.md:45
 msgid "Evaluation"
 msgstr "評価"
 
-#: manual/design/utlc/nbe.md:46
+#: manual/design/utlc/nbe.md:47
 msgid "$\\llbracket t \\rrbracket\\rho$ evaluates to weak head form:"
 msgstr "$\\llbracket t \\rrbracket\\rho$ は弱頭部形式まで評価する："
 
-#: manual/design/utlc/nbe.md:64
+#: manual/design/utlc/nbe.md:65
 msgid "Arguments are delayed, so evaluation is *call by name*: an argument that is never used is never evaluated. There is no memoization; a delayed argument used twice is evaluated twice."
 msgstr "引数は遅延されるので、評価は*名前呼び*である：使われない引数は決して評価されない。メモ化はなく、2 回使われる遅延引数は 2 回評価される。"
 
-#: manual/design/utlc/nbe.md:68
+#: manual/design/utlc/nbe.md:69
 msgid "Readback"
 msgstr "読み戻し"
 
-#: manual/design/utlc/nbe.md:70
+#: manual/design/utlc/nbe.md:71
 msgid "$R_n(d)$ reads $d$ back under $n$ binders:"
 msgstr "$R_n(d)$ は $n$ 個の束縛子の下で $d$ を読み戻す："
 
-#: manual/design/utlc/nbe.md:83
+#: manual/design/utlc/nbe.md:84
 msgid "A closure is read back by applying it to a fresh variable. That variable is represented by its *level* $n$, which does not change while the value is carried under further binders, and converted to the index $n - 1 - \\ell$ at the occurrence (see levels in the [debruijn design](../debruijn.md)). `normalize(t)` is $R_0(\\llbracket t \\rrbracket[\\,])$ for closed $t$."
 msgstr "クロージャは新しい変数に適用することで読み戻される。その変数は*レベル* $n$ で表され、値がさらに束縛子の下へ運ばれても変わらず、出現位置でインデックス $n - 1 - \\ell$ に変換される（[debruijn の設計](../debruijn.md)のレベルを参照）。閉じた $t$ について `normalize(t)` は $R_0(\\llbracket t \\rrbracket[\\,])$ である。"
 
-#: manual/design/utlc/nbe.md:91
+#: manual/design/utlc/nbe.md:92
 msgid "Untyped NbE needs a budget"
 msgstr "型なし NbE には予算が必要"
 
-#: manual/design/utlc/nbe.md:93
+#: manual/design/utlc/nbe.md:94
 msgid "**Problem.** For $\\Omega = (\\lambda.\\,0\\,0)(\\lambda.\\,0\\,0)$, evaluation unfolds $\\mathrm{app}(\\mathsf{clo}(0\\,0, [\\,]), \\cdot)$ forever. In the typed setting termination is a theorem ([stlc design](../stlc.md)); here it is false."
 msgstr "**問題。** $\\Omega = (\\lambda.\\,0\\,0)(\\lambda.\\,0\\,0)$ に対して、評価は $\\mathrm{app}(\\mathsf{clo}(0\\,0, [\\,]), \\cdot)$ を際限なく展開する。型付きの設定では停止性は定理である（[stlc の設計](../stlc.md)）が、ここでは成り立たない。"
 
-#: manual/design/utlc/nbe.md:98
+#: manual/design/utlc/nbe.md:99
 msgid "**Choice.** Every evaluation of a node, every `force` and every readback step costs one unit of fuel, and running out yields `FuelExhausted` with the amount consumed. The budget is threaded through all phases, so the cost of reading back under binders, which may evaluate closure bodies, is included."
 msgstr "**選択。** ノードの評価 1 回、`force` 1 回、読み戻しの 1 ステップごとに燃料を 1 単位消費し、燃料が尽きると消費量とともに `FuelExhausted` を返す。予算はすべての段階を通して受け渡されるので、束縛子の下での読み戻し（クロージャ本体を評価することがある）のコストも含まれる。"
 
-#: manual/design/utlc/nbe.md:103
+#: manual/design/utlc/nbe.md:104
 msgid "**Determinism in the budget.** The computation does not inspect the fuel except to stop, so a run with fuel $f$ that ends with a normal form after consuming $c \\le f$ units performs exactly the same computation with any fuel $f' \\ge c$. The fuel is only tested by `fuel <= 0`, and every test that passes is followed by spending one unit. If $s$ units have been spent before some test of the original run, that test is followed by at least one more unit, so $s + 1 \\le c$; with fuel $f'$ the test sees $f' - s \\ge c - s \\ge 1$ and passes as well. Every test of the original run therefore passes again, the run takes the same path, and it stops with the same result. With $f' = c - 1$ the last test sees $0$ and fails. Results are therefore reproducible, and `consumed` is the exact minimum budget for that result."
 msgstr "**予算における決定性。** 計算は停止のため以外に燃料を調べないので、燃料 $f$ で $c \\le f$ 単位を消費して正規形で終わる実行は、$f' \\ge c$ の任意の燃料でもまったく同じ計算を行う。燃料は `fuel <= 0` によってのみ検査され、通過した検査の後には必ず 1 単位が消費される。元の実行のある検査の前に $s$ 単位が消費されていれば、その検査の後には少なくとも 1 単位がさらに消費されるので $s + 1 \\le c$ である。燃料 $f'$ ではその検査は $f' - s \\ge c - s \\ge 1$ を見るので、やはり通過する。したがって元の実行のすべての検査が再び通過し、実行は同じ経路をたどり、同じ結果で停止する。$f' = c - 1$ では最後の検査が $0$ を見て失敗する。したがって結果は再現可能であり、`consumed` はその結果に必要な正確な最小予算である。"
 
-#: manual/design/utlc/nbe.md:116
+#: manual/design/utlc/nbe.md:117
+msgid "A bounded host stack"
+msgstr "有界なホストスタック"
+
+#: manual/design/utlc/nbe.md:119
+msgid "**Problem.** Written as host functions, the equations of evaluation and readback are mutually recursive, and every call whose result is still needed keeps a host stack frame. On $\\Omega$, applying $\\mathsf{clo}(0\\,0, [\\,])$ evaluates $0\\,0$, which applies the closure again, and none of these calls returns before the fuel runs out: the host stack grows with the fuel spent. The js, wasm and wasm-gc stacks are much smaller than a budget of a few million units needs, so such a run overflowed the stack instead of ending with `FuelExhausted`, against the constraint that every phase is bounded. Readback has the same problem on a term with an infinite normal form, such as $(\\lambda.\\,f\\,(0\\,0))\\,(\\lambda.\\,f\\,(0\\,0))$, whose readback $f\\,(f\\,(f \\cdots))$ nests one call of $R_n$ per argument."
+msgstr "**問題。** ホストの関数として書くと、評価と読み戻しの方程式は相互再帰になり、結果がまだ必要な呼び出しはそれぞれホストのスタックフレームを 1 つ占める。$\\Omega$ では、$\\mathsf{clo}(0\\,0, [\\,])$ の適用が $0\\,0$ を評価し、それが再びクロージャを適用し、燃料が尽きるまでこれらの呼び出しはどれも戻らない。つまりホストスタックは消費した燃料とともに伸びる。js、wasm、wasm-gc のスタックは数百万単位の予算に必要な深さよりはるかに小さいので、このような実行は `FuelExhausted` で終わらずにスタックをあふれさせ、すべての段階に上限があるという制約に反していた。読み戻しも、$(\\lambda.\\,f\\,(0\\,0))\\,(\\lambda.\\,f\\,(0\\,0))$ のように無限の正規形をもつ項で同じ問題を抱える。その読み戻し $f\\,(f\\,(f \\cdots))$ は引数ごとに $R_n$ の呼び出しを 1 段入れ子にする。"
+
+#: manual/design/utlc/nbe.md:131
+msgid "**Choice.** Evaluation runs as an abstract machine whose continuation is an explicit stack of frames in the heap: the recursive evaluator in continuation-passing style with the continuations defunctionalized, in the manner of the CEK machine.[^machines] A state $\\langle c \\mid K \\mid f \\rangle$ consists of a control $c$, a continuation $K$ (a list of frames, top first) and the remaining fuel $f$:"
+msgstr "**選択。** 評価は、継続をヒープ上の明示的なフレームのスタックとする抽象機械として実行する。これは再帰的な評価器を継続渡しスタイルに変換し、継続を脱関数化したもので、CEK 機械と同じやり方である。[^machines] 状態 $\\langle c \\mid K \\mid f \\rangle$ は、制御 $c$、継続 $K$（フレームのリストで、先頭が最上段）、残りの燃料 $f$ からなる："
+
+#: manual/design/utlc/nbe.md:144
+msgid "$\\mathsf{ev}$ and $\\mathsf{fo}$ are calls of $\\llbracket - \\rrbracket$ and $\\mathrm{force}$; $\\mathsf{ret}(d)$ passes a value to the top frame. $\\mathsf{spine}(\\vec u, j, \\rho)$, for the arguments $\\vec u = u_0 \\cdots u_{m-1}$ of an application node, waits for the value to apply to $\\mathsf{delay}(u_j, \\rho), \\ldots, \\mathsf{delay}(u_{m-1}, \\rho)$; $\\mathsf{to}(e)$ waits for a forced function to apply to $e$. In the code these are `EvalControl` (`Evaluate`, `Force`, `Return`) and `EvalFrame` (`ApplyArguments`, `ApplyTo`). The rules for $\\mathsf{ev}$ and $\\mathsf{fo}$ apply when $f \\ge 1$; with $f \\le 0$ the machine stops with `FuelExhausted`, and an index outside $\\rho$ stops it with `ScopeFailure`:"
+msgstr "$\\mathsf{ev}$ と $\\mathsf{fo}$ は $\\llbracket - \\rrbracket$ と $\\mathrm{force}$ の呼び出しであり、$\\mathsf{ret}(d)$ は値を最上段のフレームに渡す。$\\mathsf{spine}(\\vec u, j, \\rho)$ は適用ノードの引数 $\\vec u = u_0 \\cdots u_{m-1}$ について、値を待ち、それを $\\mathsf{delay}(u_j, \\rho), \\ldots, \\mathsf{delay}(u_{m-1}, \\rho)$ に順に適用する。$\\mathsf{to}(e)$ は強制済みの関数を待ち、それを $e$ に適用する。コードではこれらは `EvalControl`（`Evaluate`、`Force`、`Return`）と `EvalFrame`（`ApplyArguments`、`ApplyTo`）である。$\\mathsf{ev}$ と $\\mathsf{fo}$ の規則は $f \\ge 1$ のときに適用される。$f \\le 0$ なら機械は `FuelExhausted` で停止し、$\\rho$ の範囲外のインデックスでは `ScopeFailure` で停止する："
+
+#: manual/design/utlc/nbe.md:170
+msgid "where $K' = \\mathsf{spine}(\\vec u, j + 1, \\rho) \\cdot K$ if $j + 1 < m$ and $K' = K$ otherwise. An empty application $t\\,()$ steps to $\\langle \\mathsf{ev}(t, \\rho) \\mid K \\mid f - 1 \\rangle$. The machine starts in $\\langle \\mathsf{ev}(t, \\rho) \\mid \\varepsilon \\mid f \\rangle$ (or $\\mathsf{fo}(d)$) and returns $d$ with $f$ units left when it reaches $\\langle \\mathsf{ret}(d) \\mid \\varepsilon \\mid f \\rangle$."
+msgstr "ここで $j + 1 < m$ なら $K' = \\mathsf{spine}(\\vec u, j + 1, \\rho) \\cdot K$、そうでなければ $K' = K$ である。空の適用 $t\\,()$ は $\\langle \\mathsf{ev}(t, \\rho) \\mid K \\mid f - 1 \\rangle$ に遷移する。機械は $\\langle \\mathsf{ev}(t, \\rho) \\mid \\varepsilon \\mid f \\rangle$（または $\\mathsf{fo}(d)$）から始まり、$\\langle \\mathsf{ret}(d) \\mid \\varepsilon \\mid f \\rangle$ に達すると、残り $f$ 単位とともに $d$ を返す。"
+
+#: manual/design/utlc/nbe.md:177
+msgid "*Same values.* Read a continuation as the function it still has to apply,"
+msgstr "*同じ値。* 継続を、これから適用すべき関数として読み、"
+
+#: manual/design/utlc/nbe.md:187
+msgid "and a state $\\langle c \\mid K \\mid f \\rangle$ as $K(\\overline{c})$ with $\\overline{\\mathsf{ev}(t, \\rho)} = \\llbracket t \\rrbracket\\rho$, $\\overline{\\mathsf{fo}(d)} = \\mathrm{force}(d)$ and $\\overline{\\mathsf{ret}(d)} = d$. Every rule turns a state into one with the same reading, by one of the evaluation equations above: the first seven rules are the equations of $\\llbracket - \\rrbracket$ and $\\mathrm{force}$, the $\\mathsf{spine}$ rule unfolds the leftmost application of the spine, starting it as the implementation does by forcing the function, and the two $\\mathsf{to}$ rules are the two equations of $\\mathrm{app}$. When $j + 1 = m$ no frame for the remaining arguments is needed, since $\\mathsf{spine}(\\vec u, m, \\rho) \\cdot K$ reads as $K$. By induction on the number of steps, a run that stops at $\\langle \\mathsf{ret}(d) \\mid \\varepsilon \\mid f' \\rangle$ computes $d = \\llbracket t \\rrbracket\\rho$."
+msgstr "状態 $\\langle c \\mid K \\mid f \\rangle$ を $K(\\overline{c})$ と読む。ここで $\\overline{\\mathsf{ev}(t, \\rho)} = \\llbracket t \\rrbracket\\rho$、$\\overline{\\mathsf{fo}(d)} = \\mathrm{force}(d)$、$\\overline{\\mathsf{ret}(d)} = d$ である。どの規則も、上の評価の方程式の 1 つによって、状態を同じ読みをもつ状態に移す。最初の 7 つの規則は $\\llbracket - \\rrbracket$ と $\\mathrm{force}$ の方程式であり、$\\mathsf{spine}$ 規則はスパインの最も左の適用を展開し、実装と同じくまず関数を強制する。2 つの $\\mathsf{to}$ 規則は $\\mathrm{app}$ の 2 つの方程式である。$j + 1 = m$ のときは残りの引数のためのフレームは不要である。$\\mathsf{spine}(\\vec u, m, \\rho) \\cdot K$ は $K$ と読めるからである。ステップ数についての帰納法により、$\\langle \\mathsf{ret}(d) \\mid \\varepsilon \\mid f' \\rangle$ で止まる実行は $d = \\llbracket t \\rrbracket\\rho$ を計算する。"
+
+#: manual/design/utlc/nbe.md:201
+msgid "*Same fuel.* Units are tested and spent exactly in the $\\mathsf{ev}$ and $\\mathsf{fo}$ rules, that is on entry to $\\llbracket - \\rrbracket$ and $\\mathrm{force}$, where the recursive functions test and spend them; the $\\mathsf{ret}$ rules spend nothing, like returning from a host call and dispatching on its result. The machine makes the calls in the order of the recursive definition (it is that definition with its host stack made explicit), so every test sees the same remaining fuel. Results, `consumed`, and the determinism argument above are therefore unchanged; the tests pin exact costs from before the change."
+msgstr "*同じ燃料。* 燃料はちょうど $\\mathsf{ev}$ と $\\mathsf{fo}$ の規則、すなわち $\\llbracket - \\rrbracket$ と $\\mathrm{force}$ に入るときに検査され消費される。これは再帰的な関数が検査し消費する場所と同じである。$\\mathsf{ret}$ の規則は、ホストの呼び出しから戻ってその結果で分岐するのと同様に、何も消費しない。機械は再帰的な定義と同じ順序で呼び出しを行う（ホストスタックを明示化したその定義そのものである）ので、どの検査も同じ残り燃料を見る。したがって結果、`consumed`、上記の決定性の議論は変わらない。テストは変更前に測った正確なコストを固定している。"
+
+#: manual/design/utlc/nbe.md:211
+msgid "*Bounded stacks.* The machine is a single loop, so its host stack depth is constant. The frame stack $K$ grows only in the $\\mathsf{ev}(t\\,\\vec u, \\rho)$ rule, which spends a unit, and in the $\\mathsf{spine}$ rule, which replaces one frame by at most two and is followed by a $\\mathsf{fo}$ step that spends a unit or stops. Hence, at every step,"
+msgstr "*有界なスタック。* 機械は 1 つのループなので、ホストスタックの深さは一定である。フレームのスタック $K$ が伸びるのは、1 単位を消費する $\\mathsf{ev}(t\\,\\vec u, \\rho)$ 規則と、1 つのフレームを高々 2 つに置き換え、その後に 1 単位を消費するか停止する $\\mathsf{fo}$ ステップが続く $\\mathsf{spine}$ 規則だけである。したがってどのステップでも"
+
+#: manual/design/utlc/nbe.md:222
+msgid "and the pending work lives in the heap, bounded by the initial budget $f_0$. On $\\Omega$ the stack never holds more than one frame: applying the closure to the last argument of the spine leaves nothing below the $\\mathsf{to}$ frame, and the $\\mathsf{to}$ rule pops it before the body is evaluated, so this tail call runs in constant space. A term that grows, such as $(\\lambda.\\,0\\,0\\,0)\\,(\\lambda.\\,0\\,0\\,0)$, keeps one $\\mathsf{spine}$ frame per unfolding for its last argument; its stack grows in the heap, within the bound."
+msgstr "であり、保留中の仕事はヒープ上にあって初期予算 $f_0$ で抑えられる。$\\Omega$ ではスタックが 2 つ以上のフレームをもつことはない。スパインの最後の引数にクロージャを適用するとき $\\mathsf{to}$ フレームの下には何も残らず、$\\mathsf{to}$ 規則は本体を評価する前にそれを取り除くので、この末尾呼び出しは定数の空間で実行される。$(\\lambda.\\,0\\,0\\,0)\\,(\\lambda.\\,0\\,0\\,0)$ のように伸びる項は、展開のたびに最後の引数のための $\\mathsf{spine}$ フレームを 1 つ残す。そのスタックはヒープ上で、上の上限の範囲内で伸びる。"
+
+#: manual/design/utlc/nbe.md:231
+msgid "Readback is transformed in the same way, with controls $\\mathsf{rb}(d, n)$ (read $d$ back under $n$ binders) and $\\mathsf{emit}(u)$ (pass a term to the top frame) and frames"
+msgstr "読み戻しも同じやり方で変換する。制御は $\\mathsf{rb}(d, n)$（$n$ 個の束縛子の下で $d$ を読み戻す）と $\\mathsf{emit}(u)$（項を最上段のフレームに渡す）であり、フレームは"
+
+#: manual/design/utlc/nbe.md:239
+msgid "(`QuoteControl` and `QuoteFrame` in the code). A step $\\mathsf{rb}(d, n)$ spends one unit and forces $d$ to $d'$; a constant, a free name or a level emits the corresponding term, an application $\\mathsf{app}(d_1, e)$ continues with $\\mathsf{rb}(d_1, n)$ under the frame $\\mathsf{arg}(e, n)$, and a closure $\\mathsf{clo}(t, \\rho)$ evaluates $t$ in $\\mathsf{lvl}(n) \\cdot \\rho$ to $d''$ and continues with $\\mathsf{rb}(d'', n + 1)$ under $\\mathsf{bind}$. An emitted $u$ meets its frame:"
+msgstr "である（コードでは `QuoteControl` と `QuoteFrame`）。ステップ $\\mathsf{rb}(d, n)$ は 1 単位を消費して $d$ を $d'$ に強制する。定数、自由な名前、レベルは対応する項を出力する。適用 $\\mathsf{app}(d_1, e)$ はフレーム $\\mathsf{arg}(e, n)$ の下で $\\mathsf{rb}(d_1, n)$ に進み、クロージャ $\\mathsf{clo}(t, \\rho)$ は $\\mathsf{lvl}(n) \\cdot \\rho$ のもとで $t$ を $d''$ に評価し、$\\mathsf{bind}$ の下で $\\mathsf{rb}(d'', n + 1)$ に進む。出力された $u$ はそのフレームと次のように出会う："
+
+#: manual/design/utlc/nbe.md:254
+msgid "These are the readback equations above, with the head of a neutral read before its argument as before. The forcing and the evaluation inside an $\\mathsf{rb}$ step run the evaluation machine to its end and return to the readback loop, so the host stack holds at most the two loops, and $Q$, like $K$, is bounded by the units spent."
+msgstr "これらは上の読み戻しの方程式であり、以前と同じく中立値の頭部をその引数より先に読み戻す。$\\mathsf{rb}$ ステップ内の強制と評価は評価機械を最後まで実行して読み戻しのループに戻るので、ホストスタックに載るのは高々この 2 つのループであり、$Q$ も $K$ と同様に消費した単位数で抑えられる。"
+
+#: manual/design/utlc/nbe.md:260
+msgid "M. Felleisen and D. P. Friedman, \"Control operators, the SECD-machine, and the λ-calculus\", 1986, for the CEK machine; M. S. Ager, D. Biernacki, O. Danvy and J. Midtgaard, \"A functional correspondence between evaluators and abstract machines\", PPDP 2003, for deriving it from an evaluator by CPS transformation and defunctionalization."
+msgstr "CEK 機械については M. Felleisen and D. P. Friedman, \"Control operators, the SECD-machine, and the λ-calculus\", 1986 を、CPS 変換と脱関数化によって評価器からそれを導くことについては M. S. Ager, D. Biernacki, O. Danvy and J. Midtgaard, \"A functional correspondence between evaluators and abstract machines\", PPDP 2003 を参照。"
+
+#: manual/design/utlc/nbe.md:262
 msgid "Laziness without sharing"
 msgstr "共有なしの遅延評価"
 
-#: manual/design/utlc/nbe.md:118
+#: manual/design/utlc/nbe.md:264
 msgid "**Problem.** Strict evaluation (call by value) diverges on $(\\lambda.\\,7)\\,\\Omega$, although the term has the normal form $7$."
 msgstr "**問題。** 正格評価（値呼び）は $(\\lambda.\\,7)\\,\\Omega$ で発散するが、この項は正規形 $7$ を持つ。"
 
-#: manual/design/utlc/nbe.md:121
+#: manual/design/utlc/nbe.md:267
 msgid "**Choice.** Arguments are delayed. Together with readback, which evaluates the head of every neutral first and its arguments afterwards, and enters closures only after their head is known, this realizes normal-order (leftmost-outermost) reduction, the normalizing strategy of the [eval design](../eval.md). Call by need would share delayed results; it is not used because it needs mutable thunks, and the budget keeps the cost of recomputation bounded and visible."
 msgstr "**選択。** 引数は遅延される。各中立項の先頭を先に評価してから引数を評価し、先頭が判明してから初めてクロージャに入る読み戻しと合わせて、これは正規順序（最左最外）簡約、すなわち [eval の設計](../eval.md)の正規化戦略を実現する。必要呼びなら遅延された結果を共有するが、可変なサンクを必要とするため採用しておらず、予算によって再計算のコストは有界かつ可視に保たれる。"
 
-#: manual/design/utlc/nbe.md:129
+#: manual/design/utlc/nbe.md:275
 msgid "Opaque semantic values"
 msgstr "不透明な意味値"
 
-#: manual/design/utlc/nbe.md:131
+#: manual/design/utlc/nbe.md:277
 msgid "`Semantic[T]` is a struct around a private enum. Callers can create neutral values (`reflect_free`, `reflect_level`), evaluate, and quote, but cannot build closures with ill-scoped environments. This keeps the invariant that every closure environment matches the scope of its body, which is why `eval` validates its input once and can then trust every index lookup."
 msgstr "`Semantic[T]` は非公開の列挙型を包む構造体である。呼び出し側は中立値の作成（`reflect_free`、`reflect_level`）、評価、quote はできるが、スコープの正しくない環境を持つクロージャは構築できない。これにより、すべてのクロージャの環境がその本体のスコープと一致するという不変条件が保たれる。`eval` が入力を一度だけ検証し、その後はすべてのインデックス参照を信頼できるのはこのためである。"
 
-#: manual/design/utlc/nbe.md:137
+#: manual/design/utlc/nbe.md:283
 msgid "Unary applications in normal forms"
 msgstr "正規形における単項適用"
 
-#: manual/design/utlc/nbe.md:139
+#: manual/design/utlc/nbe.md:285
 msgid "Readback produces $R_n(\\mathsf{app}(d, e)) = R_n(d)\\,R_n(e)$ as a unary `Apply`, so the spine $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`. The small-step reducer keeps the n-ary `Apply(f, [a, b])` of its input. Both denote the same curried application; comparisons between the two normalizers must flatten spines first."
 msgstr "読み戻しは $R_n(\\mathsf{app}(d, e)) = R_n(d)\\,R_n(e)$ を単項の `Apply` として生成するので、スパイン $f\\,a\\,b$ は `Apply(Apply(f, [a]), [b])` として返される。スモールステップ簡約器は入力の n 項 `Apply(f, [a, b])` を保つ。どちらも同じカリー化された適用を表すので、2 つの正規化器を比較する際はまずスパインを平坦化しなければならない。"
 
-#: manual/design/utlc/nbe.md:147
+#: manual/design/utlc/nbe.md:293
 msgid "**Theorem (soundness).** If `normalize(t, fuel)` returns `NormalForm(u, _)`, then $u$ is beta-normal and $t =_\\beta u$ (up to spine flattening)."
 msgstr "**定理（健全性）。** `normalize(t, fuel)` が `NormalForm(u, _)` を返すならば、$u$ は β 正規であり、$t =_\\beta u$ である（スパインの平坦化を除いて）。"
 
-#: manual/design/utlc/nbe.md:150
+#: manual/design/utlc/nbe.md:296
 msgid "*Sketch.* Define the *denotation* $\\lfloor d \\rfloor_n$ of a value under $n$ binders as the term it stands for: $\\lfloor \\mathsf{clo}(t, \\rho) \\rfloor_n = \\lambda.\\,t[\\rho]$, $\\lfloor \\mathsf{delay}(t, \\rho) \\rfloor_n = t[\\rho]$, $\\lfloor \\mathsf{lvl}(\\ell) \\rfloor_n = n - 1 - \\ell$, and so on, where $t[\\rho]$ substitutes the denotations of $\\rho$ for the free indices of $t$. By induction on evaluation, $t[\\rho] \\to_\\beta^{*} \\lfloor \\llbracket t \\rrbracket\\rho \\rfloor_n$: the only non-trivial case is $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$, which is the beta step $(\\lambda.\\,t[\\rho])\\,\\lfloor e \\rfloor \\to_\\beta t[\\lfloor e \\rfloor \\cdot \\rho]$ (substitution lemma of the [debruijn attachment](../../../attachments/design_debruijn_index-lemmas.typ)). Readback inserts only beta steps under binders, so $t \\to_\\beta^{*} u$. For normality: $R$ produces $\\lambda$ only from closures, and applications only from $\\mathsf{app}(d, e)$, whose head $d$ is a neutral or a constant, never a closure (application of a closure is evaluated, not stored). Hence the output follows the grammar"
 msgstr "*証明概要。* $n$ 個の束縛子の下での値の*表示* $\\lfloor d \\rfloor_n$ を、それが表す項として定義する：$\\lfloor \\mathsf{clo}(t, \\rho) \\rfloor_n = \\lambda.\\,t[\\rho]$、$\\lfloor \\mathsf{delay}(t, \\rho) \\rfloor_n = t[\\rho]$、$\\lfloor \\mathsf{lvl}(\\ell) \\rfloor_n = n - 1 - \\ell$ などであり、ここで $t[\\rho]$ は $t$ の自由なインデックスに $\\rho$ の表示を代入する。評価に関する帰納法により $t[\\rho] \\to_\\beta^{*} \\lfloor \\llbracket t \\rrbracket\\rho \\rfloor_n$ が成り立つ：自明でない唯一のケースは $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$ であり、これは β ステップ $(\\lambda.\\,t[\\rho])\\,\\lfloor e \\rfloor \\to_\\beta t[\\lfloor e \\rfloor \\cdot \\rho]$ である（[debruijn の付録](../../../attachments/design_debruijn_index-lemmas.typ)の代入補題）。読み戻しは束縛子の下に β ステップを挿入するだけなので、$t \\to_\\beta^{*} u$ となる。正規性について：$R$ は $\\lambda$ をクロージャからのみ生成し、適用を $\\mathsf{app}(d, e)$ からのみ生成するが、その先頭 $d$ は中立項か定数であり、決してクロージャではない（クロージャの適用は格納されずに評価される）。よって出力は次の文法に従う"
 
-#: manual/design/utlc/nbe.md:169
+#: manual/design/utlc/nbe.md:315
 msgid "which contains no redex $(\\lambda.\\,t)\\,u$. $\\square$"
 msgstr "これは簡約基 $(\\lambda.\\,t)\\,u$ を含まない。$\\square$"
 
-#: manual/design/utlc/nbe.md:171
+#: manual/design/utlc/nbe.md:317
 msgid "**Completeness (sketch).** If $t$ has a beta normal form, `normalize` returns it for sufficient fuel. Evaluation computes the weak head normal form by call by name, and readback recursively normalizes the body of a closure and the arguments of a neutral after its head: this is the leftmost-outermost strategy decomposed into head and arguments. By the normalization theorem (Barendregt 13.2.2) this strategy terminates on every term with a normal form, and by confluence the normal form is unique.[^nbe]"
 msgstr "**完全性（証明概要）。** $t$ が β 正規形を持つならば、十分な燃料があれば `normalize` はそれを返す。評価は名前呼びで弱頭部正規形を計算し、読み戻しはクロージャの本体と、中立項の先頭の後の引数を再帰的に正規化する：これは先頭と引数に分解された最左最外戦略である。正規化定理（Barendregt 13.2.2）によりこの戦略は正規形を持つすべての項で停止し、合流性により正規形は一意である。[^nbe]"
 
-#: manual/design/utlc/nbe.md:179
+#: manual/design/utlc/nbe.md:325
 msgid "For untyped NbE see K. Aehlig and F. Joachimski, \"Operational aspects of untyped normalisation by evaluation\", Mathematical Structures in Computer Science 14, 2004; for strong reduction by evaluation, B. Grégoire and X. Leroy, \"A compiled implementation of strong reduction\", ICFP 2002."
 msgstr "型なし NbE については K. Aehlig and F. Joachimski, \"Operational aspects of untyped normalisation by evaluation\", Mathematical Structures in Computer Science 14, 2004 を、評価による強簡約については B. Grégoire and X. Leroy, \"A compiled implementation of strong reduction\", ICFP 2002 を参照。"
 
-#: manual/design/utlc/nbe.md:181
-msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices."
-msgstr "**スモールステップ簡約との一致。** 健全性と合流性により、同じスコープ整合な項に対して `@nbe.normalize` と `@debruijn.normalize` がともに正規形を返すときは常に、2 つの正規形はスパインの平坦化（入れ子の適用をまとめ、空の適用を取り除くこと）の後に等しい。どちらも `Apply(h, [])` を $h$ と読む：評価はそのノードを消去し、スモールステップの簡約器は簡約基の照合でそれを透過して見る（[eval の設計](../eval.md)を参照）。`src/utlc/nbe/nbe_test.mbt` のテストはこれに加え、$(\\lambda.\\,7)\\,\\Omega$ での遅延性、$\\Omega$ での燃料切れ、quote がレベルをインデックスに戻すことを検査する。"
+#: manual/design/utlc/nbe.md:327
+msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices. Further tests run $\\Omega$, a divergent term whose head grows, and two terms with infinite normal forms with budgets of thirty million units on every backend, and pin the exact cost of Church numeral arithmetic together with its reproducibility at `consumed` and `consumed - 1`."
+msgstr "**スモールステップ簡約との一致。** 健全性と合流性により、同じスコープ整合な項に対して `@nbe.normalize` と `@debruijn.normalize` がともに正規形を返すときは常に、2 つの正規形はスパインの平坦化（入れ子の適用をまとめ、空の適用を取り除くこと）の後に等しい。どちらも `Apply(h, [])` を $h$ と読む：評価はそのノードを消去し、スモールステップの簡約器は簡約基の照合でそれを透過して見る（[eval の設計](../eval.md)を参照）。`src/utlc/nbe/nbe_test.mbt` のテストはこれに加え、$(\\lambda.\\,7)\\,\\Omega$ での遅延性、$\\Omega$ での燃料切れ、quote がレベルをインデックスに戻すことを検査する。さらに、$\\Omega$、頭部が伸び続ける発散項、無限の正規形をもつ 2 つの項を、すべてのバックエンドで 3000 万単位の予算で実行するテストと、チャーチ数の算術の正確なコストおよび `consumed` と `consumed - 1` での再現性を固定するテストがある。"
 
-#: manual/design/utlc/nbe.md:192
+#: manual/design/utlc/nbe.md:342
 msgid "Other invariants:"
 msgstr "その他の不変条件："
 
-#: manual/design/utlc/nbe.md:194
+#: manual/design/utlc/nbe.md:344
 msgid "With positive fuel, `eval` and `normalize` reject ill-scoped input with `ScopeFailure` and `consumed=0` before doing any work; with fuel `<= 0` they return `FuelExhausted(consumed=0)` without looking at the term."
 msgstr "燃料が正のとき、`eval` と `normalize` は、何の処理も行う前に、スコープの正しくない入力を `ScopeFailure` と `consumed=0` で拒否する。燃料が `<= 0` のときは、項を見ずに `FuelExhausted(consumed=0)` を返す。"
 
-#: manual/design/utlc/nbe.md:197
+#: manual/design/utlc/nbe.md:347
 msgid "`quote(value, n, _)` returns `ScopeFailure` only when $n < 0$ or a level variable is not below $n$. Values produced by `eval` contain no level variables, so quoting them at any level $n \\ge 0$ never fails this way."
 msgstr "`quote(value, n, _)` が `ScopeFailure` を返すのは $n < 0$ の場合か、レベル変数が $n$ 未満でない場合のみである。`eval` が生成する値はレベル変数を含まないので、任意のレベル $n \\ge 0$ で quote してもこの理由で失敗することはない。"
 
-#: manual/design/utlc/nbe.md:200
+#: manual/design/utlc/nbe.md:350
 msgid "Fuel: `consumed` never exceeds the fuel given; the determinism property above holds."
 msgstr "燃料：`consumed` は与えられた燃料を超えることがなく、上記の決定性が成り立つ。"
 
-#: manual/design/utlc/nbe.md:205
+#: manual/design/utlc/nbe.md:352
+msgid "Stack: evaluation and readback use a constant depth of host stack; their frame stacks live in the heap and are bounded by the budget."
+msgstr "スタック：評価と読み戻しはホストスタックを一定の深さしか使わない。それらのフレームのスタックはヒープ上にあり、予算で抑えられる。"
+
+#: manual/design/utlc/nbe.md:357
 msgid "**Typed or eta-long readback.** Untyped readback cannot know where to eta-expand; eta-long normal forms are provided for typed terms by [stlc](../stlc.md)."
 msgstr "**型付きまたは η 長形式の読み戻し。** 型なしの読み戻しはどこで η展開すべきかを知りえない。型付き項に対する η 長形式の正規形は [stlc](../stlc.md) が提供する。"
 
-#: manual/design/utlc/nbe.md:208
+#: manual/design/utlc/nbe.md:360
 msgid "**Host-language closures (HOAS).** Representing $\\mathsf{clo}$ as a MoonBit function would be faster but makes fuel accounting and inspection of values impossible, and the values could not be quoted without a fresh-variable trick on the host side. A first-order closure keeps everything observable."
 msgstr "**ホスト言語のクロージャ（HOAS）。** $\\mathsf{clo}$ を MoonBit の関数として表せば高速になるが、燃料の計上や値の検査が不可能になり、ホスト側で新しい変数を使う工夫なしには値を quote することもできない。一階のクロージャならすべてを観察可能に保てる。"
 
-#: manual/design/utlc/nbe.md:212
+#: manual/design/utlc/nbe.md:364
 msgid "**Named environments.** Indexing the environment by De Bruijn index makes lookup positional and needs no fresh names during evaluation."
 msgstr "**名前付き環境。** 環境を De Bruijn インデックスで添字付けすることで参照は位置によるものとなり、評価中に新しい名前を必要としない。"
 
-#: manual/design/utlc/nbe.md:217
+#: manual/design/utlc/nbe.md:366
+msgid "**Direct recursion with a larger stack.** The js and wasm hosts fix the stack size, and any fixed stack is exhausted by some budget, so the outcome would depend on the backend."
+msgstr "**スタックを大きくした直接再帰。** js と wasm のホストはスタックの大きさを固定しており、どんな固定サイズのスタックもある予算で使い尽くされるので、結果がバックエンドに依存してしまう。"
+
+#: manual/design/utlc/nbe.md:369
+msgid "**Trampolining through host closures.** Returning a closure for the rest of the computation also bounds the stack, but allocates a host function per step and hides the pending work. First-order frames keep the machine observable, for the same reason as first-order semantic closures."
+msgstr "**ホストのクロージャによるトランポリン。** 残りの計算を表すクロージャを返す方法でもスタックは抑えられるが、ステップごとにホストの関数を確保し、保留中の仕事を隠してしまう。一階のフレームなら、一階の意味論的クロージャと同じ理由で、機械を観察可能に保てる。"
+
+#: manual/design/utlc/nbe.md:376
 msgid "Beta only: no eta, no reduction of constants."
 msgstr "β のみ：η も定数の簡約もない。"
 
-#: manual/design/utlc/nbe.md:218
+#: manual/design/utlc/nbe.md:377
 msgid "Not total: `FuelExhausted` is the expected outcome for divergent terms and does not prove divergence."
 msgstr "全域的ではない：`FuelExhausted` は発散する項に対して予期される結果であるが、発散を証明するものではない。"
 
-#: manual/design/utlc/nbe.md:220
+#: manual/design/utlc/nbe.md:379
 msgid "No sharing of delayed arguments."
 msgstr "遅延された引数は共有されない。"
 
-#: manual/design/utlc/nbe.md:221
+#: manual/design/utlc/nbe.md:380
+msgid "Only evaluation and readback have a bounded host stack. `eval` and `normalize` first validate their input with `@debruijn.validate`, which recurses over the term, so the stack depth they need still grows with the nesting depth of the input term."
+msgstr "ホストスタックが有界なのは評価と読み戻しだけである。`eval` と `normalize` はまず `@debruijn.validate` で入力を検証し、これは項を再帰的にたどるので、それらに必要なスタックの深さは依然として入力項の入れ子の深さとともに増える。"
+
+#: manual/design/utlc/nbe.md:384
 msgid "Normal forms use unary applications."
 msgstr "正規形は単項適用を用いる。"
 
-#: manual/design/utlc/nbe.md:222
+#: manual/design/utlc/nbe.md:385
 msgid "Input must be De Bruijn syntax; convert named terms with `@debruijn.from_named` and results back with `@debruijn.to_named`."
 msgstr "入力は De Bruijn 構文でなければならない。名前付き項は `@debruijn.from_named` で変換し、結果は `@debruijn.to_named` で戻すこと。"
 
@@ -5528,41 +5604,26 @@ msgstr "[utlc/nbe の設計](../../design/utlc/nbe.md)：意味領域と健全�
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc チュートリアル](../stlc.md)：型付きの η 長形式 NbE。"
 
-#~ msgid "leftmost-innermost redex (`@rewrite.bottom_up_once`)"
-#~ msgstr "最左最内の簡約基（`@rewrite.bottom_up_once`）"
+#~ msgid "**Divergence.** Untyped terms need not normalize, so every phase must be bounded."
+#~ msgstr "**発散。** 型なしの項は正規化されるとは限らないので、すべての段階に上限がなければならない。"
 
-#~ msgid "Children are tried before their parent, in the same left-to-right order. The chosen position is the leftmost-innermost redex. `NoStep` again means that the rule applies nowhere."
-#~ msgstr "子は親より先に、同じく左から右の順で試される。選ばれる位置は最左最内の簡約基である。`NoStep` はここでも規則がどこにも適用できないことを表す。"
-
-#~ msgid "**No new semantics.** Every strategy is a traversal of [rewrite](rewrite.md), so it inherits the one-redex contract, the step-count contract and traces."
-#~ msgstr "**新しい意味論を持ち込まない。** すべての戦略は [rewrite](rewrite.md) の走査であるので、単一簡約基の契約、ステップ数の契約、トレースを受け継ぐ。"
-
-#~ msgid "Each strategy is one traversal of rewrite"
-#~ msgstr "各戦略は rewrite の一つの走査である"
-
-#~ msgid "Pre-order search returns the first redex that no other redex contains, scanning head before arguments and arguments left to right; this is the leftmost-outermost redex, and the normal-form lemma of the [rewrite design](rewrite.md) shows that `NoStep` means \"normal\". Post-order search returns a redex that contains no other redex, the leftmost-innermost one. Weak head search follows only the spine, so its `NoStep` means \"weak head normal\" and nothing more."
-#~ msgstr "前順探索は、他のどの簡約基にも含まれない最初の簡約基を返す。ヘッドを引数より先に、引数は左から右へ走査する。これは最左最外の簡約基であり、[rewrite の設計](rewrite.md) の正規形補題により `NoStep` は「正規形である」ことを意味する。後順探索は他の簡約基を含まない簡約基、すなわち最左最内のものを返す。弱頭部探索はスパインのみをたどるので、その `NoStep` は「弱頭部正規形である」ことのみを意味し、それ以上の意味はない。"
-
-#~ msgid "The library's tests check named and De Bruijn beta steps against each other (`src/utlc/lambda/lambda_test.mbt`), and normal order against the NbE normalizer (`src/utlc/nbe/nbe_test.mbt`)."
-#~ msgstr "ライブラリのテストは、名前付きと De Bruijn の β ステップを互いに照合し（`src/utlc/lambda/lambda_test.mbt`）、正規順序を NbE 正規化器と照合する（`src/utlc/nbe/nbe_test.mbt`）。"
-
-#~ msgid "`NoStep` and `Reduced` have the meaning of `@rewrite.StepResult`; the rule name is always `\"beta\"`. `ScopeFailure` reports an index error met while contracting a redex."
-#~ msgstr "`NoStep` と `Reduced` の意味は `@rewrite.StepResult` と同じであり、規則名は常に `\"beta\"` である。`ScopeFailure` は簡約基を縮約する際に遭遇したインデックスエラーを報告する。"
-
-#~ msgid "`normalize` returns a beta-eta normal form, which is in general *not* the beta normal form of the other normalizers: $\\lambda x.\\,f\\,x$ is beta-normal and normalizes to $f$ here. The two are related by eta alone. If $N$ is beta-normal, eta steps keep it beta-normal (a new beta redex would need $(\\lambda x.\\,f\\,x)\\,a$ or $\\lambda x.\\,(\\lambda y.\\,b)\\,x$ in $N$, both beta redexes already), so its eta normal form is beta-eta normal and, by confluence of $\\to_{\\beta\\eta}$, alpha-equivalent to the result of `normalize`, up to the unary-spine restriction of `eta_rule`."
-#~ msgstr "`normalize` は βη 正規形を返し、これは一般に他の正規化器の β 正規形では*ない*：$\\lambda x.\\,f\\,x$ は β 正規であり、ここでは $f$ に正規化される。両者は η だけで関係づけられる。$N$ が β 正規ならば、η ステップは β 正規性を保つ（新しい β 簡約基ができるには $N$ に $(\\lambda x.\\,f\\,x)\\,a$ か $\\lambda x.\\,(\\lambda y.\\,b)\\,x$ が必要だが、どちらもすでに β 簡約基である）。したがってその η 正規形は βη 正規であり、$\\to_{\\beta\\eta}$ の合流性により、`eta_rule` の単項スパインの制限を除いて `normalize` の結果と α 同値である。"
-
-#~ msgid "An empty application `Apply(h, [])` is read as $h$ when a redex is matched, but it is not removed from the term (see the [eval design](../eval.md))."
-#~ msgstr "空の適用 `Apply(h, [])` は簡約基の照合で $h$ と読まれるが、項からは取り除かれない（[eval の設計](../eval.md)を参照）。"
-
-#~ msgid "`@lambda.normalize` also contracts eta redexes, so its result is the eta normal form of that common beta normal form, not the beta normal form itself: $\\lambda x.\\,f\\,x$ normalizes to $f$ there and to $\\lambda.\\,f\\,0$ in the other two ([utlc/lambda design](design/utlc/lambda.md)). All normalizers read an empty application `Apply(h, [])` as $h$; NbE drops the node, the small-step reducers keep it, so spine flattening also drops empty applications ([eval design](design/eval.md))."
-#~ msgstr "`@lambda.normalize` は η 簡約基も縮約するので、その結果はその共通の β 正規形そのものではなく、その η 正規形である：$\\lambda x.\\,f\\,x$ はそちらでは $f$ に、他の 2 つでは $\\lambda.\\,f\\,0$ に正規化される（[utlc/lambda の設計](design/utlc/lambda.md)）。すべての正規化器は空の適用 `Apply(h, [])` を $h$ と読む。NbE はそのノードを取り除き、スモールステップの簡約器は残すので、スパインの平坦化では空の適用も取り除く（[eval の設計](design/eval.md)）。"
+#~ msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices."
+#~ msgstr "**スモールステップ簡約との一致。** 健全性と合流性により、同じスコープ整合な項に対して `@nbe.normalize` と `@debruijn.normalize` がともに正規形を返すときは常に、2 つの正規形はスパインの平坦化（入れ子の適用をまとめ、空の適用を取り除くこと）の後に等しい。どちらも `Apply(h, [])` を $h$ と読む：評価はそのノードを消去し、スモールステップの簡約器は簡約基の照合でそれを透過して見る（[eval の設計](../eval.md)を参照）。`src/utlc/nbe/nbe_test.mbt` のテストはこれに加え、$(\\lambda.\\,7)\\,\\Omega$ での遅延性、$\\Omega$ での燃料切れ、quote がレベルをインデックスに戻すことを検査する。"
 
 #~ msgid "`NegativeShift(index, delta, cutoff)`: shifting `Bound(index)` by `delta` would make it negative; `cutoff` is the effective cutoff at the occurrence."
 #~ msgstr "`NegativeShift(index, delta, cutoff)`：`Bound(index)` を `delta` だけシフトすると負になる。`cutoff` はその出現位置での実効カットオフである。"
 
 #~ msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. Returns `Err(NegativeShift)` if an index would become negative and `Err(NegativeIndex)` if the input contains a negative index."
 #~ msgstr "`shift(t, delta, cutoff)` は操作 $\\uparrow^{delta}_{cutoff}$ である：`k` 個の束縛子の下で、インデックス `i >= cutoff + k` は `i + delta` になり、それより小さいインデックスはそのままである。インデックスが負になる場合は `Err(NegativeShift)` を、入力に負のインデックスが含まれる場合は `Err(NegativeIndex)` を返す。"
+
+#~ msgid "`NoStep` and `Reduced` have the meaning of `@rewrite.StepResult`; the rule name is always `\"beta\"`. `ScopeFailure` reports an index error met while contracting a redex."
+#~ msgstr "`NoStep` と `Reduced` の意味は `@rewrite.StepResult` と同じであり、規則名は常に `\"beta\"` である。`ScopeFailure` は簡約基を縮約する際に遭遇したインデックスエラーを報告する。"
+
+#~ msgid "leftmost-innermost redex (`@rewrite.bottom_up_once`)"
+#~ msgstr "最左最内の簡約基（`@rewrite.bottom_up_once`）"
+
+#~ msgid "Children are tried before their parent, in the same left-to-right order. The chosen position is the leftmost-innermost redex. `NoStep` again means that the rule applies nowhere."
+#~ msgstr "子は親より先に、同じく左から右の順で試される。選ばれる位置は最左最内の簡約基である。`NoStep` はここでも規則がどこにも適用できないことを表す。"
 
 #~ msgid "Values are compared with `==`, free variables by name, and bound variables by the binder they refer to. The relation is an equivalence and is decided in one simultaneous traversal of both terms."
 #~ msgstr "値は `==` で、自由変数は名前で、束縛変数は参照する束縛子で比較される。この関係は同値関係であり、二つの項を同時に一度走査することで判定される。"
@@ -5575,6 +5636,18 @@ msgstr "[stlc チュートリアル](../stlc.md)：型付きの η 長形式 NbE
 
 #~ msgid "No free index $0$ remains, so the shift by $-1$ maps $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$ without a negative result. $\\square$"
 #~ msgstr "自由添字 $0$ はもはや残らないので、$-1$ によるシフトは負の結果を生じることなく $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$ と写す。$\\square$"
+
+#~ msgid "**No new semantics.** Every strategy is a traversal of [rewrite](rewrite.md), so it inherits the one-redex contract, the step-count contract and traces."
+#~ msgstr "**新しい意味論を持ち込まない。** すべての戦略は [rewrite](rewrite.md) の走査であるので、単一簡約基の契約、ステップ数の契約、トレースを受け継ぐ。"
+
+#~ msgid "Each strategy is one traversal of rewrite"
+#~ msgstr "各戦略は rewrite の一つの走査である"
+
+#~ msgid "Pre-order search returns the first redex that no other redex contains, scanning head before arguments and arguments left to right; this is the leftmost-outermost redex, and the normal-form lemma of the [rewrite design](rewrite.md) shows that `NoStep` means \"normal\". Post-order search returns a redex that contains no other redex, the leftmost-innermost one. Weak head search follows only the spine, so its `NoStep` means \"weak head normal\" and nothing more."
+#~ msgstr "前順探索は、他のどの簡約基にも含まれない最初の簡約基を返す。ヘッドを引数より先に、引数は左から右へ走査する。これは最左最外の簡約基であり、[rewrite の設計](rewrite.md) の正規形補題により `NoStep` は「正規形である」ことを意味する。後順探索は他の簡約基を含まない簡約基、すなわち最左最内のものを返す。弱頭部探索はスパインのみをたどるので、その `NoStep` は「弱頭部正規形である」ことのみを意味し、それ以上の意味はない。"
+
+#~ msgid "The library's tests check named and De Bruijn beta steps against each other (`src/utlc/lambda/lambda_test.mbt`), and normal order against the NbE normalizer (`src/utlc/nbe/nbe_test.mbt`)."
+#~ msgstr "ライブラリのテストは、名前付きと De Bruijn の β ステップを互いに照合し（`src/utlc/lambda/lambda_test.mbt`）、正規順序を NbE 正規化器と照合する（`src/utlc/nbe/nbe_test.mbt`）。"
 
 #~ msgid "has declarative type $B$ and no other. Without the renaming, the trailing $x$ would be typed in $\\Gamma, x{:}\\mathsf{Unit}$ and the checker would answer `Unit`; versions before the fix did exactly that, and `check` accepted the term at `Unit`. With $x' = x_1$ the trailing $x$ keeps its type $B$, and `infer` returns $B$. The typed evaluator computes the type of a redex head with the same rule, so `normalize_eta_long` accepts the same terms as `check`."
 #~ msgstr "は宣言的な型 $B$ を持ち、それ以外の型は持たない。名前替えがなければ、後続の $x$ は $\\Gamma, x{:}\\mathsf{Unit}$ で型付けされ、検査器は `Unit` と答えてしまう。修正前の版はまさにそうしており、`check` はこの項を `Unit` で受理していた。$x' = x_1$ とすれば後続の $x$ は型 $B$ を保ち、`infer` は $B$ を返す。型付き評価器は簡約基の先頭の型を同じ規則で計算するので、`normalize_eta_long` は `check` と同じ項を受理する。"
@@ -5596,6 +5669,15 @@ msgstr "[stlc チュートリアル](../stlc.md)：型付きの η 長形式 NbE
 
 #~ msgid "`alpha_equal` is reflexive, symmetric and transitive, and coincides with $=_\\alpha$ (theorem above). Reflexivity is also checked by a QuickCheck property in `src/syntax/syntax_wbtest.mbt`."
 #~ msgstr "`alpha_equal` は反射的、対称的、推移的であり、$=_\\alpha$ と一致する（上記の定理）。反射性は `src/syntax/syntax_wbtest.mbt` の QuickCheck プロパティでも検査されている。"
+
+#~ msgid "`normalize` returns a beta-eta normal form, which is in general *not* the beta normal form of the other normalizers: $\\lambda x.\\,f\\,x$ is beta-normal and normalizes to $f$ here. The two are related by eta alone. If $N$ is beta-normal, eta steps keep it beta-normal (a new beta redex would need $(\\lambda x.\\,f\\,x)\\,a$ or $\\lambda x.\\,(\\lambda y.\\,b)\\,x$ in $N$, both beta redexes already), so its eta normal form is beta-eta normal and, by confluence of $\\to_{\\beta\\eta}$, alpha-equivalent to the result of `normalize`, up to the unary-spine restriction of `eta_rule`."
+#~ msgstr "`normalize` は βη 正規形を返し、これは一般に他の正規化器の β 正規形では*ない*：$\\lambda x.\\,f\\,x$ は β 正規であり、ここでは $f$ に正規化される。両者は η だけで関係づけられる。$N$ が β 正規ならば、η ステップは β 正規性を保つ（新しい β 簡約基ができるには $N$ に $(\\lambda x.\\,f\\,x)\\,a$ か $\\lambda x.\\,(\\lambda y.\\,b)\\,x$ が必要だが、どちらもすでに β 簡約基である）。したがってその η 正規形は βη 正規であり、$\\to_{\\beta\\eta}$ の合流性により、`eta_rule` の単項スパインの制限を除いて `normalize` の結果と α 同値である。"
+
+#~ msgid "An empty application `Apply(h, [])` is read as $h$ when a redex is matched, but it is not removed from the term (see the [eval design](../eval.md))."
+#~ msgstr "空の適用 `Apply(h, [])` は簡約基の照合で $h$ と読まれるが、項からは取り除かれない（[eval の設計](../eval.md)を参照）。"
+
+#~ msgid "`@lambda.normalize` also contracts eta redexes, so its result is the eta normal form of that common beta normal form, not the beta normal form itself: $\\lambda x.\\,f\\,x$ normalizes to $f$ there and to $\\lambda.\\,f\\,0$ in the other two ([utlc/lambda design](design/utlc/lambda.md)). All normalizers read an empty application `Apply(h, [])` as $h$; NbE drops the node, the small-step reducers keep it, so spine flattening also drops empty applications ([eval design](design/eval.md))."
+#~ msgstr "`@lambda.normalize` は η 簡約基も縮約するので、その結果はその共通の β 正規形そのものではなく、その η 正規形である：$\\lambda x.\\,f\\,x$ はそちらでは $f$ に、他の 2 つでは $\\lambda.\\,f\\,0$ に正規化される（[utlc/lambda の設計](design/utlc/lambda.md)）。すべての正規化器は空の適用 `Apply(h, [])` を $h$ と読む。NbE はそのノードを取り除き、スモールステップの簡約器は残すので、スパインの平坦化では空の適用も取り除く（[eval の設計](design/eval.md)）。"
 
 #~ msgid "`reduce_once` does not validate its input. It returns `ScopeFailure` only when the redex it contracts contains a negative index; a negative index elsewhere is skipped like any other variable, and a dangling index is shifted like a free one (`(λ. 5) 1` reduces to `Bound(4)`). Call `validate` first if the term may be ill scoped."
 #~ msgstr "`reduce_once` は入力を検証しない。`ScopeFailure` を返すのは、縮約する簡約基が負のインデックスを含む場合だけである。それ以外の場所にある負のインデックスは他の変数と同様に読み飛ばされ、ぶら下がったインデックスは自由なインデックスと同様にシフトされる（`(λ. 5) 1` は `Bound(4)` に簡約される）。項のスコープが正しくない可能性がある場合は、先に `validate` を呼ぶこと。"

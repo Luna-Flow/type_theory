@@ -865,7 +865,7 @@ msgstr "可约式的后续参数在可约式的上下文中定型，而不是在
 
 #: manual/api/stlc.md:240
 #: manual/api/utlc/lambda.md:123
-#: manual/api/utlc/nbe.md:170
+#: manual/api/utlc/nbe.md:186
 msgid "Normalization"
 msgstr "范式化"
 
@@ -1267,74 +1267,78 @@ msgid "Fuel is a step budget measured in units: every evaluation of a term node,
 msgstr "燃料是以单位计量的步数预算：每次对项节点求值、每次强制延迟值、每次读回值都花费一个单位。所有结果都报告 `consumed`，即所用的单位数。燃料 `<= 0` 的调用不做任何事，直接返回 `FuelExhausted(consumed=0)`（`quote` 会先拒绝负的层级）。调用结果与超出其消耗量的燃料无关：若燃料为 $f$ 的调用在消耗 $c$ 个单位后返回范式，则任何燃料至少为 $c$ 的调用都返回相同的结果。"
 
 #: manual/api/utlc/nbe.md:43
+msgid "The budget bounds the work, not the depth of the host call stack. Evaluation and readback run as a loop that keeps pending work on a stack in the heap, so the call stack does not grow with the fuel spent: a divergent term ends with `FuelExhausted` on every backend, however large the budget. The pending work is bounded by the budget."
+msgstr "预算限制的是工作量，而不是宿主调用栈的深度。求值与读回以循环方式运行，把待完成的工作保存在堆上的栈中，因此调用栈不会随所花费的燃料增长：无论预算多大，发散项在每个后端上都以 `FuelExhausted` 结束。待完成的工作受预算限制。"
+
+#: manual/api/utlc/nbe.md:59
 msgid "Semantic values"
 msgstr "语义值"
 
-#: manual/api/utlc/nbe.md:47
+#: manual/api/utlc/nbe.md:63
 msgid "`Semantic[T]` is an opaque semantic value."
 msgstr "`Semantic[T]` 是不透明的语义值。"
 
-#: manual/api/utlc/nbe.md:57
+#: manual/api/utlc/nbe.md:73
 msgid "A semantic value is a constant, a closure (a binder body with its environment), a delayed argument, or a neutral value (a free variable, a variable at a quote level, or a neutral value applied to an argument). The representation is private; values are produced by `eval` and the `reflect_*` functions and consumed by `quote`."
 msgstr "语义值是常量、闭包（带有环境的绑定子体）、延迟参数或中性值（自由变量、某个 quote 层级上的变量，或作用于参数的中性值）。其表示是私有的；值由 `eval` 和 `reflect_*` 函数产生，由 `quote` 消费。"
 
-#: manual/api/utlc/nbe.md:65
+#: manual/api/utlc/nbe.md:81
 msgid "`reflect_free` turns a free name into a neutral semantic value."
 msgstr "`reflect_free` 把自由名转换为中性语义值。"
 
-#: manual/api/utlc/nbe.md:71
+#: manual/api/utlc/nbe.md:87
 msgid "Quoting it gives `Free(name)`."
 msgstr "对其 quote 得到 `Free(name)`。"
 
-#: manual/api/utlc/nbe.md:75
+#: manual/api/utlc/nbe.md:91
 msgid "`reflect_level` turns a quote level into a neutral semantic variable."
 msgstr "`reflect_level` 把 quote 层级转换为中性语义变量。"
 
-#: manual/api/utlc/nbe.md:81
+#: manual/api/utlc/nbe.md:97
 msgid "Returns `None` for a negative level. Quoting the variable of level `l` at depth `n > l` gives `Bound(n - l - 1)`."
 msgstr "层级为负时返回 `None`。在深度 `n > l` 处对层级 `l` 的变量 quote 得到 `Bound(n - l - 1)`。"
 
-#: manual/api/utlc/nbe.md:102
+#: manual/api/utlc/nbe.md:118
 msgid "Evaluation and readback"
 msgstr "求值与读回"
 
-#: manual/api/utlc/nbe.md:106
+#: manual/api/utlc/nbe.md:122
 msgid "`EvaluationResult[T]` is the outcome of `eval`."
 msgstr "`EvaluationResult[T]` 是 `eval` 的结果。"
 
-#: manual/api/utlc/nbe.md:118
+#: manual/api/utlc/nbe.md:134
 msgid "`eval` evaluates a closed De Bruijn term to weak head form in the lazy semantic domain."
 msgstr "`eval` 在惰性语义域中把闭 De Bruijn 项求值为弱头形式。"
 
-#: manual/api/utlc/nbe.md:125
+#: manual/api/utlc/nbe.md:141
 msgid "The term must be well scoped (free names are allowed); otherwise the result is `ScopeFailure` with `consumed=0`. Evaluation is call by name: arguments are delayed and evaluated only when needed, and evaluation stops at a closure or a neutral value without entering binders."
 msgstr "项必须是良作用域的（允许自由名）；否则结果为 `ScopeFailure`，且 `consumed=0`。求值采用传名调用：参数被延迟，仅在需要时求值；求值在闭包或中性值处停止，不进入绑定子。"
 
-#: manual/api/utlc/nbe.md:132
+#: manual/api/utlc/nbe.md:148
 msgid "`QuoteResult[T]` is the outcome of `quote`."
 msgstr "`QuoteResult[T]` 是 `quote` 的结果。"
 
-#: manual/api/utlc/nbe.md:144
+#: manual/api/utlc/nbe.md:160
 msgid "`quote` reads a semantic value back as a beta-normal De Bruijn term."
 msgstr "`quote` 把语义值读回为 beta 范式的 De Bruijn 项。"
 
-#: manual/api/utlc/nbe.md:150
+#: manual/api/utlc/nbe.md:166
 msgid "`quote(value, level, fuel)` reads `value` back under `level` binders. A closure is read back by applying it to a fresh variable of the current level and reading the result under one more binder; neutral applications are read back argument by argument, which forces delayed arguments. Use `level = 0` for values from `eval`. A negative `level`, or a level variable that is not below `level`, gives `ScopeFailure(NegativeIndex)`."
 msgstr "`quote(value, level, fuel)` 在 `level` 个绑定子之下读回 `value`。闭包的读回方式是：把它作用于当前层级的一个新变量，再在多一层绑定子之下读回结果；中性应用逐个参数读回，这会强制延迟参数。对来自 `eval` 的值使用 `level = 0`。负的 `level`，或不小于 `level` 的层级变量，会得到 `ScopeFailure(NegativeIndex)`。"
 
-#: manual/api/utlc/nbe.md:174
+#: manual/api/utlc/nbe.md:190
 msgid "`NbeResult[T]` is the outcome of `normalize`."
 msgstr "`NbeResult[T]` 是 `normalize` 的结果。"
 
-#: manual/api/utlc/nbe.md:187
+#: manual/api/utlc/nbe.md:203
 msgid "`normalize` computes the beta normal form of a well-scoped De Bruijn term within a fuel budget."
 msgstr "`normalize` 在燃料预算内计算良作用域 De Bruijn 项的 beta 范式。"
 
-#: manual/api/utlc/nbe.md:194
+#: manual/api/utlc/nbe.md:210
 msgid "It validates the term, evaluates it and quotes the result at level 0, with one shared budget. `NormalForm(t, c)`: `t` is the beta normal form, reached with `c` units. `FuelExhausted(c)`: the budget ran out; the term may diverge or may need more fuel. `ScopeFailure`: the input has a dangling or negative index. The fuel test comes first, so an ill-scoped term with fuel `<= 0` gives `FuelExhausted(consumed=0)`, not `ScopeFailure`."
 msgstr "它校验项、对其求值并在层级 0 对结果 quote，三者共享同一预算。`NormalForm(t, c)`：`t` 是 beta 范式，用 `c` 个单位得到。`FuelExhausted(c)`：预算耗尽；该项可能发散，也可能需要更多燃料。`ScopeFailure`：输入含有悬空或负的索引。燃料检测先进行，因此燃料 `<= 0` 时，作用域不良的项给出 `FuelExhausted(consumed=0)`，而不是 `ScopeFailure`。"
 
-#: manual/api/utlc/nbe.md:201
+#: manual/api/utlc/nbe.md:217
 msgid "Applications in the result are unary: a normal form $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])` evaluates to the value of `h`, so it disappears from the result; the small-step reducers also read it as `h` but leave the node in place. The two normalizers agree after spines are flattened, where flattening merges nested applications and drops empty ones."
 msgstr "结果中的应用是一元的：范式 $f\\,a\\,b$ 以 `Apply(Apply(f, [a]), [b])` 返回，而 `@debruijn.normalize` 保留输入的 n 元脊 `Apply(f, [a, b])`。空应用 `Apply(h, [])` 求值为 `h` 的值，因此从结果中消失；小步归约器同样把它读作 `h`，但保留该节点。两个范式化器在脊展平之后一致，其中展平是指合并嵌套的应用并去掉空应用。"
 
@@ -1393,7 +1397,7 @@ msgstr "**定律不由编译器检查。** 契约必须陈述得足够精确，�
 #: manual/design/substitution.md:23
 #: manual/design/syntax.md:22
 #: manual/design/utlc/lambda.md:21
-#: manual/design/utlc/nbe.md:23
+#: manual/design/utlc/nbe.md:24
 msgid "Mathematical background"
 msgstr "数学背景"
 
@@ -1454,7 +1458,7 @@ msgstr "`generic_top_down_once` 满足 [rewrite 设计](rewrite.md)中的单可�
 #: manual/design/substitution.md:62
 #: manual/design/syntax.md:71
 #: manual/design/utlc/lambda.md:65
-#: manual/design/utlc/nbe.md:89
+#: manual/design/utlc/nbe.md:90
 msgid "Design decisions"
 msgstr "设计决策"
 
@@ -1515,7 +1519,7 @@ msgstr "下游变量类型通过单射（不同变量映射到不同名）转换
 #: manual/design/substitution.md:130
 #: manual/design/syntax.md:286
 #: manual/design/utlc/lambda.md:205
-#: manual/design/utlc/nbe.md:145
+#: manual/design/utlc/nbe.md:291
 msgid "Correctness and invariants"
 msgstr "正确性与不变量"
 
@@ -1568,7 +1572,7 @@ msgstr "下游 adapter 应为自己的节点种类添加 (V1)–(V5) 的测试�
 #: manual/design/substitution.md:329
 #: manual/design/syntax.md:309
 #: manual/design/utlc/lambda.md:232
-#: manual/design/utlc/nbe.md:203
+#: manual/design/utlc/nbe.md:355
 msgid "Alternatives rejected"
 msgstr "被否决的替代方案"
 
@@ -1593,7 +1597,7 @@ msgstr "**在运行时检查定律。** 这些定律是关于所有节点的等�
 #: manual/design/substitution.md:343
 #: manual/design/syntax.md:323
 #: manual/design/utlc/lambda.md:243
-#: manual/design/utlc/nbe.md:215
+#: manual/design/utlc/nbe.md:374
 msgid "Boundaries"
 msgstr "边界"
 
@@ -3503,166 +3507,238 @@ msgid "Small-step normalization repeats a search from the root for every beta st
 msgstr "小步范式化对每个 β 步都要从根重新搜索，并且每次都复制项。*基于求值的范式化*（NbE）则将项解释为宿主语言中的值，其中 β 归约就是函数应用，然后把该值读回为范式。本包为 [De Bruijn 项](../debruijn.md)上的无类型演算提供 NbE：速度快，但受燃料（fuel）限制，因为无类型项不一定可范式化。操作式归约器仍是参考语义；NbE 以它们为基准进行检验。"
 
 #: manual/design/utlc/nbe.md:16
-msgid "**Divergence.** Untyped terms need not normalize, so every phase must be bounded."
-msgstr "**发散。** 无类型项不一定能范式化，因此每个阶段都必须有界。"
+msgid "**Divergence.** Untyped terms need not normalize, so every phase must be bounded, and only by the budget: a divergent run must end with `FuelExhausted` on every backend, whatever the size of the host stack."
+msgstr "**发散。** 无类型项不一定能范式化，因此每个阶段都必须有界，而且只受预算约束：无论宿主栈有多大，发散的运行都必须在每个后端上以 `FuelExhausted` 结束。"
 
-#: manual/design/utlc/nbe.md:18
+#: manual/design/utlc/nbe.md:19
 msgid "**Reproducibility.** The outcome must not depend on anything but the input and the budget, and the reported cost must be exact."
 msgstr "**可复现性。** 结果只能依赖输入和预算，且报告的开销必须精确。"
 
-#: manual/design/utlc/nbe.md:20
+#: manual/design/utlc/nbe.md:21
 msgid "**Encapsulation.** Callers must not be able to build semantic values that break the evaluator's scope invariant."
 msgstr "**封装。** 调用者不能构造出破坏求值器作用域不变式的语义值。"
 
-#: manual/design/utlc/nbe.md:25
+#: manual/design/utlc/nbe.md:26
 msgid "The semantic domain"
 msgstr "语义域"
 
-#: manual/design/utlc/nbe.md:27
+#: manual/design/utlc/nbe.md:28
 msgid "Values are given by the following grammar, where $\\rho$ is an environment (a list of values, index $0$ first), $t$ a De Bruijn term, $x$ a free name and $\\ell$ a level:"
 msgstr "值由下面的文法给出，其中 $\\rho$ 是环境（值的列表，索引 $0$ 在前），$t$ 是 De Bruijn 项，$x$ 是自由名字，$\\ell$ 是层级（level）："
 
-#: manual/design/utlc/nbe.md:38
+#: manual/design/utlc/nbe.md:39
 msgid "$\\mathsf{clo}(t, \\rho)$ is the value of $\\lambda.\\,t$ in $\\rho$; $\\mathsf{delay}(t, \\rho)$ is an argument not yet evaluated; neutral values $n$ are computations stuck on a variable. In the implementation, $\\mathsf{app}(d, e)$ also arises when $d$ is a constant, since a constant applied to an argument is stuck as well."
 msgstr "$\\mathsf{clo}(t, \\rho)$ 是 $\\lambda.\\,t$ 在 $\\rho$ 中的值；$\\mathsf{delay}(t, \\rho)$ 是尚未求值的参数；中性值 $n$ 是卡在某个变量上的计算。在实现中，当 $d$ 是常量时也会出现 $\\mathsf{app}(d, e)$，因为常量应用于参数同样会卡住。"
 
-#: manual/design/utlc/nbe.md:44
+#: manual/design/utlc/nbe.md:45
 msgid "Evaluation"
 msgstr "求值"
 
-#: manual/design/utlc/nbe.md:46
+#: manual/design/utlc/nbe.md:47
 msgid "$\\llbracket t \\rrbracket\\rho$ evaluates to weak head form:"
 msgstr "$\\llbracket t \\rrbracket\\rho$ 求值到弱头形式："
 
-#: manual/design/utlc/nbe.md:64
+#: manual/design/utlc/nbe.md:65
 msgid "Arguments are delayed, so evaluation is *call by name*: an argument that is never used is never evaluated. There is no memoization; a delayed argument used twice is evaluated twice."
 msgstr "参数被延迟，因此求值是*传名调用*：从未使用的参数永远不会被求值。没有记忆化；被使用两次的延迟参数会被求值两次。"
 
-#: manual/design/utlc/nbe.md:68
+#: manual/design/utlc/nbe.md:69
 msgid "Readback"
 msgstr "读回"
 
-#: manual/design/utlc/nbe.md:70
+#: manual/design/utlc/nbe.md:71
 msgid "$R_n(d)$ reads $d$ back under $n$ binders:"
 msgstr "$R_n(d)$ 在 $n$ 个绑定子之下读回 $d$："
 
-#: manual/design/utlc/nbe.md:83
+#: manual/design/utlc/nbe.md:84
 msgid "A closure is read back by applying it to a fresh variable. That variable is represented by its *level* $n$, which does not change while the value is carried under further binders, and converted to the index $n - 1 - \\ell$ at the occurrence (see levels in the [debruijn design](../debruijn.md)). `normalize(t)` is $R_0(\\llbracket t \\rrbracket[\\,])$ for closed $t$."
 msgstr "闭包通过应用于一个新变量来读回。该变量由其*层级* $n$ 表示，当值被携带到更多绑定子之下时层级不变，并在出现处转换为索引 $n - 1 - \\ell$（见 [debruijn 设计](../debruijn.md)中的层级）。对闭项 $t$，`normalize(t)` 即 $R_0(\\llbracket t \\rrbracket[\\,])$。"
 
-#: manual/design/utlc/nbe.md:91
+#: manual/design/utlc/nbe.md:92
 msgid "Untyped NbE needs a budget"
 msgstr "无类型 NbE 需要预算"
 
-#: manual/design/utlc/nbe.md:93
+#: manual/design/utlc/nbe.md:94
 msgid "**Problem.** For $\\Omega = (\\lambda.\\,0\\,0)(\\lambda.\\,0\\,0)$, evaluation unfolds $\\mathrm{app}(\\mathsf{clo}(0\\,0, [\\,]), \\cdot)$ forever. In the typed setting termination is a theorem ([stlc design](../stlc.md)); here it is false."
 msgstr "**问题。** 对于 $\\Omega = (\\lambda.\\,0\\,0)(\\lambda.\\,0\\,0)$，求值会无休止地展开 $\\mathrm{app}(\\mathsf{clo}(0\\,0, [\\,]), \\cdot)$。在有类型的设定中终止性是一个定理（[stlc 设计](../stlc.md)）；在这里它不成立。"
 
-#: manual/design/utlc/nbe.md:98
+#: manual/design/utlc/nbe.md:99
 msgid "**Choice.** Every evaluation of a node, every `force` and every readback step costs one unit of fuel, and running out yields `FuelExhausted` with the amount consumed. The budget is threaded through all phases, so the cost of reading back under binders, which may evaluate closure bodies, is included."
 msgstr "**选择。** 每次对节点求值、每次 `force` 以及每个读回步骤都消耗一单位燃料，燃料耗尽时返回 `FuelExhausted` 及已消耗的量。预算贯穿所有阶段，因此在绑定子之下读回（可能会对闭包体求值）的开销也计算在内。"
 
-#: manual/design/utlc/nbe.md:103
+#: manual/design/utlc/nbe.md:104
 msgid "**Determinism in the budget.** The computation does not inspect the fuel except to stop, so a run with fuel $f$ that ends with a normal form after consuming $c \\le f$ units performs exactly the same computation with any fuel $f' \\ge c$. The fuel is only tested by `fuel <= 0`, and every test that passes is followed by spending one unit. If $s$ units have been spent before some test of the original run, that test is followed by at least one more unit, so $s + 1 \\le c$; with fuel $f'$ the test sees $f' - s \\ge c - s \\ge 1$ and passes as well. Every test of the original run therefore passes again, the run takes the same path, and it stops with the same result. With $f' = c - 1$ the last test sees $0$ and fails. Results are therefore reproducible, and `consumed` is the exact minimum budget for that result."
 msgstr "**预算中的确定性。** 计算除了用于停止外从不检查燃料，因此一次以燃料 $f$ 进行、消耗 $c \\le f$ 个单位后以范式结束的运行，在任意燃料 $f' \\ge c$ 下都执行完全相同的计算。燃料只通过 `fuel <= 0` 测试，而每次通过的测试之后都会花费一个单位。若在原运行的某次测试之前已花费 $s$ 个单位，则该测试之后至少还会再花费一个单位，所以 $s + 1 \\le c$；在燃料 $f'$ 下，该测试看到 $f' - s \\ge c - s \\ge 1$，因此同样通过。于是原运行的每次测试都再次通过，运行走同一路径，并以相同结果停止。当 $f' = c - 1$ 时，最后一次测试看到 $0$ 而失败。因此结果是可复现的，并且 `consumed` 恰好是得到该结果所需的最小预算。"
 
-#: manual/design/utlc/nbe.md:116
+#: manual/design/utlc/nbe.md:117
+msgid "A bounded host stack"
+msgstr "有界的宿主栈"
+
+#: manual/design/utlc/nbe.md:119
+msgid "**Problem.** Written as host functions, the equations of evaluation and readback are mutually recursive, and every call whose result is still needed keeps a host stack frame. On $\\Omega$, applying $\\mathsf{clo}(0\\,0, [\\,])$ evaluates $0\\,0$, which applies the closure again, and none of these calls returns before the fuel runs out: the host stack grows with the fuel spent. The js, wasm and wasm-gc stacks are much smaller than a budget of a few million units needs, so such a run overflowed the stack instead of ending with `FuelExhausted`, against the constraint that every phase is bounded. Readback has the same problem on a term with an infinite normal form, such as $(\\lambda.\\,f\\,(0\\,0))\\,(\\lambda.\\,f\\,(0\\,0))$, whose readback $f\\,(f\\,(f \\cdots))$ nests one call of $R_n$ per argument."
+msgstr "**问题。** 若写成宿主函数，求值与读回的方程是相互递归的，每个结果仍被需要的调用都会占用一个宿主栈帧。在 $\\Omega$ 上，应用 $\\mathsf{clo}(0\\,0, [\\,])$ 会求值 $0\\,0$，后者再次应用该闭包，而这些调用在燃料耗尽之前都不会返回：宿主栈随所花费的燃料增长。js、wasm 与 wasm-gc 的栈远小于数百万单位的预算所需，因此这样的运行会使栈溢出，而不是以 `FuelExhausted` 结束，这违反了每个阶段都有界的约束。读回在具有无限范式的项上也有同样的问题，例如 $(\\lambda.\\,f\\,(0\\,0))\\,(\\lambda.\\,f\\,(0\\,0))$，其读回 $f\\,(f\\,(f \\cdots))$ 每个参数都多嵌套一层 $R_n$ 调用。"
+
+#: manual/design/utlc/nbe.md:131
+msgid "**Choice.** Evaluation runs as an abstract machine whose continuation is an explicit stack of frames in the heap: the recursive evaluator in continuation-passing style with the continuations defunctionalized, in the manner of the CEK machine.[^machines] A state $\\langle c \\mid K \\mid f \\rangle$ consists of a control $c$, a continuation $K$ (a list of frames, top first) and the remaining fuel $f$:"
+msgstr "**选择。** 求值以抽象机的形式运行，其续延是堆上显式的帧栈：即把递归求值器改写为续延传递风格并将续延去函数化，方式与 CEK 机相同。[^machines] 状态 $\\langle c \\mid K \\mid f \\rangle$ 由控制 $c$、续延 $K$（帧的列表，栈顶在前）和剩余燃料 $f$ 组成："
+
+#: manual/design/utlc/nbe.md:144
+msgid "$\\mathsf{ev}$ and $\\mathsf{fo}$ are calls of $\\llbracket - \\rrbracket$ and $\\mathrm{force}$; $\\mathsf{ret}(d)$ passes a value to the top frame. $\\mathsf{spine}(\\vec u, j, \\rho)$, for the arguments $\\vec u = u_0 \\cdots u_{m-1}$ of an application node, waits for the value to apply to $\\mathsf{delay}(u_j, \\rho), \\ldots, \\mathsf{delay}(u_{m-1}, \\rho)$; $\\mathsf{to}(e)$ waits for a forced function to apply to $e$. In the code these are `EvalControl` (`Evaluate`, `Force`, `Return`) and `EvalFrame` (`ApplyArguments`, `ApplyTo`). The rules for $\\mathsf{ev}$ and $\\mathsf{fo}$ apply when $f \\ge 1$; with $f \\le 0$ the machine stops with `FuelExhausted`, and an index outside $\\rho$ stops it with `ScopeFailure`:"
+msgstr "$\\mathsf{ev}$ 与 $\\mathsf{fo}$ 是对 $\\llbracket - \\rrbracket$ 与 $\\mathrm{force}$ 的调用；$\\mathsf{ret}(d)$ 把一个值交给栈顶的帧。$\\mathsf{spine}(\\vec u, j, \\rho)$ 对应应用节点的参数 $\\vec u = u_0 \\cdots u_{m-1}$，它等待一个值，再把该值依次应用到 $\\mathsf{delay}(u_j, \\rho), \\ldots, \\mathsf{delay}(u_{m-1}, \\rho)$；$\\mathsf{to}(e)$ 等待一个已强制的函数，再把它应用到 $e$。在代码中它们是 `EvalControl`（`Evaluate`、`Force`、`Return`）与 `EvalFrame`（`ApplyArguments`、`ApplyTo`）。$\\mathsf{ev}$ 与 $\\mathsf{fo}$ 的规则在 $f \\ge 1$ 时适用；当 $f \\le 0$ 时机器以 `FuelExhausted` 停止，超出 $\\rho$ 范围的索引则使其以 `ScopeFailure` 停止："
+
+#: manual/design/utlc/nbe.md:170
+msgid "where $K' = \\mathsf{spine}(\\vec u, j + 1, \\rho) \\cdot K$ if $j + 1 < m$ and $K' = K$ otherwise. An empty application $t\\,()$ steps to $\\langle \\mathsf{ev}(t, \\rho) \\mid K \\mid f - 1 \\rangle$. The machine starts in $\\langle \\mathsf{ev}(t, \\rho) \\mid \\varepsilon \\mid f \\rangle$ (or $\\mathsf{fo}(d)$) and returns $d$ with $f$ units left when it reaches $\\langle \\mathsf{ret}(d) \\mid \\varepsilon \\mid f \\rangle$."
+msgstr "其中若 $j + 1 < m$，则 $K' = \\mathsf{spine}(\\vec u, j + 1, \\rho) \\cdot K$，否则 $K' = K$。空应用 $t\\,()$ 一步变为 $\\langle \\mathsf{ev}(t, \\rho) \\mid K \\mid f - 1 \\rangle$。机器从 $\\langle \\mathsf{ev}(t, \\rho) \\mid \\varepsilon \\mid f \\rangle$（或 $\\mathsf{fo}(d)$）开始，到达 $\\langle \\mathsf{ret}(d) \\mid \\varepsilon \\mid f \\rangle$ 时返回 $d$，并剩余 $f$ 个单位。"
+
+#: manual/design/utlc/nbe.md:177
+msgid "*Same values.* Read a continuation as the function it still has to apply,"
+msgstr "*相同的值。* 把续延读作它仍需应用的函数，"
+
+#: manual/design/utlc/nbe.md:187
+msgid "and a state $\\langle c \\mid K \\mid f \\rangle$ as $K(\\overline{c})$ with $\\overline{\\mathsf{ev}(t, \\rho)} = \\llbracket t \\rrbracket\\rho$, $\\overline{\\mathsf{fo}(d)} = \\mathrm{force}(d)$ and $\\overline{\\mathsf{ret}(d)} = d$. Every rule turns a state into one with the same reading, by one of the evaluation equations above: the first seven rules are the equations of $\\llbracket - \\rrbracket$ and $\\mathrm{force}$, the $\\mathsf{spine}$ rule unfolds the leftmost application of the spine, starting it as the implementation does by forcing the function, and the two $\\mathsf{to}$ rules are the two equations of $\\mathrm{app}$. When $j + 1 = m$ no frame for the remaining arguments is needed, since $\\mathsf{spine}(\\vec u, m, \\rho) \\cdot K$ reads as $K$. By induction on the number of steps, a run that stops at $\\langle \\mathsf{ret}(d) \\mid \\varepsilon \\mid f' \\rangle$ computes $d = \\llbracket t \\rrbracket\\rho$."
+msgstr "并把状态 $\\langle c \\mid K \\mid f \\rangle$ 读作 $K(\\overline{c})$，其中 $\\overline{\\mathsf{ev}(t, \\rho)} = \\llbracket t \\rrbracket\\rho$，$\\overline{\\mathsf{fo}(d)} = \\mathrm{force}(d)$，$\\overline{\\mathsf{ret}(d)} = d$。每条规则都借助上面的一条求值方程，把状态变为读法相同的状态：前七条规则就是 $\\llbracket - \\rrbracket$ 与 $\\mathrm{force}$ 的方程；$\\mathsf{spine}$ 规则展开脊上最左的应用，并像实现那样先强制函数；两条 $\\mathsf{to}$ 规则就是 $\\mathrm{app}$ 的两条方程。当 $j + 1 = m$ 时不需要为剩余参数保留帧，因为 $\\mathsf{spine}(\\vec u, m, \\rho) \\cdot K$ 读作 $K$。对步数归纳可知，停在 $\\langle \\mathsf{ret}(d) \\mid \\varepsilon \\mid f' \\rangle$ 的运行计算出 $d = \\llbracket t \\rrbracket\\rho$。"
+
+#: manual/design/utlc/nbe.md:201
+msgid "*Same fuel.* Units are tested and spent exactly in the $\\mathsf{ev}$ and $\\mathsf{fo}$ rules, that is on entry to $\\llbracket - \\rrbracket$ and $\\mathrm{force}$, where the recursive functions test and spend them; the $\\mathsf{ret}$ rules spend nothing, like returning from a host call and dispatching on its result. The machine makes the calls in the order of the recursive definition (it is that definition with its host stack made explicit), so every test sees the same remaining fuel. Results, `consumed`, and the determinism argument above are therefore unchanged; the tests pin exact costs from before the change."
+msgstr "*相同的燃料。* 燃料恰好在 $\\mathsf{ev}$ 与 $\\mathsf{fo}$ 规则中被测试和花费，也就是在进入 $\\llbracket - \\rrbracket$ 与 $\\mathrm{force}$ 时，正是递归函数测试并花费燃料的位置；$\\mathsf{ret}$ 规则不花费燃料，就像从宿主调用返回并按其结果分派一样。机器按递归定义的顺序进行这些调用（它就是把宿主栈显式化后的那个定义），因此每次测试看到的剩余燃料都相同。所以结果、`consumed` 以及上面的确定性论证都保持不变；测试固定了修改之前测得的确切开销。"
+
+#: manual/design/utlc/nbe.md:211
+msgid "*Bounded stacks.* The machine is a single loop, so its host stack depth is constant. The frame stack $K$ grows only in the $\\mathsf{ev}(t\\,\\vec u, \\rho)$ rule, which spends a unit, and in the $\\mathsf{spine}$ rule, which replaces one frame by at most two and is followed by a $\\mathsf{fo}$ step that spends a unit or stops. Hence, at every step,"
+msgstr "*有界的栈。* 机器是单个循环，因此它的宿主栈深度是常数。帧栈 $K$ 只在两种规则中增长：$\\mathsf{ev}(t\\,\\vec u, \\rho)$ 规则，它花费一个单位；以及 $\\mathsf{spine}$ 规则，它把一个帧替换为至多两个帧，随后是一个花费一个单位或停止的 $\\mathsf{fo}$ 步。因此在每一步，"
+
+#: manual/design/utlc/nbe.md:222
+msgid "and the pending work lives in the heap, bounded by the initial budget $f_0$. On $\\Omega$ the stack never holds more than one frame: applying the closure to the last argument of the spine leaves nothing below the $\\mathsf{to}$ frame, and the $\\mathsf{to}$ rule pops it before the body is evaluated, so this tail call runs in constant space. A term that grows, such as $(\\lambda.\\,0\\,0\\,0)\\,(\\lambda.\\,0\\,0\\,0)$, keeps one $\\mathsf{spine}$ frame per unfolding for its last argument; its stack grows in the heap, within the bound."
+msgstr "待完成的工作位于堆上，并受初始预算 $f_0$ 限制。在 $\\Omega$ 上，栈中从不超过一个帧：把闭包应用到脊的最后一个参数时，$\\mathsf{to}$ 帧之下不留下任何东西，而 $\\mathsf{to}$ 规则在求值函数体之前就将其弹出，因此这个尾调用在常数空间内运行。会增长的项，例如 $(\\lambda.\\,0\\,0\\,0)\\,(\\lambda.\\,0\\,0\\,0)$，每展开一次都为其最后一个参数保留一个 $\\mathsf{spine}$ 帧；它的栈在堆上增长，但不超出上述界限。"
+
+#: manual/design/utlc/nbe.md:231
+msgid "Readback is transformed in the same way, with controls $\\mathsf{rb}(d, n)$ (read $d$ back under $n$ binders) and $\\mathsf{emit}(u)$ (pass a term to the top frame) and frames"
+msgstr "读回也以同样的方式变换，其控制为 $\\mathsf{rb}(d, n)$（在 $n$ 个绑定子之下读回 $d$）与 $\\mathsf{emit}(u)$（把一个项交给栈顶的帧），帧为"
+
+#: manual/design/utlc/nbe.md:239
+msgid "(`QuoteControl` and `QuoteFrame` in the code). A step $\\mathsf{rb}(d, n)$ spends one unit and forces $d$ to $d'$; a constant, a free name or a level emits the corresponding term, an application $\\mathsf{app}(d_1, e)$ continues with $\\mathsf{rb}(d_1, n)$ under the frame $\\mathsf{arg}(e, n)$, and a closure $\\mathsf{clo}(t, \\rho)$ evaluates $t$ in $\\mathsf{lvl}(n) \\cdot \\rho$ to $d''$ and continues with $\\mathsf{rb}(d'', n + 1)$ under $\\mathsf{bind}$. An emitted $u$ meets its frame:"
+msgstr "（代码中的 `QuoteControl` 与 `QuoteFrame`）。一步 $\\mathsf{rb}(d, n)$ 花费一个单位并把 $d$ 强制为 $d'$；常量、自由名或层级发出对应的项；应用 $\\mathsf{app}(d_1, e)$ 在帧 $\\mathsf{arg}(e, n)$ 之下继续执行 $\\mathsf{rb}(d_1, n)$；闭包 $\\mathsf{clo}(t, \\rho)$ 在 $\\mathsf{lvl}(n) \\cdot \\rho$ 中把 $t$ 求值为 $d''$，并在 $\\mathsf{bind}$ 之下继续执行 $\\mathsf{rb}(d'', n + 1)$。发出的项 $u$ 遇到它的帧时："
+
+#: manual/design/utlc/nbe.md:254
+msgid "These are the readback equations above, with the head of a neutral read before its argument as before. The forcing and the evaluation inside an $\\mathsf{rb}$ step run the evaluation machine to its end and return to the readback loop, so the host stack holds at most the two loops, and $Q$, like $K$, is bounded by the units spent."
+msgstr "这些就是上面的读回方程，并且与之前一样，先读回中性值的头部，再读回其参数。$\\mathsf{rb}$ 步中的强制与求值会把求值机运行到结束，再返回读回循环，因此宿主栈中至多只有这两个循环，而 $Q$ 与 $K$ 一样受已花费的单位数限制。"
+
+#: manual/design/utlc/nbe.md:260
+msgid "M. Felleisen and D. P. Friedman, \"Control operators, the SECD-machine, and the λ-calculus\", 1986, for the CEK machine; M. S. Ager, D. Biernacki, O. Danvy and J. Midtgaard, \"A functional correspondence between evaluators and abstract machines\", PPDP 2003, for deriving it from an evaluator by CPS transformation and defunctionalization."
+msgstr "CEK 机见 M. Felleisen 与 D. P. Friedman，“Control operators, the SECD-machine, and the λ-calculus”，1986；通过 CPS 变换与去函数化从求值器推导出它，见 M. S. Ager、D. Biernacki、O. Danvy 与 J. Midtgaard，“A functional correspondence between evaluators and abstract machines”，PPDP 2003。"
+
+#: manual/design/utlc/nbe.md:262
 msgid "Laziness without sharing"
 msgstr "无共享的惰性"
 
-#: manual/design/utlc/nbe.md:118
+#: manual/design/utlc/nbe.md:264
 msgid "**Problem.** Strict evaluation (call by value) diverges on $(\\lambda.\\,7)\\,\\Omega$, although the term has the normal form $7$."
 msgstr "**问题。** 严格求值（传值调用）在 $(\\lambda.\\,7)\\,\\Omega$ 上发散，尽管该项有范式 $7$。"
 
-#: manual/design/utlc/nbe.md:121
+#: manual/design/utlc/nbe.md:267
 msgid "**Choice.** Arguments are delayed. Together with readback, which evaluates the head of every neutral first and its arguments afterwards, and enters closures only after their head is known, this realizes normal-order (leftmost-outermost) reduction, the normalizing strategy of the [eval design](../eval.md). Call by need would share delayed results; it is not used because it needs mutable thunks, and the budget keeps the cost of recomputation bounded and visible."
 msgstr "**选择。** 参数被延迟。读回先对每个中性项的头部求值，然后再处理其参数，并且只在头部确定之后才进入闭包；二者结合实现了正规序（最左最外）归约，即 [eval 设计](../eval.md)中的范式化策略。传需求调用会共享延迟的结果；未采用它是因为它需要可变的 thunk，而预算使重复计算的开销有界且可见。"
 
-#: manual/design/utlc/nbe.md:129
+#: manual/design/utlc/nbe.md:275
 msgid "Opaque semantic values"
 msgstr "不透明的语义值"
 
-#: manual/design/utlc/nbe.md:131
+#: manual/design/utlc/nbe.md:277
 msgid "`Semantic[T]` is a struct around a private enum. Callers can create neutral values (`reflect_free`, `reflect_level`), evaluate, and quote, but cannot build closures with ill-scoped environments. This keeps the invariant that every closure environment matches the scope of its body, which is why `eval` validates its input once and can then trust every index lookup."
 msgstr "`Semantic[T]` 是包裹一个私有枚举的结构体。调用者可以创建中性值（`reflect_free`、`reflect_level`）、求值和 quote，但无法构造环境作用域不良的闭包。这保持了“每个闭包环境都与其体的作用域相匹配”这一不变式，这也是 `eval` 只需验证一次输入、之后便可信任每次索引查找的原因。"
 
-#: manual/design/utlc/nbe.md:137
+#: manual/design/utlc/nbe.md:283
 msgid "Unary applications in normal forms"
 msgstr "范式中的一元应用"
 
-#: manual/design/utlc/nbe.md:139
+#: manual/design/utlc/nbe.md:285
 msgid "Readback produces $R_n(\\mathsf{app}(d, e)) = R_n(d)\\,R_n(e)$ as a unary `Apply`, so the spine $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`. The small-step reducer keeps the n-ary `Apply(f, [a, b])` of its input. Both denote the same curried application; comparisons between the two normalizers must flatten spines first."
 msgstr "读回将 $R_n(\\mathsf{app}(d, e)) = R_n(d)\\,R_n(e)$ 生成为一元 `Apply`，因此脊 $f\\,a\\,b$ 被返回为 `Apply(Apply(f, [a]), [b])`。小步归约器则保留其输入中的 n 元 `Apply(f, [a, b])`。两者表示同一个柯里化应用；比较这两个范式化器时必须先展平脊。"
 
-#: manual/design/utlc/nbe.md:147
+#: manual/design/utlc/nbe.md:293
 msgid "**Theorem (soundness).** If `normalize(t, fuel)` returns `NormalForm(u, _)`, then $u$ is beta-normal and $t =_\\beta u$ (up to spine flattening)."
 msgstr "**定理（可靠性）。** 若 `normalize(t, fuel)` 返回 `NormalForm(u, _)`，则 $u$ 是 β-范式，且 $t =_\\beta u$（在脊展平意义下）。"
 
-#: manual/design/utlc/nbe.md:150
+#: manual/design/utlc/nbe.md:296
 msgid "*Sketch.* Define the *denotation* $\\lfloor d \\rfloor_n$ of a value under $n$ binders as the term it stands for: $\\lfloor \\mathsf{clo}(t, \\rho) \\rfloor_n = \\lambda.\\,t[\\rho]$, $\\lfloor \\mathsf{delay}(t, \\rho) \\rfloor_n = t[\\rho]$, $\\lfloor \\mathsf{lvl}(\\ell) \\rfloor_n = n - 1 - \\ell$, and so on, where $t[\\rho]$ substitutes the denotations of $\\rho$ for the free indices of $t$. By induction on evaluation, $t[\\rho] \\to_\\beta^{*} \\lfloor \\llbracket t \\rrbracket\\rho \\rfloor_n$: the only non-trivial case is $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$, which is the beta step $(\\lambda.\\,t[\\rho])\\,\\lfloor e \\rfloor \\to_\\beta t[\\lfloor e \\rfloor \\cdot \\rho]$ (substitution lemma of the [debruijn attachment](../../../attachments/design_debruijn_index-lemmas.typ)). Readback inserts only beta steps under binders, so $t \\to_\\beta^{*} u$. For normality: $R$ produces $\\lambda$ only from closures, and applications only from $\\mathsf{app}(d, e)$, whose head $d$ is a neutral or a constant, never a closure (application of a closure is evaluated, not stored). Hence the output follows the grammar"
 msgstr "*证明概要。* 将值在 $n$ 个绑定子之下的*指称* $\\lfloor d \\rfloor_n$ 定义为它所代表的项：$\\lfloor \\mathsf{clo}(t, \\rho) \\rfloor_n = \\lambda.\\,t[\\rho]$，$\\lfloor \\mathsf{delay}(t, \\rho) \\rfloor_n = t[\\rho]$，$\\lfloor \\mathsf{lvl}(\\ell) \\rfloor_n = n - 1 - \\ell$，依此类推，其中 $t[\\rho]$ 将 $\\rho$ 的指称代换为 $t$ 的自由索引。对求值归纳可得 $t[\\rho] \\to_\\beta^{*} \\lfloor \\llbracket t \\rrbracket\\rho \\rfloor_n$：唯一非平凡的情形是 $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$，它就是 β 步 $(\\lambda.\\,t[\\rho])\\,\\lfloor e \\rfloor \\to_\\beta t[\\lfloor e \\rfloor \\cdot \\rho]$（[debruijn 附录](../../../attachments/design_debruijn_index-lemmas.typ)中的代换引理）。读回只在绑定子之下插入 β 步，因此 $t \\to_\\beta^{*} u$。关于范式性：$R$ 只从闭包生成 $\\lambda$，只从 $\\mathsf{app}(d, e)$ 生成应用，而其头部 $d$ 是中性项或常量，绝不是闭包（闭包的应用会被求值，而不是被存储）。因此输出遵循文法"
 
-#: manual/design/utlc/nbe.md:169
+#: manual/design/utlc/nbe.md:315
 msgid "which contains no redex $(\\lambda.\\,t)\\,u$. $\\square$"
 msgstr "其中不含可约式 $(\\lambda.\\,t)\\,u$。$\\square$"
 
-#: manual/design/utlc/nbe.md:171
+#: manual/design/utlc/nbe.md:317
 msgid "**Completeness (sketch).** If $t$ has a beta normal form, `normalize` returns it for sufficient fuel. Evaluation computes the weak head normal form by call by name, and readback recursively normalizes the body of a closure and the arguments of a neutral after its head: this is the leftmost-outermost strategy decomposed into head and arguments. By the normalization theorem (Barendregt 13.2.2) this strategy terminates on every term with a normal form, and by confluence the normal form is unique.[^nbe]"
 msgstr "**完备性（证明概要）。** 若 $t$ 有 β 范式，则在燃料充足时 `normalize` 返回它。求值通过传名调用计算弱头范式，读回则递归地范式化闭包的体，以及中性项在其头部之后的参数：这正是分解为头部与参数的最左最外策略。由范式化定理（Barendregt 13.2.2），该策略在每个有范式的项上终止；由合流性，范式是唯一的。[^nbe]"
 
-#: manual/design/utlc/nbe.md:179
+#: manual/design/utlc/nbe.md:325
 msgid "For untyped NbE see K. Aehlig and F. Joachimski, \"Operational aspects of untyped normalisation by evaluation\", Mathematical Structures in Computer Science 14, 2004; for strong reduction by evaluation, B. Grégoire and X. Leroy, \"A compiled implementation of strong reduction\", ICFP 2002."
 msgstr "关于无类型 NbE，见 K. Aehlig 与 F. Joachimski，\"Operational aspects of untyped normalisation by evaluation\"，Mathematical Structures in Computer Science 14，2004；关于通过求值实现的强归约，见 B. Grégoire 与 X. Leroy，\"A compiled implementation of strong reduction\"，ICFP 2002。"
 
-#: manual/design/utlc/nbe.md:181
-msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices."
-msgstr "**与小步归约一致。** 由可靠性与合流性，只要 `@nbe.normalize` 与 `@debruijn.normalize` 对同一个良作用域项都返回范式，两个范式在脊展平（合并嵌套的应用并去掉空应用）之后相等。两者都把 `Apply(h, [])` 读作 $h$：求值会抹去该节点，小步归约器在匹配可约式时透过它（见 [eval 设计](../eval.md)）。`src/utlc/nbe/nbe_test.mbt` 中的测试检查这一点，以及 $(\\lambda.\\,7)\\,\\Omega$ 上的惰性、$\\Omega$ 上的燃料耗尽，以及 quote 把层级转回索引。"
+#: manual/design/utlc/nbe.md:327
+msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices. Further tests run $\\Omega$, a divergent term whose head grows, and two terms with infinite normal forms with budgets of thirty million units on every backend, and pin the exact cost of Church numeral arithmetic together with its reproducibility at `consumed` and `consumed - 1`."
+msgstr "**与小步归约一致。** 由可靠性与合流性，只要 `@nbe.normalize` 与 `@debruijn.normalize` 对同一个良作用域项都返回范式，两个范式在脊展平（合并嵌套的应用并去掉空应用）之后相等。两者都把 `Apply(h, [])` 读作 $h$：求值会抹去该节点，小步归约器在匹配可约式时透过它（见 [eval 设计](../eval.md)）。`src/utlc/nbe/nbe_test.mbt` 中的测试检查这一点，以及 $(\\lambda.\\,7)\\,\\Omega$ 上的惰性、$\\Omega$ 上的燃料耗尽，以及 quote 把层级转回索引。其他测试在每个后端上以三千万单位的预算运行 $\\Omega$、一个头部不断增长的发散项以及两个具有无限范式的项，并固定丘奇数算术的确切开销及其在 `consumed` 与 `consumed - 1` 下的可复现性。"
 
-#: manual/design/utlc/nbe.md:192
+#: manual/design/utlc/nbe.md:342
 msgid "Other invariants:"
 msgstr "其他不变式："
 
-#: manual/design/utlc/nbe.md:194
+#: manual/design/utlc/nbe.md:344
 msgid "With positive fuel, `eval` and `normalize` reject ill-scoped input with `ScopeFailure` and `consumed=0` before doing any work; with fuel `<= 0` they return `FuelExhausted(consumed=0)` without looking at the term."
 msgstr "燃料为正时，`eval` 和 `normalize` 在做任何工作之前就以 `ScopeFailure` 和 `consumed=0` 拒绝作用域不良的输入；燃料 `<= 0` 时，它们不查看项就返回 `FuelExhausted(consumed=0)`。"
 
-#: manual/design/utlc/nbe.md:197
+#: manual/design/utlc/nbe.md:347
 msgid "`quote(value, n, _)` returns `ScopeFailure` only when $n < 0$ or a level variable is not below $n$. Values produced by `eval` contain no level variables, so quoting them at any level $n \\ge 0$ never fails this way."
 msgstr "`quote(value, n, _)` 仅当 $n < 0$ 或某个层级变量不小于 $n$ 时才返回 `ScopeFailure`。由 `eval` 产生的值不含层级变量，因此在任意层级 $n \\ge 0$ 对它们 quote 都不会以这种方式失败。"
 
-#: manual/design/utlc/nbe.md:200
+#: manual/design/utlc/nbe.md:350
 msgid "Fuel: `consumed` never exceeds the fuel given; the determinism property above holds."
 msgstr "燃料：`consumed` 从不超过给定的燃料；上述确定性性质成立。"
 
-#: manual/design/utlc/nbe.md:205
+#: manual/design/utlc/nbe.md:352
+msgid "Stack: evaluation and readback use a constant depth of host stack; their frame stacks live in the heap and are bounded by the budget."
+msgstr "栈：求值与读回使用常数深度的宿主栈；它们的帧栈位于堆上，并受预算限制。"
+
+#: manual/design/utlc/nbe.md:357
 msgid "**Typed or eta-long readback.** Untyped readback cannot know where to eta-expand; eta-long normal forms are provided for typed terms by [stlc](../stlc.md)."
 msgstr "**有类型或 η-长形式的读回。** 无类型读回无法知道在何处进行 η-展开；有类型项的 η-长形式范式由 [stlc](../stlc.md) 提供。"
 
-#: manual/design/utlc/nbe.md:208
+#: manual/design/utlc/nbe.md:360
 msgid "**Host-language closures (HOAS).** Representing $\\mathsf{clo}$ as a MoonBit function would be faster but makes fuel accounting and inspection of values impossible, and the values could not be quoted without a fresh-variable trick on the host side. A first-order closure keeps everything observable."
 msgstr "**宿主语言闭包（HOAS）。** 将 $\\mathsf{clo}$ 表示为 MoonBit 函数会更快，但会使燃料计量与值的检查变得不可能，而且若不在宿主侧使用新变量技巧，这些值也无法被 quote。一阶闭包使一切都保持可观察。"
 
-#: manual/design/utlc/nbe.md:212
+#: manual/design/utlc/nbe.md:364
 msgid "**Named environments.** Indexing the environment by De Bruijn index makes lookup positional and needs no fresh names during evaluation."
 msgstr "**具名环境。** 以 De Bruijn 索引对环境进行索引使查找按位置进行，并且求值期间不需要新名字。"
 
-#: manual/design/utlc/nbe.md:217
+#: manual/design/utlc/nbe.md:366
+msgid "**Direct recursion with a larger stack.** The js and wasm hosts fix the stack size, and any fixed stack is exhausted by some budget, so the outcome would depend on the backend."
+msgstr "**直接递归并加大栈。** js 与 wasm 的宿主固定了栈大小，而任何固定大小的栈都会被某个预算耗尽，因此结果将取决于后端。"
+
+#: manual/design/utlc/nbe.md:369
+msgid "**Trampolining through host closures.** Returning a closure for the rest of the computation also bounds the stack, but allocates a host function per step and hides the pending work. First-order frames keep the machine observable, for the same reason as first-order semantic closures."
+msgstr "**通过宿主闭包进行蹦床。** 为剩余计算返回一个闭包同样能限制栈深度，但每一步都要分配一个宿主函数，并且隐藏了待完成的工作。一阶帧使机器保持可观察，理由与一阶语义闭包相同。"
+
+#: manual/design/utlc/nbe.md:376
 msgid "Beta only: no eta, no reduction of constants."
 msgstr "仅 β：没有 η，也没有常量的归约。"
 
-#: manual/design/utlc/nbe.md:218
+#: manual/design/utlc/nbe.md:377
 msgid "Not total: `FuelExhausted` is the expected outcome for divergent terms and does not prove divergence."
 msgstr "不是全函数：`FuelExhausted` 是发散项的预期结果，但它并不证明发散。"
 
-#: manual/design/utlc/nbe.md:220
+#: manual/design/utlc/nbe.md:379
 msgid "No sharing of delayed arguments."
 msgstr "延迟参数不共享。"
 
-#: manual/design/utlc/nbe.md:221
+#: manual/design/utlc/nbe.md:380
+msgid "Only evaluation and readback have a bounded host stack. `eval` and `normalize` first validate their input with `@debruijn.validate`, which recurses over the term, so the stack depth they need still grows with the nesting depth of the input term."
+msgstr "只有求值与读回具有有界的宿主栈。`eval` 与 `normalize` 首先用 `@debruijn.validate` 验证输入，它对项进行递归，因此它们所需的栈深度仍随输入项的嵌套深度增长。"
+
+#: manual/design/utlc/nbe.md:384
 msgid "Normal forms use unary applications."
 msgstr "范式使用一元应用。"
 
-#: manual/design/utlc/nbe.md:222
+#: manual/design/utlc/nbe.md:385
 msgid "Input must be De Bruijn syntax; convert named terms with `@debruijn.from_named` and results back with `@debruijn.to_named`."
 msgstr "输入必须是 De Bruijn 语法；用 `@debruijn.from_named` 转换具名项，并用 `@debruijn.to_named` 把结果转换回来。"
 
@@ -5528,41 +5604,26 @@ msgstr "[utlc/nbe 设计](../../design/utlc/nbe.md)：语义域与可靠性论�
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc 教程](../stlc.md)：带类型的 η-长形式 NbE。"
 
-#~ msgid "leftmost-innermost redex (`@rewrite.bottom_up_once`)"
-#~ msgstr "最左最内可约式（`@rewrite.bottom_up_once`）"
+#~ msgid "**Divergence.** Untyped terms need not normalize, so every phase must be bounded."
+#~ msgstr "**发散。** 无类型项不一定能范式化，因此每个阶段都必须有界。"
 
-#~ msgid "Children are tried before their parent, in the same left-to-right order. The chosen position is the leftmost-innermost redex. `NoStep` again means that the rule applies nowhere."
-#~ msgstr "子节点先于其父节点尝试，顺序同样是从左到右。所选位置是最左最内的可约式。`NoStep` 同样表示该规则在任何位置都不适用。"
-
-#~ msgid "**No new semantics.** Every strategy is a traversal of [rewrite](rewrite.md), so it inherits the one-redex contract, the step-count contract and traces."
-#~ msgstr "**不引入新语义。** 每个策略都是 [rewrite](rewrite.md) 的一种遍历，因此它继承单可约式契约、步数契约以及轨迹。"
-
-#~ msgid "Each strategy is one traversal of rewrite"
-#~ msgstr "每个策略都是 rewrite 的一种遍历"
-
-#~ msgid "Pre-order search returns the first redex that no other redex contains, scanning head before arguments and arguments left to right; this is the leftmost-outermost redex, and the normal-form lemma of the [rewrite design](rewrite.md) shows that `NoStep` means \"normal\". Post-order search returns a redex that contains no other redex, the leftmost-innermost one. Weak head search follows only the spine, so its `NoStep` means \"weak head normal\" and nothing more."
-#~ msgstr "前序搜索返回第一个不被其他可约式包含的可约式，先扫描头部再扫描参数，参数从左到右；这就是最左最外的可约式，而 [rewrite 设计](rewrite.md) 中的范式引理表明 `NoStep` 意味着\"已是范式\"。后序搜索返回一个不包含其他可约式的可约式，即最左最内的那个。弱头搜索只沿脊柱进行，因此它的 `NoStep` 仅意味着\"已是弱头范式\"，别无其他。"
-
-#~ msgid "The library's tests check named and De Bruijn beta steps against each other (`src/utlc/lambda/lambda_test.mbt`), and normal order against the NbE normalizer (`src/utlc/nbe/nbe_test.mbt`)."
-#~ msgstr "库的测试将具名与 De Bruijn 的 beta 步骤相互比对（`src/utlc/lambda/lambda_test.mbt`），并将正规序与 NbE 正规化器相互比对（`src/utlc/nbe/nbe_test.mbt`）。"
-
-#~ msgid "`NoStep` and `Reduced` have the meaning of `@rewrite.StepResult`; the rule name is always `\"beta\"`. `ScopeFailure` reports an index error met while contracting a redex."
-#~ msgstr "`NoStep` 和 `Reduced` 的含义与 `@rewrite.StepResult` 相同；规则名总是 `\"beta\"`。`ScopeFailure` 报告在收缩可约式时遇到的索引错误。"
-
-#~ msgid "`normalize` returns a beta-eta normal form, which is in general *not* the beta normal form of the other normalizers: $\\lambda x.\\,f\\,x$ is beta-normal and normalizes to $f$ here. The two are related by eta alone. If $N$ is beta-normal, eta steps keep it beta-normal (a new beta redex would need $(\\lambda x.\\,f\\,x)\\,a$ or $\\lambda x.\\,(\\lambda y.\\,b)\\,x$ in $N$, both beta redexes already), so its eta normal form is beta-eta normal and, by confluence of $\\to_{\\beta\\eta}$, alpha-equivalent to the result of `normalize`, up to the unary-spine restriction of `eta_rule`."
-#~ msgstr "`normalize` 返回 β-η 范式，它一般*不是*其他范式化器给出的 β 范式：$\\lambda x.\\,f\\,x$ 是 β-范式，而在这里范式化为 $f$。两者仅相差 η。若 $N$ 是 β-范式，η 步会保持其为 β-范式（新的 β 可约式需要 $N$ 中含有 $(\\lambda x.\\,f\\,x)\\,a$ 或 $\\lambda x.\\,(\\lambda y.\\,b)\\,x$，而两者本身已是 β 可约式），因此它的 η 范式是 β-η 范式，并且由 $\\to_{\\beta\\eta}$ 的合流性，与 `normalize` 的结果 α-等价；唯一的例外来自 `eta_rule` 仅处理一元脊这一限制。"
-
-#~ msgid "An empty application `Apply(h, [])` is read as $h$ when a redex is matched, but it is not removed from the term (see the [eval design](../eval.md))."
-#~ msgstr "空应用 `Apply(h, [])` 在匹配可约式时被读作 $h$，但不会从项中去掉（见 [eval 设计](../eval.md)）。"
-
-#~ msgid "`@lambda.normalize` also contracts eta redexes, so its result is the eta normal form of that common beta normal form, not the beta normal form itself: $\\lambda x.\\,f\\,x$ normalizes to $f$ there and to $\\lambda.\\,f\\,0$ in the other two ([utlc/lambda design](design/utlc/lambda.md)). All normalizers read an empty application `Apply(h, [])` as $h$; NbE drops the node, the small-step reducers keep it, so spine flattening also drops empty applications ([eval design](design/eval.md))."
-#~ msgstr "`@lambda.normalize` 还会收缩 eta 可约式，因此其结果是这个公共 beta 范式的 eta 范式，而不是该 beta 范式本身：$\\lambda x.\\,f\\,x$ 在那里范式化为 $f$，在另外两者中为 $\\lambda.\\,f\\,0$（[utlc/lambda 设计](design/utlc/lambda.md)）。所有范式化器都把空应用 `Apply(h, [])` 读作 $h$；NbE 去掉该节点，小步归约器保留它，因此脊展平也会去掉空应用（[eval 设计](design/eval.md)）。"
+#~ msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices."
+#~ msgstr "**与小步归约一致。** 由可靠性与合流性，只要 `@nbe.normalize` 与 `@debruijn.normalize` 对同一个良作用域项都返回范式，两个范式在脊展平（合并嵌套的应用并去掉空应用）之后相等。两者都把 `Apply(h, [])` 读作 $h$：求值会抹去该节点，小步归约器在匹配可约式时透过它（见 [eval 设计](../eval.md)）。`src/utlc/nbe/nbe_test.mbt` 中的测试检查这一点，以及 $(\\lambda.\\,7)\\,\\Omega$ 上的惰性、$\\Omega$ 上的燃料耗尽，以及 quote 把层级转回索引。"
 
 #~ msgid "`NegativeShift(index, delta, cutoff)`: shifting `Bound(index)` by `delta` would make it negative; `cutoff` is the effective cutoff at the occurrence."
 #~ msgstr "`NegativeShift(index, delta, cutoff)`：将 `Bound(index)` 移位 `delta` 会使其变为负数；`cutoff` 是该出现处的有效截断值。"
 
 #~ msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. Returns `Err(NegativeShift)` if an index would become negative and `Err(NegativeIndex)` if the input contains a negative index."
 #~ msgstr "`shift(t, delta, cutoff)` 即操作 $\\uparrow^{delta}_{cutoff}$：在 `k` 个绑定子之下，索引 `i >= cutoff + k` 变为 `i + delta`，较小的索引保持不变。若某索引会变为负数则返回 `Err(NegativeShift)`，若输入包含负索引则返回 `Err(NegativeIndex)`。"
+
+#~ msgid "`NoStep` and `Reduced` have the meaning of `@rewrite.StepResult`; the rule name is always `\"beta\"`. `ScopeFailure` reports an index error met while contracting a redex."
+#~ msgstr "`NoStep` 和 `Reduced` 的含义与 `@rewrite.StepResult` 相同；规则名总是 `\"beta\"`。`ScopeFailure` 报告在收缩可约式时遇到的索引错误。"
+
+#~ msgid "leftmost-innermost redex (`@rewrite.bottom_up_once`)"
+#~ msgstr "最左最内可约式（`@rewrite.bottom_up_once`）"
+
+#~ msgid "Children are tried before their parent, in the same left-to-right order. The chosen position is the leftmost-innermost redex. `NoStep` again means that the rule applies nowhere."
+#~ msgstr "子节点先于其父节点尝试，顺序同样是从左到右。所选位置是最左最内的可约式。`NoStep` 同样表示该规则在任何位置都不适用。"
 
 #~ msgid "Values are compared with `==`, free variables by name, and bound variables by the binder they refer to. The relation is an equivalence and is decided in one simultaneous traversal of both terms."
 #~ msgstr "值用 `==` 比较，自由变量按名字比较，约束变量按其所指的绑定子比较。该关系是等价关系，并通过对两个项的一趟同时遍历来判定。"
@@ -5575,6 +5636,18 @@ msgstr "[stlc 教程](../stlc.md)：带类型的 η-长形式 NbE。"
 
 #~ msgid "No free index $0$ remains, so the shift by $-1$ maps $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$ without a negative result. $\\square$"
 #~ msgstr "不再有自由索引 $0$，因此按 $-1$ 的移位将 $\\{1, \\dots, n\\} \\to \\{0, \\dots, n - 1\\}$ 映射过去，不会产生负值。$\\square$"
+
+#~ msgid "**No new semantics.** Every strategy is a traversal of [rewrite](rewrite.md), so it inherits the one-redex contract, the step-count contract and traces."
+#~ msgstr "**不引入新语义。** 每个策略都是 [rewrite](rewrite.md) 的一种遍历，因此它继承单可约式契约、步数契约以及轨迹。"
+
+#~ msgid "Each strategy is one traversal of rewrite"
+#~ msgstr "每个策略都是 rewrite 的一种遍历"
+
+#~ msgid "Pre-order search returns the first redex that no other redex contains, scanning head before arguments and arguments left to right; this is the leftmost-outermost redex, and the normal-form lemma of the [rewrite design](rewrite.md) shows that `NoStep` means \"normal\". Post-order search returns a redex that contains no other redex, the leftmost-innermost one. Weak head search follows only the spine, so its `NoStep` means \"weak head normal\" and nothing more."
+#~ msgstr "前序搜索返回第一个不被其他可约式包含的可约式，先扫描头部再扫描参数，参数从左到右；这就是最左最外的可约式，而 [rewrite 设计](rewrite.md) 中的范式引理表明 `NoStep` 意味着\"已是范式\"。后序搜索返回一个不包含其他可约式的可约式，即最左最内的那个。弱头搜索只沿脊柱进行，因此它的 `NoStep` 仅意味着\"已是弱头范式\"，别无其他。"
+
+#~ msgid "The library's tests check named and De Bruijn beta steps against each other (`src/utlc/lambda/lambda_test.mbt`), and normal order against the NbE normalizer (`src/utlc/nbe/nbe_test.mbt`)."
+#~ msgstr "库的测试将具名与 De Bruijn 的 beta 步骤相互比对（`src/utlc/lambda/lambda_test.mbt`），并将正规序与 NbE 正规化器相互比对（`src/utlc/nbe/nbe_test.mbt`）。"
 
 #~ msgid "has declarative type $B$ and no other. Without the renaming, the trailing $x$ would be typed in $\\Gamma, x{:}\\mathsf{Unit}$ and the checker would answer `Unit`; versions before the fix did exactly that, and `check` accepted the term at `Unit`. With $x' = x_1$ the trailing $x$ keeps its type $B$, and `infer` returns $B$. The typed evaluator computes the type of a redex head with the same rule, so `normalize_eta_long` accepts the same terms as `check`."
 #~ msgstr "具有声明式类型 $B$，且没有其他类型。若不改名，后续的 $x$ 会在 $\\Gamma, x{:}\\mathsf{Unit}$ 中定型，检查器就会回答 `Unit`；修复之前的版本正是如此，`check` 曾在 `Unit` 下接受该项。取 $x' = x_1$ 后，后续的 $x$ 保持其类型 $B$，`infer` 返回 $B$。带类型的求值器用同一规则计算可约式头部的类型，因此 `normalize_eta_long` 与 `check` 接受相同的项。"
@@ -5596,6 +5669,15 @@ msgstr "[stlc 教程](../stlc.md)：带类型的 η-长形式 NbE。"
 
 #~ msgid "`alpha_equal` is reflexive, symmetric and transitive, and coincides with $=_\\alpha$ (theorem above). Reflexivity is also checked by a QuickCheck property in `src/syntax/syntax_wbtest.mbt`."
 #~ msgstr "`alpha_equal` 是自反、对称且传递的，并与 $=_\\alpha$ 一致（见上述定理）。自反性还由 `src/syntax/syntax_wbtest.mbt` 中的一个 QuickCheck 性质检验。"
+
+#~ msgid "`normalize` returns a beta-eta normal form, which is in general *not* the beta normal form of the other normalizers: $\\lambda x.\\,f\\,x$ is beta-normal and normalizes to $f$ here. The two are related by eta alone. If $N$ is beta-normal, eta steps keep it beta-normal (a new beta redex would need $(\\lambda x.\\,f\\,x)\\,a$ or $\\lambda x.\\,(\\lambda y.\\,b)\\,x$ in $N$, both beta redexes already), so its eta normal form is beta-eta normal and, by confluence of $\\to_{\\beta\\eta}$, alpha-equivalent to the result of `normalize`, up to the unary-spine restriction of `eta_rule`."
+#~ msgstr "`normalize` 返回 β-η 范式，它一般*不是*其他范式化器给出的 β 范式：$\\lambda x.\\,f\\,x$ 是 β-范式，而在这里范式化为 $f$。两者仅相差 η。若 $N$ 是 β-范式，η 步会保持其为 β-范式（新的 β 可约式需要 $N$ 中含有 $(\\lambda x.\\,f\\,x)\\,a$ 或 $\\lambda x.\\,(\\lambda y.\\,b)\\,x$，而两者本身已是 β 可约式），因此它的 η 范式是 β-η 范式，并且由 $\\to_{\\beta\\eta}$ 的合流性，与 `normalize` 的结果 α-等价；唯一的例外来自 `eta_rule` 仅处理一元脊这一限制。"
+
+#~ msgid "An empty application `Apply(h, [])` is read as $h$ when a redex is matched, but it is not removed from the term (see the [eval design](../eval.md))."
+#~ msgstr "空应用 `Apply(h, [])` 在匹配可约式时被读作 $h$，但不会从项中去掉（见 [eval 设计](../eval.md)）。"
+
+#~ msgid "`@lambda.normalize` also contracts eta redexes, so its result is the eta normal form of that common beta normal form, not the beta normal form itself: $\\lambda x.\\,f\\,x$ normalizes to $f$ there and to $\\lambda.\\,f\\,0$ in the other two ([utlc/lambda design](design/utlc/lambda.md)). All normalizers read an empty application `Apply(h, [])` as $h$; NbE drops the node, the small-step reducers keep it, so spine flattening also drops empty applications ([eval design](design/eval.md))."
+#~ msgstr "`@lambda.normalize` 还会收缩 eta 可约式，因此其结果是这个公共 beta 范式的 eta 范式，而不是该 beta 范式本身：$\\lambda x.\\,f\\,x$ 在那里范式化为 $f$，在另外两者中为 $\\lambda.\\,f\\,0$（[utlc/lambda 设计](design/utlc/lambda.md)）。所有范式化器都把空应用 `Apply(h, [])` 读作 $h$；NbE 去掉该节点，小步归约器保留它，因此脊展平也会去掉空应用（[eval 设计](design/eval.md)）。"
 
 #~ msgid "`reduce_once` does not validate its input. It returns `ScopeFailure` only when the redex it contracts contains a negative index; a negative index elsewhere is skipped like any other variable, and a dangling index is shifted like a free one (`(λ. 5) 1` reduces to `Bound(4)`). Call `validate` first if the term may be ill scoped."
 #~ msgstr "`reduce_once` 不验证其输入。仅当它收缩的可约式含有负索引时，它才返回 `ScopeFailure`；其他位置的负索引会像其他变量一样被跳过，悬空索引会像自由索引一样被移位（`(λ. 5) 1` 归约为 `Bound(4)`）。如果项可能作用域不良，请先调用 `validate`。"
