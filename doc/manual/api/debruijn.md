@@ -243,8 +243,10 @@ pub fn[T : Eq] DbStepResult::equal(Self[T], Self[T]) -> Bool
 ```
 
 `NoStep` and `Reduced` have the meaning of `@rewrite.StepResult`; the rule
-name is always `"beta"`. `ScopeFailure` reports an index error met while
-contracting a redex.
+name is always `"beta"`. `ScopeFailure` reports that the input is ill
+scoped: `reduce_once` validates the whole term before searching for a redex,
+and the error is the first one `validate` finds. No step is taken in that
+case.
 
 ### `reduce_once`
 
