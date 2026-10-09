@@ -108,6 +108,17 @@ among such redexes it is the leftmost. `bottom_up_once` tries children first
 and returns the first redex in post-order, the *leftmost-innermost* redex: it
 contains no other redex.
 
+"Contains" refers to positions of the n-ary tree, where
+`Apply(h, [a1, …, an])` is one node above all of its arguments. This is the
+reading of the symbolic ASTs the package serves, where an operator applied to
+several arguments is one node. The lambda calculus reads the node as the
+curried spine $h\,a_1 \cdots a_n$, in which a beta redex
+$(\lambda x.\,b)\,a_1$ is a prefix that does not contain $a_2$; there,
+`bottom_up_once` reduces inside $a_2$ before that redex, and the nested
+encoding does not. The `ApplicativeOrder` strategy of [eval](eval.md)
+therefore uses its own traversal, which follows the curried reading and still
+rewrites only positions of the n-ary tree.
+
 **Lemma (normal forms).** For both traversals, `NoStep` on $t$ iff $t$ is a
 normal form of $\to_r$.
 

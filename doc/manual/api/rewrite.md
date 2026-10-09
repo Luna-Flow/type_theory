@@ -219,8 +219,12 @@ pub fn[T] bottom_up_once(@syntax.Term[T], RuleName, (@syntax.Term[T]) -> @syntax
 ```
 
 Children are tried before their parent, in the same left-to-right order. The
-chosen position is the leftmost-innermost redex. `NoStep` again means that
-the rule applies nowhere.
+chosen position is the leftmost-innermost redex of the n-ary tree: an
+application `Apply(h, [a1, …, an])` is one node, tried after all of its
+arguments. `NoStep` again means that the rule applies nowhere. The lambda
+calculus reads such a node as the curried spine $h\,a_1 \cdots a_n$, in which
+the beta redex $(\lambda x.\,b)\,a_1$ does not contain $a_2, \dots, a_n$; the
+`ApplicativeOrder` strategy of [eval](eval.md) follows that reading.
 
 ```moonbit
 fn drop_zero(t : @syntax.Term[String]) -> @syntax.Term[String]? {

@@ -97,6 +97,13 @@ step count equals the length of the corresponding curried reduction. The De
 Bruijn reducer makes the same choice, which keeps the two step by step
 comparable.
 
+The redex $(\lambda x.\,b)\,a$ is a prefix of the spine but is reported at
+the spine's position, the only position the n-ary tree has for it. The
+strategies of [eval](../eval.md) account for this, so each of them takes the
+same steps on `Apply(f, [a1, a2])` and on `Apply(Apply(f, [a1]), [a2])`; in
+particular, applicative order contracts the prefix before any redex inside
+`a2`.
+
 ### Eta only on unary applications
 
 `eta_rule` matches `Bind(x, Apply(f, [Variable(x)]))`. On the curried
@@ -208,6 +215,10 @@ fails and no agreement is claimed.
   [utlc/nbe](nbe.md) coincide after conversion and spine flattening. The test
   "named and debruijn beta reduction agree modulo alpha" checks a step that
   requires renaming.
+- Every strategy of [eval](../eval.md) with `beta_rule` takes the same steps
+  on a term and on its curried form, up to alpha-equivalence; the test
+  "every strategy takes the same steps on a term and its curried form" checks
+  this on 1000 random terms.
 - `normalize` returns a beta-eta normal form, which is in general *not* the
   beta normal form of the other normalizers: $\lambda x.\,f\,x$ is beta-normal
   and normalizes to $f$ here. The two are related by eta alone, but only
