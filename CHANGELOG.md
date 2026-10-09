@@ -70,6 +70,12 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   `ai` it now tries the rule on the whole application if the rule applies to
   the prefix `Apply(h, [a1 .. ai])`; only real positions are rewritten, and
   `@rewrite.bottom_up_once` keeps its n-ary post-order (#11).
+- `utlc/nbe`: evaluation and readback no longer grow the host stack with the
+  fuel spent. They recursed once per pending step, so on js, wasm and wasm-gc
+  a divergent term such as `(λ. 0 0) (λ. 0 0)` overflowed the stack with a
+  budget of a few million units instead of returning `FuelExhausted`. Both
+  now run as loops over an explicit stack of frames in the heap, bounded by
+  the budget; results and `consumed` are unchanged (#12).
 
 ### Documentation
 

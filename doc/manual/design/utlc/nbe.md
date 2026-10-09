@@ -14,7 +14,8 @@ them.
 ## Constraints
 
 - **Divergence.** Untyped terms need not normalize, so every phase must be
-  bounded.
+  bounded, and only by the budget: a divergent run must end with
+  `FuelExhausted` on every backend, whatever the size of the host stack.
 - **Reproducibility.** The outcome must not depend on anything but the input
   and the budget, and the reported cost must be exact.
 - **Encapsulation.** Callers must not be able to build semantic values that
@@ -113,6 +114,151 @@ same result. With $f' = c - 1$ the last test sees $0$ and fails. Results are
 therefore reproducible, and `consumed` is the exact minimum budget for that
 result.
 
+### A bounded host stack
+
+**Problem.** Written as host functions, the equations of evaluation and
+readback are mutually recursive, and every call whose result is still
+needed keeps a host stack frame. On $\Omega$, applying
+$\mathsf{clo}(0\,0, [\,])$ evaluates $0\,0$, which applies the closure
+again, and none of these calls returns before the fuel runs out: the host
+stack grows with the fuel spent. The js, wasm and wasm-gc stacks are much
+smaller than a budget of a few million units needs, so such a run overflowed
+the stack instead of ending with `FuelExhausted`, against the constraint
+that every phase is bounded. Readback has the same problem on a term with an
+infinite normal form, such as $(\lambda.\,f\,(0\,0))\,(\lambda.\,f\,(0\,0))$,
+whose readback $f\,(f\,(f \cdots))$ nests one call of $R_n$ per argument.
+
+**Choice.** Evaluation runs as an abstract machine whose continuation is an
+explicit stack of frames in the heap: the recursive evaluator in
+continuation-passing style with the continuations defunctionalized, in the
+manner of the CEK machine.[^machines] A state
+$\langle c \mid K \mid f \rangle$ consists of a control $c$, a continuation
+$K$ (a list of frames, top first) and the remaining fuel $f$:
+
+$$
+c \;::=\; \mathsf{ev}(t, \rho) \;\mid\; \mathsf{fo}(d) \;\mid\; \mathsf{ret}(d), \qquad
+k \;::=\; \mathsf{spine}(\vec u, j, \rho) \;\mid\; \mathsf{to}(e), \qquad
+K \;::=\; \varepsilon \;\mid\; k \cdot K .
+$$
+
+$\mathsf{ev}$ and $\mathsf{fo}$ are calls of $\llbracket - \rrbracket$ and
+$\mathrm{force}$; $\mathsf{ret}(d)$ passes a value to the top frame.
+$\mathsf{spine}(\vec u, j, \rho)$, for the arguments
+$\vec u = u_0 \cdots u_{m-1}$ of an application node, waits for the value to
+apply to $\mathsf{delay}(u_j, \rho), \ldots, \mathsf{delay}(u_{m-1}, \rho)$;
+$\mathsf{to}(e)$ waits for a forced function to apply to $e$. In the code
+these are `EvalControl` (`Evaluate`, `Force`, `Return`) and `EvalFrame`
+(`ApplyArguments`, `ApplyTo`). The rules for $\mathsf{ev}$ and
+$\mathsf{fo}$ apply when $f \ge 1$; with $f \le 0$ the machine stops with
+`FuelExhausted`, and an index outside $\rho$ stops it with `ScopeFailure`:
+
+$$
+\begin{aligned}
+\langle \mathsf{ev}(v, \rho) \mid K \mid f \rangle &\to \langle \mathsf{ret}(\mathsf{atom}(v)) \mid K \mid f - 1 \rangle \\
+\langle \mathsf{ev}(x, \rho) \mid K \mid f \rangle &\to \langle \mathsf{ret}(\mathsf{free}(x)) \mid K \mid f - 1 \rangle \\
+\langle \mathsf{ev}(i, \rho) \mid K \mid f \rangle &\to \langle \mathsf{fo}(\rho_i) \mid K \mid f - 1 \rangle \\
+\langle \mathsf{ev}(\lambda.\,t, \rho) \mid K \mid f \rangle &\to \langle \mathsf{ret}(\mathsf{clo}(t, \rho)) \mid K \mid f - 1 \rangle \\
+\langle \mathsf{ev}(t\,\vec u, \rho) \mid K \mid f \rangle &\to \langle \mathsf{ev}(t, \rho) \mid \mathsf{spine}(\vec u, 0, \rho) \cdot K \mid f - 1 \rangle \quad (m \ge 1) \\
+\langle \mathsf{fo}(\mathsf{delay}(t, \rho)) \mid K \mid f \rangle &\to \langle \mathsf{ev}(t, \rho) \mid K \mid f - 1 \rangle \\
+\langle \mathsf{fo}(d) \mid K \mid f \rangle &\to \langle \mathsf{ret}(d) \mid K \mid f - 1 \rangle \quad (d \text{ not delayed}) \\
+\langle \mathsf{ret}(d) \mid \mathsf{spine}(\vec u, j, \rho) \cdot K \mid f \rangle &\to \langle \mathsf{fo}(d) \mid \mathsf{to}(\mathsf{delay}(u_j, \rho)) \cdot K' \mid f \rangle \\
+\langle \mathsf{ret}(\mathsf{clo}(t, \rho)) \mid \mathsf{to}(e) \cdot K \mid f \rangle &\to \langle \mathsf{ev}(t, e \cdot \rho) \mid K \mid f \rangle \\
+\langle \mathsf{ret}(d) \mid \mathsf{to}(e) \cdot K \mid f \rangle &\to \langle \mathsf{ret}(\mathsf{app}(d, e)) \mid K \mid f \rangle \quad (d \text{ not a closure})
+\end{aligned}
+$$
+
+where $K' = \mathsf{spine}(\vec u, j + 1, \rho) \cdot K$ if $j + 1 < m$ and
+$K' = K$ otherwise. An empty application $t\,()$ steps to
+$\langle \mathsf{ev}(t, \rho) \mid K \mid f - 1 \rangle$. The machine starts
+in $\langle \mathsf{ev}(t, \rho) \mid \varepsilon \mid f \rangle$ (or
+$\mathsf{fo}(d)$) and returns $d$ with $f$ units left when it reaches
+$\langle \mathsf{ret}(d) \mid \varepsilon \mid f \rangle$.
+
+*Same values.* Read a continuation as the function it still has to apply,
+
+$$
+\begin{aligned}
+\varepsilon(d) &= d, \qquad
+(\mathsf{to}(e) \cdot K)(d) = K\big(\mathrm{app}(d, e)\big), \\
+(\mathsf{spine}(\vec u, j, \rho) \cdot K)(d) &= K\big(\mathrm{app}(\cdots\mathrm{app}(d, \mathsf{delay}(u_j, \rho))\cdots, \mathsf{delay}(u_{m-1}, \rho))\big),
+\end{aligned}
+$$
+
+and a state $\langle c \mid K \mid f \rangle$ as $K(\overline{c})$ with
+$\overline{\mathsf{ev}(t, \rho)} = \llbracket t \rrbracket\rho$,
+$\overline{\mathsf{fo}(d)} = \mathrm{force}(d)$ and
+$\overline{\mathsf{ret}(d)} = d$. Every rule turns a state into one with the
+same reading, by one of the evaluation equations above: the first seven
+rules are the equations of $\llbracket - \rrbracket$ and $\mathrm{force}$,
+the $\mathsf{spine}$ rule unfolds the leftmost application of the spine,
+starting it as the implementation does by forcing the function, and the two
+$\mathsf{to}$ rules are the two equations of $\mathrm{app}$. When
+$j + 1 = m$ no frame for the remaining arguments is needed, since
+$\mathsf{spine}(\vec u, m, \rho) \cdot K$ reads as $K$. By induction on the
+number of steps, a run that stops at $\langle \mathsf{ret}(d) \mid
+\varepsilon \mid f' \rangle$ computes $d = \llbracket t \rrbracket\rho$.
+
+*Same fuel.* Units are tested and spent exactly in the
+$\mathsf{ev}$ and $\mathsf{fo}$ rules, that is on entry to
+$\llbracket - \rrbracket$ and $\mathrm{force}$, where the recursive
+functions test and spend them; the $\mathsf{ret}$ rules spend nothing, like
+returning from a host call and dispatching on its result. The machine makes
+the calls in the order of the recursive definition (it is that definition
+with its host stack made explicit), so every test sees the same remaining
+fuel. Results, `consumed`, and the determinism argument above are therefore
+unchanged; the tests pin exact costs from before the change.
+
+*Bounded stacks.* The machine is a single loop, so its host stack depth is
+constant. The frame stack $K$ grows only in the
+$\mathsf{ev}(t\,\vec u, \rho)$ rule, which spends a unit, and in the
+$\mathsf{spine}$ rule, which replaces one frame by at most two and is
+followed by a $\mathsf{fo}$ step that spends a unit or stops. Hence, at
+every step,
+
+$$
+|K| \;\le\; \text{units spent so far} + 1 \;\le\; f_0 + 1 ,
+$$
+
+and the pending work lives in the heap, bounded by the initial budget $f_0$.
+On $\Omega$ the stack never holds more than one frame: applying the closure
+to the last argument of the spine leaves nothing below the
+$\mathsf{to}$ frame, and the $\mathsf{to}$ rule pops it before the body is
+evaluated, so this tail call runs in constant space. A term that grows, such
+as $(\lambda.\,0\,0\,0)\,(\lambda.\,0\,0\,0)$, keeps one
+$\mathsf{spine}$ frame per unfolding for its last argument; its stack grows
+in the heap, within the bound.
+
+Readback is transformed in the same way, with controls
+$\mathsf{rb}(d, n)$ (read $d$ back under $n$ binders) and
+$\mathsf{emit}(u)$ (pass a term to the top frame) and frames
+
+$$
+q \;::=\; \mathsf{bind} \;\mid\; \mathsf{arg}(e, n) \;\mid\; \mathsf{head}(s)
+$$
+
+(`QuoteControl` and `QuoteFrame` in the code). A step
+$\mathsf{rb}(d, n)$ spends one unit and forces $d$ to $d'$; a constant, a
+free name or a level emits the corresponding term, an application
+$\mathsf{app}(d_1, e)$ continues with $\mathsf{rb}(d_1, n)$ under the frame
+$\mathsf{arg}(e, n)$, and a closure $\mathsf{clo}(t, \rho)$ evaluates $t$ in
+$\mathsf{lvl}(n) \cdot \rho$ to $d''$ and continues with
+$\mathsf{rb}(d'', n + 1)$ under $\mathsf{bind}$. An emitted $u$ meets its
+frame:
+
+$$
+\langle \mathsf{emit}(u) \mid \mathsf{bind} \cdot Q \rangle \to \langle \mathsf{emit}(\lambda.\,u) \mid Q \rangle, \quad
+\langle \mathsf{emit}(u) \mid \mathsf{arg}(e, n) \cdot Q \rangle \to \langle \mathsf{rb}(e, n) \mid \mathsf{head}(u) \cdot Q \rangle, \quad
+\langle \mathsf{emit}(u) \mid \mathsf{head}(s) \cdot Q \rangle \to \langle \mathsf{emit}(s\,u) \mid Q \rangle .
+$$
+
+These are the readback equations above, with the head of a neutral
+read before its argument as before. The forcing and the evaluation inside an
+$\mathsf{rb}$ step run the evaluation machine to its end and return to the
+readback loop, so the host stack holds at most the two loops, and $Q$, like
+$K$, is bounded by the units spent.
+
+[^machines]: M. Felleisen and D. P. Friedman, "Control operators, the SECD-machine, and the λ-calculus", 1986, for the CEK machine; M. S. Ager, D. Biernacki, O. Danvy and J. Midtgaard, "A functional correspondence between evaluators and abstract machines", PPDP 2003, for deriving it from an evaluator by CPS transformation and defunctionalization.
+
 ### Laziness without sharing
 
 **Problem.** Strict evaluation (call by value) diverges on
@@ -187,7 +333,11 @@ looks through it when it matches a redex (see the
 [eval design](../eval.md)). The
 tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on
 $(\lambda.\,7)\,\Omega$, fuel exhaustion on $\Omega$, and that quote turns
-levels back into indices.
+levels back into indices. Further tests run $\Omega$, a divergent term whose
+head grows, and two terms with infinite normal forms with budgets of thirty
+million units on every backend, and pin the exact cost of Church numeral
+arithmetic together with its reproducibility at `consumed` and
+`consumed - 1`.
 
 Other invariants:
 
@@ -199,6 +349,8 @@ Other invariants:
   variables, so quoting them at any level $n \ge 0$ never fails this way.
 - Fuel: `consumed` never exceeds the fuel given; the determinism property
   above holds.
+- Stack: evaluation and readback use a constant depth of host stack; their
+  frame stacks live in the heap and are bounded by the budget.
 
 ## Alternatives rejected
 
@@ -211,6 +363,13 @@ Other invariants:
   trick on the host side. A first-order closure keeps everything observable.
 - **Named environments.** Indexing the environment by De Bruijn index makes
   lookup positional and needs no fresh names during evaluation.
+- **Direct recursion with a larger stack.** The js and wasm hosts fix the
+  stack size, and any fixed stack is exhausted by some budget, so the outcome
+  would depend on the backend.
+- **Trampolining through host closures.** Returning a closure for the rest of
+  the computation also bounds the stack, but allocates a host function per
+  step and hides the pending work. First-order frames keep the machine
+  observable, for the same reason as first-order semantic closures.
 
 ## Boundaries
 
@@ -218,6 +377,10 @@ Other invariants:
 - Not total: `FuelExhausted` is the expected outcome for divergent terms and
   does not prove divergence.
 - No sharing of delayed arguments.
+- Only evaluation and readback have a bounded host stack. `eval` and
+  `normalize` first validate their input with `@debruijn.validate`, which
+  recurses over the term, so the stack depth they need still grows with the
+  nesting depth of the input term.
 - Normal forms use unary applications.
 - Input must be De Bruijn syntax; convert named terms with
   `@debruijn.from_named` and results back with `@debruijn.to_named`.

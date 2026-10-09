@@ -40,6 +40,22 @@ call does not depend on the fuel beyond what it consumed: if a call with fuel
 $f$ returns a normal form after consuming $c$ units, every call with fuel at
 least $c$ returns the same result.
 
+The budget bounds the work, not the depth of the host call stack.
+Evaluation and readback run as a loop that keeps pending work on a stack in
+the heap, so the call stack does not grow with the fuel spent: a divergent
+term ends with `FuelExhausted` on every backend, however large the budget.
+The pending work is bounded by the budget.
+
+```moonbit
+test "a large budget ends with FuelExhausted" {
+  let w : @debruijn.DbTerm[Int] = Bind(Apply(Bound(0), [Bound(0)]))
+  let omega : @debruijn.DbTerm[Int] = Apply(w, [w])
+  assert_true(
+    @nbe.normalize(omega, 5_000_000) == FuelExhausted(consumed=5_000_000),
+  )
+}
+```
+
 ## Semantic values
 
 ### `Semantic`
