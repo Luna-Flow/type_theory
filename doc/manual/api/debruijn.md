@@ -41,7 +41,7 @@ pub(all) enum DbTerm[T] {
   Bound(Int)
   Apply(DbTerm[T], Array[DbTerm[T]])
   Bind(DbTerm[T])
-} derive(Eq, @debug.Debug)
+} derive(@debug.Debug)
 ```
 
 - `Value(v)` is a domain constant, opaque as in `@syntax.Term`.
@@ -60,10 +60,47 @@ array of `Apply` as immutable and build a new node instead of changing it.
 
 ### `DbTerm::equal`
 
-`DbTerm::equal` compares two terms structurally.
+`DbTerm::equal` compares two terms structurally. It implements `Eq`, so it
+is also the `==` of `DbTerm`.
 
 ```mbti
 pub fn[T : Eq] DbTerm::equal(Self[T], Self[T]) -> Bool
+pub impl[T : Eq] Eq for DbTerm[T]
+```
+
+The implementation is written by hand rather than derived, so that it
+handles terms of any nesting depth (see below); it is the same relation a
+derived `Eq` would compute.
+
+### Nesting depth
+
+Every function of this package, and `==` on its types, works on terms of
+any nesting depth on every backend: long application chains in head or
+argument position, long chains of binders, and any mixture of these. The
+traversals keep their pending work in arrays on the heap, so the host call
+stack they use does not grow with the depth of the term, and the js, wasm
+and wasm-gc backends, whose stacks are small, give the same results as
+native. The tests run every operation on terms nested to depth 100 000 on
+all four backends.
+
+The exception is the derived `Debug`: `@debug.to_string`, `inspect` and the
+failure message of `assert_eq` recurse over the term and can overflow the
+host stack on a deep term. To check deep terms in tests, compare them with
+`==` (for example `assert_true(a == b)`), which renders nothing.
+
+```moonbit
+test "a deep term" {
+  let f = @core.Name::new("f")
+  let mut term : @debruijn.DbTerm[Int] = Bound(0)
+  for _ in 0..<100_000 {
+    term = Bind(Apply(Free(f), [term]))
+  }
+  assert_true(@debruijn.validate(term) == Ok(()))
+  match @debruijn.to_named(term) {
+    Ok(named) => assert_true(@debruijn.from_named(named) == term)
+    Err(_) => fail("well scoped")
+  }
+}
 ```
 
 ### `ScopeError`, `ScopeError::equal`
