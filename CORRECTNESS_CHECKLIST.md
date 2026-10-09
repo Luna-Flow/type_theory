@@ -14,8 +14,8 @@ Last audited: 2026-10-09
 | Shift and instantiation | Correct | nested binder beta tests, downward-shift capture regressions (#9), negative cutoff regressions (#10) | standard cutoff-based shifting; a free index that would fall below the cutoff returns `NegativeShift`; a negative cutoff returns `NegativeCutoff` |
 | De Bruijn small-step | Correct | path, normalization and empty-application tests (#2) | leftmost-outermost beta; `Apply(h, [])` is read as `h` |
 | UTLC untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests, 30M-unit divergence tests on every backend and exact-cost tests (#12) | beta-normalization may exhaust fuel; evaluation and readback use a constant host stack |
-| STLC bidirectional typechecking | Correct | typing, rejection, shadowing and trailing-argument capture tests (#1) | inference is syntax-directed and lambdas check against arrows; a redex parameter is renamed apart from trailing arguments |
-| STLC typed eta-long NbE | Correct | eta-expansion, open neutral, beta/eta, and curried redex spine tests (#7) | well-typed STLC terms normalize by type-directed readback |
+| STLC bidirectional typechecking | Correct | typing, rejection, shadowing and trailing-argument capture tests (#1); checking-mode redex tests on curried and flat spines, nested redexes, capture and ill-typed variants (#8) | inference is syntax-directed and lambdas check against arrows; a redex is typed in either mode by inferring its first argument, and a checked redex checks the rest of its spine against the expected type; a redex parameter is renamed apart from trailing arguments |
+| STLC typed eta-long NbE | Correct | eta-expansion, open neutral, beta/eta, curried redex spine tests (#7), and redexes returning a lambda (#8) | well-typed STLC terms normalize by type-directed readback; accepts exactly the terms `check` accepts |
 | Custom AST integration | Contract tested | mock downstream AST | domain canonicalization remains downstream |
 
 ## Known Boundaries
@@ -44,8 +44,6 @@ Last audited: 2026-10-09
 
 Open:
 
-- `check` has no checking-mode redex rule, so it rejects well-typed redexes
-  whose result is a lambda in checking position (#8).
 - Deeply nested input terms overflow the host stack on js, wasm and wasm-gc
   (#13).
 - Public array fields let callers mutate values documented as immutable (#14).
@@ -73,6 +71,11 @@ Fixed on 2026-10-09:
   `(λx. (λy. λz. z) x) () v`, which `check` accepts, with `CannotInferLambda`
   (#7). The evaluator now flattens the spine and follows redex bodies as
   `infer` does.
+- STLC `check` had no checking-mode redex rule, so it rejected
+  `(λx. λy. y) ()` at `Unit -> Unit` and `f ((λx. λy. y) ())` at `A` under
+  `f : (A -> A) -> A` with `CannotInferLambda` (#8). A checked redex now
+  infers its first argument and checks the rest of its spine against the
+  expected type; `normalize_eta_long` accepts the same terms.
 - `ApplicativeOrder` tried every argument of an n-ary spine before the
   application, so `Apply(λx. b, [a1, a2])` reduced inside `a2` before the
   redex `(λx. b) a1` that the nested encoding contracts first (#11). It now
