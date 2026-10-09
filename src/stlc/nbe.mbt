@@ -86,6 +86,29 @@ fn apply_value_typed(
 }
 
 ///|
+/// Removes the first `count` domains from a function type: the type of a head
+/// of type `ty` once it has been applied to `count` arguments.
+fn drop_domains(ty : Ty, count : Int) -> Result[Ty, TypeError] {
+  let mut current = ty
+  for _ in 0..<count {
+    match current {
+      Ty::Arrow(_, codomain) => current = codomain
+      _ => return Err(TypeError::ExpectedFunction(current))
+    }
+  }
+  Ok(current)
+}
+
+///|
+/// Computes the type at which `head` must be evaluated so that the flattened
+/// application `head arguments` has type `expected`.
+///
+/// A lambda head cannot be inferred, so its type is rebuilt from the redex
+/// rule: the first argument gives the domain, and the codomain is the type of
+/// the remaining spine `b a2 ... an`, computed recursively by the same
+/// `redex_step` that `infer` uses. A body that is itself an application joins
+/// that spine, and its own arguments are dropped from the result to obtain the
+/// type of the body. Any other head is inferred.
 fn head_type_for_application(
   sig : Signature,
   ctx : TypeContext,
@@ -98,33 +121,30 @@ fn head_type_for_application(
   }
   match head {
     @syntax.Bind(parameter, body) => {
-      let (parameter, body) = rename_parameter_apart(
-        ctx,
-        parameter,
-        body,
-        arguments[1:],
-      )
-      match infer(sig, ctx, arguments[0]) {
-        Err(error) => Err(error)
-        Ok(domain) => {
-          let codomain = if arguments.length() == 1 {
-            expected
-          } else {
-            match
-              head_type_for_application(
-                sig,
-                ctx.extend_with(parameter, domain),
-                body,
-                arguments[1:].to_owned(),
-                expected,
-              ) {
-              Err(error) => return Err(error)
-              Ok(body_type) => body_type
-            }
-          }
-          Ok(Ty::Arrow(domain, codomain))
+      let step = match redex_step(sig, ctx, parameter, body, arguments) {
+        Ok(step) => step
+        Err(error) => return Err(error)
+      }
+      let body_type = if step.arguments.length() == 0 {
+        expected
+      } else {
+        let spine_head_type = match
+          head_type_for_application(
+            sig,
+            step.ctx,
+            step.head,
+            step.arguments,
+            expected,
+          ) {
+          Ok(spine_head_type) => spine_head_type
+          Err(error) => return Err(error)
+        }
+        match drop_domains(spine_head_type, step.body_arity) {
+          Ok(body_type) => body_type
+          Err(error) => return Err(error)
         }
       }
+      Ok(Ty::Arrow(step.domain, body_type))
     }
     _ => infer(sig, ctx, head)
   }
@@ -159,9 +179,10 @@ fn eval_typed(
             ),
           )
       }
-    @syntax.Apply(head, arguments) => {
-      if arguments.length() == 0 {
-        return Err(TypeError::EmptyApplication)
+    @syntax.Apply(_, _) => {
+      let (head, arguments) = match application_spine(term) {
+        Ok(spine) => spine
+        Err(error) => return Err(error)
       }
       let mut current_type = match
         head_type_for_application(sig, ctx, head, arguments, ty) {

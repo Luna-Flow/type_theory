@@ -479,3 +479,147 @@ test "empty applications are rejected anywhere in a spine" {
     @stlc.check(sig, ctx, redex, a) == Err(@stlc.TypeError::EmptyApplication),
   )
 }
+
+///|
+/// Asserts that `check` accepts `term` at `ty`, and that `normalize_eta_long`
+/// accepts it as well and returns `expected` up to alpha-equivalence.
+fn assert_nbe_agrees_with_check(
+  sig : @stlc.Signature,
+  ctx : @stlc.TypeContext,
+  term : @stlc.Term,
+  ty : @stlc.Ty,
+  expected : @stlc.Term,
+) -> Unit raise {
+  assert_true(@stlc.check(sig, ctx, term, ty) == Ok(()))
+  match @stlc.normalize_eta_long(sig, ctx, term, ty) {
+    Ok(normal) => assert_true(@syntax.alpha_equal(normal, expected))
+    Err(_) => fail("check accepts the term, NbE rejects it")
+  }
+}
+
+///|
+test "typed eta long nbe accepts a curried redex head" {
+  // Γ = x : B ⊢ ((λx. λy. y) ()) x : B   (issue #7, first shape)
+  let b = base("B")
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty().extend_with(@core.Name::new("x"), b)
+  let k = lam("x", lam("y", tm_var("y")))
+  let term = app(app(k, unit_term()), tm_var("x"))
+  assert_true(@stlc.infer(sig, ctx, term) == Ok(b))
+  assert_nbe_agrees_with_check(sig, ctx, term, b, tm_var("x"))
+  // the curried form of the issue #1 term must not capture the trailing x
+  assert_true(
+    @stlc.check(sig, ctx, term, @stlc.Ty::Unit) ==
+    Err(@stlc.TypeError::TypeMismatch(expected=@stlc.Ty::Unit, actual=b)),
+  )
+  assert_true(
+    @stlc.normalize_eta_long(sig, ctx, term, @stlc.Ty::Unit) ==
+    Err(@stlc.TypeError::TypeMismatch(expected=@stlc.Ty::Unit, actual=b)),
+  )
+}
+
+///|
+test "typed eta long nbe accepts a redex body that consumes outer arguments" {
+  // Γ = v : A ⊢ (λx. (λy. λz. z) x) () v : A   (issue #7, second shape)
+  let a = base("A")
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty().extend_with(@core.Name::new("v"), a)
+  let inner = spine(lam("y", lam("z", tm_var("z"))), [tm_var("x")])
+  let term = spine(lam("x", inner), [unit_term(), tm_var("v")])
+  assert_true(@stlc.infer(sig, ctx, term) == Ok(a))
+  assert_nbe_agrees_with_check(sig, ctx, term, a, tm_var("v"))
+  // the same term with a curried spine
+  let curried = app(
+    app(
+      lam("x", app(lam("y", lam("z", tm_var("z"))), tm_var("x"))),
+      unit_term(),
+    ),
+    tm_var("v"),
+  )
+  assert_nbe_agrees_with_check(sig, ctx, curried, a, tm_var("v"))
+}
+
+///|
+test "typed eta long nbe accepts deeply curried redex heads" {
+  // Γ = u : A, v : B ⊢ (((λx. λy. λz. z) ()) u) v : B
+  let a = base("A")
+  let b = base("B")
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty()
+    .extend_with(@core.Name::new("u"), a)
+    .extend_with(@core.Name::new("v"), b)
+  let k3 = lam("x", lam("y", lam("z", tm_var("z"))))
+  let three = app(app(app(k3, unit_term()), tm_var("u")), tm_var("v"))
+  assert_nbe_agrees_with_check(sig, ctx, three, b, tm_var("v"))
+  // ((λx. λy. y) ()) f at A -> B returns a neutral function: eta-expanded
+  let f = @core.Name::new("f")
+  let fctx = ctx.extend_with(f, @stlc.Ty::Arrow(a, b))
+  let two = app(app(lam("x", lam("y", tm_var("y"))), unit_term()), tm_var("f"))
+  assert_nbe_agrees_with_check(
+    sig,
+    fctx,
+    two,
+    @stlc.Ty::Arrow(a, b),
+    lam("w", app(tm_var("f"), tm_var("w"))),
+  )
+  // a curried redex head selecting a neutral function, applied once more
+  let pick = app(
+    app(app(lam("g", lam("y", tm_var("g"))), tm_var("f")), unit_term()),
+    tm_var("u"),
+  )
+  assert_nbe_agrees_with_check(
+    sig,
+    fctx,
+    pick,
+    b,
+    app(tm_var("f"), tm_var("u")),
+  )
+}
+
+///|
+test "typed eta long nbe accepts mixed flat and nested spines" {
+  // Γ = u : A, v : B ⊢ spines mixing Apply(h, [a1, a2]) and Apply(Apply(h, [a1]), [a2])
+  let a = base("A")
+  let b = base("B")
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty()
+    .extend_with(@core.Name::new("u"), a)
+    .extend_with(@core.Name::new("v"), b)
+  let k3 = lam("x", lam("y", lam("z", tm_var("z"))))
+  let flat_then_nested = spine(spine(k3, [unit_term(), tm_var("u")]), [
+    tm_var("v"),
+  ])
+  assert_nbe_agrees_with_check(sig, ctx, flat_then_nested, b, tm_var("v"))
+  let nested_then_flat = spine(app(k3, unit_term()), [tm_var("u"), tm_var("v")])
+  assert_nbe_agrees_with_check(sig, ctx, nested_then_flat, b, tm_var("v"))
+  // redex body that is itself a curried redex consuming two outer arguments:
+  // (λx. ((λp. λq. λr. q) x) u) () v w   with w : A
+  let wctx = ctx.extend_with(@core.Name::new("w"), a)
+  let body = app(
+    app(lam("p", lam("q", lam("r", lam("s", tm_var("q"))))), tm_var("x")),
+    tm_var("u"),
+  )
+  let term = spine(lam("x", body), [unit_term(), tm_var("v"), tm_var("w")])
+  assert_true(@stlc.infer(sig, wctx, term) == Ok(a))
+  assert_nbe_agrees_with_check(sig, wctx, term, a, tm_var("u"))
+}
+
+///|
+test "typed eta long nbe renames a curried redex parameter apart from outer arguments" {
+  // Γ = x : B ⊢ (λx. (λy. λz. z) x) () x : B — the trailing x is the outer x
+  let b = base("B")
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty().extend_with(@core.Name::new("x"), b)
+  let inner = app(lam("y", lam("z", tm_var("z"))), tm_var("x"))
+  let term = app(app(lam("x", inner), unit_term()), tm_var("x"))
+  assert_true(@stlc.infer(sig, ctx, term) == Ok(b))
+  assert_nbe_agrees_with_check(sig, ctx, term, b, tm_var("x"))
+  assert_true(
+    @stlc.normalize_eta_long(sig, ctx, term, @stlc.Ty::Unit) ==
+    Err(@stlc.TypeError::TypeMismatch(expected=@stlc.Ty::Unit, actual=b)),
+  )
+  // the inner parameter y is also renamed apart from the outer x
+  let inner_y = app(lam("x", lam("z", tm_var("z"))), tm_var("x"))
+  let term_y = app(app(lam("x", inner_y), unit_term()), tm_var("x"))
+  assert_nbe_agrees_with_check(sig, ctx, term_y, b, tm_var("x"))
+}
