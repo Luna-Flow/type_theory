@@ -3,6 +3,11 @@
 ///
 /// `T` is treated as a closed atom with respect to `Name`: free-variable
 /// analysis, renaming, substitution, and alpha-equivalence do not inspect it.
+///
+/// Terms are shared, not copied: operations may return a term, or a subterm,
+/// that is also held by an argument or by a library value such as a
+/// substitution or a reduction trace. Treat the argument array of `Apply` as
+/// immutable; build a new term instead of changing it in place.
 pub(all) enum Term[T] {
   Value(T)
   Variable(@core.Name)
