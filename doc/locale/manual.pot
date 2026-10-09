@@ -251,15 +251,15 @@ msgstr ""
 #: manual/api/core.md:334
 #: manual/api/stlc.md:296
 #: manual/api/stlc.md:298
-#: manual/api/syntax.md:329
-#: manual/api/syntax.md:331
+#: manual/api/syntax.md:346
+#: manual/api/syntax.md:348
 #: manual/index.md:103
 msgid "Deprecated"
 msgstr ""
 
 #: manual/api/core.md:334
 #: manual/api/stlc.md:298
-#: manual/api/syntax.md:331
+#: manual/api/syntax.md:348
 msgid "Replacement"
 msgstr ""
 
@@ -695,7 +695,7 @@ msgid "`trace` runs the same loop as `normalize` and records every step."
 msgstr ""
 
 #: manual/api/rewrite.md:346
-#: manual/api/syntax.md:222
+#: manual/api/syntax.md:239
 msgid "Binding-aware ASTs"
 msgstr ""
 
@@ -1059,98 +1059,102 @@ msgid "`alpha_equal` decides whether two terms are equal up to the names of boun
 msgstr ""
 
 #: manual/api/syntax.md:149
-msgid "Values are compared with `==`, free variables by name, and bound variables by the binder they refer to. The relation is an equivalence and is decided in one simultaneous traversal of both terms."
+msgid "Values are compared with `T`'s `==`, free variables by name, and bound variables by the binder they refer to, in one simultaneous traversal of both terms."
 msgstr ""
 
-#: manual/api/syntax.md:167
+#: manual/api/syntax.md:153
+msgid "`alpha_equal` is the payload equality lifted through binders, so it inherits the properties of `T`'s `==`: each of reflexivity, symmetry and transitivity holds for `alpha_equal` exactly when it holds for that `==`, so `alpha_equal` is an equivalence relation exactly when `==` is one. When `==` is the identity of `T` (as for `Int` or `String`), it is alpha-equivalence. `Double` follows IEEE 754: `NaN` is not equal to itself, so a term with a `NaN` payload is not alpha-equal to itself, while `0.0` and `-0.0` are equal payloads."
+msgstr ""
+
+#: manual/api/syntax.md:184
 msgid "Renaming"
 msgstr ""
 
-#: manual/api/syntax.md:171
+#: manual/api/syntax.md:188
 msgid "`Term::rename_free` applies a renaming to the free variables of a term, renaming binders where necessary to avoid capture."
 msgstr ""
 
-#: manual/api/syntax.md:178
+#: manual/api/syntax.md:195
 msgid "Under `Bind(x, body)` the renaming loses its entry for `x`, because the bound `x` is a different variable. If a remaining target of the renaming equals `x`, the binder is renamed to a fresh name first. The result is alpha-equivalent to the textbook capture-avoiding renaming."
 msgstr ""
 
-#: manual/api/syntax.md:196
+#: manual/api/syntax.md:213
 msgid "`Term::alpha_rename_bound` renames the occurrences of a variable that are bound by an enclosing binder, refusing a target name that could be captured."
 msgstr ""
 
-#: manual/api/syntax.md:203
+#: manual/api/syntax.md:220
 msgid "Call it on the *body* of a binder: `body.alpha_rename_bound(from, to_)` replaces the occurrences of `from` that are free in `body` (and therefore bound by the enclosing `Bind(from, body)`) with `to_`. Inner binders named `from` stop the renaming. The result is `None` when `to_` occurs anywhere in `body`, and `Some(body)` when `from == to_`. On success, `Bind(from, body)` and `Bind(to_, result)` are alpha-equivalent."
 msgstr ""
 
-#: manual/api/syntax.md:226
+#: manual/api/syntax.md:243
 msgid "`BindingView[N]` is the one-layer view of a node that generic algorithms inspect."
 msgstr ""
 
-#: manual/api/syntax.md:238
+#: manual/api/syntax.md:255
 msgid "`Opaque` marks a node with no variables inside, such as a literal. The other cases mirror the constructors of `Term`, with the children left in the downstream type `N`."
 msgstr ""
 
-#: manual/api/syntax.md:244
+#: manual/api/syntax.md:261
 msgid "`BindingSyntax` is the open trait that a downstream AST implements to use the generic binding algorithms."
 msgstr ""
 
-#: manual/api/syntax.md:256
+#: manual/api/syntax.md:273
 msgid "`project(node)` tells the algorithms what the node is."
 msgstr ""
 
-#: manual/api/syntax.md:257
+#: manual/api/syntax.md:274
 msgid "`variable`, `apply` and `bind` rebuild nodes of each kind."
 msgstr ""
 
-#: manual/api/syntax.md:259
+#: manual/api/syntax.md:276
 msgid "An implementation must make `project` and the three constructors agree: `project(variable(x))` is `Variable(x)`, `project(apply(h, args))` is `Apply(h, args)`, `project(bind(x, b))` is `Bind(x, b)`, and rebuilding a projected `Apply` or `Bind` node gives back an equivalent node. An `Opaque` node must not contain variables. The [adapter design](../design/adapter.md) explains these laws; the [adapter tutorial](../tutorial/adapter.md) implements them for a small AST."
 msgstr ""
 
-#: manual/api/syntax.md:267
+#: manual/api/syntax.md:284
 msgid "Call the trait methods through the trait, for example `@syntax.BindingSyntax::project(node)`."
 msgstr ""
 
-#: manual/api/syntax.md:272
+#: manual/api/syntax.md:289
 msgid "`Term[T]` implements `BindingSyntax` with the obvious projection."
 msgstr ""
 
-#: manual/api/syntax.md:278
+#: manual/api/syntax.md:295
 msgid "`Value` projects to `Opaque` and every other constructor to the case of the same name, so the generic functions below agree with their `Term` versions on `Term` values."
 msgstr ""
 
-#: manual/api/syntax.md:295
+#: manual/api/syntax.md:312
 msgid "These functions compute free variables and all names for any `BindingSyntax` type."
 msgstr ""
 
-#: manual/api/syntax.md:303
+#: manual/api/syntax.md:320
 msgid "On `Term[T]` they return the same sets as `free_variables` and `all_names`."
 msgstr ""
 
-#: manual/api/syntax.md:307
+#: manual/api/syntax.md:324
 msgid "`generic_alpha_rename_bound` is `Term::alpha_rename_bound` for any `BindingSyntax` type."
 msgstr ""
 
-#: manual/api/syntax.md:314
+#: manual/api/syntax.md:331
 msgid "It returns `None` when the target name occurs in the node, and rebuilds the renamed node through `variable`, `apply` and `bind`."
 msgstr ""
 
-#: manual/api/syntax.md:334
+#: manual/api/syntax.md:351
 msgid "`Term::variable(name)` method form"
 msgstr ""
 
-#: manual/api/syntax.md:335
+#: manual/api/syntax.md:352
 msgid "`Term::apply(head, args)` method form"
 msgstr ""
 
-#: manual/api/syntax.md:336
+#: manual/api/syntax.md:353
 msgid "`Term::bind(name, body)` method form"
 msgstr ""
 
-#: manual/api/syntax.md:338
+#: manual/api/syntax.md:355
 msgid "`Repr(term)` or `@debug.to_string(term)`"
 msgstr ""
 
-#: manual/api/syntax.md:340
+#: manual/api/syntax.md:357
 msgid "These method forms were implicit promotions of trait methods. They are kept hidden and deprecated so that old callers still compile."
 msgstr ""
 
@@ -1505,7 +1509,7 @@ msgstr ""
 #: manual/design/rewrite.md:171
 #: manual/design/stlc.md:332
 #: manual/design/substitution.md:130
-#: manual/design/syntax.md:234
+#: manual/design/syntax.md:286
 #: manual/design/utlc/lambda.md:116
 #: manual/design/utlc/nbe.md:145
 msgid "Correctness and invariants"
@@ -1558,7 +1562,7 @@ msgstr ""
 #: manual/design/rewrite.md:196
 #: manual/design/stlc.md:353
 #: manual/design/substitution.md:329
-#: manual/design/syntax.md:254
+#: manual/design/syntax.md:309
 #: manual/design/utlc/lambda.md:142
 #: manual/design/utlc/nbe.md:203
 msgid "Alternatives rejected"
@@ -1583,7 +1587,7 @@ msgstr ""
 #: manual/design/rewrite.md:208
 #: manual/design/stlc.md:366
 #: manual/design/substitution.md:343
-#: manual/design/syntax.md:268
+#: manual/design/syntax.md:323
 #: manual/design/utlc/lambda.md:153
 #: manual/design/utlc/nbe.md:215
 msgid "Boundaries"
@@ -1824,7 +1828,7 @@ msgid "A term is *well scoped at depth $n$* when every index under $k$ binders i
 msgstr ""
 
 #: manual/design/debruijn.md:44
-#: manual/design/syntax.md:167
+#: manual/design/syntax.md:217
 msgid "N. G. de Bruijn, \"Lambda calculus notation with nameless dummies\", Indagationes Mathematicae 34, 1972."
 msgstr ""
 
@@ -3037,52 +3041,78 @@ msgid "**Problem.** Deciding $=_\\alpha$ directly from the definition requires s
 msgstr ""
 
 #: manual/design/syntax.md:126
-msgid "**Choice.** `alpha_equal` walks both terms in lockstep with two binder environments $E_L, E_R$ that map each bound name to the *level* (binder depth, counting from the root) at which it was bound; a later binding of the same name shadows an earlier one. Writing $E(x)$ for the level of the last binding of $x$ in $E$, and $d$ for the current depth:"
+msgid "**Choice.** `alpha_equal` walks both terms in lockstep with two binder environments $E_L, E_R$ that map each bound name to the *level* (binder depth, counting from the root) at which it was bound; a later binding of the same name shadows an earlier one. Writing $E(x)$ for the level of the last binding of $x$ in $E$, $d$ for the current depth, and $\\approx_T$ for the relation on $V$ computed by `T`'s `==`:"
 msgstr ""
 
-#: manual/design/syntax.md:146
-msgid "**Theorem.** `alpha_equal(t, u)` holds iff $t =_\\alpha u$."
+#: manual/design/syntax.md:147
+msgid "The relation $\\approx_T$ is whatever `T`'s `==` computes; nothing forces it to be an equivalence. To state exactly what `alpha_equal` decides, let $\\ulcorner t \\urcorner$ be the De Bruijn translation of the [debruijn design](debruijn.md), which replaces a bound occurrence at depth $d$ whose binder sits at level $\\ell$ by the index $i = d - 1 - \\ell$, and keeps free names and values. For a relation $R$ on $V$, its *lifting* $\\widehat{R}$ relates two nameless terms when they have the same shape, the same index or free name at each variable position, and payloads related by $R$ at each value position:"
 msgstr ""
 
-#: manual/design/syntax.md:148
-msgid "*Proof sketch.* Let $\\ulcorner t \\urcorner$ be the De Bruijn translation of the [debruijn design](debruijn.md), which replaces a bound occurrence at depth $d$ whose binder sits at level $\\ell$ by the index $i = d - 1 - \\ell$, and keeps free names. Both traversals visit the same positions at the same depth $d$, so for bound occurrences"
-msgstr ""
-
-#: manual/design/syntax.md:158
-msgid "and free occurrences are compared by name in both. Hence `alpha_equal(t, u)` iff $\\ulcorner t \\urcorner = \\ulcorner u \\urcorner$. The classical theorem that two named terms are alpha-equivalent iff their De Bruijn translations are identical[^debruijn] completes the proof. $\\square$"
-msgstr ""
-
-#: manual/design/syntax.md:163
-msgid "Each node is visited once. A variable lookup scans the environment, and each binder copies it, both in $O(d)$ for binder depth $d$, so the comparison costs $O(n \\cdot d)$ for terms of size $n$."
+#: manual/design/syntax.md:167
+msgid "and no other pairs are related."
 msgstr ""
 
 #: manual/design/syntax.md:169
-msgid "Capture-avoiding renaming of free variables"
-msgstr ""
-
-#: manual/design/syntax.md:171
-msgid "**Problem.** Applying a renaming $\\rho$ under a binder can capture: renaming $x \\mapsto y$ in $\\beta y.\\,x$ naively gives $\\beta y.\\,y$."
+msgid "**Theorem.** `alpha_equal(t, u)` holds iff $\\ulcorner t \\urcorner \\mathrel{\\widehat{\\approx_T}} \\ulcorner u \\urcorner$. In particular, if $\\approx_T$ is the identity of $V$, then `alpha_equal(t, u)` holds iff $t =_\\alpha u$."
 msgstr ""
 
 #: manual/design/syntax.md:174
-msgid "**Choice.** `rename_free` implements"
+msgid "*Proof sketch.* Both traversals visit the same positions at the same depth $d$, so for bound occurrences"
 msgstr ""
 
-#: manual/design/syntax.md:187
-msgid "with $x' = \\operatorname{fresh}(x,\\ \\mathrm{names}(t) \\cup \\operatorname{supp}(\\rho \\setminus x) \\cup \\{x\\})$."
+#: manual/design/syntax.md:181
+msgid "free occurrences are compared by name in both, and values by $\\approx_T$ in both. This is the first claim. If $\\approx_T$ is the identity, then $\\widehat{\\approx_T}$ is the identity of nameless terms, so `alpha_equal(t, u)` iff $\\ulcorner t \\urcorner = \\ulcorner u \\urcorner$. The classical theorem that two named terms are alpha-equivalent iff their De Bruijn translations are identical[^debruijn] completes the proof. $\\square$"
 msgstr ""
 
-#: manual/design/syntax.md:189
-msgid "**Lemma (free variables of a renaming).** $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$."
+#: manual/design/syntax.md:188
+msgid "**Corollary.** Each of reflexivity, symmetry and transitivity holds for `alpha_equal` on `Term[T]` iff it holds for $\\approx_T$. Hence `alpha_equal` is an equivalence relation iff `T`'s `==` is one."
 msgstr ""
 
 #: manual/design/syntax.md:192
+msgid "*Proof.* ($\\Leftarrow$) Two terms related by $\\widehat{R}$ have the same shape, so a chain $a \\mathrel{\\widehat{R}} b \\mathrel{\\widehat{R}} c$ compares the payloads $a_p, b_p, c_p$ at each value position $p$ through $a_p \\mathrel{R} b_p \\mathrel{R} c_p$, and identities at every other position. Reflexivity, symmetry and transitivity of $R$ therefore give the same property of $\\widehat{R}$ position by position. The theorem pulls each property back along the function $t \\mapsto \\ulcorner t \\urcorner$. ($\\Rightarrow$) With empty environments the first rule gives `alpha_equal(Value(a), Value(b))` $= (a \\approx_T b)$, so a counterexample $a, b, c$ for $\\approx_T$ is a counterexample `Value(a)`, `Value(b)`, `Value(c)` for `alpha_equal`. $\\square$"
+msgstr ""
+
+#: manual/design/syntax.md:204
+msgid ""
+"For `Int` or `String`, `==` is the identity and `alpha_equal` is exactly $=_\\alpha$. When `==` is an equivalence coarser than the identity, `alpha_equal` is alpha-equivalence modulo $\\approx_T$: the least congruence containing $=_\\alpha$ and $v \\sim v'$ for $v \\approx_T v'$. For `Double`, `==` is IEEE 754 equality,[^ieee754] which is symmetric and transitive but not reflexive: $\\mathrm{NaN} \\n"
+"ot\\approx_T \\mathrm{NaN}$. So `alpha_equal` on `Term[Double]` is symmetric and transitive, reflexive exactly on the terms without a `NaN` payload, and it identifies `Value(0.0)` with `Value(-0.0)`."
+msgstr ""
+
+#: manual/design/syntax.md:213
+msgid "Each node is visited once. A variable lookup scans the environment, and each binder copies it, both in $O(d)$ for binder depth $d$, so the comparison costs $O(n \\cdot d)$ for terms of size $n$."
+msgstr ""
+
+#: manual/design/syntax.md:219
+msgid "IEEE Std 754-2019, *IEEE Standard for Floating-Point Arithmetic*, §5.11: every NaN compares unordered with everything, itself included, and $+0 = -0$."
+msgstr ""
+
+#: manual/design/syntax.md:221
+msgid "Capture-avoiding renaming of free variables"
+msgstr ""
+
+#: manual/design/syntax.md:223
+msgid "**Problem.** Applying a renaming $\\rho$ under a binder can capture: renaming $x \\mapsto y$ in $\\beta y.\\,x$ naively gives $\\beta y.\\,y$."
+msgstr ""
+
+#: manual/design/syntax.md:226
+msgid "**Choice.** `rename_free` implements"
+msgstr ""
+
+#: manual/design/syntax.md:239
+msgid "with $x' = \\operatorname{fresh}(x,\\ \\mathrm{names}(t) \\cup \\operatorname{supp}(\\rho \\setminus x) \\cup \\{x\\})$."
+msgstr ""
+
+#: manual/design/syntax.md:241
+msgid "**Lemma (free variables of a renaming).** $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$."
+msgstr ""
+
+#: manual/design/syntax.md:244
 msgid ""
 "The only interesting case is the binder without freshening. Let $\\rho' = \\rho \\setminus x$ with $x \\n"
 "otin \\operatorname{tgt}\\rho'$. By induction $\\mathrm{FV}(t\\rho') = \\rho'(\\mathrm{FV}(t))$, so"
 msgstr ""
 
-#: manual/design/syntax.md:205
+#: manual/design/syntax.md:257
 msgid ""
 "The second step uses $\\rho(n) \\n"
 "e x$ for $n \\n"
@@ -3090,83 +3120,87 @@ msgid ""
 "e x$. In the freshened case the same computation applies to $t\\{x \\mapsto x'\\}$ and $x'$, since $x'$ is outside $\\operatorname{supp}\\rho'$ and so neither a source nor a target. The lemma says exactly that no free variable was captured."
 msgstr ""
 
-#: manual/design/syntax.md:212
+#: manual/design/syntax.md:264
 msgid ""
 "The test $x \\n"
 "otin \\operatorname{tgt}(\\rho \\setminus x)$ is conservative: it also renames the binder when the offending entry's source does not occur in $t$. The result is still alpha-equivalent to the minimal one. The lemma shows that no variable is captured; that the result is the intended term up to $=_\\alpha$ follows from the translation lemma of the [substitution design](substitution.md), which covers renamings as well."
 msgstr ""
 
-#: manual/design/syntax.md:219
+#: manual/design/syntax.md:271
 msgid "Checked bound renaming"
 msgstr ""
 
-#: manual/design/syntax.md:221
+#: manual/design/syntax.md:273
 msgid ""
 "`alpha_rename_bound(t, x, y)` computes $t\\{x \\mapsto y\\}$, the body of the alpha step above, and returns `None` unless $y \\n"
 "otin \\mathrm{names}(t)$ (or $x = y$). Under that side condition the alpha axiom gives directly"
 msgstr ""
 
-#: manual/design/syntax.md:229
+#: manual/design/syntax.md:281
 msgid "The check is stronger than necessary (an occurrence of $y$ under an inner binder for $y$ would be harmless), but it is cheap and it is all the substitution algorithms need, because they always call it with a name chosen fresh for the body."
 msgstr ""
 
-#: manual/design/syntax.md:236
+#: manual/design/syntax.md:288
 msgid "$\\mathrm{FV}(t) \\subseteq \\mathrm{names}(t)$; `map_values` preserves both."
 msgstr ""
 
-#: manual/design/syntax.md:237
-msgid "`alpha_equal` is reflexive, symmetric and transitive, and coincides with $=_\\alpha$ (theorem above). Reflexivity is also checked by a QuickCheck property in `src/syntax/syntax_wbtest.mbt`."
+#: manual/design/syntax.md:289
+msgid "`alpha_equal` decides the lifting of `T`'s `==` to nameless terms, and coincides with $=_\\alpha$ when that `==` is the identity (theorem above). It is reflexive, symmetric and transitive exactly when `==` is (corollary above). Reflexivity for `Int` payloads is checked by a QuickCheck property in `src/syntax/syntax_wbtest.mbt`, and a test there records that a `NaN` payload is not alpha-equal to itself."
 msgstr ""
 
-#: manual/design/syntax.md:240
+#: manual/design/syntax.md:295
 msgid "`rename_free` satisfies $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$ and is invariant under $=_\\alpha$: alpha-equivalent inputs give alpha-equivalent outputs."
 msgstr ""
 
-#: manual/design/syntax.md:243
+#: manual/design/syntax.md:298
 msgid "`alpha_rename_bound(t, x, y) = Some(t')` implies $\\beta x.\\,t =_\\alpha \\beta y.\\,t'$."
 msgstr ""
 
-#: manual/design/syntax.md:245
+#: manual/design/syntax.md:300
 msgid "On `Term[T]` every `generic_*` function equals its specialised counterpart."
 msgstr ""
 
-#: manual/design/syntax.md:247
+#: manual/design/syntax.md:302
 msgid "Cost: `free_variables` and `all_names` make $O(n)$ hash-set operations for a term of size $n$; each union costs up to the size of the sets involved. `alpha_rename_bound` adds one traversal to `all_names`. `rename_free` removes one entry and computes the targets of the renaming at every binder, so it costs $O(n \\cdot |\\rho|)$ when no binder is renamed; each freshened binder adds `all_names` and one renaming traversal of its body."
 msgstr ""
 
-#: manual/design/syntax.md:256
+#: manual/design/syntax.md:311
 msgid "**Variables inside values.** Letting `T` contain names would require a traversal trait on `T` as well. Such ASTs implement `BindingSyntax` directly, which covers the same need with one trait."
 msgstr ""
 
-#: manual/design/syntax.md:259
+#: manual/design/syntax.md:314
 msgid "**Multi-variable binders.** A binder for several names at once is expressed as nested `Bind` nodes. This keeps the view small and the proofs per binder."
 msgstr ""
 
-#: manual/design/syntax.md:261
+#: manual/design/syntax.md:316
 msgid "**Unchecked bound renaming.** A version without the `None` case would make a capture silent. The checked form makes the precondition visible in the type."
 msgstr ""
 
-#: manual/design/syntax.md:264
+#: manual/design/syntax.md:319
 msgid "**Alpha-equivalence by conversion.** Converting both terms to De Bruijn form and comparing would allocate two new terms; the lockstep algorithm is the same comparison without the allocation."
 msgstr ""
 
-#: manual/design/syntax.md:270
+#: manual/design/syntax.md:325
 msgid "`Value` payloads are never inspected. A payload that contains variables is outside the contract."
 msgstr ""
 
-#: manual/design/syntax.md:272
+#: manual/design/syntax.md:327
 msgid "`==` on terms is structural, not alpha-equivalence."
 msgstr ""
 
-#: manual/design/syntax.md:273
+#: manual/design/syntax.md:328
+msgid "`alpha_equal` compares payloads with `T`'s `==` and adds no reflexivity of its own: with a non-reflexive `==` (such as `Double` and `NaN`) a term can fail to be alpha-equal to itself."
+msgstr ""
+
+#: manual/design/syntax.md:331
 msgid "No sorts, scopes or types: every name is a term variable of the same kind."
 msgstr ""
 
-#: manual/design/syntax.md:274
+#: manual/design/syntax.md:332
 msgid "The package does not check that a `BindingSyntax` implementation obeys its laws; [adapter](adapter.md) describes how to test them."
 msgstr ""
 
-#: manual/design/syntax.md:276
+#: manual/design/syntax.md:334
 msgid "Substitution lives in [substitution](substitution.md), traversal and rewriting in [rewrite](rewrite.md)."
 msgstr ""
 
@@ -4141,7 +4175,7 @@ msgstr ""
 #: manual/tutorial/rewrite.md:225
 #: manual/tutorial/stlc.md:253
 #: manual/tutorial/substitution.md:209
-#: manual/tutorial/syntax.md:211
+#: manual/tutorial/syntax.md:214
 #: manual/tutorial/utlc/lambda.md:191
 #: manual/tutorial/utlc/nbe.md:198
 msgid "Next steps"
@@ -5073,26 +5107,30 @@ msgid "**`==` is not alpha-equivalence.** Results of substitution and normalizat
 msgstr ""
 
 #: manual/tutorial/syntax.md:202
-msgid "**Variables inside values.** `Value(T)` is never inspected. If your constants contain variables, implement `BindingSyntax` for your AST instead of wrapping it in `Term`."
+msgid "**Payloads are compared with their own `==`.** `alpha_equal` inherits it: with `Term[Double]`, a term containing `Value(0.0 / 0.0)` (NaN) is not alpha-equal to itself, and `Value(0.0)` equals `Value(-0.0)`."
 msgstr ""
 
 #: manual/tutorial/syntax.md:205
-msgid "**Calling `alpha_rename_bound` on the binder.** It expects the *body*: `body.alpha_rename_bound(x, z)`, not `Bind(x, body).alpha_rename_bound(...)`, which would find no free `x` to rename."
+msgid "**Variables inside values.** `Value(T)` is never inspected. If your constants contain variables, implement `BindingSyntax` for your AST instead of wrapping it in `Term`."
 msgstr ""
 
 #: manual/tutorial/syntax.md:208
+msgid "**Calling `alpha_rename_bound` on the binder.** It expects the *body*: `body.alpha_rename_bound(x, z)`, not `Bind(x, body).alpha_rename_bound(...)`, which would find no free `x` to rename."
+msgstr ""
+
+#: manual/tutorial/syntax.md:211
 msgid "**Method-style trait calls.** `term.project()` is deprecated; write `@syntax.BindingSyntax::project(term)`."
 msgstr ""
 
-#: manual/tutorial/syntax.md:213
+#: manual/tutorial/syntax.md:216
 msgid "[syntax API](../api/syntax.md): every function and its contract."
 msgstr ""
 
-#: manual/tutorial/syntax.md:214
+#: manual/tutorial/syntax.md:217
 msgid "[syntax design](../design/syntax.md): the definitions and the proofs behind alpha-equivalence and capture-avoiding renaming."
 msgstr ""
 
-#: manual/tutorial/syntax.md:216
+#: manual/tutorial/syntax.md:219
 msgid "[substitution tutorial](substitution.md): replacing variables by terms."
 msgstr ""
 
