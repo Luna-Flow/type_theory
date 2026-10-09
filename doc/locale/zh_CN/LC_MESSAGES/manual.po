@@ -37,12 +37,12 @@ msgid "The interface you implement to adapt your own AST is [`@syntax.BindingSyn
 msgstr "为适配你自己的 AST 而需实现的接口是 [`@syntax.BindingSyntax`](syntax.md)；随后你将获得的算法是 [`@syntax.generic_free_variables`](syntax.md)、[`@substitution.GenericSubstitution`](substitution.md) 和 [`@rewrite.generic_top_down_once`](rewrite.md)。该契约在 [adapter 设计](../design/adapter.md)中说明，[adapter 教程](../tutorial/adapter.md)则一步步构建一个适配器。"
 
 #: manual/api/adapter.md:33
-#: manual/api/core.md:11
+#: manual/api/core.md:14
 #: manual/api/debruijn.md:14
 #: manual/api/eval.md:12
 #: manual/api/rewrite.md:17
 #: manual/api/stlc.md:15
-#: manual/api/substitution.md:13
+#: manual/api/substitution.md:15
 #: manual/api/syntax.md:14
 #: manual/api/utlc/lambda.md:14
 #: manual/api/utlc/nbe.md:14
@@ -78,192 +78,204 @@ msgid "core API"
 msgstr "core API"
 
 #: manual/api/core.md:5
-msgid "The `core` package defines the vocabulary that every other package of `type_theory` shares: variable names, fresh-name generation, ordered scopes, telescopes and finite renamings. All values are immutable: every operation that \"changes\" a value returns a new one and leaves its argument untouched. The mathematics behind these definitions is in the [core design](../design/core.md)."
-msgstr "`core` 包定义了 `type_theory` 中所有其他包共享的基本词汇：变量名、新名字生成、有序作用域、伸缩式（telescope）以及有限重命名。所有值都是不可变的：每个“改变”值的操作都返回一个新值，并保持其参数不变。这些定义背后的数学见 [core 设计](../design/core.md)。"
+msgid "The `core` package defines the vocabulary that every other package of `type_theory` shares: variable names, fresh-name generation, ordered scopes, telescopes and finite renamings. All values are immutable: every operation that \"changes\" a value returns a new one and leaves its argument untouched. `Context`, `Telescope` and `Renaming` are abstract types, so their storage cannot be reached from outside the package, and every method that returns an array returns a fresh copy. The mathematics behind these definitions is in the [core design](../design/core.md)."
+msgstr "`core` 包定义了 `type_theory` 中所有其他包共享的基本词汇：变量名、新名字生成、有序作用域、伸缩式（telescope）以及有限重命名。所有值都是不可变的：每个“改变”值的操作都返回一个新值，并保持其参数不变。`Context`、`Telescope` 和 `Renaming` 是抽象类型，因此包外无法触及它们的存储，且每个返回数组的方法都返回一个新的副本。这些定义背后的数学见 [core 设计](../design/core.md)。"
 
-#: manual/api/core.md:13
+#: manual/api/core.md:16
 #: manual/api/debruijn.md:16
 #: manual/api/eval.md:14
 #: manual/api/rewrite.md:19
 #: manual/api/stlc.md:17
-#: manual/api/substitution.md:15
+#: manual/api/substitution.md:17
 #: manual/api/syntax.md:16
 #: manual/api/utlc/lambda.md:16
 #: manual/api/utlc/nbe.md:16
 msgid "Add the package, and the packages whose types appear in its signatures, to your `moon.pkg`:"
 msgstr "将该包以及其签名中出现的类型所在的包添加到你的 `moon.pkg`："
 
-#: manual/api/core.md:23
+#: manual/api/core.md:26
 msgid "`hashset` is needed for the name sets that `fresh_name`, `Renaming::support` and `Renaming::targets` take or return. The examples on this page refer to every name through its package alias, for example `@core.Name`."
 msgstr "`fresh_name`、`Renaming::support` 和 `Renaming::targets` 接受或返回的名字集合需要 `hashset`。本页的示例都通过包别名引用名字，例如 `@core.Name`。"
 
-#: manual/api/core.md:27
+#: manual/api/core.md:30
 msgid "Names"
 msgstr "名字"
 
-#: manual/api/core.md:31
+#: manual/api/core.md:34
 msgid "`Name` is a variable name, compared by its text."
 msgstr "`Name` 是变量名，按其文本进行比较。"
 
-#: manual/api/core.md:39
+#: manual/api/core.md:42
 msgid "Two names are the same variable exactly when their texts are equal. A name carries no scope, no unique identifier and no type: binding is decided by the syntax that contains the name. The field `text` is read-only outside the package; use `Name::new` and `Name::text`."
 msgstr "两个名字当且仅当文本相等时才是同一个变量。名字不携带作用域、唯一标识符或类型：绑定关系由包含该名字的语法决定。字段 `text` 在包外是只读的；请使用 `Name::new` 和 `Name::text`。"
 
-#: manual/api/core.md:46
+#: manual/api/core.md:49
 msgid "`Name::new` makes a name from its text."
 msgstr "`Name::new` 由文本构造一个名字。"
 
-#: manual/api/core.md:52
+#: manual/api/core.md:55
 msgid "Any string is accepted, including the empty string and strings that look like generated names such as `x_1`. The library never parses the text, except that `fresh_name` appends `_<k>` suffixes to it."
 msgstr "任何字符串都可接受，包括空字符串以及看起来像生成名字的字符串，例如 `x_1`。库从不解析该文本，只是 `fresh_name` 会在其后追加 `_<k>` 后缀。"
 
-#: manual/api/core.md:58
+#: manual/api/core.md:61
 msgid "`Name::text` returns the text of a name."
 msgstr "`Name::text` 返回名字的文本。"
 
-#: manual/api/core.md:75
+#: manual/api/core.md:78
 msgid "These methods compare and hash names through their text."
 msgstr "这些方法通过名字的文本对其进行比较和哈希。"
 
-#: manual/api/core.md:83
+#: manual/api/core.md:86
 msgid "They are the `Eq`, `Compare` and `Hash` implementations promoted to methods. `compare` is the order of `String` on the texts: shorter texts first, then by UTF-16 code units. It is a total order, so names can be sorted for deterministic output; `hash` lets names live in `HashSet` and `HashMap`. Prefer the operators `==`, `!=`, `<` and friends in new code."
 msgstr "它们是提升为方法的 `Eq`、`Compare` 和 `Hash` 实现。`compare` 是文本上 `String` 的顺序：较短的文本在前，然后按 UTF-16 码元比较。这是一个全序，因此可以对名字排序以获得确定性输出；`hash` 使名字可以放入 `HashSet` 和 `HashMap`。新代码中请优先使用运算符 `==`、`!=`、`<` 等。"
 
-#: manual/api/core.md:101
+#: manual/api/core.md:104
 msgid "`fresh_name` returns a name that does not occur in a set of used names, keeping a hint when possible."
 msgstr "`fresh_name` 返回一个不在已用名字集合中出现的名字，并在可能时保留提示名。"
 
-#: manual/api/core.md:108
+#: manual/api/core.md:111
 msgid "`fresh_name(hint, used)` returns `hint` itself when `hint` is not in `used`. Otherwise it tries `hint_1`, `hint_2`, … in order and returns the first candidate that is not in `used`. The result is a function of `hint` and `used` only, so repeated runs produce the same names. It always terminates: at most $|used| + 1$ candidates are tried."
 msgstr "当 `hint` 不在 `used` 中时，`fresh_name(hint, used)` 直接返回 `hint`。否则它依次尝试 `hint_1`、`hint_2`、…，并返回第一个不在 `used` 中的候选。结果只依赖于 `hint` 和 `used`，因此重复运行会产生相同的名字。它总会终止：最多尝试 $|used| + 1$ 个候选。"
 
-#: manual/api/core.md:123
+#: manual/api/core.md:126
 msgid "Scopes"
 msgstr "作用域"
 
-#: manual/api/core.md:127
+#: manual/api/core.md:130
 msgid "`Context` is an ordered list of names in scope, innermost last."
 msgstr "`Context` 是作用域内名字的有序列表，最内层的在最后。"
 
-#: manual/api/core.md:135
-msgid "A context may contain the same name more than once; a later entry shadows an earlier one. Two contexts are equal when they list the same names in the same order."
-msgstr "一个上下文可以多次包含同一个名字；较后的条目遮蔽较早的条目。两个上下文当以相同顺序列出相同名字时相等。"
+#: manual/api/core.md:136
+msgid "A context may contain the same name more than once; a later entry shadows an earlier one. Two contexts are equal when they list the same names in the same order. The type is abstract: read a context with `length`, `contains` and `to_array`."
+msgstr "一个上下文可以多次包含同一个名字；较后的条目遮蔽较早的条目。两个上下文当以相同顺序列出相同名字时相等。该类型是抽象的：请用 `length`、`contains` 和 `to_array` 读取上下文。"
 
-#: manual/api/core.md:141
+#: manual/api/core.md:143
 msgid "These functions build a context with no names, or with the names of an array in order."
 msgstr "这些函数构造一个不含名字的上下文，或按顺序包含某个数组中名字的上下文。"
 
-#: manual/api/core.md:149
+#: manual/api/core.md:151
 msgid "`from_array` copies the array, so later changes to the array do not affect the context."
 msgstr "`from_array` 会复制数组，因此之后对数组的修改不会影响上下文。"
 
-#: manual/api/core.md:154
+#: manual/api/core.md:156
 msgid "`Context::extend_with` returns the context with one more name at the inner end."
 msgstr "`Context::extend_with` 返回在内层末端多一个名字的上下文。"
 
-#: manual/api/core.md:161
+#: manual/api/core.md:163
 msgid "The original context is unchanged. The call copies the names, so it costs $O(n)$ for a context of length $n$."
 msgstr "原上下文保持不变。该调用会复制名字，因此对长度为 $n$ 的上下文开销为 $O(n)$。"
 
-#: manual/api/core.md:166
+#: manual/api/core.md:168
 msgid "These methods query a context."
 msgstr "这些方法查询上下文。"
 
-#: manual/api/core.md:175
-msgid "`contains` is a linear search. `to_array` returns a copy, outermost name first. `equal` is the promoted `Eq` implementation."
-msgstr "`contains` 是线性查找。`to_array` 返回一个副本，最外层名字在前。`equal` 是提升的 `Eq` 实现。"
+#: manual/api/core.md:177
+msgid "`contains` is a linear search. `to_array` returns a fresh array, outermost name first; changing it does not change the context. `equal` is the promoted `Eq` implementation."
+msgstr "`contains` 是线性查找。`to_array` 返回一个新数组，最外层名字在前；修改该数组不会改变上下文。`equal` 是提升的 `Eq` 实现。"
 
-#: manual/api/core.md:192
+#: manual/api/core.md:195
 msgid "`Telescope[T]` is a sequence of binders, each with an annotation of type `T`, in dependency order."
 msgstr "`Telescope[T]` 是按依赖顺序排列的绑定子序列，每个绑定子带有一个类型为 `T` 的标注。"
 
-#: manual/api/core.md:201
-msgid "In a telescope $x_1 : A_1, \\dots, x_n : A_n$ the annotation $A_i$ may refer to $x_1, \\dots, x_{i-1}$. `Telescope` records the order; it does not check what the annotations mention."
-msgstr "在伸缩式 $x_1 : A_1, \\dots, x_n : A_n$ 中，标注 $A_i$ 可以引用 $x_1, \\dots, x_{i-1}$。`Telescope` 只记录顺序；它不检查标注中提及了什么。"
+#: manual/api/core.md:202
+msgid "In a telescope $x_1 : A_1, \\dots, x_n : A_n$ the annotation $A_i$ may refer to $x_1, \\dots, x_{i-1}$. `Telescope` records the order; it does not check what the annotations mention. The type is abstract: read a telescope with `length` and `to_array`."
+msgstr "在伸缩式 $x_1 : A_1, \\dots, x_n : A_n$ 中，标注 $A_i$ 可以引用 $x_1, \\dots, x_{i-1}$。`Telescope` 只记录顺序；它不检查标注中提及了什么。该类型是抽象的：请用 `length` 和 `to_array` 读取伸缩式。"
 
-#: manual/api/core.md:207
+#: manual/api/core.md:209
 msgid "These functions build and read a telescope."
 msgstr "这些函数构造和读取伸缩式。"
 
-#: manual/api/core.md:217
-msgid "`extend_with` appends one binder and returns a new telescope; `to_array` returns a copy of the entries, first binder first."
-msgstr "`extend_with` 追加一个绑定子并返回新的伸缩式；`to_array` 返回条目的副本，第一个绑定子在前。"
+#: manual/api/core.md:219
+msgid "`extend_with` appends one binder and returns a new telescope; `to_array` returns a fresh array of the entries, first binder first, and changing it does not change the telescope."
+msgstr "`extend_with` 追加一个绑定子并返回新的伸缩式；`to_array` 返回由条目组成的新数组，第一个绑定子在前，修改该数组不会改变伸缩式。"
 
-#: manual/api/core.md:232
+#: manual/api/core.md:235
 #: manual/design/core.md:66
 msgid "Renamings"
 msgstr "重命名"
 
-#: manual/api/core.md:236
+#: manual/api/core.md:239
 msgid "`Renaming` is a finite map from names to names; names outside its domain are left unchanged."
 msgstr "`Renaming` 是从名字到名字的有限映射；定义域之外的名字保持不变。"
 
-#: manual/api/core.md:245
-msgid "A renaming $\\rho$ denotes the total function $\\rho(n) = m$ if $(n, m)$ is an entry and $\\rho(n) = n$ otherwise. It is applied simultaneously: the image of a name is never renamed again. A renaming need not be injective. Equality (`Renaming::equal`) compares the entry lists, so two renamings that denote the same function can still be different values."
-msgstr "重命名 $\\rho$ 表示如下全函数：若 $(n, m)$ 是一个条目则 $\\rho(n) = m$，否则 $\\rho(n) = n$。它是同时作用的：名字的像不会再次被重命名。重命名不必是单射。相等性（`Renaming::equal`）比较的是条目列表，因此表示同一函数的两个重命名仍可能是不同的值。"
+#: manual/api/core.md:246
+msgid "A renaming $\\rho$ denotes the total function $\\rho(n) = m$ if $(n, m)$ is an entry and $\\rho(n) = n$ otherwise. It is applied simultaneously: the image of a name is never renamed again. A renaming need not be injective. The type is abstract, so the only way to build a renaming is through the functions below, and each name has at most one entry. Equality (`Renaming::equal`) compares the entry lists, so two renamings that denote the same function can still be different values."
+msgstr "重命名 $\\rho$ 表示如下全函数：若 $(n, m)$ 是一个条目则 $\\rho(n) = m$，否则 $\\rho(n) = n$。它是同时作用的：名字的像不会再次被重命名。重命名不必是单射。该类型是抽象的，因此构造重命名的唯一途径是下面的函数，且每个名字至多有一个条目。相等性（`Renaming::equal`）比较的是条目列表，因此表示同一函数的两个重命名仍可能是不同的值。"
 
-#: manual/api/core.md:253
+#: manual/api/core.md:256
 msgid "These functions build renamings."
 msgstr "这些函数构造重命名。"
 
-#: manual/api/core.md:261
+#: manual/api/core.md:264
 msgid "`set(from, to_)` adds the entry `from ↦ to_`, replacing an existing image of `from` in place."
 msgstr "`set(from, to_)` 添加条目 `from ↦ to_`，若 `from` 已有像则就地替换。"
 
-#: manual/api/core.md:266
+#: manual/api/core.md:269
 msgid "`Renaming::apply` returns the image of a name."
 msgstr "`Renaming::apply` 返回名字的像。"
 
-#: manual/api/core.md:274
+#: manual/api/core.md:277
+msgid "These methods read the entries of a renaming."
+msgstr "这些方法读取重命名的条目。"
+
+#: manual/api/core.md:284
+msgid "`length` is the number of names in the domain. `to_array` returns the entries `(from, to_)` as a fresh array, in the order the names were first added; changing the array does not change the renaming. An entry may map a name to itself, so `length` can count names that `apply` leaves unchanged."
+msgstr "`length` 是定义域中名字的个数。`to_array` 以新数组的形式返回条目 `(from, to_)`，顺序为名字首次加入的顺序；修改该数组不会改变重命名。一个条目可以把名字映射到自身，因此 `length` 可能计入 `apply` 保持不变的名字。"
+
+#: manual/api/core.md:306
 msgid "`Renaming::without` removes a name from the domain."
 msgstr "`Renaming::without` 从定义域中移除一个名字。"
 
-#: manual/api/core.md:280
+#: manual/api/core.md:312
 msgid "This is the operation a binder performs: under a binder for `x`, free occurrences of `x` are no longer the `x` of the renaming."
 msgstr "这正是绑定子所执行的操作：在 `x` 的绑定子之下，`x` 的自由出现不再是该重命名中的 `x`。"
 
-#: manual/api/core.md:285
+#: manual/api/core.md:317
 msgid "These methods return the names a renaming mentions."
 msgstr "这些方法返回重命名中提及的名字。"
 
-#: manual/api/core.md:292
+#: manual/api/core.md:324
 msgid "`support` contains every source and every target of an entry; `targets` contains only the targets. Capture-avoiding operations use them to choose fresh binder names."
 msgstr "`support` 包含每个条目的所有源和所有目标；`targets` 只包含目标。避免捕获的操作用它们来选择新的绑定子名字。"
 
-#: manual/api/core.md:298
+#: manual/api/core.md:330
 msgid "`Renaming::then` composes two renamings, applying `self` first."
 msgstr "`Renaming::then` 复合两个重命名，先应用 `self`。"
 
-#: manual/api/core.md:304
+#: manual/api/core.md:336
 msgid "For every name $n$, `r.then(s).apply(n) == s.apply(r.apply(n))`."
 msgstr "对每个名字 $n$，`r.then(s).apply(n) == s.apply(r.apply(n))`。"
 
-#: manual/api/core.md:324
+#: manual/api/core.md:356
 msgid "`Renaming::equal` compares two renamings entry by entry."
 msgstr "`Renaming::equal` 逐条目比较两个重命名。"
 
-#: manual/api/core.md:330
+#: manual/api/core.md:362
 #: manual/api/eval.md:77
 msgid "It is the promoted `Eq` implementation; use `==` in new code."
 msgstr "它是提升的 `Eq` 实现；新代码中请使用 `==`。"
 
-#: manual/api/core.md:332
-#: manual/api/core.md:334
-#: manual/api/stlc.md:330
-#: manual/api/stlc.md:332
-#: manual/api/syntax.md:346
-#: manual/api/syntax.md:348
+#: manual/api/core.md:364
+#: manual/api/core.md:366
+#: manual/api/stlc.md:336
+#: manual/api/stlc.md:338
+#: manual/api/syntax.md:353
+#: manual/api/syntax.md:355
 #: manual/index.md:103
 msgid "Deprecated"
 msgstr "已弃用"
 
-#: manual/api/core.md:334
-#: manual/api/stlc.md:332
-#: manual/api/syntax.md:348
+#: manual/api/core.md:366
+#: manual/api/stlc.md:338
+#: manual/api/syntax.md:355
 msgid "Replacement"
 msgstr "替代项"
 
-#: manual/api/core.md:339
+#: manual/api/core.md:371
+msgid "The fields `Context::names`, `Telescope::entries` and `Renaming::entries` are no longer public; use `to_array`, `length`, `contains` and `apply` instead."
+msgstr "字段 `Context::names`、`Telescope::entries` 和 `Renaming::entries` 不再公开；请改用 `to_array`、`length`、`contains` 和 `apply`。"
+
+#: manual/api/core.md:375
 msgid "`extend` became a reserved word in MoonBit 0.10, so the methods were renamed. The old names remain as deprecated aliases. The method forms `not_equal`, `op_lt`, `op_le`, `op_gt`, `op_ge`, `hash_combine` and `to_repr` on these types are hidden and deprecated; use the operators `!=`, `<`, `<=`, `>`, `>=`, the `Hash` trait and `Repr(x)` instead."
 msgstr "`extend` 在 MoonBit 0.10 中成为保留字，因此这些方法被重命名。旧名字作为已弃用的别名保留。这些类型上的方法形式 `not_equal`、`op_lt`、`op_le`、`op_gt`、`op_ge`、`hash_combine` 和 `to_repr` 已被隐藏并弃用；请改用运算符 `!=`、`<`、`<=`、`>`、`>=`、`Hash` trait 以及 `Repr(x)`。"
 
@@ -283,7 +295,7 @@ msgstr "移位与实例化的定义及其性质的推导见 [debruijn 设计](..
 #: manual/api/eval.md:25
 #: manual/api/rewrite.md:29
 #: manual/api/stlc.md:29
-#: manual/api/substitution.md:26
+#: manual/api/substitution.md:28
 #: manual/api/syntax.md:26
 #: manual/api/utlc/lambda.md:28
 #: manual/api/utlc/nbe.md:27
@@ -322,127 +334,131 @@ msgstr "`Bind(body)` 是绑定子；其变量在 `body` 中为 `Bound(0)`。"
 msgid "A term is *well scoped* when every `Bound(i)` lies under more than `i` binders. Because binders carry no names, `==` (`DbTerm::equal`) on well-scoped terms is alpha-equivalence."
 msgstr "当每个 `Bound(i)` 都位于多于 `i` 个绑定子之下时，称该项是*良作用域的*。由于绑定子不携带名字，良作用域项上的 `==`（`DbTerm::equal`）就是 α-等价。"
 
-#: manual/api/debruijn.md:60
+#: manual/api/debruijn.md:58
+msgid "As with `@syntax.Term`, terms are shared, not copied: treat the argument array of `Apply` as immutable and build a new node instead of changing it."
+msgstr "与 `@syntax.Term` 一样，项是共享的而非复制的：请把 `Apply` 的参数数组视为不可变，需要修改时构造新节点，而不是原地修改。"
+
+#: manual/api/debruijn.md:63
 msgid "`DbTerm::equal` compares two terms structurally."
 msgstr "`DbTerm::equal` 按结构比较两个项。"
 
-#: manual/api/debruijn.md:68
+#: manual/api/debruijn.md:71
 msgid "`ScopeError` describes an index that does not refer to a binder."
 msgstr "`ScopeError` 描述一个不指向任何绑定子的索引。"
 
-#: manual/api/debruijn.md:80
+#: manual/api/debruijn.md:83
 msgid "`UnboundIndex(index, depth)`: `Bound(index)` occurs under only `depth` binders."
 msgstr "`UnboundIndex(index, depth)`：`Bound(index)` 仅出现在 `depth` 个绑定子之下。"
 
-#: manual/api/debruijn.md:82
+#: manual/api/debruijn.md:85
 msgid "`NegativeIndex(index)`: a negative index."
 msgstr "`NegativeIndex(index)`：负索引。"
 
-#: manual/api/debruijn.md:83
+#: manual/api/debruijn.md:86
 msgid "`NegativeShift(index, delta, cutoff)`: shifting the free `Bound(index)` by `delta` would move it below `cutoff`, the effective cutoff at the occurrence, where it would be captured by an enclosing binder or become negative."
 msgstr "`NegativeShift(index, delta, cutoff)`：将自由的 `Bound(index)` 移位 `delta` 会使其低于 `cutoff`（该出现处的有效截断值），从而被外围绑定子捕获或变为负数。"
 
-#: manual/api/debruijn.md:87
+#: manual/api/debruijn.md:90
 msgid "`NegativeCutoff(cutoff)`: `shift` was called with a negative `cutoff`."
 msgstr "`NegativeCutoff(cutoff)`：调用 `shift` 时给出了负的 `cutoff`。"
 
-#: manual/api/debruijn.md:89
+#: manual/api/debruijn.md:92
 msgid "Conversion and validation"
 msgstr "转换与验证"
 
-#: manual/api/debruijn.md:93
+#: manual/api/debruijn.md:96
 msgid "`from_named` converts named syntax to De Bruijn syntax."
 msgstr "`from_named` 将具名语法转换为 De Bruijn 语法。"
 
-#: manual/api/debruijn.md:99
+#: manual/api/debruijn.md:102
 msgid "A variable bound by an enclosing `Bind` becomes `Bound(i)`, where `i` counts the binders between the occurrence and its binder (the nearest binder of that name wins). Free variables become `Free`. The result is always well scoped, and alpha-equivalent named terms give equal results."
 msgstr "由外围 `Bind` 绑定的变量变为 `Bound(i)`，其中 `i` 计数该出现与其绑定子之间的绑定子个数（同名时最近的绑定子胜出）。自由变量变为 `Free`。结果总是良作用域的，且 α-等价的具名项给出相等的结果。"
 
-#: manual/api/debruijn.md:106
+#: manual/api/debruijn.md:109
 msgid "`to_named` converts De Bruijn syntax back to named syntax with deterministic binder names."
 msgstr "`to_named` 将 De Bruijn 语法转换回具名语法，并使用确定性的绑定子名字。"
 
-#: manual/api/debruijn.md:113
+#: manual/api/debruijn.md:116
 msgid "Binders are named `x`, `x_1`, `x_2`, …: each one gets the first name of that sequence that is neither a free name of the term nor the name of an enclosing binder. Returns `Err(NegativeIndex)` or `Err(UnboundIndex)` for an ill-scoped term. For a well-scoped `d`, `from_named(to_named(d))` is `d`; for a named `t`, `to_named(from_named(t))` is alpha-equivalent to `t`."
 msgstr "绑定子依次命名为 `x`、`x_1`、`x_2`、…：每个绑定子取该序列中第一个既不是项的自由名字、也不是外围绑定子名字的名字。对作用域不良的项返回 `Err(NegativeIndex)` 或 `Err(UnboundIndex)`。对良作用域的 `d`，`from_named(to_named(d))` 就是 `d`；对具名项 `t`，`to_named(from_named(t))` 与 `t` α-等价。"
 
-#: manual/api/debruijn.md:136
+#: manual/api/debruijn.md:139
 msgid "The binder becomes `x_1` because `x` is a free name of the term."
 msgstr "绑定子变为 `x_1`，因为 `x` 是该项的自由名字。"
 
-#: manual/api/debruijn.md:140
+#: manual/api/debruijn.md:143
 msgid "`validate` checks that every bound index refers to an enclosing binder."
 msgstr "`validate` 检查每个约束索引都指向某个外围绑定子。"
 
-#: manual/api/debruijn.md:146
+#: manual/api/debruijn.md:149
 msgid "Returns `Ok(())` for a well-scoped term and otherwise the first error found in pre-order."
 msgstr "对良作用域项返回 `Ok(())`，否则返回按前序遍历找到的第一个错误。"
 
-#: manual/api/debruijn.md:158
+#: manual/api/debruijn.md:161
 msgid "Index operations"
 msgstr "索引操作"
 
-#: manual/api/debruijn.md:162
+#: manual/api/debruijn.md:165
 msgid "`shift` adds `delta` to every index that is free relative to a cutoff."
 msgstr "`shift` 将 `delta` 加到每个相对于截断值为自由的索引上。"
 
-#: manual/api/debruijn.md:168
+#: manual/api/debruijn.md:171
 msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. It requires `cutoff >= 0`: a negative cutoff would treat indices bound inside `t` as free, so `shift` returns `Err(NegativeCutoff(cutoff~))` for it before looking at `t`, even when `t` has no index at all. The shift is defined when no index falls below the cutoff, that is, there is no `i >= cutoff + k` with `i + delta < cutoff + k`. Returns `Err(NegativeShift)` if an index would fall below the cutoff, where it would be captured by an enclosing binder or become negative, and `Err(NegativeIndex)` if the input contains a negative index."
 msgstr "`shift(t, delta, cutoff)` 即操作 $\\uparrow^{delta}_{cutoff}$：在 `k` 个绑定子之下，索引 `i >= cutoff + k` 变为 `i + delta`，较小的索引保持不变。它要求 `cutoff >= 0`：负的截断值会把 `t` 内部约束的索引当作自由索引，因此 `shift` 在查看 `t` 之前就对其返回 `Err(NegativeCutoff(cutoff~))`，即使 `t` 中根本没有索引。当没有索引落到截断值之下时，即不存在满足 `i + delta < cutoff + k` 的 `i >= cutoff + k` 时，移位才有定义。若某索引会落到截断值之下（从而被外围绑定子捕获或变为负数）则返回 `Err(NegativeShift)`，若输入包含负索引则返回 `Err(NegativeIndex)`。"
 
-#: manual/api/debruijn.md:181
+#: manual/api/debruijn.md:184
 msgid "`substitute_bound` replaces a free index by a term."
 msgstr "`substitute_bound` 用一个项替换一个自由索引。"
 
-#: manual/api/debruijn.md:187
+#: manual/api/debruijn.md:190
 msgid "`substitute_bound(t, j, s)` is $[j \\mapsto s]\\,t$: under `k` binders, `Bound(j + k)` is replaced by `s` shifted up by `k`, so that the free indices of `s` keep pointing at the same binders. Other indices are unchanged; the binder count of the result is not adjusted. Returns `Err(NegativeIndex)` for a negative `j` or a negative index in `t`. It does not check for unbound indices; use `validate` for that."
 msgstr "`substitute_bound(t, j, s)` 即 $[j \\mapsto s]\\,t$：在 `k` 个绑定子之下，`Bound(j + k)` 被替换为向上移位 `k` 的 `s`，使 `s` 的自由索引仍指向相同的绑定子。其他索引不变；结果的绑定子计数不作调整。对负的 `j` 或 `t` 中的负索引返回 `Err(NegativeIndex)`。它不检查未绑定的索引；请使用 `validate` 进行检查。"
 
-#: manual/api/debruijn.md:196
+#: manual/api/debruijn.md:199
 msgid "`instantiate` opens a binder body with an argument."
 msgstr "`instantiate` 用一个实参打开绑定子的体。"
 
-#: manual/api/debruijn.md:202
+#: manual/api/debruijn.md:205
 msgid "`instantiate(body, arg)` computes $\\uparrow^{-1}_0\\big([0 \\mapsto \\uparrow^{1}_0 arg]\\,body\\big)$, the result of the beta step $(\\lambda.\\,body)\\,arg$. On well-scoped input it never returns an error."
 msgstr "`instantiate(body, arg)` 计算 $\\uparrow^{-1}_0\\big([0 \\mapsto \\uparrow^{1}_0 arg]\\,body\\big)$，即 β 步 $(\\lambda.\\,body)\\,arg$ 的结果。在良作用域输入上它从不返回错误。"
 
-#: manual/api/debruijn.md:238
+#: manual/api/debruijn.md:241
 msgid "Reduction"
 msgstr "归约"
 
-#: manual/api/debruijn.md:242
+#: manual/api/debruijn.md:245
 msgid "`DbStepResult[T]` is the outcome of one De Bruijn reduction attempt."
 msgstr "`DbStepResult[T]` 是一次 De Bruijn 归约尝试的结果。"
 
-#: manual/api/debruijn.md:253
+#: manual/api/debruijn.md:256
 msgid "`NoStep` and `Reduced` have the meaning of `@rewrite.StepResult`; the rule name is always `\"beta\"`. `ScopeFailure` reports that the input is ill scoped: `reduce_once` validates the whole term before searching for a redex, and the error is the first one `validate` finds. No step is taken in that case."
 msgstr "`NoStep` 和 `Reduced` 的含义与 `@rewrite.StepResult` 相同；规则名总是 `\"beta\"`。`ScopeFailure` 报告输入的作用域不良：`reduce_once` 在搜索可约式之前先校验整个项，错误是 `validate` 找到的第一个错误。此时不进行任何一步归约。"
 
-#: manual/api/debruijn.md:261
+#: manual/api/debruijn.md:264
 msgid "`reduce_once` performs one leftmost-outermost beta step."
 msgstr "`reduce_once` 执行一步最左最外 β 归约。"
 
-#: manual/api/debruijn.md:267
+#: manual/api/debruijn.md:270
 msgid "A redex is `Apply(Bind(body), [a, ..rest])`; it becomes `instantiate(body, a)`, applied to `rest` if `rest` is not empty. An empty application `Apply(h, [])` is read as `h`, so a head wrapped in empty applications, as in `Apply(Apply(Bind(body), []), [a])`, still forms a redex; `Apply(Bind(body), [])` alone has no argument and is not one. The search order is the root, then the head, then the arguments from left to right, and binder bodies are entered."
 msgstr "可约式是 `Apply(Bind(body), [a, ..rest])`；它变为 `instantiate(body, a)`，若 `rest` 非空则再应用于 `rest`。空应用 `Apply(h, [])` 被读作 `h`，因此被空应用包裹的头部，如 `Apply(Apply(Bind(body), []), [a])`，仍然构成可约式；单独的 `Apply(Bind(body), [])` 没有参数，不是可约式。搜索顺序是根，然后是头部，然后从左到右是各参数，并且会进入绑定子的体。"
 
-#: manual/api/debruijn.md:275
+#: manual/api/debruijn.md:278
 msgid "`reduce_once` validates the whole term first, as `validate` does: an ill-scoped term gives `ScopeFailure` with the first error in pre-order, wherever the bad index is, for example `ScopeFailure(NegativeIndex(index=-1))` for `Bind(Bound(-1))` and `ScopeFailure(UnboundIndex(index=5, depth=1))` for `(λ. 5) 1`. A well-scoped term never gives `ScopeFailure`."
 msgstr "`reduce_once` 先像 `validate` 一样验证整个项：作用域不良的项无论坏索引在何处，都会得到带有先序中第一个错误的 `ScopeFailure`，例如 `Bind(Bound(-1))` 得到 `ScopeFailure(NegativeIndex(index=-1))`，`(λ. 5) 1` 得到 `ScopeFailure(UnboundIndex(index=5, depth=1))`。良作用域的项永远不会得到 `ScopeFailure`。"
 
-#: manual/api/debruijn.md:283
+#: manual/api/debruijn.md:286
 msgid "`DbNormalizationResult[T]` is the outcome of bounded De Bruijn normalization."
 msgstr "`DbNormalizationResult[T]` 是有界 De Bruijn 范式化的结果。"
 
-#: manual/api/debruijn.md:294
+#: manual/api/debruijn.md:297
 msgid "`ScopeFailure` carries the term that was found ill scoped, the error and the number of steps taken before it; `normalize` reports it only for its input, with `steps=0`."
 msgstr "`ScopeFailure` 携带被发现作用域不良的项、错误以及在此之前已执行的步数；`normalize` 只对其输入报告它，此时 `steps=0`。"
 
-#: manual/api/debruijn.md:300
+#: manual/api/debruijn.md:303
 msgid "`normalize` repeats `reduce_once` until no step applies, a step fails, or a step limit is reached."
 msgstr "`normalize` 重复执行 `reduce_once`，直到没有可执行的步骤、某一步失败或达到步数上限。"
 
-#: manual/api/debruijn.md:307
+#: manual/api/debruijn.md:310
 msgid "It has the step-count contract of `@rewrite.normalize`: at most `max_steps` steps, and one extra step attempt to classify the final term. It validates the input once: an ill-scoped term gives `ScopeFailure(term, error, steps=0)` without any step. Reducts of a well-scoped term are well scoped (see the [debruijn design](../design/debruijn.md)), so the later steps are not validated again, and the result is `ScopeFailure` exactly when the input is ill scoped."
 msgstr "它遵循 `@rewrite.normalize` 的步数契约：至多 `max_steps` 步，再加一次额外的步进尝试来判定最终项。输入只验证一次：作用域不良的项不执行任何步骤，直接得到 `ScopeFailure(term, error, steps=0)`。良作用域项的归约结果仍是良作用域的（见 [debruijn 设计](../design/debruijn.md)），因此后续步骤不再重新验证，且结果为 `ScopeFailure` 当且仅当输入作用域不良。"
 
@@ -626,114 +642,123 @@ msgstr "`BinderBody` 进入 `Bind` 的体，`ApplyHead` 进入 `Apply` 的头部
 msgid "`ReductionPath` is the sequence of frames from the root to a position."
 msgstr "`ReductionPath` 是从根到某个位置的帧序列。"
 
-#: manual/api/rewrite.md:143
-msgid "The empty path is the root."
-msgstr "空路径即根。"
+#: manual/api/rewrite.md:141
+msgid "The empty path is the root. The type is abstract: a path is built only with `root` and `prepend` and cannot be changed afterwards."
+msgstr "空路径表示根。该类型是抽象的：路径只能由 `root` 和 `prepend` 构造，构造后不能再改变。"
 
-#: manual/api/rewrite.md:147
+#: manual/api/rewrite.md:146
 msgid "These functions build and read paths."
 msgstr "这些函数构造和读取路径。"
 
 #: manual/api/rewrite.md:155
-msgid "`prepend(frame)` adds a frame at the root end, which is how a traversal lifts the path of a step in a child to the parent. `to_array` returns the frames root first."
-msgstr "`prepend(frame)` 在根端添加一帧，遍历正是借此把子节点中某一步的路径提升到父节点。`to_array` 返回以根开头的帧。"
+msgid "`prepend(frame)` adds a frame at the root end, which is how a traversal lifts the path of a step in a child to the parent. `length` is the number of frames, 0 for the root. `to_array` returns the frames root first, as a fresh array: changing it does not change the path."
+msgstr "`prepend(frame)` 在根端添加一帧，遍历正是借此把子节点中某一步的路径提升到父节点。`length` 是帧的个数，根为 0。`to_array` 以新数组的形式返回以根开头的帧：修改该数组不会改变路径。"
 
-#: manual/api/rewrite.md:161
+#: manual/api/rewrite.md:162
 msgid "`ReductionPath::equal` compares two paths frame by frame."
 msgstr "`ReductionPath::equal` 逐帧比较两条路径。"
 
-#: manual/api/rewrite.md:177
+#: manual/api/rewrite.md:179
 msgid "Single steps on `Term`"
 msgstr "`Term` 上的单步"
 
-#: manual/api/rewrite.md:181
+#: manual/api/rewrite.md:183
 msgid "`StepResult[T]` is the outcome of one reduction attempt."
 msgstr "`StepResult[T]` 是一次归约尝试的结果。"
 
-#: manual/api/rewrite.md:191
+#: manual/api/rewrite.md:193
 msgid "`NoStep` means the traversal found no position where the rule applies. `Reduced` records the whole term `before`, the whole term `after`, the rule and the path of the rewritten position. Exactly one position was rewritten: the subterm of `before` at `path` is a redex of the rule, and `after` is `before` with that subterm replaced by the rule's result. `equal` is the promoted `Eq` implementation, which compares terms structurally."
 msgstr "`NoStep` 表示遍历没有找到规则适用的位置。`Reduced` 记录整个项 `before`、整个项 `after`、规则以及被重写位置的路径。恰好有一个位置被重写：`before` 在 `path` 处的子项是该规则的可约式，而 `after` 是将该子项替换为规则结果后的 `before`。`equal` 是提升的 `Eq` 实现，按结构比较项。"
 
-#: manual/api/rewrite.md:200
+#: manual/api/rewrite.md:202
 msgid "`top_down_once` rewrites the first position, in pre-order, at which the rule applies."
 msgstr "`top_down_once` 按前序重写规则适用的第一个位置。"
 
-#: manual/api/rewrite.md:207
+#: manual/api/rewrite.md:209
 msgid "The rule is tried at a node before its children; children are visited head first, then arguments from left to right, and binder bodies are entered. The chosen position is the leftmost-outermost redex. `NoStep` means that the rule applies nowhere in the term."
 msgstr "规则先在节点本身上尝试，再在其子节点上尝试；子节点的访问顺序是先头部，再从左到右依次访问参数，并且会进入绑定子的体。所选位置是最左最外的可约式。`NoStep` 表示该规则在项中任何位置都不适用。"
 
-#: manual/api/rewrite.md:214
+#: manual/api/rewrite.md:216
 msgid "`bottom_up_once` rewrites the first position, in post-order, at which the rule applies."
 msgstr "`bottom_up_once` 按后序遍历，改写规则适用的第一个位置。"
 
-#: manual/api/rewrite.md:221
+#: manual/api/rewrite.md:223
 msgid "Children are tried before their parent, in the same left-to-right order. The chosen position is the leftmost-innermost redex of the n-ary tree: an application `Apply(h, [a1, …, an])` is one node, tried after all of its arguments. `NoStep` again means that the rule applies nowhere. The lambda calculus reads such a node as the curried spine $h\\,a_1 \\cdots a_n$, in which the beta redex $(\\lambda x.\\,b)\\,a_1$ does not contain $a_2, \\dots, a_n$; the `ApplicativeOrder` strategy of [eval](eval.md) follows that reading."
 msgstr "子节点先于其父节点尝试，顺序同样是从左到右。所选位置是 n 元树上的最左最内可约式：应用 `Apply(h, [a1, …, an])` 是一个节点，在其所有参数之后尝试。`NoStep` 同样表示该规则在任何位置都不适用。λ 演算把这样的节点读作柯里化的脊 $h\\,a_1 \\cdots a_n$，其中 beta 可约式 $(\\lambda x.\\,b)\\,a_1$ 不包含 $a_2, \\dots, a_n$；[eval](eval.md) 的 `ApplicativeOrder` 策略遵循这种读法。"
 
-#: manual/api/rewrite.md:258
+#: manual/api/rewrite.md:260
 msgid "Repeating steps on `Term`"
 msgstr "在 `Term` 上重复执行步骤"
 
-#: manual/api/rewrite.md:262
+#: manual/api/rewrite.md:264
 msgid "`NormalizationResult[T]` is the outcome of bounded repetition of a step function."
 msgstr "`NormalizationResult[T]` 是对步进函数进行有界重复的结果。"
 
-#: manual/api/rewrite.md:273
+#: manual/api/rewrite.md:275
 msgid "`NormalForm(term, steps)`: the step function returns `NoStep` on `term`, which was reached after `steps` steps. `StepLimitReached(term, steps)`: the limit of `steps` steps was used up and `term` can still be reduced."
 msgstr "`NormalForm(term, steps)`：步进函数在 `term` 上返回 `NoStep`，该项是经过 `steps` 步得到的。`StepLimitReached(term, steps)`：`steps` 步的上限已用尽，且 `term` 仍可继续归约。"
 
-#: manual/api/rewrite.md:279
+#: manual/api/rewrite.md:281
 msgid "`normalize` applies a step function until it returns `NoStep` or a step limit is reached."
 msgstr "`normalize` 反复应用步进函数，直到它返回 `NoStep` 或达到步数上限。"
 
-#: manual/api/rewrite.md:286
+#: manual/api/rewrite.md:288
 msgid "`normalize(term, step, max_steps)` performs at most `max_steps` successful steps and calls `step` at most `max_steps + 1` times: after the last allowed step it calls `step` once more to decide between `NormalForm` and `StepLimitReached`. With `max_steps <= 0` it performs no step and only classifies `term`. The step function decides the strategy; see [eval](eval.md) for ready-made ones."
 msgstr "`normalize(term, step, max_steps)` 至多执行 `max_steps` 个成功步骤，并且至多调用 `step` `max_steps + 1` 次：在最后一个允许的步骤之后，它会再调用一次 `step`，以判定结果是 `NormalForm` 还是 `StepLimitReached`。当 `max_steps <= 0` 时，它不执行任何步骤，只对 `term` 进行分类。归约策略由步进函数决定；现成的步进函数见 [eval](eval.md)。"
 
-#: manual/api/rewrite.md:295
+#: manual/api/rewrite.md:297
 msgid "`ReductionTrace[T]` records a bounded run: the initial term, every successful step and the final result."
 msgstr "`ReductionTrace[T]` 记录一次有界运行：初始项、每个成功的步骤以及最终结果。"
 
-#: manual/api/rewrite.md:310
-msgid "`initial()`, `steps()` and `result()` read the three fields; `steps()` returns a copy, and `equal` is the promoted `Eq` implementation. Every element of `steps` is a `Reduced` value, and `steps().length()` equals the `steps` count of `result`. When the step function keeps the contract of `StepResult` (it reports its own input as `before`, as every traversal of this package and of [eval](eval.md) does), consecutive steps chain: the first `before` is `initial`, and the `after` of one step is the `before` of the next. `trace` stores whatever the step function returns, so a hand-written step that reports another `before` breaks the chain."
-msgstr "`initial()`、`steps()` 和 `result()` 读取这三个字段；`steps()` 返回一个副本，`equal` 是提升的 `Eq` 实现。`steps` 中的每个元素都是一个 `Reduced` 值，且 `steps().length()` 等于 `result` 中的 `steps` 计数。当步进函数遵守 `StepResult` 的契约时（它把自身的输入报告为 `before`，本包和 [eval](eval.md) 的每个遍历都是如此），相邻步骤首尾相接：第一个 `before` 是 `initial`，前一步的 `after` 即后一步的 `before`。`trace` 存储步进函数返回的任何内容，因此一个报告了其他 `before` 的手写步进函数会破坏这条链。"
+#: manual/api/rewrite.md:308
+msgid "The type is abstract: only `trace` builds a trace, and `initial()`, `steps()` and `result()` read its three parts. `steps()` returns a fresh array, so changing it does not change the trace; the terms inside are shared, not copied, and must be treated as immutable (see [`Term`](syntax.md)). `equal` is the promoted `Eq` implementation. Every element of `steps` is a `Reduced` value, and `steps().length()` equals the `steps` count of `result`. When the step function keeps the contract of `StepResult` (it reports its own input as `before`, as every traversal of this package and of [eval](eval.md) does), consecutive steps chain: the first `before` is `initial`, and the `after` of one step is the `before` of the next. `trace` stores whatever the step function returns, so a hand-written step that reports another `before` breaks the chain."
+msgstr "该类型是抽象的：只有 `trace` 会构造轨迹，`initial()`、`steps()` 和 `result()` 读取它的三个部分。`steps()` 返回一个新数组，因此修改它不会改变轨迹；其中的项是共享的而非复制的，必须视为不可变（见 [`Term`](syntax.md)）。`equal` 是提升的 `Eq` 实现。`steps` 中的每个元素都是一个 `Reduced` 值，且 `steps().length()` 等于 `result` 中的 `steps` 计数。当步进函数遵守 `StepResult` 的契约时（它把自身的输入报告为 `before`，本包和 [eval](eval.md) 的每个遍历都是如此），相邻步骤首尾相接：第一个 `before` 是 `initial`，前一步的 `after` 即后一步的 `before`。`trace` 存储步进函数返回的任何内容，因此一个报告了其他 `before` 的手写步进函数会破坏这条链。"
 
-#: manual/api/rewrite.md:322
+#: manual/api/rewrite.md:323
 msgid "`trace` runs the same loop as `normalize` and records every step."
 msgstr "`trace` 运行与 `normalize` 相同的循环，并记录每一步。"
 
-#: manual/api/rewrite.md:350
-#: manual/api/syntax.md:239
+#: manual/api/rewrite.md:351
+#: manual/api/syntax.md:246
 msgid "Binding-aware ASTs"
 msgstr "感知绑定的 AST"
 
-#: manual/api/rewrite.md:354
+#: manual/api/rewrite.md:355
 msgid "`GenericStepResult[N]` is `StepResult` for a downstream AST `N`."
 msgstr "`GenericStepResult[N]` 是针对下游 AST `N` 的 `StepResult`。"
 
-#: manual/api/rewrite.md:366
+#: manual/api/rewrite.md:367
 msgid "`generic_top_down_once` is `top_down_once` for any `BindingSyntax` AST."
 msgstr "`generic_top_down_once` 是适用于任意 `BindingSyntax` AST 的 `top_down_once`。"
 
-#: manual/api/rewrite.md:372
+#: manual/api/rewrite.md:373
 msgid "The traversal uses `BindingSyntax::project` to find children and the trait constructors to rebuild the parents of the rewritten node. `Opaque` and variable nodes have no children; the rule is still tried on them."
 msgstr "遍历使用 `BindingSyntax::project` 查找子节点，并使用 trait 的构造函数重建被改写节点的各级父节点。`Opaque` 节点和变量节点没有子节点；规则仍会在它们上面尝试。"
 
-#: manual/api/rewrite.md:378
+#: manual/api/rewrite.md:379
 msgid "`GenericNormalizationResult[N]` is `NormalizationResult` for a downstream AST."
 msgstr "`GenericNormalizationResult[N]` 是针对下游 AST 的 `NormalizationResult`。"
 
-#: manual/api/rewrite.md:391
+#: manual/api/rewrite.md:392
 msgid "`generic_normalize` repeats `generic_top_down_once` with one rule until no step applies or the step limit is reached."
 msgstr "`generic_normalize` 使用同一条规则重复执行 `generic_top_down_once`，直到没有步骤可用或达到步数上限。"
 
-#: manual/api/rewrite.md:398
+#: manual/api/rewrite.md:399
 msgid "It has the same step-count contract as `normalize`, with the top-down strategy fixed."
 msgstr "它与 `normalize` 遵循相同的步数约定，只是策略固定为自顶向下。"
 
-#: manual/api/rewrite.md:413
+#: manual/api/rewrite.md:414
 msgid "For a downstream AST see the [adapter tutorial](../tutorial/adapter.md)."
 msgstr "关于下游 AST，请参阅[适配器教程](../tutorial/adapter.md)。"
+
+#: manual/api/rewrite.md:416
+#: manual/api/substitution.md:271
+msgid "Removed fields"
+msgstr "已移除的字段"
+
+#: manual/api/rewrite.md:418
+msgid "The fields `ReductionPath::frames` and `ReductionTrace::initial`, `steps` and `result` are no longer public. Use `ReductionPath::length` and `ReductionPath::to_array`, and the methods `ReductionTrace::initial`, `ReductionTrace::steps` and `ReductionTrace::result`."
+msgstr "字段 `ReductionPath::frames` 以及 `ReductionTrace::initial`、`steps` 和 `result` 不再公开。请使用 `ReductionPath::length` 和 `ReductionPath::to_array`，以及方法 `ReductionTrace::initial`、`ReductionTrace::steps` 和 `ReductionTrace::result`。"
 
 #: manual/api/stlc.md:1
 msgid "stlc API"
@@ -783,211 +808,235 @@ msgstr "签名与上下文"
 msgid "`Signature` assigns types to constants."
 msgstr "`Signature` 为常量指定类型。"
 
-#: manual/api/stlc.md:96
-msgid "`empty()` has no constants. `extend_with(c, ty)` returns a new signature with `c : ty` added; a later entry for the same name shadows an earlier one, and `lookup` returns the latest, or `None`. `to_array` returns a copy of the entries in insertion order, and `equal` compares the entry lists."
-msgstr "`empty()` 不含任何常量。`extend_with(c, ty)` 返回添加了 `c : ty` 的新签名；同名的较晚条目会遮蔽较早的条目，`lookup` 返回最新的那个，或返回 `None`。`to_array` 按插入顺序返回条目的副本，`equal` 比较条目列表。"
+#: manual/api/stlc.md:95
+msgid "The type is abstract: a signature is built only with `empty` and `extend_with` and cannot be changed afterwards. `empty()` has no constants. `extend_with(c, ty)` returns a new signature with `c : ty` added; a later entry for the same name shadows an earlier one, and `lookup` returns the latest, or `None`. `length` counts the entries, shadowed ones included. `to_array` returns a fresh array of the entries in insertion order, so changing it does not change the signature, and `equal` compares the entry lists."
+msgstr "该类型是抽象的：签名只能由 `empty` 和 `extend_with` 构造，构造后不能再改变。`empty()` 不含任何常量。`extend_with(c, ty)` 返回添加了 `c : ty` 的新签名；同名的较晚条目会遮蔽较早的条目，`lookup` 返回最新的那个，或返回 `None`。`length` 统计条目数，包括被遮蔽的条目。`to_array` 按插入顺序返回由条目组成的新数组，因此修改它不会改变签名；`equal` 比较条目列表。"
 
-#: manual/api/stlc.md:103
+#: manual/api/stlc.md:106
 msgid "`TypeContext` assigns types to free variables."
 msgstr "`TypeContext` 为自由变量指定类型。"
 
-#: manual/api/stlc.md:117
+#: manual/api/stlc.md:119
 msgid "The functions behave as those of `Signature`, with the same shadowing rule: the type checker extends the context when it enters a lambda, so the nearest binder of a name wins."
 msgstr "这些函数的行为与 `Signature` 的相应函数相同，遮蔽规则也相同：类型检查器在进入 lambda 时扩展上下文，因此一个名字由最近的绑定子决定。"
 
-#: manual/api/stlc.md:134
+#: manual/api/stlc.md:140
 msgid "Errors"
 msgstr "错误"
 
-#: manual/api/stlc.md:138
+#: manual/api/stlc.md:144
 msgid "`TypeError` reports why a term is rejected."
 msgstr "`TypeError` 报告项被拒绝的原因。"
 
-#: manual/api/stlc.md:154
+#: manual/api/stlc.md:160
 msgid "Case"
 msgstr "情形"
 
-#: manual/api/stlc.md:154
+#: manual/api/stlc.md:160
 msgid "Meaning"
 msgstr "含义"
 
-#: manual/api/stlc.md:156
+#: manual/api/stlc.md:162
 msgid "`x` is not in the context."
 msgstr "`x` 不在上下文中。"
 
-#: manual/api/stlc.md:157
+#: manual/api/stlc.md:163
 msgid "`c` is not in the signature."
 msgstr "`c` 不在签名中。"
 
-#: manual/api/stlc.md:158
+#: manual/api/stlc.md:164
 msgid "a lambda appears where its type must be inferred."
 msgstr "lambda 出现在必须推断其类型的位置。"
 
-#: manual/api/stlc.md:159
+#: manual/api/stlc.md:165
 msgid "a term of the non-function type `ty` is applied."
 msgstr "对非函数类型 `ty` 的项进行了应用。"
 
-#: manual/api/stlc.md:160
+#: manual/api/stlc.md:166
 msgid "the inferred type differs from the expected one."
 msgstr "推断出的类型与期望的类型不同。"
 
-#: manual/api/stlc.md:161
+#: manual/api/stlc.md:167
 msgid "an application node, `Apply(head, [])`, has no argument."
 msgstr "一个应用节点 `Apply(head, [])` 没有参数。"
 
-#: manual/api/stlc.md:162
+#: manual/api/stlc.md:168
 msgid "reserved for De Bruijn scope failures; not produced by the current functions."
 msgstr "为 De Bruijn 作用域错误保留；当前的函数不会产生。"
 
-#: manual/api/stlc.md:163
+#: manual/api/stlc.md:169
 msgid "an internal invariant of typed NbE failed; not expected for checked input."
 msgstr "带类型 NbE 的内部不变式失败；对已检查的输入不应出现。"
 
-#: manual/api/stlc.md:165
+#: manual/api/stlc.md:171
 msgid "Type checking"
 msgstr "类型检查"
 
-#: manual/api/stlc.md:169
+#: manual/api/stlc.md:175
 msgid "`infer` synthesizes the type of a term."
 msgstr "`infer` 合成项的类型。"
 
-#: manual/api/stlc.md:175
+#: manual/api/stlc.md:181
 msgid "The unit literal has type `Unit`, constants and variables have their declared types, and an application `f a_1 … a_n` has the result type of `f` after checking each argument against the corresponding domain. A lambda alone cannot be inferred (`CannotInferLambda`). A lambda applied directly to arguments, $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$, is inferred by inferring the type of $a_1$ and then typing $b\\,a_2 \\cdots a_n$ with $x$ given that type. If $x$ occurs free in $a_2, \\dots, a_n$, the parameter is first renamed to a fresh name, so those arguments keep the types they have in the context. An application with no arguments, at the root of a spine or nested in its head, gives `EmptyApplication`."
 msgstr "单位字面量的类型是 `Unit`，常量与变量具有其声明的类型，应用 `f a_1 … a_n` 在每个参数都对相应定义域检查之后，具有 `f` 的结果类型。单独的 lambda 无法推断（`CannotInferLambda`）。直接应用于参数的 lambda $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$ 的推断方式是：先推断 $a_1$ 的类型，再在 $x$ 具有该类型的前提下为 $b\\,a_2 \\cdots a_n$ 定型。若 $x$ 在 $a_2, \\dots, a_n$ 中自由出现，形参会先被改名为新名字，使这些参数保持它们在上下文中的类型。没有参数的应用，无论位于脊的根部还是嵌套在其头部，都会得到 `EmptyApplication`。"
 
-#: manual/api/stlc.md:188
+#: manual/api/stlc.md:194
 msgid "`check` verifies a term against a type."
 msgstr "`check` 将项对照类型进行检验。"
 
-#: manual/api/stlc.md:194
+#: manual/api/stlc.md:200
 msgid "A lambda checks against an arrow type by checking its body against the codomain, with the parameter given the domain. A lambda applied directly to arguments, $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$, is checked as `infer` types it, except that $b\\,a_2 \\cdots a_n$ is checked against the expected type instead of inferred: the type of $a_1$ is still inferred, and the parameter is renamed apart from $a_2, \\dots, a_n$ in the same way. So a redex whose result is a lambda, such as $(\\lambda x.\\,\\lambda y.\\,y)\\,()$, checks against an arrow type, also when it is the argument of a function. Every other term is inferred and compared with `==`; a difference gives `TypeMismatch`. An argument that is given to a lambda, such as $a_1$, must be inferable: a lambda there gives `CannotInferLambda`."
 msgstr "lambda 对照箭头类型进行检查时，会以定义域作为参数的类型，将体对照陪域进行检查。直接作用于参数的 lambda，即 $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$，按 `infer` 为其定型的方式检查，只是 $b\\,a_2 \\cdots a_n$ 对照期望类型进行检查，而不是被推断：$a_1$ 的类型仍然被推断，形参也以同样的方式改名，使其与 $a_2, \\dots, a_n$ 不冲突。因此，结果为 lambda 的可约式，例如 $(\\lambda x.\\,\\lambda y.\\,y)\\,()$，可以对照箭头类型通过检查，作为函数的参数时也是如此。其他所有项都先推断类型，再用 `==` 比较；若不同则给出 `TypeMismatch`。交给 lambda 的参数（如 $a_1$）必须可推断：该位置上的 lambda 会给出 `CannotInferLambda`。"
 
-#: manual/api/stlc.md:225
+#: manual/api/stlc.md:231
 msgid "A redex whose result is a lambda is checked against the expected arrow:"
 msgstr "结果为 lambda 的可约式会对照期望的箭头类型进行检查："
 
-#: manual/api/stlc.md:251
+#: manual/api/stlc.md:257
 msgid "The trailing arguments of a redex are typed in the context of the redex, not under its parameter:"
 msgstr "可约式的后续参数在可约式的上下文中定型，而不是在其形参之下："
 
-#: manual/api/stlc.md:274
+#: manual/api/stlc.md:280
 #: manual/api/utlc/lambda.md:123
 #: manual/api/utlc/nbe.md:186
 msgid "Normalization"
 msgstr "范式化"
 
-#: manual/api/stlc.md:278
+#: manual/api/stlc.md:284
 msgid "`normalize_checked` checks a term against a type and then normalizes it with the untyped beta-eta reducer."
 msgstr "`normalize_checked` 将项对照类型进行检查，然后用无类型的 β-η 归约器对其范式化。"
 
-#: manual/api/stlc.md:285
+#: manual/api/stlc.md:291
 msgid "On a type error it returns `Err` without reducing. Otherwise it returns `Ok(@lambda.normalize(term, max_steps))`: normal-order beta-eta reduction with a step limit. Its normal forms are beta-normal and eta-*short* (for unary applications, see [`@lambda.eta_rule`](utlc/lambda.md)). Because every well-typed term is strongly normalizing, a large enough `max_steps` always gives `NormalForm`."
 msgstr "遇到类型错误时，它返回 `Err` 而不进行归约。否则返回 `Ok(@lambda.normalize(term, max_steps))`：带步数上限的正规序 β-η 归约。其范式是 β-范式且 η-*短*的（针对一元应用，见 [`@lambda.eta_rule`](utlc/lambda.md)）。由于每个良类型项都是强范式化的，足够大的 `max_steps` 总会得到 `NormalForm`。"
 
-#: manual/api/stlc.md:294
+#: manual/api/stlc.md:300
 msgid "`normalize_eta_long` checks a term against a type and returns its beta-normal, eta-long form, computed by typed normalization by evaluation."
 msgstr "`normalize_eta_long` 将项对照类型进行检查，并返回其 β-范式、η-长形式，该形式通过带类型的求值范式化计算得到。"
 
-#: manual/api/stlc.md:301
+#: manual/api/stlc.md:307
 msgid "In the result, every subterm of arrow type is a lambda, and every application has a variable or a constant at its head. Variables of the context and constants of the signature are kept as they are and eta-expanded according to their types. No step limit is needed: well-typed terms always normalize. New binder names are `x`, `x_1`, … chosen to avoid every name of the term and the context."
 msgstr "在结果中，每个箭头类型的子项都是 lambda，每个应用的头部都是变量或常量。上下文中的变量和签名中的常量保持原样，并按其类型进行 η-展开。不需要步数上限：良类型的项总能范式化。新的绑定子名称为 `x`、`x_1`、…，其选取会避开项和上下文中的所有名字。"
 
-#: manual/api/stlc.md:337
+#: manual/api/stlc.md:343
 msgid "The hidden method forms `not_equal` and `to_repr` on the types of this package are deprecated; use `!=` and `Repr(x)`."
 msgstr "本包中各类型上隐藏的方法形式 `not_equal` 和 `to_repr` 已弃用；请使用 `!=` 和 `Repr(x)`。"
+
+#: manual/api/stlc.md:346
+msgid "The field `entries` of `Signature` and of `TypeContext` is no longer public; use `lookup`, `length` and `to_array` instead."
+msgstr "`Signature` 和 `TypeContext` 的字段 `entries` 不再公开；请改用 `lookup`、`length` 和 `to_array`。"
 
 #: manual/api/substitution.md:1
 msgid "substitution API"
 msgstr "substitution API"
 
 #: manual/api/substitution.md:5
-msgid "The `substitution` package replaces free variables by terms without capturing variables. `Substitution[T]` works on `@syntax.Term[T]`; `GenericSubstitution[N]` works on any AST that implements `@syntax.BindingSyntax`. Both are finite, simultaneous and immutable."
-msgstr "`substitution` 包用项替换自由变量，且不会捕获变量。`Substitution[T]` 作用于 `@syntax.Term[T]`；`GenericSubstitution[N]` 作用于任何实现了 `@syntax.BindingSyntax` 的 AST。两者都是有限的、同时的且不可变的。"
+msgid "The `substitution` package replaces free variables by terms without capturing variables. `Substitution[T]` works on `@syntax.Term[T]`; `GenericSubstitution[N]` works on any AST that implements `@syntax.BindingSyntax`. Both are finite, simultaneous and immutable: they are abstract types, every operation returns a new value, and every method that returns an array returns a fresh copy."
+msgstr "`substitution` 包用项替换自由变量，且不会捕获变量。`Substitution[T]` 作用于 `@syntax.Term[T]`；`GenericSubstitution[N]` 作用于任何实现了 `@syntax.BindingSyntax` 的 AST。两者都是有限的、同时的且不可变的：它们是抽象类型，每个操作都返回新值，且每个返回数组的方法都返回一个新的副本。"
 
-#: manual/api/substitution.md:10
+#: manual/api/substitution.md:12
 msgid "The definition of capture-avoiding substitution and the proofs of its laws are in the [substitution design](../design/substitution.md)."
 msgstr "避免捕获的代换的定义及其定律的证明见[代换设计](../design/substitution.md)。"
 
-#: manual/api/substitution.md:29
+#: manual/api/substitution.md:31
 msgid "Substitutions on `Term`"
 msgstr "`Term` 上的代换"
 
-#: manual/api/substitution.md:33
+#: manual/api/substitution.md:35
 msgid "`Substitution[T]` is a finite map from names to replacement terms."
 msgstr "`Substitution[T]` 是从名字到替换项的有限映射。"
 
 #: manual/api/substitution.md:41
-msgid "It denotes the map $\\sigma$ with $\\sigma(x) = s$ for an entry $(x, s)$ and $\\sigma(x) = x$ (the variable itself) for every other name. The entries are read-only outside the package; at most one entry exists per name."
-msgstr "它表示映射 $\\sigma$：对于条目 $(x, s)$ 有 $\\sigma(x) = s$，对于其他所有名字有 $\\sigma(x) = x$（即变量本身）。这些条目在包外是只读的；每个名字至多有一个条目。"
+msgid "It denotes the map $\\sigma$ with $\\sigma(x) = s$ for an entry $(x, s)$ and $\\sigma(x) = x$ (the variable itself) for every other name. The type is abstract: the entries cannot be reached from outside the package, so the functions below are the only way to build a substitution, and each name has at most one entry."
+msgstr "它表示映射 $\\sigma$：对于条目 $(x, s)$ 有 $\\sigma(x) = s$，对于其他所有名字有 $\\sigma(x) = x$（即变量本身）。该类型是抽象的：包外无法触及这些条目，因此下面的函数是构造替换的唯一途径，且每个名字至多有一个条目。"
 
 #: manual/api/substitution.md:47
+msgid "Replacement terms are stored and returned as they are, not copied: `get`, `to_array` and `apply` return terms that share structure with the terms passed to `singleton` and `set`. `Term` is a plain enum whose `Apply` arguments are an `Array`, so treat terms as immutable values; changing the argument array of a term in place would also change every substitution that holds it."
+msgstr "替换项按原样存储和返回，不会被复制：`get`、`to_array` 和 `apply` 返回的项与传给 `singleton` 和 `set` 的项共享结构。`Term` 是一个普通的枚举，其 `Apply` 的参数是一个 `Array`，因此请把项视为不可变值；原地修改某个项的参数数组，也会改变所有持有该项的替换。"
+
+#: manual/api/substitution.md:56
 msgid "These functions build substitutions."
 msgstr "以下函数用于构建代换。"
 
-#: manual/api/substitution.md:55
+#: manual/api/substitution.md:64
 msgid "`set(x, s)` adds $x \\mapsto s$, replacing an existing entry for `x` in place."
 msgstr "`set(x, s)` 添加 $x \\mapsto s$，若 `x` 已有条目则就地替换。"
 
-#: manual/api/substitution.md:59
+#: manual/api/substitution.md:68
 msgid "`Substitution::get` returns the replacement for a name, if any."
 msgstr "`Substitution::get` 返回某个名字的替换项（如果有）。"
 
-#: manual/api/substitution.md:67
+#: manual/api/substitution.md:76
+msgid "These methods read the entries of a substitution."
+msgstr "这些方法读取替换的条目。"
+
+#: manual/api/substitution.md:83
+msgid "`length` is the number of names in the domain. `to_array` returns the entries `(x, s)` as a fresh array, in the order the names were first added; changing the array does not change the substitution."
+msgstr "`length` 是定义域中名字的个数。`to_array` 以新数组的形式返回条目 `(x, s)`，顺序为名字首次加入的顺序；修改该数组不会改变替换。"
+
+#: manual/api/substitution.md:105
 msgid "These methods shrink the domain of a substitution."
 msgstr "以下方法用于缩小代换的定义域。"
 
-#: manual/api/substitution.md:74
+#: manual/api/substitution.md:112
 msgid "`without(x)` drops the entry for `x`, which is what a binder for `x` does. `restrict(names)` keeps only the entries whose name is in `names`."
 msgstr "`without(x)` 删除 `x` 的条目，这正是 `x` 的绑定子所起的作用。`restrict(names)` 只保留名字属于 `names` 的条目。"
 
-#: manual/api/substitution.md:94
+#: manual/api/substitution.md:132
 msgid "`Substitution::apply` replaces the free variables of a term simultaneously, renaming binders to avoid capture."
 msgstr "`Substitution::apply` 同时替换项中的自由变量，并重命名绑定子以避免捕获。"
 
-#: manual/api/substitution.md:101
+#: manual/api/substitution.md:139
 msgid "Every free occurrence of a name `x` in the domain is replaced by its replacement; nothing is substituted inside an inserted replacement. Under `Bind(y, body)` the entry for `y` is ignored. When a replacement that is actually inserted into `body` has `y` free, the binder is renamed to a fresh name first, so free variables of replacements stay free. The result is determined up to the choice of fresh names, which is deterministic."
 msgstr "定义域中名字 `x` 的每个自由出现都被替换为其替换项；不会在插入的替换项内部再做代换。在 `Bind(y, body)` 之下，`y` 的条目被忽略。当某个实际插入到 `body` 中的替换项含有自由的 `y` 时，会先将绑定子重命名为新鲜名字，从而替换项中的自由变量保持自由。结果在新鲜名字的选取意义下是确定的，而该选取本身是确定性的。"
 
-#: manual/api/substitution.md:122
+#: manual/api/substitution.md:160
 msgid "`Substitution::then` composes two substitutions, applying `self` first."
 msgstr "`Substitution::then` 复合两个代换，先应用 `self`。"
 
-#: manual/api/substitution.md:128
+#: manual/api/substitution.md:166
 msgid "`s.then(t)` maps each `x` in the domain of `s` to `t.apply(s(x))`, and each other `x` in the domain of `t` to `t(x)`. For every term, `s.then(t).apply(term)` is alpha-equivalent to `t.apply(s.apply(term))`."
 msgstr "`s.then(t)` 将 `s` 定义域中的每个 `x` 映射到 `t.apply(s(x))`，将 `t` 定义域中的其余每个 `x` 映射到 `t(x)`。对于每个项，`s.then(t).apply(term)` 与 `t.apply(s.apply(term))` α-等价。"
 
-#: manual/api/substitution.md:152
+#: manual/api/substitution.md:190
 msgid "`from_renaming` turns a renaming into a substitution on a given set of names."
 msgstr "`from_renaming` 将一个重命名转换为作用于给定名字集合上的代换。"
 
-#: manual/api/substitution.md:158
+#: manual/api/substitution.md:196
 msgid "The result maps each listed name `x` with `renaming.apply(x) != x` to `Variable(renaming.apply(x))`. When the free variables of a term are among the listed names, applying the result is alpha-equivalent to `term.rename_free(renaming)`."
 msgstr "结果将每个满足 `renaming.apply(x) != x` 的所列名字 `x` 映射到 `Variable(renaming.apply(x))`。当项的自由变量都在所列名字之中时，应用该结果与 `term.rename_free(renaming)` α-等价。"
 
-#: manual/api/substitution.md:175
+#: manual/api/substitution.md:213
 msgid "Substitutions on binding-aware ASTs"
 msgstr "感知绑定的 AST 上的代换"
 
-#: manual/api/substitution.md:179
+#: manual/api/substitution.md:217
 msgid "`GenericSubstitution[N]` is a finite map from names to nodes of a downstream AST `N`."
 msgstr "`GenericSubstitution[N]` 是从名字到下游 AST `N` 的节点的有限映射。"
 
-#: manual/api/substitution.md:190
+#: manual/api/substitution.md:224
+msgid "Like `Substitution`, the type is abstract and has at most one entry per name. Replacement nodes are stored and returned without copying."
+msgstr "与 `Substitution` 一样，该类型是抽象的，每个名字至多有一个条目。替换节点在存储和返回时都不会被复制。"
+
+#: manual/api/substitution.md:229
 msgid "These functions build and query generic substitutions; they behave exactly like their `Substitution` counterparts."
 msgstr "以下函数用于构建和查询泛型代换；它们的行为与对应的 `Substitution` 版本完全相同。"
 
-#: manual/api/substitution.md:203
+#: manual/api/substitution.md:244
 msgid "`GenericSubstitution::apply_once` applies the substitution to a node in one simultaneous, capture-avoiding pass."
 msgstr "`GenericSubstitution::apply_once` 以一趟同时且避免捕获的遍历将代换应用于节点。"
 
-#: manual/api/substitution.md:210
+#: manual/api/substitution.md:251
 msgid "The algorithm is the one of `Substitution::apply`, run through `BindingSyntax::project` and rebuilt with `variable`, `apply` and `bind`. `Opaque` nodes are returned unchanged. \"Once\" means that inserted replacements are not visited again: substituting $x \\mapsto y$ and $y \\mapsto 2$ in $x + y$ gives $y + 2$, not $2 + 2$."
 msgstr "算法与 `Substitution::apply` 相同，通过 `BindingSyntax::project` 执行，并用 `variable`、`apply` 和 `bind` 重建。`Opaque` 节点原样返回。“Once”的意思是不会再次访问插入的替换项：在 $x + y$ 中代换 $x \\mapsto y$ 和 $y \\mapsto 2$ 得到 $y + 2$，而不是 $2 + 2$。"
 
-#: manual/api/substitution.md:227
+#: manual/api/substitution.md:268
 msgid "On `Term[T]`, `apply_once` agrees with `Substitution::apply`. For a downstream AST see the [adapter tutorial](../tutorial/adapter.md)."
 msgstr "在 `Term[T]` 上，`apply_once` 与 `Substitution::apply` 一致。关于下游 AST，请参阅[适配器教程](../tutorial/adapter.md)。"
+
+#: manual/api/substitution.md:273
+msgid "The field `entries` of `Substitution` and of `GenericSubstitution` is no longer public. Read a substitution with `get`, `length` and `to_array`."
+msgstr "`Substitution` 和 `GenericSubstitution` 的字段 `entries` 不再公开。请用 `get`、`length` 和 `to_array` 读取替换。"
 
 #: manual/api/syntax.md:1
 msgid "syntax API"
@@ -1030,143 +1079,147 @@ msgstr "`Bind(x, body)` 在 `body` 中绑定 `x`。在 lambda 演算中它是 $\
 msgid "`==` (`Term::equal`) is structural equality: binder names must match literally. Use `alpha_equal` to compare terms up to renaming of bound variables."
 msgstr "`==`（`Term::equal`）是结构相等：绑定子名字必须字面一致。若要在约束变量重命名的意义下比较项，请使用 `alpha_equal`。"
 
-#: manual/api/syntax.md:73
+#: manual/api/syntax.md:59
+msgid "Terms are values that the library shares instead of copying: an operation may return its argument, a subterm of it, or a term stored in a substitution or a reduction trace. The argument list of `Apply` is an ordinary `Array`, so the compiler does not stop you from changing it in place, but doing so changes every term and every library value that shares it. Treat terms as immutable: build a new `Apply` node instead of changing the array of an existing one."
+msgstr "项是库共享而非复制的值：一个操作可能返回它的参数、参数的子项，或存储在替换或归约轨迹中的项。`Apply` 的参数列表是一个普通的 `Array`，因此编译器不会阻止你原地修改它，但这样做会改变所有共享它的项和库中的值。请把项视为不可变：构造新的 `Apply` 节点，而不是修改已有节点的数组。"
+
+#: manual/api/syntax.md:80
 msgid "`Term::equal` compares two terms structurally."
 msgstr "`Term::equal` 按结构比较两个项。"
 
-#: manual/api/syntax.md:79
+#: manual/api/syntax.md:86
 msgid "It is the promoted `Eq` implementation. `λx.x` and `λy.y` are not `equal`."
 msgstr "它是提升而来的 `Eq` 实现。`λx.x` 与 `λy.y` 并不 `equal`。"
 
-#: manual/api/syntax.md:83
+#: manual/api/syntax.md:90
 msgid "`Term::map_values` applies a function to every domain value and keeps the variables and binders."
 msgstr "`Term::map_values` 对每个领域值应用一个函数，并保留变量和绑定子。"
 
-#: manual/api/syntax.md:90
+#: manual/api/syntax.md:97
 msgid "It is a functor map: `t.map_values(v => v)` is `t`, and mapping `f` then `g` equals mapping `v => g(f(v))`. Free variables are unchanged."
 msgstr "它是函子映射：`t.map_values(v => v)` 就是 `t`，先映射 `f` 再映射 `g` 等于映射 `v => g(f(v))`。自由变量保持不变。"
 
-#: manual/api/syntax.md:102
+#: manual/api/syntax.md:109
 msgid "Analyses"
 msgstr "分析"
 
-#: manual/api/syntax.md:106
+#: manual/api/syntax.md:113
 msgid "`free_variables` returns the names that occur free in a term."
 msgstr "`free_variables` 返回在项中自由出现的名字。"
 
-#: manual/api/syntax.md:112
+#: manual/api/syntax.md:119
 msgid "An occurrence of `x` is free when no enclosing `Bind(x, _)` binds it. Values contribute no names. Cost: $O(n)$ set operations for a term of size $n$."
 msgstr "当没有外层的 `Bind(x, _)` 绑定 `x` 的某次出现时，该出现是自由的。值不贡献任何名字。代价：对大小为 $n$ 的项需要 $O(n)$ 次集合运算。"
 
-#: manual/api/syntax.md:117
+#: manual/api/syntax.md:124
 msgid "`all_names` returns every name in a term: free variables, bound occurrences and binder names."
 msgstr "`all_names` 返回项中的每个名字：自由变量、约束出现和绑定子名字。"
 
-#: manual/api/syntax.md:124
+#: manual/api/syntax.md:131
 msgid "Use it as the \"used\" set when choosing a fresh name for a term."
 msgstr "为项选取新鲜名字时，可将其用作“已使用”集合。"
 
-#: manual/api/syntax.md:142
+#: manual/api/syntax.md:149
 msgid "`alpha_equal` decides whether two terms are equal up to the names of bound variables."
 msgstr "`alpha_equal` 判定两个项在约束变量名字的意义下是否相等。"
 
-#: manual/api/syntax.md:149
+#: manual/api/syntax.md:156
 msgid "Values are compared with `T`'s `==`, free variables by name, and bound variables by the binder they refer to, in one simultaneous traversal of both terms."
 msgstr "值用 `T` 的 `==` 比较，自由变量按名字比较，约束变量按其所指的绑定子比较，整个过程是对两个项的一趟同时遍历。"
 
-#: manual/api/syntax.md:153
+#: manual/api/syntax.md:160
 msgid "`alpha_equal` is the payload equality lifted through binders, so it inherits the properties of `T`'s `==`: each of reflexivity, symmetry and transitivity holds for `alpha_equal` exactly when it holds for that `==`, so `alpha_equal` is an equivalence relation exactly when `==` is one. When `==` is the identity of `T` (as for `Int` or `String`), it is alpha-equivalence. `Double` follows IEEE 754: `NaN` is not equal to itself, so a term with a `NaN` payload is not alpha-equal to itself, while `0.0` and `-0.0` are equal payloads."
 msgstr "`alpha_equal` 是把载荷相等关系穿过绑定子提升所得的关系，因此继承 `T` 的 `==` 的性质：自反性、对称性、传递性中的每一条对 `alpha_equal` 成立，当且仅当它对该 `==` 成立；所以 `alpha_equal` 是等价关系当且仅当 `==` 是等价关系。当 `==` 是 `T` 上的恒等关系时（如 `Int` 或 `String`），它就是 α-等价。`Double` 遵循 IEEE 754：`NaN` 不等于自身，所以含 `NaN` 载荷的项与自身不 α-相等，而 `0.0` 与 `-0.0` 是相等的载荷。"
 
-#: manual/api/syntax.md:184
+#: manual/api/syntax.md:191
 msgid "Renaming"
 msgstr "重命名"
 
-#: manual/api/syntax.md:188
+#: manual/api/syntax.md:195
 msgid "`Term::rename_free` applies a renaming to the free variables of a term, renaming binders where necessary to avoid capture."
 msgstr "`Term::rename_free` 对项的自由变量应用重命名，并在必要时重命名绑定子以避免捕获。"
 
-#: manual/api/syntax.md:195
+#: manual/api/syntax.md:202
 msgid "Under `Bind(x, body)` the renaming loses its entry for `x`, because the bound `x` is a different variable. If a remaining target of the renaming equals `x`, the binder is renamed to a fresh name first. The result is alpha-equivalent to the textbook capture-avoiding renaming."
 msgstr "在 `Bind(x, body)` 之下，重命名会失去 `x` 的条目，因为被绑定的 `x` 是另一个变量。如果重命名剩余的某个目标等于 `x`，会先将绑定子重命名为新鲜名字。结果与教科书中避免捕获的重命名 α-等价。"
 
-#: manual/api/syntax.md:213
+#: manual/api/syntax.md:220
 msgid "`Term::alpha_rename_bound` renames the occurrences of a variable that are bound by an enclosing binder, refusing a target name that could be captured."
 msgstr "`Term::alpha_rename_bound` 重命名被外层绑定子约束的某个变量的各次出现，并拒绝可能被捕获的目标名字。"
 
-#: manual/api/syntax.md:220
+#: manual/api/syntax.md:227
 msgid "Call it on the *body* of a binder: `body.alpha_rename_bound(from, to_)` replaces the occurrences of `from` that are free in `body` (and therefore bound by the enclosing `Bind(from, body)`) with `to_`. Inner binders named `from` stop the renaming. The result is `None` when `to_` occurs anywhere in `body`, and `Some(body)` when `from == to_`. On success, `Bind(from, body)` and `Bind(to_, result)` are alpha-equivalent."
 msgstr "请在绑定子的*体*上调用它：`body.alpha_rename_bound(from, to_)` 将 `from` 在 `body` 中自由（因而被外层 `Bind(from, body)` 约束）的出现替换为 `to_`。名为 `from` 的内层绑定子会阻止重命名。当 `to_` 出现在 `body` 中任何位置时结果为 `None`，当 `from == to_` 时结果为 `Some(body)`。成功时，`Bind(from, body)` 与 `Bind(to_, result)` α-等价。"
 
-#: manual/api/syntax.md:243
+#: manual/api/syntax.md:250
 msgid "`BindingView[N]` is the one-layer view of a node that generic algorithms inspect."
 msgstr "`BindingView[N]` 是泛型算法所检查的节点的单层视图。"
 
-#: manual/api/syntax.md:255
+#: manual/api/syntax.md:262
 msgid "`Opaque` marks a node with no variables inside, such as a literal. The other cases mirror the constructors of `Term`, with the children left in the downstream type `N`."
 msgstr "`Opaque` 标记内部不含变量的节点，例如字面量。其他情形与 `Term` 的构造器一一对应，子节点保留为下游类型 `N`。"
 
-#: manual/api/syntax.md:261
+#: manual/api/syntax.md:268
 msgid "`BindingSyntax` is the open trait that a downstream AST implements to use the generic binding algorithms."
 msgstr "`BindingSyntax` 是开放 trait，下游 AST 实现它即可使用泛型绑定算法。"
 
-#: manual/api/syntax.md:273
+#: manual/api/syntax.md:280
 msgid "`project(node)` tells the algorithms what the node is."
 msgstr "`project(node)` 告诉算法该节点是什么。"
 
-#: manual/api/syntax.md:274
+#: manual/api/syntax.md:281
 msgid "`variable`, `apply` and `bind` rebuild nodes of each kind."
 msgstr "`variable`、`apply` 和 `bind` 分别重建各类节点。"
 
-#: manual/api/syntax.md:276
+#: manual/api/syntax.md:283
 msgid "An implementation must make `project` and the three constructors agree: `project(variable(x))` is `Variable(x)`, `project(apply(h, args))` is `Apply(h, args)`, `project(bind(x, b))` is `Bind(x, b)`, and rebuilding a projected `Apply` or `Bind` node gives back an equivalent node. An `Opaque` node must not contain variables. The [adapter design](../design/adapter.md) explains these laws; the [adapter tutorial](../tutorial/adapter.md) implements them for a small AST."
 msgstr "实现必须使 `project` 与三个构造器保持一致：`project(variable(x))` 为 `Variable(x)`，`project(apply(h, args))` 为 `Apply(h, args)`，`project(bind(x, b))` 为 `Bind(x, b)`，并且重建一个投影得到的 `Apply` 或 `Bind` 节点会得到等价的节点。`Opaque` 节点不得包含变量。[适配器设计](../design/adapter.md)解释了这些定律；[适配器教程](../tutorial/adapter.md)为一个小型 AST 实现了它们。"
 
-#: manual/api/syntax.md:284
+#: manual/api/syntax.md:291
 msgid "Call the trait methods through the trait, for example `@syntax.BindingSyntax::project(node)`."
 msgstr "请通过 trait 调用 trait 方法，例如 `@syntax.BindingSyntax::project(node)`。"
 
-#: manual/api/syntax.md:289
+#: manual/api/syntax.md:296
 msgid "`Term[T]` implements `BindingSyntax` with the obvious projection."
 msgstr "`Term[T]` 以显然的投影实现了 `BindingSyntax`。"
 
-#: manual/api/syntax.md:295
+#: manual/api/syntax.md:302
 msgid "`Value` projects to `Opaque` and every other constructor to the case of the same name, so the generic functions below agree with their `Term` versions on `Term` values."
 msgstr "`Value` 投影为 `Opaque`，其他每个构造器投影为同名的情形，因此下面的泛型函数在 `Term` 值上与其 `Term` 版本一致。"
 
-#: manual/api/syntax.md:312
+#: manual/api/syntax.md:319
 msgid "These functions compute free variables and all names for any `BindingSyntax` type."
 msgstr "以下函数为任意 `BindingSyntax` 类型计算自由变量和全部名字。"
 
-#: manual/api/syntax.md:320
+#: manual/api/syntax.md:327
 msgid "On `Term[T]` they return the same sets as `free_variables` and `all_names`."
 msgstr "在 `Term[T]` 上，它们返回与 `free_variables` 和 `all_names` 相同的集合。"
 
-#: manual/api/syntax.md:324
+#: manual/api/syntax.md:331
 msgid "`generic_alpha_rename_bound` is `Term::alpha_rename_bound` for any `BindingSyntax` type."
 msgstr "`generic_alpha_rename_bound` 是适用于任意 `BindingSyntax` 类型的 `Term::alpha_rename_bound`。"
 
-#: manual/api/syntax.md:331
+#: manual/api/syntax.md:338
 msgid "It returns `None` when the target name occurs in the node, and rebuilds the renamed node through `variable`, `apply` and `bind`."
 msgstr "当目标名字出现在节点中时，它返回 `None`；它通过 `variable`、`apply` 和 `bind` 重建重命名后的节点。"
 
-#: manual/api/syntax.md:351
+#: manual/api/syntax.md:358
 msgid "`Term::variable(name)` method form"
 msgstr "`Term::variable(name)` 方法形式"
 
-#: manual/api/syntax.md:352
+#: manual/api/syntax.md:359
 msgid "`Term::apply(head, args)` method form"
 msgstr "`Term::apply(head, args)` 方法形式"
 
-#: manual/api/syntax.md:353
+#: manual/api/syntax.md:360
 msgid "`Term::bind(name, body)` method form"
 msgstr "`Term::bind(name, body)` 方法形式"
 
-#: manual/api/syntax.md:355
+#: manual/api/syntax.md:362
 msgid "`Repr(term)` or `@debug.to_string(term)`"
 msgstr "`Repr(term)` 或 `@debug.to_string(term)`"
 
-#: manual/api/syntax.md:357
+#: manual/api/syntax.md:364
 msgid "These method forms were implicit promotions of trait methods. They are kept hidden and deprecated so that old callers still compile."
 msgstr "这些方法形式原本是 trait 方法的隐式提升。保留它们（隐藏且已弃用）是为了让旧的调用者仍能编译。"
 
@@ -1400,7 +1453,7 @@ msgstr "**定律不由编译器检查。** 契约必须陈述得足够精确，�
 #: manual/design/core.md:21
 #: manual/design/debruijn.md:21
 #: manual/design/eval.md:23
-#: manual/design/rewrite.md:21
+#: manual/design/rewrite.md:23
 #: manual/design/stlc.md:20
 #: manual/design/substitution.md:23
 #: manual/design/syntax.md:22
@@ -1461,7 +1514,7 @@ msgstr "`generic_top_down_once` 满足 [rewrite 设计](rewrite.md)中的单可�
 #: manual/design/core.md:125
 #: manual/design/debruijn.md:112
 #: manual/design/eval.md:134
-#: manual/design/rewrite.md:78
+#: manual/design/rewrite.md:80
 #: manual/design/stlc.md:67
 #: manual/design/substitution.md:62
 #: manual/design/syntax.md:71
@@ -1519,10 +1572,10 @@ msgid "A downstream variable type converts to `@core.Name` by an injective map (
 msgstr "下游变量类型通过单射（不同变量映射到不同名）转换为 `@core.Name`。正是单射性使名的相等与变量的同一性一致，从而对下游变量而言新鲜性和捕获检查是正确的。"
 
 #: manual/design/adapter.md:132
-#: manual/design/core.md:168
+#: manual/design/core.md:170
 #: manual/design/debruijn.md:242
 #: manual/design/eval.md:203
-#: manual/design/rewrite.md:182
+#: manual/design/rewrite.md:184
 #: manual/design/stlc.md:386
 #: manual/design/substitution.md:130
 #: manual/design/syntax.md:286
@@ -1572,12 +1625,12 @@ msgid "Downstream adapters should add tests of (V1)–(V5) for their own node ki
 msgstr "下游 adapter 应为自己的节点种类添加 (V1)–(V5) 的测试：投影每个构造子的结果，重建每个被投影的节点，并检查 opaque 节点没有自由变量。"
 
 #: manual/design/adapter.md:147
-#: manual/design/core.md:182
+#: manual/design/core.md:187
 #: manual/design/debruijn.md:263
 #: manual/design/eval.md:226
-#: manual/design/rewrite.md:207
+#: manual/design/rewrite.md:212
 #: manual/design/stlc.md:412
-#: manual/design/substitution.md:329
+#: manual/design/substitution.md:336
 #: manual/design/syntax.md:309
 #: manual/design/utlc/lambda.md:232
 #: manual/design/utlc/nbe.md:355
@@ -1597,12 +1650,12 @@ msgid "**Checking the laws at run time.** The laws are equations over all nodes;
 msgstr "**在运行时检查定律。** 这些定律是关于所有节点的等式；它们通过测试验证，而非强制执行。"
 
 #: manual/design/adapter.md:158
-#: manual/design/core.md:195
+#: manual/design/core.md:200
 #: manual/design/debruijn.md:275
 #: manual/design/eval.md:240
-#: manual/design/rewrite.md:219
+#: manual/design/rewrite.md:224
 #: manual/design/stlc.md:425
-#: manual/design/substitution.md:343
+#: manual/design/substitution.md:350
 #: manual/design/syntax.md:323
 #: manual/design/utlc/lambda.md:243
 #: manual/design/utlc/nbe.md:374
@@ -1750,66 +1803,66 @@ msgid "Persistent values by copying"
 msgstr "通过复制实现持久值"
 
 #: manual/design/core.md:155
-msgid "`Context`, `Telescope` and `Renaming` are immutable records over arrays. Every update copies the array, which costs $O(n)$. The alternative, a persistent list or tree, would make updates cheaper but the sizes involved are the number of binders in scope, which is small for the intended use. Copying keeps the representation simple and the values safe to share."
-msgstr "`Context`、`Telescope` 和 `Renaming` 是基于数组的不可变记录。每次更新都复制数组，代价为 $O(n)$。另一种做法是持久列表或树，它会让更新更便宜，但涉及的规模是作用域中的绑定子数，对预期用途而言很小。复制让表示保持简单，并使值可以安全共享。"
+msgid "`Context`, `Telescope` and `Renaming` are immutable records over arrays. The types are abstract, so the arrays can be reached only inside the package: `from_array` copies its argument, `to_array` returns a copy, and every update builds a new array, which costs $O(n)$. The alternative, a persistent list or tree, would make updates cheaper but the sizes involved are the number of binders in scope, which is small for the intended use. Copying keeps the representation simple and the values safe to share."
+msgstr "`Context`、`Telescope` 和 `Renaming` 是基于数组的不可变记录。这些类型是抽象的，因此数组只能在包内触及：`from_array` 复制其参数，`to_array` 返回副本，每次更新都构造新数组，代价为 $O(n)$。另一种做法是持久列表或树，它会让更新更便宜，但涉及的规模是作用域中的绑定子数，对预期用途而言很小。复制让表示保持简单，并使值可以安全共享。"
 
-#: manual/design/core.md:161
+#: manual/design/core.md:163
 msgid "Renamings are not required to be injective"
 msgstr "重命名不要求是单射"
 
-#: manual/design/core.md:163
+#: manual/design/core.md:165
 msgid "A renaming that maps two names to one target is useful (it identifies variables) and is allowed. The capture-avoiding operations therefore do not rely on injectivity: they freshen a binder whenever it is a target, see the [syntax design](syntax.md)."
 msgstr "把两个名映射到同一目标的重命名是有用的（它把变量等同起来），因此是允许的。所以避免捕获的操作不依赖单射性：只要绑定子是某个目标，它们就将其换成新鲜名，见 [syntax 设计](syntax.md)。"
 
-#: manual/design/core.md:170
+#: manual/design/core.md:172
 msgid "`fresh_name(h, U) ∉ U`, and `fresh_name(h, U) = h` when `h ∉ U` (freshness lemma)."
 msgstr "`fresh_name(h, U) ∉ U`，且当 `h ∉ U` 时 `fresh_name(h, U) = h`（新鲜性引理）。"
 
-#: manual/design/core.md:171
-msgid "`Renaming::set` keeps at most one entry per source; `apply` therefore denotes a function."
-msgstr "`Renaming::set` 对每个源至多保留一个条目；因此 `apply` 表示一个函数。"
-
 #: manual/design/core.md:173
+msgid "`Renaming::set` keeps at most one entry per source, and because the type is abstract no other code can add an entry; `apply` therefore denotes a function."
+msgstr "`Renaming::set` 对每个源至多保留一个条目，并且由于该类型是抽象的，其他代码无法添加条目；因此 `apply` 表示一个函数。"
+
+#: manual/design/core.md:176
 msgid "`r.then(s)` denotes $\\sigma \\circ \\rho$ (composition lemma); `empty` is a two-sided identity for `then` as functions."
 msgstr "`r.then(s)` 表示 $\\sigma \\circ \\rho$（复合引理）；作为函数，`empty` 是 `then` 的双边单位元。"
 
-#: manual/design/core.md:175
+#: manual/design/core.md:178
 msgid "`r.without(x).apply(x) == x` and `r.without(x).apply(n) == r.apply(n)` for `n != x`."
 msgstr "`r.without(x).apply(x) == x`，且对 `n != x` 有 `r.without(x).apply(n) == r.apply(n)`。"
 
-#: manual/design/core.md:177
-msgid "Every operation returns a new value; no argument is mutated."
-msgstr "每个操作都返回新值；不修改任何参数。"
+#: manual/design/core.md:180
+msgid "Every operation returns a new value; no argument is mutated, and no array stored in a value is handed out, so a value cannot change after it is built."
+msgstr "每个操作都返回新值；不修改任何参数，也不交出值中存储的任何数组，因此值在构造后不会改变。"
 
-#: manual/design/core.md:179
+#: manual/design/core.md:184
 msgid "These laws are exercised by the tests in `src/core/core_test.mbt` and by every capture-avoidance test of the higher packages."
 msgstr "这些定律由 `src/core/core_test.mbt` 中的测试以及上层包的每个避免捕获测试检验。"
 
-#: manual/design/core.md:184
+#: manual/design/core.md:189
 msgid "**De Bruijn indices everywhere.** Indices remove the need for names in the kernel, and the [debruijn package](debruijn.md) provides them, but downstream ASTs (polynomials, numeric expressions) are written and printed with names. Names stay the shared interface; indices are an internal representation chosen per algorithm."
 msgstr "**处处使用 De Bruijn 索引。** 索引消除了内核对名的需要，[debruijn 包](debruijn.md)也提供了索引，但下游 AST（多项式、数值表达式）是用名书写和打印的。名仍是共享接口；索引是按算法选择的内部表示。"
 
-#: manual/design/core.md:189
+#: manual/design/core.md:194
 msgid "**Locally nameless or nominal types with name abstraction.** These need a richer type system or a library-wide change of representation, while the string-based design lets any downstream AST adopt the library by implementing one trait."
 msgstr "**局部无名表示或带名抽象的名义类型。** 它们需要更丰富的类型系统或全库范围的表示变更，而基于字符串的设计让任何下游 AST 只需实现一个 trait 就能采用本库。"
 
-#: manual/design/core.md:193
+#: manual/design/core.md:198
 msgid "**A global fresh-name counter.** Rejected as hidden state, see above."
 msgstr "**全局新鲜名计数器。** 作为隐藏状态而被否决，见上文。"
 
-#: manual/design/core.md:197
+#: manual/design/core.md:202
 msgid "`Name` has no scope, kind or sort. Distinguishing term variables from type variables, or variables of different downstream sorts, is left to the syntax that contains them."
 msgstr "`Name` 没有作用域、种类或 sort。区分项变量与类型变量，或区分不同下游 sort 的变量，交由包含它们的语法负责。"
 
-#: manual/design/core.md:200
+#: manual/design/core.md:205
 msgid "`Context` and `Telescope` do not check well-formedness: they neither reject duplicates nor check what annotations mention."
 msgstr "`Context` 和 `Telescope` 不检查良构性：它们既不拒绝重复，也不检查标注提及了什么。"
 
-#: manual/design/core.md:202
+#: manual/design/core.md:207
 msgid "`Renaming::equal` compares representations, not the denoted functions."
 msgstr "`Renaming::equal` 比较的是表示，而不是所表示的函数。"
 
-#: manual/design/core.md:203
+#: manual/design/core.md:208
 msgid "`fresh_name` guarantees freshness only with respect to the set it is given. Supplying a complete set of used names is the caller's responsibility."
 msgstr "`fresh_name` 只保证相对于所给集合的新鲜性。提供完整的已用名集合是调用者的责任。"
 
@@ -2295,190 +2348,194 @@ msgid "**Arbitrary rules.** A rule is any MoonBit function, so termination and c
 msgstr "**任意规则。** 规则可以是任意 MoonBit 函数，因此终止性与合流性不可判定；重复必须有界。"
 
 #: manual/design/rewrite.md:19
-msgid "**Immutable terms.** Steps build new terms and never update in place."
-msgstr "**不可变的项。** 步骤构建新项，从不原地更新。"
+msgid "**Immutable terms.** Steps build new terms and never update in place. Unchanged subterms are shared between `before` and `after`, so callers must not change the argument array of an `Apply` node either."
+msgstr "**不可变的项。** 每一步都构造新项，从不原地更新。未改变的子项在 `before` 与 `after` 之间共享，因此调用者也不得修改 `Apply` 节点的参数数组。"
 
-#: manual/design/rewrite.md:23
+#: manual/design/rewrite.md:25
 msgid "Abstract rewriting systems"
 msgstr "抽象重写系统"
 
-#: manual/design/rewrite.md:25
+#: manual/design/rewrite.md:27
 msgid "An *abstract rewriting system* is a set $A$ with a relation $\\to\\ \\subseteq A \\times A$.[^terese] Write $\\to^{*}$ for its reflexive transitive closure and $\\leftrightarrow^{*}$ for its equivalence closure."
 msgstr "*抽象重写系统*是一个集合 $A$ 连同一个关系 $\\to\\ \\subseteq A \\times A$。[^terese] 记 $\\to^{*}$ 为其自反传递闭包，$\\leftrightarrow^{*}$ 为其等价闭包。"
 
-#: manual/design/rewrite.md:29
+#: manual/design/rewrite.md:31
 msgid "$a$ is a *normal form* if there is no $b$ with $a \\to b$."
 msgstr "若不存在 $b$ 使得 $a \\to b$，则 $a$ 是一个*范式*。"
 
-#: manual/design/rewrite.md:30
+#: manual/design/rewrite.md:32
 msgid "$\\to$ is *terminating* (strongly normalizing) if there is no infinite chain $a_0 \\to a_1 \\to \\cdots$, and *weakly normalizing* if every element reduces to some normal form."
 msgstr "若不存在无穷链 $a_0 \\to a_1 \\to \\cdots$，则 $\\to$ 是*终止的*（强正规化）；若每个元素都能归约到某个范式，则它是*弱正规化的*。"
 
-#: manual/design/rewrite.md:33
+#: manual/design/rewrite.md:35
 msgid "$\\to$ is *confluent* if $b \\leftarrow^{*} a \\to^{*} c$ implies $b \\to^{*} d \\leftarrow^{*} c$ for some $d$, and *locally confluent* if this holds for one-step forks $b \\leftarrow a \\to c$."
 msgstr "若 $b \\leftarrow^{*} a \\to^{*} c$ 蕴涵对某个 $d$ 有 $b \\to^{*} d \\leftarrow^{*} c$，则 $\\to$ 是*合流的*；若这对单步分叉 $b \\leftarrow a \\to c$ 成立，则它是*局部合流的*。"
 
-#: manual/design/rewrite.md:37
+#: manual/design/rewrite.md:39
 msgid "Confluence makes normal forms unique: if $a \\to^{*} n_1$ and $a \\to^{*} n_2$ with both normal, a common reduct $d$ must equal both. Newman's lemma states that a terminating, locally confluent system is confluent; local confluence of a term rewriting system follows from the joinability of its critical pairs (Knuth–Bendix).[^newman]"
 msgstr "合流性使范式唯一：若 $a \\to^{*} n_1$ 且 $a \\to^{*} n_2$，且两者均为范式，则公共归约结果 $d$ 必须同时等于两者。Newman 引理指出，终止且局部合流的系统是合流的；项重写系统的局部合流性由其临界对的可汇合性得出（Knuth–Bendix）。[^newman]"
 
-#: manual/design/rewrite.md:43
+#: manual/design/rewrite.md:45
 msgid "Terese, *Term Rewriting Systems*, Cambridge University Press 2003, chapter 1."
 msgstr "Terese，*Term Rewriting Systems*，Cambridge University Press 2003，第 1 章。"
 
-#: manual/design/rewrite.md:45
+#: manual/design/rewrite.md:47
 msgid "M. H. A. Newman, \"On theories with a combinatorial definition of equivalence\", Annals of Mathematics 43, 1942."
 msgstr "M. H. A. Newman，\"On theories with a combinatorial definition of equivalence\"，Annals of Mathematics 43，1942。"
 
-#: manual/design/rewrite.md:47
+#: manual/design/rewrite.md:49
 msgid "Positions and contexts"
 msgstr "位置与上下文"
 
-#: manual/design/rewrite.md:49
+#: manual/design/rewrite.md:51
 msgid "A *position* is a path $p$ of frames from the root: `BinderBody` enters $\\beta x.\\,\\Box$, `ApplyHead` enters $\\Box(\\bar u)$, `ApplyArgument(i)` enters the $i$-th argument. Write $t|_p$ for the subterm at $p$ and $t[s]_p$ for $t$ with that subterm replaced by $s$:"
 msgstr "*位置*是从根出发的帧路径 $p$：`BinderBody` 进入 $\\beta x.\\,\\Box$，`ApplyHead` 进入 $\\Box(\\bar u)$，`ApplyArgument(i)` 进入第 $i$ 个参数。记 $t|_p$ 为位置 $p$ 处的子项，$t[s]_p$ 为将该子项替换为 $s$ 后的 $t$："
 
-#: manual/design/rewrite.md:63
+#: manual/design/rewrite.md:65
 msgid "The rewrite relation of a rule"
 msgstr "规则的重写关系"
 
-#: manual/design/rewrite.md:65
+#: manual/design/rewrite.md:67
 msgid "A rule is a partial function $r : \\mathrm{Term} \\rightharpoonup \\mathrm{Term}$. A *redex* of $r$ is a term in its domain. The rewrite relation of $r$ is its closure under contexts:"
 msgstr "规则是一个部分函数 $r : \\mathrm{Term} \\rightharpoonup \\mathrm{Term}$。$r$ 的*可约式*是其定义域中的项。$r$ 的重写关系是它在上下文下的闭包："
 
-#: manual/design/rewrite.md:73
+#: manual/design/rewrite.md:75
 msgid "A *strategy* is a partial function $S$ with $S(t) \\in \\{\\, u \\mid t \\to_r u \\,\\}$ whenever it is defined; it chooses one of the possible steps. The traversal functions of this package are strategies, and `StepResult` makes the choice observable."
 msgstr "*策略*是一个部分函数 $S$，只要有定义就满足 $S(t) \\in \\{\\, u \\mid t \\to_r u \\,\\}$；它在可能的步骤中选择一个。本包的遍历函数都是策略，而 `StepResult` 使这种选择可观察。"
 
-#: manual/design/rewrite.md:80
+#: manual/design/rewrite.md:82
 msgid "The single step is the primitive"
 msgstr "单步是原语"
 
-#: manual/design/rewrite.md:82
+#: manual/design/rewrite.md:84
 msgid "**Problem.** A normalizer that rewrites \"everything it can\" in one pass is fast, but its behaviour cannot be compared with a specification, and its intermediate states are lost."
 msgstr "**问题。** 一遍就重写\"所有能重写之处\"的正规化器速度快，但其行为无法与规范对照，中间状态也会丢失。"
 
-#: manual/design/rewrite.md:86
+#: manual/design/rewrite.md:88
 msgid "**Choice.** The primitive is one step at one position, returned as `Reduced(before, after, rule, path)` or `NoStep`. Its contract, checked by construction in the implementation, is"
 msgstr "**选择。** 原语是在一个位置上的一步，返回为 `Reduced(before, after, rule, path)` 或 `NoStep`。其契约在实现中由构造保证，即"
 
-#: manual/design/rewrite.md:94
+#: manual/design/rewrite.md:96
 msgid "so each reported step is a step of $\\to_r$ at exactly the reported position. The traversals build `after` by rebuilding only the nodes on the path, and build `path` by prepending one frame per level on the way back up. Normalizers and traces are loops over this primitive and add nothing semantic. The cost of the design is that a full normalization repeats a traversal from the root for every step; the benefit is that every normalizer has a trace, and that two implementations can be compared step by step."
 msgstr "因此每个报告的步骤都恰好是在所报告位置上的一步 $\\to_r$。遍历仅重建路径上的节点来构造 `after`，并在返回途中每层前置一个帧来构造 `path`。正规化器和轨迹都是在这个原语上的循环，不添加任何语义。这一设计的代价是完全正规化每一步都要从根重新遍历；好处是每个正规化器都有轨迹，并且两个实现可以逐步比较。"
 
-#: manual/design/rewrite.md:102
+#: manual/design/rewrite.md:104
 msgid "Strategies as traversal orders"
 msgstr "策略即遍历顺序"
 
-#: manual/design/rewrite.md:104
+#: manual/design/rewrite.md:106
 msgid "`top_down_once` tries the rule at a node before its children, children in the order head, argument 0, argument 1, … It returns the first redex in pre-order, which is the *leftmost-outermost* redex: no redex contains it, and among such redexes it is the leftmost. `bottom_up_once` tries children first and returns the first redex in post-order, the *leftmost-innermost* redex: it contains no other redex."
 msgstr "`top_down_once` 先在节点上尝试规则，再尝试其子节点，子节点顺序为头部、参数 0、参数 1、… 它返回前序中的第一个可约式，即*最左最外*的可约式：没有可约式包含它，且在这样的可约式中它是最左的。`bottom_up_once` 先尝试子节点，返回后序中的第一个可约式，即*最左最内*的可约式：它不包含其他可约式。"
 
-#: manual/design/rewrite.md:111
+#: manual/design/rewrite.md:113
 msgid "\"Contains\" refers to positions of the n-ary tree, where `Apply(h, [a1, …, an])` is one node above all of its arguments. This is the reading of the symbolic ASTs the package serves, where an operator applied to several arguments is one node. The lambda calculus reads the node as the curried spine $h\\,a_1 \\cdots a_n$, in which a beta redex $(\\lambda x.\\,b)\\,a_1$ is a prefix that does not contain $a_2$; there, `bottom_up_once` reduces inside $a_2$ before that redex, and the nested encoding does not. The `ApplicativeOrder` strategy of [eval](eval.md) therefore uses its own traversal, which follows the curried reading and still rewrites only positions of the n-ary tree."
 msgstr "\"包含\"指的是 n 元树中的位置，其中 `Apply(h, [a1, …, an])` 是位于其所有参数之上的一个节点。这是本包所服务的符号 AST 的读法：作用于多个参数的运算符是一个节点。λ 演算把该节点读作柯里化的脊 $h\\,a_1 \\cdots a_n$，其中 beta 可约式 $(\\lambda x.\\,b)\\,a_1$ 是不包含 $a_2$ 的前缀；在这种读法下，`bottom_up_once` 会先在 $a_2$ 内部归约，再处理该可约式，而嵌套编码则不会。因此 [eval](eval.md) 的 `ApplicativeOrder` 策略使用自己的遍历，它遵循柯里化读法，同时仍只重写 n 元树中的位置。"
 
-#: manual/design/rewrite.md:122
+#: manual/design/rewrite.md:124
 msgid "**Lemma (normal forms).** For both traversals, `NoStep` on $t$ iff $t$ is a normal form of $\\to_r$."
 msgstr "**引理（范式）。** 对两种遍历，$t$ 上的 `NoStep` 当且仅当 $t$ 是 $\\to_r$ 的范式。"
 
-#: manual/design/rewrite.md:125
+#: manual/design/rewrite.md:127
 msgid "Both traversals visit every position of $t$ (they enter binder bodies, the head and all arguments) and try $r$ there. They return `NoStep` only after every attempt returned `None`, so no position is a redex; conversely, if some position is a redex, the traversal reaches it unless it returns earlier with another step. $\\square$"
 msgstr "两种遍历都访问 $t$ 的每个位置（进入绑定子体、头部和所有参数），并在那里尝试 $r$。只有在每次尝试都返回 `None` 后它们才返回 `NoStep`，因此没有位置是可约式；反之，若某个位置是可约式，遍历会到达它，除非更早以另一步返回。$\\square$"
 
-#: manual/design/rewrite.md:131
+#: manual/design/rewrite.md:133
 msgid "Hence `normalize` with either traversal returns `NormalForm(t, n)` only when $t$ is $\\to_r$-normal. Other strategies, such as weak-head reduction in [eval](eval.md), visit fewer positions; for them `NoStep` only means \"no redex at a position the strategy considers\"."
 msgstr "因此，使用任一遍历的 `normalize` 仅当 $t$ 是 $\\to_r$ 范式时才返回 `NormalForm(t, n)`。其他策略，例如 [eval](eval.md) 中的弱头归约，访问的位置更少；对它们而言 `NoStep` 仅意味着\"在策略考虑的位置上没有可约式\"。"
 
-#: manual/design/rewrite.md:136
+#: manual/design/rewrite.md:138
 msgid "Bounded repetition with an exact count"
 msgstr "带精确计数的有界重复"
 
-#: manual/design/rewrite.md:138
+#: manual/design/rewrite.md:140
 msgid "`normalize(t, step, k)` computes the sequence $t_0 = t$, $t_{i+1} = \\mathit{after}(\\mathit{step}(t_i))$ and stops at the first $n$ with $\\mathit{step}(t_n) = \\texttt{NoStep}$ or at $n = k$:"
 msgstr "`normalize(t, step, k)` 计算序列 $t_0 = t$、$t_{i+1} = \\mathit{after}(\\mathit{step}(t_i))$，并在第一个满足 $\\mathit{step}(t_n) = \\texttt{NoStep}$ 的 $n$ 处或在 $n = k$ 处停止："
 
-#: manual/design/rewrite.md:150
+#: manual/design/rewrite.md:152
 msgid "The extra call at $n = k$ distinguishes \"normal after exactly $k$ steps\" from \"limit reached\", so the result never claims a normal form that it has not checked. A limit $k \\le 0$ behaves like $k = 0$: no step is taken and $t$ is only classified. A step limit is necessary because termination is not decidable for arbitrary rules (and fails for the untyped lambda calculus); it is a parameter, not a global setting."
 msgstr "在 $n = k$ 处的额外调用区分了“恰好 $k$ 步后为范式”与“达到上限”，因此结果从不声称一个未经检查的范式。上限 $k \\le 0$ 的行为与 $k = 0$ 相同：不执行任何步骤，只对 $t$ 进行判定。步数上限是必要的，因为对任意规则而言终止性不可判定（且对无类型 lambda 演算不成立）；它是一个参数，而不是全局设置。"
 
-#: manual/design/rewrite.md:157
+#: manual/design/rewrite.md:159
 msgid "Rules are named, not registered"
 msgstr "规则是命名的，而非注册的"
 
-#: manual/design/rewrite.md:159
+#: manual/design/rewrite.md:161
 msgid "**Problem.** Rewriting systems usually have several rules."
 msgstr "**问题。** 重写系统通常有多条规则。"
 
-#: manual/design/rewrite.md:161
+#: manual/design/rewrite.md:163
 msgid "**Options.** A rule registry inside the package; a list of rules per call; one rule function per call."
 msgstr "**备选方案。** 包内的规则注册表；每次调用一个规则列表；每次调用一个规则函数。"
 
-#: manual/design/rewrite.md:164
+#: manual/design/rewrite.md:166
 msgid "**Choice.** One rule function with one `RuleName` per call. A system with several rules is either combined into one rule (as `beta_eta_rule` in [lambda](utlc/lambda.md), which tries beta before eta at each position), or expressed as a step function that tries several single-rule traversals in turn. The two choices give different strategies: the first picks the outermost position at which *any* rule applies, the second prefers the first rule anywhere in the term. Keeping that choice with the caller avoids fixing one priority scheme for every language."
 msgstr "**选择。** 每次调用一个规则函数和一个 `RuleName`。具有多条规则的系统要么合并为一条规则（如 [lambda](utlc/lambda.md) 中的 `beta_eta_rule`，它在每个位置先尝试 beta 再尝试 eta），要么表达为依次尝试若干单规则遍历的单步函数。这两种选择给出不同的策略：前者选取*任一*规则适用的最外位置，后者在整个项中优先第一条规则。把这一选择留给调用者，避免了为每种语言固定同一种优先级方案。"
 
-#: manual/design/rewrite.md:173
+#: manual/design/rewrite.md:175
 msgid "Generic traversal through the view"
 msgstr "通过视图的泛型遍历"
 
-#: manual/design/rewrite.md:175
+#: manual/design/rewrite.md:177
 msgid "`generic_top_down_once` is `top_down_once` with `project` for pattern matching and the trait constructors for rebuilding. It needs no knowledge of the downstream AST beyond the [view laws](adapter.md), so a polynomial or numeric-expression AST gets positions and traces for free. Only the top-down strategy is provided generically, because it is the one downstream simplifiers use and because it makes the normal-form lemma available."
 msgstr "`generic_top_down_once` 就是使用 `project` 做模式匹配、使用 trait 构造器做重建的 `top_down_once`。除了 [视图定律](adapter.md) 之外，它不需要了解下游 AST 的任何信息，因此多项式或数值表达式 AST 可以免费获得位置和轨迹。只有自顶向下策略提供了泛型版本，因为它是下游化简器使用的策略，并且它使范式引理可用。"
 
-#: manual/design/rewrite.md:184
+#: manual/design/rewrite.md:186
 msgid "One step rewrites at most one position, and the reported `path` addresses it in `before` (contract above). Tested by \"structured step records rule and root path\" and the path tests of [debruijn](debruijn.md)."
 msgstr "一步至多在一个位置重写，且所报告的 `path` 在 `before` 中指向该位置（契约见上文）。由 \"structured step records rule and root path\" 以及 [debruijn](debruijn.md) 的路径测试检验。"
 
-#: manual/design/rewrite.md:187
+#: manual/design/rewrite.md:189
 msgid "`NoStep` from `top_down_once`, `bottom_up_once` or `generic_top_down_once` means the term is normal for the rule (normal-form lemma)."
 msgstr "来自 `top_down_once`、`bottom_up_once` 或 `generic_top_down_once` 的 `NoStep` 意味着该项对该规则是范式（范式引理）。"
 
-#: manual/design/rewrite.md:189
+#: manual/design/rewrite.md:191
 msgid "`normalize` and `trace` perform at most `max_steps` steps and call `step` at most `max_steps + 1` times; `NormalForm(t, n)` implies `step(t) = NoStep`."
 msgstr "`normalize` 与 `trace` 至多执行 `max_steps` 步，并至多调用 `step` `max_steps + 1` 次；`NormalForm(t, n)` 蕴涵 `step(t) = NoStep`。"
 
-#: manual/design/rewrite.md:191
+#: manual/design/rewrite.md:193
 msgid "In a `ReductionTrace` the final term of `result` is the last `after` (or `initial` when there are no steps), and the number of recorded steps is the count in `result`. If the step function reports its input as `before`, as every traversal of this package and of [eval](eval.md) does, then also `steps[0].before = initial` and `steps[i].after = steps[i+1].before`. `trace` records what the step function returns and does not check this."
 msgstr "在 `ReductionTrace` 中，`result` 的最终项是最后一个 `after`（若没有步骤则为 `initial`），所记录的步骤数就是 `result` 中的计数。如果步进函数把自身的输入报告为 `before`（本包和 [eval](eval.md) 的每个遍历都是如此），那么还有 `steps[0].before = initial` 以及 `steps[i].after = steps[i+1].before`。`trace` 只记录步进函数返回的内容，并不检查这一点。"
 
-#: manual/design/rewrite.md:198
+#: manual/design/rewrite.md:199
+msgid "`ReductionPath` and `ReductionTrace` are abstract and their accessors return copies of the stored arrays, so a path or a trace cannot change after it is built and the laws above, once true of it, stay true."
+msgstr "`ReductionPath` 和 `ReductionTrace` 是抽象类型，它们的访问器返回所存数组的副本，因此路径或轨迹在构造后不会改变，上述定律一旦对它成立，就会一直成立。"
+
+#: manual/design/rewrite.md:203
 msgid "**What is not checked.** The package does not decide termination or confluence of a rule. When the rule is confluent, every terminating strategy reaches the same normal form; when it is not, different strategies can legitimately return different normal forms, and the trace shows why."
 msgstr "**不检查的内容。** 本包不判定规则的终止性或合流性。当规则合流时，每个终止的策略都到达相同的范式；当规则不合流时，不同策略可以合理地返回不同的范式，而轨迹会显示原因。"
 
-#: manual/design/rewrite.md:203
+#: manual/design/rewrite.md:208
 msgid "Cost: one step costs $O(n)$ rule attempts for a term of size $n$, plus rebuilding the path; normalizing in $k$ steps costs $O(k \\cdot n)$ rule attempts."
 msgstr "代价：对大小为 $n$ 的项，一步需要 $O(n)$ 次规则尝试，外加重建路径；以 $k$ 步正规化需要 $O(k \\cdot n)$ 次规则尝试。"
 
-#: manual/design/rewrite.md:209
+#: manual/design/rewrite.md:214
 msgid "**In-place or memoized rewriting.** Faster, but loses `before` and the path, and conflicts with immutable terms."
 msgstr "**原地或记忆化的重写。** 更快，但会丢失 `before` 和路径，并与不可变项相冲突。"
 
-#: manual/design/rewrite.md:211
+#: manual/design/rewrite.md:216
 msgid "**A fixed rule language (patterns with variables).** A pattern language would need matching and an occurs check; a rule as a MoonBit function can use pattern matching of the host language and any side condition."
 msgstr "**固定的规则语言（带变量的模式）。** 模式语言需要匹配和出现检查；以 MoonBit 函数表示的规则可以使用宿主语言的模式匹配以及任意附加条件。"
 
-#: manual/design/rewrite.md:214
+#: manual/design/rewrite.md:219
 msgid "**Capture-aware traversal.** The traversal could rename binders before passing an open subterm to a rule. Rules that need binding-aware behaviour use [substitution](substitution.md), which already renames; renaming in the traversal would change binder names behind the rule's back."
 msgstr "**感知捕获的遍历。** 遍历可以在把开子项传给规则之前对绑定子重命名。需要感知绑定的规则使用 [代换](substitution.md)，它已经会重命名；在遍历中重命名会在规则不知情的情况下改变绑定子名称。"
 
-#: manual/design/rewrite.md:221
+#: manual/design/rewrite.md:226
 msgid "Rules see subterms under binders as open terms; the traversal neither renames nor reports which binders are in scope. A rule must be correct on open terms."
 msgstr "规则把绑定子下的子项视为开项；遍历既不重命名，也不报告哪些绑定子在作用域内。规则必须在开项上正确。"
 
-#: manual/design/rewrite.md:224
+#: manual/design/rewrite.md:229
 msgid "No matching modulo associativity, commutativity or alpha-equivalence; a rule matches with MoonBit patterns on the term as it is."
 msgstr "不支持模结合律、交换律或 alpha 等价的匹配；规则按项的原样用 MoonBit 模式进行匹配。"
 
-#: manual/design/rewrite.md:226
+#: manual/design/rewrite.md:231
 msgid "No termination, confluence or critical-pair analysis."
 msgstr "不做终止性、合流性或临界对分析。"
 
-#: manual/design/rewrite.md:227
+#: manual/design/rewrite.md:232
 msgid "Generic versions exist only for the top-down strategy and for normalization without a trace."
 msgstr "泛型版本仅存在于自顶向下策略以及不带轨迹的正规化。"
 
-#: manual/design/rewrite.md:229
+#: manual/design/rewrite.md:234
 msgid "The bound `max_steps` counts steps, not time or memory."
 msgstr "上限 `max_steps` 计数的是步数，而不是时间或内存。"
 
@@ -2855,26 +2912,30 @@ msgid "so that sequential application can be expressed as one simultaneous subst
 msgstr "这样顺序应用就可以表示为一次同时代换，它开销更小（一次遍历），并满足下文的定律。"
 
 #: manual/design/substitution.md:132
+msgid "`Substitution` and `GenericSubstitution` are abstract types: only the functions of the package build them, each of those keeps at most one entry per name, and `to_array` returns a copy of the entries. So every value denotes a map $\\sigma$ and keeps denoting the same map. The replacement terms are shared, not copied; the laws assume, as the whole library does, that terms are not changed in place."
+msgstr "`Substitution` 和 `GenericSubstitution` 是抽象类型：只有本包的函数能构造它们，这些函数都对每个名字至多保留一个条目，且 `to_array` 返回条目的副本。因此每个值都表示一个映射 $\\sigma$，并始终表示同一个映射。替换项是共享的而非复制的；与整个库一样，这些定律假设项不会被原地修改。"
+
+#: manual/design/substitution.md:139
 msgid "The laws below are proved through the nameless reading of terms. The direct argument by induction on named terms is the classical one, but its binder case has to compare results whose fresh names differ, and that comparison is exactly what the nameless reading makes trivial."
 msgstr "下面的定律借助项的无名解读来证明。对具名项归纳的直接论证是经典做法，但其绑定子情形必须比较新名字不同的结果，而这种比较正是无名解读使之变得平凡的。"
 
-#: manual/design/substitution.md:137
+#: manual/design/substitution.md:144
 msgid "The nameless reading"
 msgstr "无名解读"
 
-#: manual/design/substitution.md:139
+#: manual/design/substitution.md:146
 msgid "Let $\\ulcorner t \\urcorner$ be `@debruijn.from_named(t)`, the translation of the [debruijn design](debruijn.md): bound occurrences become indices, free names stay names. It is computed by *closing* each binder's variable. For a nameless term $d$, let $\\kappa^k_x\\,d$ replace every free name $x$ under $j$ inner binders by the index $k + j$; then"
 msgstr "令 $\\ulcorner t \\urcorner$ 为 `@debruijn.from_named(t)`，即 [debruijn 设计](debruijn.md)中的翻译：约束出现变为索引，自由名字保持为名字。它通过*闭合*每个绑定子的变量来计算。对无名项 $d$，令 $\\kappa^k_x\\,d$ 把位于 $j$ 个内层绑定子之下的每个自由名字 $x$ 替换为索引 $k + j$；于是"
 
-#: manual/design/substitution.md:152
+#: manual/design/substitution.md:159
 msgid "This is the same as the environment-based definition of `from_named`: the occurrences of $x$ that are still free in $\\ulcorner t \\urcorner$ are exactly those whose nearest binder is this one. Translations are *locally closed*: every index points at a binder inside the term. Two facts are used below."
 msgstr "这与 `from_named` 基于环境的定义相同：在 $\\ulcorner t \\urcorner$ 中仍然自由的 $x$ 的出现，恰好是那些最近的绑定子就是当前绑定子的出现。翻译是*局部闭合*的：每个索引都指向项内部的某个绑定子。下面用到两个事实。"
 
-#: manual/design/substitution.md:157
+#: manual/design/substitution.md:164
 msgid "**(T1)** $t =_\\alpha u \\iff \\ulcorner t \\urcorner = \\ulcorner u \\urcorner$ (de Bruijn's theorem, see the [syntax design](syntax.md))."
 msgstr "**(T1)** $t =_\\alpha u \\iff \\ulcorner t \\urcorner = \\ulcorner u \\urcorner$（de Bruijn 定理，见 [syntax 设计](syntax.md)）。"
 
-#: manual/design/substitution.md:159
+#: manual/design/substitution.md:166
 msgid ""
 "**(T2)** If $y \\n"
 "otin \\mathrm{names}(t)$, then $\\kappa^0_y \\ulcorner t\\{x \\mapsto y\\} \\urcorner = \\kappa^0_x \\ulcorner t \\urcorner$. The free name $y$ occurs in $\\ulcorner t\\{x \\mapsto y\\} \\urcorner$ exactly where $x$ occurs free in $\\ulcorner t \\urcorner$, because $y$ occurs nowhere in $t$, so closing $y$ in the one gives the same indices as closing $x$ in the other."
@@ -2882,23 +2943,23 @@ msgstr ""
 "**(T2)** 若 $y \\n"
 "otin \\mathrm{names}(t)$，则 $\\kappa^0_y \\ulcorner t\\{x \\mapsto y\\} \\urcorner = \\kappa^0_x \\ulcorner t \\urcorner$。由于 $y$ 在 $t$ 中不出现，自由名字 $y$ 在 $\\ulcorner t\\{x \\mapsto y\\} \\urcorner$ 中出现的位置恰好是 $x$ 在 $\\ulcorner t \\urcorner$ 中自由出现的位置，因此在前者中闭合 $y$ 与在后者中闭合 $x$ 给出相同的索引。"
 
-#: manual/design/substitution.md:166
+#: manual/design/substitution.md:173
 msgid "On nameless terms, substitution for free names is plain replacement. For a substitution $\\sigma$ write $d\\langle\\sigma\\rangle$ for $d$ with every free name $z$ replaced by $\\ulcorner \\sigma(z) \\urcorner$. No binder is renamed and no index is shifted: the inserted terms are locally closed, so they mean the same under any number of binders."
 msgstr "在无名项上，对自由名字的代换就是简单替换。对代换 $\\sigma$，记 $d\\langle\\sigma\\rangle$ 为把 $d$ 中每个自由名字 $z$ 替换为 $\\ulcorner \\sigma(z) \\urcorner$ 所得的项。不重命名任何绑定子，也不移位任何索引：插入的项是局部闭合的，因此在任意多个绑定子之下含义都相同。"
 
-#: manual/design/substitution.md:172
+#: manual/design/substitution.md:179
 msgid "The translation lemma"
 msgstr "翻译引理"
 
-#: manual/design/substitution.md:174
+#: manual/design/substitution.md:181
 msgid "**Lemma 0.** $\\ulcorner t\\sigma \\urcorner = \\ulcorner t \\urcorner\\langle\\sigma\\rangle$ for every term $t$ and substitution $\\sigma$."
 msgstr "**引理 0。** 对每个项 $t$ 和代换 $\\sigma$，$\\ulcorner t\\sigma \\urcorner = \\ulcorner t \\urcorner\\langle\\sigma\\rangle$。"
 
-#: manual/design/substitution.md:177
+#: manual/design/substitution.md:184
 msgid "By induction on the size of $t$, for all $\\sigma$ at once. Values, variables and applications are immediate. For $\\beta x.\\,t$ let $\\sigma' = \\sigma \\setminus x$. Closing commutes with replacement under two conditions, checked occurrence by occurrence:"
 msgstr "对 $t$ 的大小归纳，同时对所有 $\\sigma$ 证明。值、变量和应用的情形是直接的。对 $\\beta x.\\,t$，令 $\\sigma' = \\sigma \\setminus x$。闭合在两个条件下与替换交换，这两个条件逐个出现地检查："
 
-#: manual/design/substitution.md:189
+#: manual/design/substitution.md:196
 msgid ""
 "The first condition holds because $x$ was removed. The free names of $\\ulcorner t \\urcorner$ are $\\mathrm{FV}(t)$, so the second is exactly $x \\n"
 "otin R_{\\sigma'}(\\mathrm{FV}(t))$. Hence, without renaming,"
@@ -2906,71 +2967,71 @@ msgstr ""
 "第一个条件成立，因为 $x$ 已被移除。$\\ulcorner t \\urcorner$ 的自由名字是 $\\mathrm{FV}(t)$，因此第二个条件恰好是 $x \\n"
 "otin R_{\\sigma'}(\\mathrm{FV}(t))$。于是，在不重命名时，"
 
-#: manual/design/substitution.md:204
+#: manual/design/substitution.md:211
 msgid "and with renaming to $x'$, which lies outside $\\operatorname{supp}\\sigma' \\cup \\mathrm{names}(t)$,"
 msgstr "而在重命名为位于 $\\operatorname{supp}\\sigma' \\cup \\mathrm{names}(t)$ 之外的 $x'$ 时，"
 
-#: manual/design/substitution.md:219
+#: manual/design/substitution.md:226
 msgid "Everything else follows from Lemma 0, because replacement on locally closed nameless terms is a homomorphism with no side conditions."
 msgstr "其余一切都由引理 0 得出，因为局部闭合无名项上的替换是没有附加条件的同态。"
 
-#: manual/design/substitution.md:222
+#: manual/design/substitution.md:229
 msgid "Free variables"
 msgstr "自由变量"
 
-#: manual/design/substitution.md:224
+#: manual/design/substitution.md:231
 msgid "**Lemma 1.** $\\mathrm{FV}(t\\sigma) = \\bigcup_{z \\in \\mathrm{FV}(t)} \\mathrm{FV}(\\sigma(z))$."
 msgstr "**引理 1。** $\\mathrm{FV}(t\\sigma) = \\bigcup_{z \\in \\mathrm{FV}(t)} \\mathrm{FV}(\\sigma(z))$。"
 
-#: manual/design/substitution.md:226
+#: manual/design/substitution.md:233
 msgid "The free names of $\\ulcorner t \\urcorner\\langle\\sigma\\rangle$ are those of the inserted $\\ulcorner \\sigma(z) \\urcorner$ for the free names $z$ of $\\ulcorner t \\urcorner$, that is for $z \\in \\mathrm{FV}(t)$ (with $\\sigma(z) = z$ outside the domain). $\\square$"
 msgstr "$\\ulcorner t \\urcorner\\langle\\sigma\\rangle$ 的自由名字，就是针对 $\\ulcorner t \\urcorner$ 的自由名字 $z$（即 $z \\in \\mathrm{FV}(t)$）插入的 $\\ulcorner \\sigma(z) \\urcorner$ 的自由名字（在定义域之外 $\\sigma(z) = z$）。$\\square$"
 
-#: manual/design/substitution.md:231
+#: manual/design/substitution.md:238
 msgid "**Corollary (no capture).** A variable free in an inserted replacement $\\sigma(z)$, $z \\in \\mathrm{FV}(t)$, is free in $t\\sigma$."
 msgstr "**推论（无捕获）。** 在插入的替换项 $\\sigma(z)$（$z \\in \\mathrm{FV}(t)$）中自由的变量，在 $t\\sigma$ 中也是自由的。"
 
-#: manual/design/substitution.md:234
+#: manual/design/substitution.md:241
 msgid "Only the free variables matter"
 msgstr "只有自由变量起作用"
 
-#: manual/design/substitution.md:236
+#: manual/design/substitution.md:243
 msgid "**Lemma 2.** $t\\sigma =_\\alpha t\\,(\\sigma|_{\\mathrm{FV}(t)})$, where $\\sigma|_S$ is `restrict(S)`. More generally, if $\\sigma(z) =_\\alpha \\tau(z)$ for every $z \\in \\mathrm{FV}(t)$, then $t\\sigma =_\\alpha t\\tau$."
 msgstr "**引理 2。** $t\\sigma =_\\alpha t\\,(\\sigma|_{\\mathrm{FV}(t)})$，其中 $\\sigma|_S$ 即 `restrict(S)`。更一般地，若对每个 $z \\in \\mathrm{FV}(t)$ 都有 $\\sigma(z) =_\\alpha \\tau(z)$，则 $t\\sigma =_\\alpha t\\tau$。"
 
-#: manual/design/substitution.md:240
+#: manual/design/substitution.md:247
 msgid "$\\ulcorner t \\urcorner\\langle\\sigma\\rangle$ consults $\\sigma$ only at the free names of $\\ulcorner t \\urcorner$, and only through $\\ulcorner \\sigma(z) \\urcorner$, which (T1) makes invariant under $=_\\alpha$. Equal translations mean alpha-equivalent terms by (T1). The two sides need not be equal as values, because the fresh binder names avoid the support of different substitutions. $\\square$"
 msgstr "$\\ulcorner t \\urcorner\\langle\\sigma\\rangle$ 只在 $\\ulcorner t \\urcorner$ 的自由名字处查询 $\\sigma$，并且只经由 $\\ulcorner \\sigma(z) \\urcorner$，而 (T1) 使它在 $=_\\alpha$ 下不变。由 (T1)，翻译相等意味着项 α-等价。两边作为值不必相等，因为新的绑定子名字避开的是不同代换的支撑。$\\square$"
 
-#: manual/design/substitution.md:247
+#: manual/design/substitution.md:254
 msgid "Alpha-invariance"
 msgstr "α-不变性"
 
-#: manual/design/substitution.md:249
+#: manual/design/substitution.md:256
 msgid "**Lemma 3.** If $t =_\\alpha t'$ then $t\\sigma =_\\alpha t'\\sigma$."
 msgstr "**引理 3。** 若 $t =_\\alpha t'$，则 $t\\sigma =_\\alpha t'\\sigma$。"
 
-#: manual/design/substitution.md:251
+#: manual/design/substitution.md:258
 msgid "By (T1), $\\ulcorner t \\urcorner = \\ulcorner t' \\urcorner$, so $\\ulcorner t\\sigma \\urcorner = \\ulcorner t \\urcorner\\langle\\sigma\\rangle = \\ulcorner t'\\sigma \\urcorner$ by Lemma 0, and (T1) again gives the claim. $\\square$"
 msgstr "由 (T1)，$\\ulcorner t \\urcorner = \\ulcorner t' \\urcorner$，因此由引理 0 有 $\\ulcorner t\\sigma \\urcorner = \\ulcorner t \\urcorner\\langle\\sigma\\rangle = \\ulcorner t'\\sigma \\urcorner$，再由 (T1) 即得结论。$\\square$"
 
-#: manual/design/substitution.md:255
+#: manual/design/substitution.md:262
 msgid "Substitution is therefore well defined on alpha-equivalence classes, and the choice of fresh names never matters semantically."
 msgstr "因此代换在 α-等价类上是良定义的，新名字的选取在语义上从不起作用。"
 
-#: manual/design/substitution.md:258
+#: manual/design/substitution.md:265
 msgid "Composition"
 msgstr "复合"
 
-#: manual/design/substitution.md:260
+#: manual/design/substitution.md:267
 msgid "**Lemma 4.** $t(\\sigma \\mathbin{;} \\tau) =_\\alpha (t\\sigma)\\tau$."
 msgstr "**引理 4。** $t(\\sigma \\mathbin{;} \\tau) =_\\alpha (t\\sigma)\\tau$。"
 
-#: manual/design/substitution.md:262
+#: manual/design/substitution.md:269
 msgid "By Lemma 0 on both sides it suffices to show $d\\langle\\sigma\\rangle\\langle\\tau\\rangle = d\\langle\\sigma \\mathbin{;} \\tau\\rangle$ for a nameless $d$. Replacement is homomorphic, so only a free name $z$ needs checking, and it splits as in the definition of $\\sigma \\mathbin{;} \\tau$:"
 msgstr "对两边应用引理 0，只需对无名项 $d$ 证明 $d\\langle\\sigma\\rangle\\langle\\tau\\rangle = d\\langle\\sigma \\mathbin{;} \\tau\\rangle$。替换是同态的，因此只需检查自由名字 $z$，并按 $\\sigma \\mathbin{;} \\tau$ 的定义分情况："
 
-#: manual/design/substitution.md:278
+#: manual/design/substitution.md:285
 msgid ""
 "**Corollary (substitution lemma).** For $x \\n"
 "e y$ and $x \\n"
@@ -2980,7 +3041,7 @@ msgstr ""
 "e y$ 且 $x \\n"
 "otin \\mathrm{FV}(r)$，"
 
-#: manual/design/substitution.md:284
+#: manual/design/substitution.md:291
 msgid ""
 "By Lemma 4 each side is one simultaneous substitution applied to $t$. The left is $\\{x \\mapsto s[y := r],\\ y \\mapsto r\\}$. The right is $\\{y \\mapsto r[x := s[y := r]],\\ x \\mapsto s[y := r]\\}$, and $r[x := s[y := r]] =_\\alpha r$ by Lemma 2, because $x \\n"
 "otin \\mathrm{FV}(r)$ and the empty substitution is the identity. The two substitutions agree up to $=_\\alpha$ at every name, so Lemma 2 makes the results alpha-equivalent.[^substlemma] This is the lemma that makes beta reduction commute with substitution in the lambda calculus packages: $M \\to_\\beta N$ implies $M\\sigma \\to_\\beta N\\sigma$ up to $=_\\alpha$."
@@ -2988,15 +3049,15 @@ msgstr ""
 "由引理 4，每一边都是作用于 $t$ 的一个同时代换。左边是 $\\{x \\mapsto s[y := r],\\ y \\mapsto r\\}$。右边是 $\\{y \\mapsto r[x := s[y := r]],\\ x \\mapsto s[y := r]\\}$，并且由于 $x \\n"
 "otin \\mathrm{FV}(r)$ 且空代换是恒等代换，由引理 2 有 $r[x := s[y := r]] =_\\alpha r$。两个代换在每个名字处都在 $=_\\alpha$ 意义下一致，因此由引理 2，结果 α-等价。[^substlemma] 正是这一引理使 lambda 演算各包中的 β 归约与代换交换：在 $=_\\alpha$ 意义下，$M \\to_\\beta N$ 蕴含 $M\\sigma \\to_\\beta N\\sigma$。"
 
-#: manual/design/substitution.md:294
+#: manual/design/substitution.md:301
 msgid "Barendregt, *The Lambda Calculus*, Lemma 2.1.16."
 msgstr "Barendregt, *The Lambda Calculus*, 引理 2.1.16。"
 
-#: manual/design/substitution.md:296
+#: manual/design/substitution.md:303
 msgid "Renamings embed into substitutions"
 msgstr "重命名嵌入代换"
 
-#: manual/design/substitution.md:298
+#: manual/design/substitution.md:305
 msgid ""
 "`Term::rename_free` obeys the analogue of Lemma 0, $\\ulcorner t\\rho \\urcorner = \\ulcorner t \\urcorner\\langle\\rho\\rangle$, with the same proof: its test $x \\n"
 "otin \\operatorname{tgt}(\\rho \\setminus x)$ implies the second condition of (C), and its fresh name avoids $\\operatorname{supp}(\\rho \\setminus x) \\cup \\mathrm{names}(t)$. For a list of names $L \\supseteq \\mathrm{FV}(t)$, `from_renaming(L, ρ)` is $\\sigma_\\rho = \\{x \\mapsto \\rho(x) \\mid x \\in L,\\ \\rho(x) \\n"
@@ -3006,47 +3067,47 @@ msgstr ""
 "otin \\operatorname{tgt}(\\rho \\setminus x)$ 蕴含 (C) 的第二个条件，且它选取的新名字避开 $\\operatorname{supp}(\\rho \\setminus x) \\cup \\mathrm{names}(t)$。对名字列表 $L \\supseteq \\mathrm{FV}(t)$，`from_renaming(L, ρ)` 就是 $\\sigma_\\rho = \\{x \\mapsto \\rho(x) \\mid x \\in L,\\ \\rho(x) \\n"
 "e x\\}$（作为变量）。它在 $\\mathrm{FV}(t)$ 上与 $\\rho$ 一致，因此 $t\\sigma_\\rho =_\\alpha t\\rho$。两个结果作为值仍可能不同：只要绑定子是重命名的某个目标，`rename_free` 就会为它换用新名字，而 `apply` 只在插入的变量会被捕获时才这样做。"
 
-#: manual/design/substitution.md:310
+#: manual/design/substitution.md:317
 msgid "Cost"
 msgstr "开销"
 
-#: manual/design/substitution.md:312
+#: manual/design/substitution.md:319
 msgid "At each binder, `apply` computes the free variables of the body and of the replacements that are inserted into it, and removes one entry from the substitution. For a term of size $n$ and binder depth $d$ this is $O(n \\cdot d)$ hash-set operations, plus $O(|\\sigma|)$ work and the free variables of the relevant replacements per binder, plus one traversal of the body for each renamed binder. `then` costs one `apply` and one `set` per entry of `self`, so $O(k^2)$ entry copies for $k$ entries besides the applications."
 msgstr "在每个绑定子处，`apply` 计算体以及插入其中的替换项的自由变量，并从代换中移除一个条目。对大小为 $n$、绑定深度为 $d$ 的项，这是 $O(n \\cdot d)$ 次哈希集合操作，外加每个绑定子 $O(|\\sigma|)$ 的工作量以及相关替换项的自由变量计算，再加上每个被重命名的绑定子一次体遍历。`then` 对 `self` 的每个条目执行一次 `apply` 和一次 `set`，因此除这些 `apply` 调用外，$k$ 个条目需要 $O(k^2)$ 次条目复制。"
 
-#: manual/design/substitution.md:321
+#: manual/design/substitution.md:328
 msgid "Generic substitution"
 msgstr "泛型代换"
 
-#: manual/design/substitution.md:323
+#: manual/design/substitution.md:330
 msgid "`GenericSubstitution::apply_once` is the same definition with every constructor replaced by its `BindingSyntax` counterpart. Reading a node through its view gives a named term, so Lemmas 0–3 hold for any implementation that satisfies the view laws of the [adapter design](adapter.md). On `Term[T]` the two algorithms coincide."
 msgstr "`GenericSubstitution::apply_once` 是同一定义，只是每个构造子都换成了对应的 `BindingSyntax` 版本。通过视图读取节点会得到具名项，因此引理 0–3 对任何满足 [adapter 设计](adapter.md) 中视图定律的实现都成立。在 `Term[T]` 上两种算法一致。"
 
-#: manual/design/substitution.md:331
+#: manual/design/substitution.md:338
 msgid "**The Barendregt variable convention.** Assuming that bound names are distinct from all free names would remove the renaming case, but terms come from users and from other algorithms, and the convention is not preserved by reduction. The library renames explicitly instead."
 msgstr "**Barendregt 变量约定。** 假定约束名与所有自由名都不同，可以去掉重命名情形；但项来自用户和其他算法，而且该约定在归约下不保持。因此本库改为显式重命名。"
 
-#: manual/design/substitution.md:335
+#: manual/design/substitution.md:342
 msgid "**Substitution on De Bruijn terms only.** Index-based substitution needs no renaming and is provided by [debruijn](debruijn.md), but the shared interface for downstream ASTs is named, so named substitution must be correct on its own."
 msgstr "**仅在 De Bruijn 项上做代换。** 基于索引的代换不需要重命名，由 [debruijn](debruijn.md) 提供；但下游 AST 共享的接口是具名的，因此具名代换本身必须正确。"
 
-#: manual/design/substitution.md:339
+#: manual/design/substitution.md:346
 msgid "**Iterated substitution.** Repeating until no domain variable occurs can diverge ($x \\mapsto f(x)$) and has no composition law. Callers that want a fixed point iterate explicitly."
 msgstr "**迭代代换。** 重复直到定义域变量不再出现可能发散（$x \\mapsto f(x)$），且没有复合律。需要不动点的调用方应显式迭代。"
 
-#: manual/design/substitution.md:345
+#: manual/design/substitution.md:352
 msgid "No unification, matching or occurs check: substitutions are given, not solved for."
 msgstr "没有合一、匹配或出现检查（occurs check）：代换是给定的，而不是求解得到的。"
 
-#: manual/design/substitution.md:347
+#: manual/design/substitution.md:354
 msgid "`GenericSubstitution` has no `then` or `restrict`; compose generic substitutions by applying them in turn."
 msgstr "`GenericSubstitution` 没有 `then` 或 `restrict`；要复合泛型代换，请依次应用它们。"
 
-#: manual/design/substitution.md:349
+#: manual/design/substitution.md:356
 msgid "Results are equal to the textbook definition only up to $=_\\alpha$; use `@syntax.alpha_equal` to compare them."
 msgstr "结果只在 $=_\\alpha$ 意义下等于教科书定义；请用 `@syntax.alpha_equal` 比较它们。"
 
-#: manual/design/substitution.md:351
+#: manual/design/substitution.md:358
 msgid "Values are never entered, so a `Value` payload that contains variables is not substituted into."
 msgstr "值从不会被进入，因此包含变量的 `Value` 载荷不会被代换。"
 
@@ -5632,11 +5693,102 @@ msgstr "[utlc/nbe 设计](../../design/utlc/nbe.md)：语义域与可靠性论�
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc 教程](../stlc.md)：带类型的 η-长形式 NbE。"
 
+#~ msgid "The `core` package defines the vocabulary that every other package of `type_theory` shares: variable names, fresh-name generation, ordered scopes, telescopes and finite renamings. All values are immutable: every operation that \"changes\" a value returns a new one and leaves its argument untouched. The mathematics behind these definitions is in the [core design](../design/core.md)."
+#~ msgstr "`core` 包定义了 `type_theory` 中所有其他包共享的基本词汇：变量名、新名字生成、有序作用域、伸缩式（telescope）以及有限重命名。所有值都是不可变的：每个“改变”值的操作都返回一个新值，并保持其参数不变。这些定义背后的数学见 [core 设计](../design/core.md)。"
+
+#~ msgid "A context may contain the same name more than once; a later entry shadows an earlier one. Two contexts are equal when they list the same names in the same order."
+#~ msgstr "一个上下文可以多次包含同一个名字；较后的条目遮蔽较早的条目。两个上下文当以相同顺序列出相同名字时相等。"
+
+#~ msgid "`contains` is a linear search. `to_array` returns a copy, outermost name first. `equal` is the promoted `Eq` implementation."
+#~ msgstr "`contains` 是线性查找。`to_array` 返回一个副本，最外层名字在前。`equal` 是提升的 `Eq` 实现。"
+
+#~ msgid "In a telescope $x_1 : A_1, \\dots, x_n : A_n$ the annotation $A_i$ may refer to $x_1, \\dots, x_{i-1}$. `Telescope` records the order; it does not check what the annotations mention."
+#~ msgstr "在伸缩式 $x_1 : A_1, \\dots, x_n : A_n$ 中，标注 $A_i$ 可以引用 $x_1, \\dots, x_{i-1}$。`Telescope` 只记录顺序；它不检查标注中提及了什么。"
+
+#~ msgid "`extend_with` appends one binder and returns a new telescope; `to_array` returns a copy of the entries, first binder first."
+#~ msgstr "`extend_with` 追加一个绑定子并返回新的伸缩式；`to_array` 返回条目的副本，第一个绑定子在前。"
+
+#~ msgid "A renaming $\\rho$ denotes the total function $\\rho(n) = m$ if $(n, m)$ is an entry and $\\rho(n) = n$ otherwise. It is applied simultaneously: the image of a name is never renamed again. A renaming need not be injective. Equality (`Renaming::equal`) compares the entry lists, so two renamings that denote the same function can still be different values."
+#~ msgstr "重命名 $\\rho$ 表示如下全函数：若 $(n, m)$ 是一个条目则 $\\rho(n) = m$，否则 $\\rho(n) = n$。它是同时作用的：名字的像不会再次被重命名。重命名不必是单射。相等性（`Renaming::equal`）比较的是条目列表，因此表示同一函数的两个重命名仍可能是不同的值。"
+
+#~ msgid "The empty path is the root."
+#~ msgstr "空路径即根。"
+
+#~ msgid "`prepend(frame)` adds a frame at the root end, which is how a traversal lifts the path of a step in a child to the parent. `to_array` returns the frames root first."
+#~ msgstr "`prepend(frame)` 在根端添加一帧，遍历正是借此把子节点中某一步的路径提升到父节点。`to_array` 返回以根开头的帧。"
+
+#~ msgid "`initial()`, `steps()` and `result()` read the three fields; `steps()` returns a copy, and `equal` is the promoted `Eq` implementation. Every element of `steps` is a `Reduced` value, and `steps().length()` equals the `steps` count of `result`. When the step function keeps the contract of `StepResult` (it reports its own input as `before`, as every traversal of this package and of [eval](eval.md) does), consecutive steps chain: the first `before` is `initial`, and the `after` of one step is the `before` of the next. `trace` stores whatever the step function returns, so a hand-written step that reports another `before` breaks the chain."
+#~ msgstr "`initial()`、`steps()` 和 `result()` 读取这三个字段；`steps()` 返回一个副本，`equal` 是提升的 `Eq` 实现。`steps` 中的每个元素都是一个 `Reduced` 值，且 `steps().length()` 等于 `result` 中的 `steps` 计数。当步进函数遵守 `StepResult` 的契约时（它把自身的输入报告为 `before`，本包和 [eval](eval.md) 的每个遍历都是如此），相邻步骤首尾相接：第一个 `before` 是 `initial`，前一步的 `after` 即后一步的 `before`。`trace` 存储步进函数返回的任何内容，因此一个报告了其他 `before` 的手写步进函数会破坏这条链。"
+
+#~ msgid "`empty()` has no constants. `extend_with(c, ty)` returns a new signature with `c : ty` added; a later entry for the same name shadows an earlier one, and `lookup` returns the latest, or `None`. `to_array` returns a copy of the entries in insertion order, and `equal` compares the entry lists."
+#~ msgstr "`empty()` 不含任何常量。`extend_with(c, ty)` 返回添加了 `c : ty` 的新签名；同名的较晚条目会遮蔽较早的条目，`lookup` 返回最新的那个，或返回 `None`。`to_array` 按插入顺序返回条目的副本，`equal` 比较条目列表。"
+
+#~ msgid "The `substitution` package replaces free variables by terms without capturing variables. `Substitution[T]` works on `@syntax.Term[T]`; `GenericSubstitution[N]` works on any AST that implements `@syntax.BindingSyntax`. Both are finite, simultaneous and immutable."
+#~ msgstr "`substitution` 包用项替换自由变量，且不会捕获变量。`Substitution[T]` 作用于 `@syntax.Term[T]`；`GenericSubstitution[N]` 作用于任何实现了 `@syntax.BindingSyntax` 的 AST。两者都是有限的、同时的且不可变的。"
+
+#~ msgid "It denotes the map $\\sigma$ with $\\sigma(x) = s$ for an entry $(x, s)$ and $\\sigma(x) = x$ (the variable itself) for every other name. The entries are read-only outside the package; at most one entry exists per name."
+#~ msgstr "它表示映射 $\\sigma$：对于条目 $(x, s)$ 有 $\\sigma(x) = s$，对于其他所有名字有 $\\sigma(x) = x$（即变量本身）。这些条目在包外是只读的；每个名字至多有一个条目。"
+
+#~ msgid "`Context`, `Telescope` and `Renaming` are immutable records over arrays. Every update copies the array, which costs $O(n)$. The alternative, a persistent list or tree, would make updates cheaper but the sizes involved are the number of binders in scope, which is small for the intended use. Copying keeps the representation simple and the values safe to share."
+#~ msgstr "`Context`、`Telescope` 和 `Renaming` 是基于数组的不可变记录。每次更新都复制数组，代价为 $O(n)$。另一种做法是持久列表或树，它会让更新更便宜，但涉及的规模是作用域中的绑定子数，对预期用途而言很小。复制让表示保持简单，并使值可以安全共享。"
+
+#~ msgid "`Renaming::set` keeps at most one entry per source; `apply` therefore denotes a function."
+#~ msgstr "`Renaming::set` 对每个源至多保留一个条目；因此 `apply` 表示一个函数。"
+
+#~ msgid "Every operation returns a new value; no argument is mutated."
+#~ msgstr "每个操作都返回新值；不修改任何参数。"
+
+#~ msgid "**Immutable terms.** Steps build new terms and never update in place."
+#~ msgstr "**不可变的项。** 步骤构建新项，从不原地更新。"
+
+#~ msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. The shift is defined when no such index falls below the cutoff, that is, there is no `i >= cutoff + k` with `i + delta < cutoff + k`. Returns `Err(NegativeShift)` if an index would fall below the cutoff, where it would be captured by an enclosing binder or become negative, and `Err(NegativeIndex)` if the input contains a negative index."
+#~ msgstr "`shift(t, delta, cutoff)` 即操作 $\\uparrow^{delta}_{cutoff}$：在 `k` 个绑定子之下，索引 `i >= cutoff + k` 变为 `i + delta`，较小的索引保持不变。当没有这样的索引落到截断值之下时，即不存在满足 `i + delta < cutoff + k` 的 `i >= cutoff + k` 时，移位才有定义。若某索引会落到截断值之下（从而被外围绑定子捕获或变为负数）则返回 `Err(NegativeShift)`，若输入包含负索引则返回 `Err(NegativeIndex)`。"
+
 #~ msgid "A lambda checks against an arrow type by checking its body against the codomain, with the parameter given the domain. Every other term is inferred and compared with `==`; a difference gives `TypeMismatch`."
 #~ msgstr "lambda 对照箭头类型进行检查时，会以定义域作为参数的类型，将体对照陪域进行检查。其他所有项都先推断类型，再用 `==` 比较；若不同则给出 `TypeMismatch`。"
 
+#~ msgid "$\\uparrow^{d}_{c}\\,t$ adds $d$ to every index of $t$ that is free relative to cutoff $c$:"
+#~ msgstr "$\\uparrow^{d}_{c}\\,t$ 给 $t$ 中相对于截断点 $c$ 自由的每个索引加上 $d$："
+
+#~ msgid "`shift(t, d, c)` implements it by carrying the binder depth $k$ and testing $i \\ge c + k$, which unfolds the recursion on $c$."
+#~ msgstr "`shift(t, d, c)` 通过携带绑定子深度 $k$ 并检验 $i \\ge c + k$ 来实现它，这展开了对 $c$ 的递归。"
+
+#~ msgid "**Choice.** `shift` returns `Err(NegativeShift)` when a free index would cross its cutoff, and `shift`, `substitute_bound`, `instantiate`, `validate` and `to_named` report `NegativeIndex` for any negative index they meet. The lemmas below show that the error cases are unreachable from well-scoped input, so the `Result` costs nothing for correct callers and turns a silent corruption into data for incorrect ones. This follows the library rule that expected failures at public boundaries are structured values."
+#~ msgstr "**选择。** 当某个自由索引会越过其截断点时，`shift` 返回 `Err(NegativeShift)`，并且 `shift`、`substitute_bound`、`instantiate`、`validate` 和 `to_named` 在遇到任何负索引时都报告 `NegativeIndex`。下面的引理表明，从良作用域的输入出发不可能到达错误情形，因此 `Result` 对正确的调用者没有代价，而对错误的调用者则把无声的损坏变成数据。这遵循本库的规则：公共边界上预期的失败是结构化的值。"
+
+#~ msgid "`shift` never turns a free index into a bound one: if a free index would fall below its cutoff, it returns `Err(NegativeShift)`."
+#~ msgstr "`shift` 从不把自由索引变成约束索引：若某个自由索引会落到其截断点之下，它返回 `Err(NegativeShift)`。"
+
+#~ msgid "In $\\textsc{App}$ the spine is flattened first, so nested `Apply` nodes are one application $h\\,a_1 \\cdots a_n$; if $h$ has fewer arrows than arguments the result is `ExpectedFunction`, and an `Apply` node of the spine without arguments gives `EmptyApplication`. In $\\textsc{Redex}$ the parameter is renamed apart from the trailing arguments:"
+#~ msgstr "在 $\\textsc{App}$ 中先展平脊，使嵌套的 `Apply` 节点成为一个应用 $h\\,a_1 \\cdots a_n$；若 $h$ 的箭头数少于参数个数，结果为 `ExpectedFunction`，而脊中没有参数的 `Apply` 节点给出 `EmptyApplication`。在 $\\textsc{Redex}$ 中，形参被改名，使其与后续参数不冲突："
+
+#~ msgid ""
+#~ "with $b\\{x \\mapsto x'\\}$ the checked bound renaming of the [syntax design](syntax.md); in both cases $\\lambda x.\\,b =_\\alpha \\lambda x'.\\,b\\{x \\mapsto x'\\}$ and $x' \\n"
+#~ "otin \\mathrm{FV}(a_2, \\dots, a_n)$. With $n = 1$ there is nothing to rename and the second premise is $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$. $\\textsc{Sub}$ applies to every term except a lambda checked against an arrow; a lambda in inference position fails with `CannotInferLambda`. Type equality in $\\textsc{Sub}$ is syntactic, which is exact for simple types."
+#~ msgstr ""
+#~ "其中 $b\\{x \\mapsto x'\\}$ 是 [syntax 设计](syntax.md) 中带检查的约束改名；两种情况下都有 $\\lambda x.\\,b =_\\alpha \\lambda x'.\\,b\\{x \\mapsto x'\\}$ 且 $x' \\n"
+#~ "otin \\mathrm{FV}(a_2, \\dots, a_n)$。当 $n = 1$ 时无需改名，第二个前提为 $\\Gamma, x{:}\\sigma \\vdash b \\Rightarrow \\tau$。$\\textsc{Sub}$ 适用于除对箭头类型检查的 lambda 之外的所有项；处于推断位置的 lambda 以 `CannotInferLambda` 失败。$\\textsc{Sub}$ 中的类型相等是语法相等，对简单类型而言是精确的。"
+
+#~ msgid "*Proof sketch.* Induction on the algorithmic derivation. $\\textsc{Lam}$ and the axioms map to their declarative counterparts; $\\textsc{Sub}$ is immediate; $\\textsc{App}$ is $n$ uses of the declarative application rule. For $\\textsc{Redex}$, write $b' = b\\{x \\mapsto x'\\}$. The second premise is a derivation for the smaller term $b'\\,a_2 \\cdots a_n$, so by induction $\\Gamma, x'{:}\\sigma \\vdash b'\\,a_2 \\cdots a_n : \\tau$, and the generation lemma for application gives types $\\tau_2, \\dots, \\tau_n$ with $\\Gamma, x'{:}\\sigma \\vdash b' : \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$ and $\\Gamma, x'{:}\\sigma \\vdash a_i : \\tau_i$ for $i \\ge 2$. Then"
+#~ msgstr "*证明梗概。* 对算法推导作归纳。$\\textsc{Lam}$ 与公理对应到各自的声明式规则；$\\textsc{Sub}$ 是直接的；$\\textsc{App}$ 是对声明式应用规则的 $n$ 次使用。对于 $\\textsc{Redex}$，记 $b' = b\\{x \\mapsto x'\\}$。第二个前提是更小项 $b'\\,a_2 \\cdots a_n$ 的推导，因此由归纳假设得 $\\Gamma, x'{:}\\sigma \\vdash b'\\,a_2 \\cdots a_n : \\tau$，再由应用的生成引理得到类型 $\\tau_2, \\dots, \\tau_n$，使得 $\\Gamma, x'{:}\\sigma \\vdash b' : \\tau_2 \\to \\cdots \\to \\tau_n \\to \\tau$，且对 $i \\ge 2$ 有 $\\Gamma, x'{:}\\sigma \\vdash a_i : \\tau_i$。于是"
+
+#~ msgid "has declarative type $B$ and no other. Without the renaming, the trailing $x$ would be typed in $\\Gamma, x{:}\\mathsf{Unit}$ and the checker would answer `Unit`; versions before the fix did exactly that, and `check` accepted the term at `Unit`. With $x' = x_1$ the trailing $x$ keeps its type $B$, and `infer` returns $B$."
+#~ msgstr "具有声明式类型 $B$，且没有其他类型。若不改名，后续的 $x$ 会在 $\\Gamma, x{:}\\mathsf{Unit}$ 中定型，检查器就会回答 `Unit`；修复之前的版本正是如此，`check` 曾在 `Unit` 下接受该项。取 $x' = x_1$ 后，后续的 $x$ 保持其类型 $B$，`infer` 返回 $B$。"
+
+#~ msgid "The typed evaluator walks a spine the same way. It flattens nested `Apply` nodes before typing the head, so the curried $((\\lambda x.\\,\\lambda y.\\,y)\\;())\\;x$ is the same spine as the term above. A lambda head cannot be inferred, so its type is rebuilt from the premises of $\\textsc{Redex}$ and the expected type $\\tau$ of the whole application. Write $b' = h\\,c_1 \\cdots c_k$ with $h$ not an application ($k = 0$ if $b'$ is not one). The head gets the type $\\sigma \\to \\rho$, where $\\sigma$ is inferred for $a_1$ and $\\rho$, the type of $b'$, is computed recursively: take the head type of the flattened spine $h\\,c_1 \\cdots c_k\\,a_2 \\cdots a_n$ under $\\Gamma, x'{:}\\sigma$ and remove its first $k$ domains ($\\rho = \\tau$ if that spine is empty). Any other head is inferred. A redex body that consumes the outer arguments, as in $(\\lambda x.\\,(\\lambda y.\\,\\lambda z.\\,z)\\,x)\\;()\\;v$, is therefore handled as `infer` handles it, and `normalize_eta_long` accepts the same terms as `check`. Versions before the fix only recognised a bare lambda head and rejected both terms with `CannotInferLambda`."
+#~ msgstr "带类型的求值器以同样的方式遍历脊柱。它在为头部定型之前先展平嵌套的 `Apply` 节点，因此柯里化形式 $((\\lambda x.\\,\\lambda y.\\,y)\\;())\\;x$ 与上面的项是同一条脊柱。lambda 头部无法推断，因此它的类型由 $\\textsc{Redex}$ 的前提和整个应用的期望类型 $\\tau$ 重建。记 $b' = h\\,c_1 \\cdots c_k$，其中 $h$ 不是应用（若 $b'$ 不是应用则 $k = 0$）。头部得到类型 $\\sigma \\to \\rho$，其中 $\\sigma$ 是为 $a_1$ 推断出的类型，而 $b'$ 的类型 $\\rho$ 递归地计算：在 $\\Gamma, x'{:}\\sigma$ 下求展平后的脊柱 $h\\,c_1 \\cdots c_k\\,a_2 \\cdots a_n$ 的头部类型，再去掉它的前 $k$ 个定义域（若该脊柱为空，则 $\\rho = \\tau$）。其他头部则直接推断。因此，像 $(\\lambda x.\\,(\\lambda y.\\,\\lambda z.\\,z)\\,x)\\;()\\;v$ 这样消耗外层参数的可约式体，会按照 `infer` 的方式处理，`normalize_eta_long` 与 `check` 接受相同的项。修复之前的版本只识别裸的 lambda 头部，会以 `CannotInferLambda` 拒绝这两个项。"
+
+#~ msgid "**Completeness for normal forms.** If $t$ is beta-normal and $\\Gamma \\vdash t : \\tau$, then `check(Σ, Γ, t, τ)` succeeds. A beta-normal term is either a lambda, handled by $\\textsc{Lam}$, or a spine whose head is a variable, a constant or $()$; its type is determined by $\\Gamma$ or $\\Sigma$ and its arguments are again normal, so $\\textsc{App}$ and induction apply. Terms with redexes are accepted when each redex's first argument is inferable; $(\\lambda f.\\,f\\,())\\,(\\lambda y.\\,y)$ is rejected with `CannotInferLambda` although it is typable."
+#~ msgstr "**对范式的完备性。** 若 $t$ 是 beta 范式且 $\\Gamma \\vdash t : \\tau$，则 `check(Σ, Γ, t, τ)` 成功。beta 范式的项要么是由 $\\textsc{Lam}$ 处理的 lambda，要么是头部为变量、常量或 $()$ 的脊柱；其类型由 $\\Gamma$ 或 $\\Sigma$ 决定，其参数也是范式，因此可以应用 $\\textsc{App}$ 和归纳。当每个可约式的第一个参数都可推断时，含可约式的项会被接受；$(\\lambda f.\\,f\\,())\\,(\\lambda y.\\,y)$ 虽然可定型，却会以 `CannotInferLambda` 被拒绝。"
+
+#~ msgid "The checker terminates. Measure a call by the size of its term, and break ties by counting a `check` call above an `infer` call. $\\textsc{Sub}$ goes from `check` to `infer` on the same term, which lowers the measure; every other recursive call is on a strictly smaller term ($\\textsc{Redex}$ recurses on $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$, which lacks the binder and $a_1$; renaming does not change the size)."
+#~ msgstr "检查器会终止。以调用所处理项的大小作为度量，大小相同时把 `check` 调用计为高于 `infer` 调用。$\\textsc{Sub}$ 在同一项上从 `check` 转到 `infer`，度量下降；其他每个递归调用都作用于严格更小的项（$\\textsc{Redex}$ 在 $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ 上递归，它少了绑定子和 $a_1$；改名不改变大小）。"
+
 #~ msgid "`check` accepts every well-typed beta-normal term."
 #~ msgstr "`check` 接受每个良类型的 β-范式项。"
+
+#~ msgid "The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing, eta expansion of open variables and of constants (including nested arrow types and higher-order arguments), agreement of the two normalizers on small terms, and agreement of `check` and `normalize_eta_long` on redexes with curried heads, mixed flat and nested spines, and bodies that consume the outer arguments."
+#~ msgstr "`src/stlc/stlc_test.mbt` 中的测试覆盖了类型化与拒绝、遮蔽、开放变量和常量的 η-展开（包括嵌套箭头类型和高阶参数）、两个范式化器在小项上的一致性，以及 `check` 与 `normalize_eta_long` 在可约式上的一致性，这些可约式包括柯里化的头部、扁平与嵌套混合的脊柱，以及消耗外层参数的体。"
 
 #~ msgid "**Divergence.** Untyped terms need not normalize, so every phase must be bounded."
 #~ msgstr "**发散。** 无类型项不一定能范式化，因此每个阶段都必须有界。"
