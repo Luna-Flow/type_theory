@@ -865,7 +865,7 @@ msgstr ""
 
 #: manual/api/stlc.md:240
 #: manual/api/utlc/lambda.md:123
-#: manual/api/utlc/nbe.md:170
+#: manual/api/utlc/nbe.md:186
 msgid "Normalization"
 msgstr ""
 
@@ -1267,74 +1267,78 @@ msgid "Fuel is a step budget measured in units: every evaluation of a term node,
 msgstr ""
 
 #: manual/api/utlc/nbe.md:43
+msgid "The budget bounds the work, not the depth of the host call stack. Evaluation and readback run as a loop that keeps pending work on a stack in the heap, so the call stack does not grow with the fuel spent: a divergent term ends with `FuelExhausted` on every backend, however large the budget. The pending work is bounded by the budget."
+msgstr ""
+
+#: manual/api/utlc/nbe.md:59
 msgid "Semantic values"
 msgstr ""
 
-#: manual/api/utlc/nbe.md:47
+#: manual/api/utlc/nbe.md:63
 msgid "`Semantic[T]` is an opaque semantic value."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:57
+#: manual/api/utlc/nbe.md:73
 msgid "A semantic value is a constant, a closure (a binder body with its environment), a delayed argument, or a neutral value (a free variable, a variable at a quote level, or a neutral value applied to an argument). The representation is private; values are produced by `eval` and the `reflect_*` functions and consumed by `quote`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:65
+#: manual/api/utlc/nbe.md:81
 msgid "`reflect_free` turns a free name into a neutral semantic value."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:71
+#: manual/api/utlc/nbe.md:87
 msgid "Quoting it gives `Free(name)`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:75
+#: manual/api/utlc/nbe.md:91
 msgid "`reflect_level` turns a quote level into a neutral semantic variable."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:81
+#: manual/api/utlc/nbe.md:97
 msgid "Returns `None` for a negative level. Quoting the variable of level `l` at depth `n > l` gives `Bound(n - l - 1)`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:102
+#: manual/api/utlc/nbe.md:118
 msgid "Evaluation and readback"
 msgstr ""
 
-#: manual/api/utlc/nbe.md:106
+#: manual/api/utlc/nbe.md:122
 msgid "`EvaluationResult[T]` is the outcome of `eval`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:118
+#: manual/api/utlc/nbe.md:134
 msgid "`eval` evaluates a closed De Bruijn term to weak head form in the lazy semantic domain."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:125
+#: manual/api/utlc/nbe.md:141
 msgid "The term must be well scoped (free names are allowed); otherwise the result is `ScopeFailure` with `consumed=0`. Evaluation is call by name: arguments are delayed and evaluated only when needed, and evaluation stops at a closure or a neutral value without entering binders."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:132
+#: manual/api/utlc/nbe.md:148
 msgid "`QuoteResult[T]` is the outcome of `quote`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:144
+#: manual/api/utlc/nbe.md:160
 msgid "`quote` reads a semantic value back as a beta-normal De Bruijn term."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:150
+#: manual/api/utlc/nbe.md:166
 msgid "`quote(value, level, fuel)` reads `value` back under `level` binders. A closure is read back by applying it to a fresh variable of the current level and reading the result under one more binder; neutral applications are read back argument by argument, which forces delayed arguments. Use `level = 0` for values from `eval`. A negative `level`, or a level variable that is not below `level`, gives `ScopeFailure(NegativeIndex)`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:174
+#: manual/api/utlc/nbe.md:190
 msgid "`NbeResult[T]` is the outcome of `normalize`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:187
+#: manual/api/utlc/nbe.md:203
 msgid "`normalize` computes the beta normal form of a well-scoped De Bruijn term within a fuel budget."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:194
+#: manual/api/utlc/nbe.md:210
 msgid "It validates the term, evaluates it and quotes the result at level 0, with one shared budget. `NormalForm(t, c)`: `t` is the beta normal form, reached with `c` units. `FuelExhausted(c)`: the budget ran out; the term may diverge or may need more fuel. `ScopeFailure`: the input has a dangling or negative index. The fuel test comes first, so an ill-scoped term with fuel `<= 0` gives `FuelExhausted(consumed=0)`, not `ScopeFailure`."
 msgstr ""
 
-#: manual/api/utlc/nbe.md:201
+#: manual/api/utlc/nbe.md:217
 msgid "Applications in the result are unary: a normal form $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])` evaluates to the value of `h`, so it disappears from the result; the small-step reducers also read it as `h` but leave the node in place. The two normalizers agree after spines are flattened, where flattening merges nested applications and drops empty ones."
 msgstr ""
 
@@ -1393,7 +1397,7 @@ msgstr ""
 #: manual/design/substitution.md:23
 #: manual/design/syntax.md:22
 #: manual/design/utlc/lambda.md:21
-#: manual/design/utlc/nbe.md:23
+#: manual/design/utlc/nbe.md:24
 msgid "Mathematical background"
 msgstr ""
 
@@ -1454,7 +1458,7 @@ msgstr ""
 #: manual/design/substitution.md:62
 #: manual/design/syntax.md:71
 #: manual/design/utlc/lambda.md:65
-#: manual/design/utlc/nbe.md:89
+#: manual/design/utlc/nbe.md:90
 msgid "Design decisions"
 msgstr ""
 
@@ -1515,7 +1519,7 @@ msgstr ""
 #: manual/design/substitution.md:130
 #: manual/design/syntax.md:286
 #: manual/design/utlc/lambda.md:205
-#: manual/design/utlc/nbe.md:145
+#: manual/design/utlc/nbe.md:291
 msgid "Correctness and invariants"
 msgstr ""
 
@@ -1568,7 +1572,7 @@ msgstr ""
 #: manual/design/substitution.md:329
 #: manual/design/syntax.md:309
 #: manual/design/utlc/lambda.md:232
-#: manual/design/utlc/nbe.md:203
+#: manual/design/utlc/nbe.md:355
 msgid "Alternatives rejected"
 msgstr ""
 
@@ -1593,7 +1597,7 @@ msgstr ""
 #: manual/design/substitution.md:343
 #: manual/design/syntax.md:323
 #: manual/design/utlc/lambda.md:243
-#: manual/design/utlc/nbe.md:215
+#: manual/design/utlc/nbe.md:374
 msgid "Boundaries"
 msgstr ""
 
@@ -3463,166 +3467,238 @@ msgid "Small-step normalization repeats a search from the root for every beta st
 msgstr ""
 
 #: manual/design/utlc/nbe.md:16
-msgid "**Divergence.** Untyped terms need not normalize, so every phase must be bounded."
+msgid "**Divergence.** Untyped terms need not normalize, so every phase must be bounded, and only by the budget: a divergent run must end with `FuelExhausted` on every backend, whatever the size of the host stack."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:18
+#: manual/design/utlc/nbe.md:19
 msgid "**Reproducibility.** The outcome must not depend on anything but the input and the budget, and the reported cost must be exact."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:20
+#: manual/design/utlc/nbe.md:21
 msgid "**Encapsulation.** Callers must not be able to build semantic values that break the evaluator's scope invariant."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:25
+#: manual/design/utlc/nbe.md:26
 msgid "The semantic domain"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:27
+#: manual/design/utlc/nbe.md:28
 msgid "Values are given by the following grammar, where $\\rho$ is an environment (a list of values, index $0$ first), $t$ a De Bruijn term, $x$ a free name and $\\ell$ a level:"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:38
+#: manual/design/utlc/nbe.md:39
 msgid "$\\mathsf{clo}(t, \\rho)$ is the value of $\\lambda.\\,t$ in $\\rho$; $\\mathsf{delay}(t, \\rho)$ is an argument not yet evaluated; neutral values $n$ are computations stuck on a variable. In the implementation, $\\mathsf{app}(d, e)$ also arises when $d$ is a constant, since a constant applied to an argument is stuck as well."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:44
+#: manual/design/utlc/nbe.md:45
 msgid "Evaluation"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:46
+#: manual/design/utlc/nbe.md:47
 msgid "$\\llbracket t \\rrbracket\\rho$ evaluates to weak head form:"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:64
+#: manual/design/utlc/nbe.md:65
 msgid "Arguments are delayed, so evaluation is *call by name*: an argument that is never used is never evaluated. There is no memoization; a delayed argument used twice is evaluated twice."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:68
+#: manual/design/utlc/nbe.md:69
 msgid "Readback"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:70
+#: manual/design/utlc/nbe.md:71
 msgid "$R_n(d)$ reads $d$ back under $n$ binders:"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:83
+#: manual/design/utlc/nbe.md:84
 msgid "A closure is read back by applying it to a fresh variable. That variable is represented by its *level* $n$, which does not change while the value is carried under further binders, and converted to the index $n - 1 - \\ell$ at the occurrence (see levels in the [debruijn design](../debruijn.md)). `normalize(t)` is $R_0(\\llbracket t \\rrbracket[\\,])$ for closed $t$."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:91
+#: manual/design/utlc/nbe.md:92
 msgid "Untyped NbE needs a budget"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:93
+#: manual/design/utlc/nbe.md:94
 msgid "**Problem.** For $\\Omega = (\\lambda.\\,0\\,0)(\\lambda.\\,0\\,0)$, evaluation unfolds $\\mathrm{app}(\\mathsf{clo}(0\\,0, [\\,]), \\cdot)$ forever. In the typed setting termination is a theorem ([stlc design](../stlc.md)); here it is false."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:98
+#: manual/design/utlc/nbe.md:99
 msgid "**Choice.** Every evaluation of a node, every `force` and every readback step costs one unit of fuel, and running out yields `FuelExhausted` with the amount consumed. The budget is threaded through all phases, so the cost of reading back under binders, which may evaluate closure bodies, is included."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:103
+#: manual/design/utlc/nbe.md:104
 msgid "**Determinism in the budget.** The computation does not inspect the fuel except to stop, so a run with fuel $f$ that ends with a normal form after consuming $c \\le f$ units performs exactly the same computation with any fuel $f' \\ge c$. The fuel is only tested by `fuel <= 0`, and every test that passes is followed by spending one unit. If $s$ units have been spent before some test of the original run, that test is followed by at least one more unit, so $s + 1 \\le c$; with fuel $f'$ the test sees $f' - s \\ge c - s \\ge 1$ and passes as well. Every test of the original run therefore passes again, the run takes the same path, and it stops with the same result. With $f' = c - 1$ the last test sees $0$ and fails. Results are therefore reproducible, and `consumed` is the exact minimum budget for that result."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:116
-msgid "Laziness without sharing"
+#: manual/design/utlc/nbe.md:117
+msgid "A bounded host stack"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:118
-msgid "**Problem.** Strict evaluation (call by value) diverges on $(\\lambda.\\,7)\\,\\Omega$, although the term has the normal form $7$."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:121
-msgid "**Choice.** Arguments are delayed. Together with readback, which evaluates the head of every neutral first and its arguments afterwards, and enters closures only after their head is known, this realizes normal-order (leftmost-outermost) reduction, the normalizing strategy of the [eval design](../eval.md). Call by need would share delayed results; it is not used because it needs mutable thunks, and the budget keeps the cost of recomputation bounded and visible."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:129
-msgid "Opaque semantic values"
+#: manual/design/utlc/nbe.md:119
+msgid "**Problem.** Written as host functions, the equations of evaluation and readback are mutually recursive, and every call whose result is still needed keeps a host stack frame. On $\\Omega$, applying $\\mathsf{clo}(0\\,0, [\\,])$ evaluates $0\\,0$, which applies the closure again, and none of these calls returns before the fuel runs out: the host stack grows with the fuel spent. The js, wasm and wasm-gc stacks are much smaller than a budget of a few million units needs, so such a run overflowed the stack instead of ending with `FuelExhausted`, against the constraint that every phase is bounded. Readback has the same problem on a term with an infinite normal form, such as $(\\lambda.\\,f\\,(0\\,0))\\,(\\lambda.\\,f\\,(0\\,0))$, whose readback $f\\,(f\\,(f \\cdots))$ nests one call of $R_n$ per argument."
 msgstr ""
 
 #: manual/design/utlc/nbe.md:131
-msgid "`Semantic[T]` is a struct around a private enum. Callers can create neutral values (`reflect_free`, `reflect_level`), evaluate, and quote, but cannot build closures with ill-scoped environments. This keeps the invariant that every closure environment matches the scope of its body, which is why `eval` validates its input once and can then trust every index lookup."
+msgid "**Choice.** Evaluation runs as an abstract machine whose continuation is an explicit stack of frames in the heap: the recursive evaluator in continuation-passing style with the continuations defunctionalized, in the manner of the CEK machine.[^machines] A state $\\langle c \\mid K \\mid f \\rangle$ consists of a control $c$, a continuation $K$ (a list of frames, top first) and the remaining fuel $f$:"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:137
-msgid "Unary applications in normal forms"
+#: manual/design/utlc/nbe.md:144
+msgid "$\\mathsf{ev}$ and $\\mathsf{fo}$ are calls of $\\llbracket - \\rrbracket$ and $\\mathrm{force}$; $\\mathsf{ret}(d)$ passes a value to the top frame. $\\mathsf{spine}(\\vec u, j, \\rho)$, for the arguments $\\vec u = u_0 \\cdots u_{m-1}$ of an application node, waits for the value to apply to $\\mathsf{delay}(u_j, \\rho), \\ldots, \\mathsf{delay}(u_{m-1}, \\rho)$; $\\mathsf{to}(e)$ waits for a forced function to apply to $e$. In the code these are `EvalControl` (`Evaluate`, `Force`, `Return`) and `EvalFrame` (`ApplyArguments`, `ApplyTo`). The rules for $\\mathsf{ev}$ and $\\mathsf{fo}$ apply when $f \\ge 1$; with $f \\le 0$ the machine stops with `FuelExhausted`, and an index outside $\\rho$ stops it with `ScopeFailure`:"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:139
-msgid "Readback produces $R_n(\\mathsf{app}(d, e)) = R_n(d)\\,R_n(e)$ as a unary `Apply`, so the spine $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`. The small-step reducer keeps the n-ary `Apply(f, [a, b])` of its input. Both denote the same curried application; comparisons between the two normalizers must flatten spines first."
+#: manual/design/utlc/nbe.md:170
+msgid "where $K' = \\mathsf{spine}(\\vec u, j + 1, \\rho) \\cdot K$ if $j + 1 < m$ and $K' = K$ otherwise. An empty application $t\\,()$ steps to $\\langle \\mathsf{ev}(t, \\rho) \\mid K \\mid f - 1 \\rangle$. The machine starts in $\\langle \\mathsf{ev}(t, \\rho) \\mid \\varepsilon \\mid f \\rangle$ (or $\\mathsf{fo}(d)$) and returns $d$ with $f$ units left when it reaches $\\langle \\mathsf{ret}(d) \\mid \\varepsilon \\mid f \\rangle$."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:147
-msgid "**Theorem (soundness).** If `normalize(t, fuel)` returns `NormalForm(u, _)`, then $u$ is beta-normal and $t =_\\beta u$ (up to spine flattening)."
+#: manual/design/utlc/nbe.md:177
+msgid "*Same values.* Read a continuation as the function it still has to apply,"
 msgstr ""
 
-#: manual/design/utlc/nbe.md:150
-msgid "*Sketch.* Define the *denotation* $\\lfloor d \\rfloor_n$ of a value under $n$ binders as the term it stands for: $\\lfloor \\mathsf{clo}(t, \\rho) \\rfloor_n = \\lambda.\\,t[\\rho]$, $\\lfloor \\mathsf{delay}(t, \\rho) \\rfloor_n = t[\\rho]$, $\\lfloor \\mathsf{lvl}(\\ell) \\rfloor_n = n - 1 - \\ell$, and so on, where $t[\\rho]$ substitutes the denotations of $\\rho$ for the free indices of $t$. By induction on evaluation, $t[\\rho] \\to_\\beta^{*} \\lfloor \\llbracket t \\rrbracket\\rho \\rfloor_n$: the only non-trivial case is $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$, which is the beta step $(\\lambda.\\,t[\\rho])\\,\\lfloor e \\rfloor \\to_\\beta t[\\lfloor e \\rfloor \\cdot \\rho]$ (substitution lemma of the [debruijn attachment](../../../attachments/design_debruijn_index-lemmas.typ)). Readback inserts only beta steps under binders, so $t \\to_\\beta^{*} u$. For normality: $R$ produces $\\lambda$ only from closures, and applications only from $\\mathsf{app}(d, e)$, whose head $d$ is a neutral or a constant, never a closure (application of a closure is evaluated, not stored). Hence the output follows the grammar"
+#: manual/design/utlc/nbe.md:187
+msgid "and a state $\\langle c \\mid K \\mid f \\rangle$ as $K(\\overline{c})$ with $\\overline{\\mathsf{ev}(t, \\rho)} = \\llbracket t \\rrbracket\\rho$, $\\overline{\\mathsf{fo}(d)} = \\mathrm{force}(d)$ and $\\overline{\\mathsf{ret}(d)} = d$. Every rule turns a state into one with the same reading, by one of the evaluation equations above: the first seven rules are the equations of $\\llbracket - \\rrbracket$ and $\\mathrm{force}$, the $\\mathsf{spine}$ rule unfolds the leftmost application of the spine, starting it as the implementation does by forcing the function, and the two $\\mathsf{to}$ rules are the two equations of $\\mathrm{app}$. When $j + 1 = m$ no frame for the remaining arguments is needed, since $\\mathsf{spine}(\\vec u, m, \\rho) \\cdot K$ reads as $K$. By induction on the number of steps, a run that stops at $\\langle \\mathsf{ret}(d) \\mid \\varepsilon \\mid f' \\rangle$ computes $d = \\llbracket t \\rrbracket\\rho$."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:169
-msgid "which contains no redex $(\\lambda.\\,t)\\,u$. $\\square$"
+#: manual/design/utlc/nbe.md:201
+msgid "*Same fuel.* Units are tested and spent exactly in the $\\mathsf{ev}$ and $\\mathsf{fo}$ rules, that is on entry to $\\llbracket - \\rrbracket$ and $\\mathrm{force}$, where the recursive functions test and spend them; the $\\mathsf{ret}$ rules spend nothing, like returning from a host call and dispatching on its result. The machine makes the calls in the order of the recursive definition (it is that definition with its host stack made explicit), so every test sees the same remaining fuel. Results, `consumed`, and the determinism argument above are therefore unchanged; the tests pin exact costs from before the change."
 msgstr ""
 
-#: manual/design/utlc/nbe.md:171
-msgid "**Completeness (sketch).** If $t$ has a beta normal form, `normalize` returns it for sufficient fuel. Evaluation computes the weak head normal form by call by name, and readback recursively normalizes the body of a closure and the arguments of a neutral after its head: this is the leftmost-outermost strategy decomposed into head and arguments. By the normalization theorem (Barendregt 13.2.2) this strategy terminates on every term with a normal form, and by confluence the normal form is unique.[^nbe]"
-msgstr ""
-
-#: manual/design/utlc/nbe.md:179
-msgid "For untyped NbE see K. Aehlig and F. Joachimski, \"Operational aspects of untyped normalisation by evaluation\", Mathematical Structures in Computer Science 14, 2004; for strong reduction by evaluation, B. Grégoire and X. Leroy, \"A compiled implementation of strong reduction\", ICFP 2002."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:181
-msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:192
-msgid "Other invariants:"
-msgstr ""
-
-#: manual/design/utlc/nbe.md:194
-msgid "With positive fuel, `eval` and `normalize` reject ill-scoped input with `ScopeFailure` and `consumed=0` before doing any work; with fuel `<= 0` they return `FuelExhausted(consumed=0)` without looking at the term."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:197
-msgid "`quote(value, n, _)` returns `ScopeFailure` only when $n < 0$ or a level variable is not below $n$. Values produced by `eval` contain no level variables, so quoting them at any level $n \\ge 0$ never fails this way."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:200
-msgid "Fuel: `consumed` never exceeds the fuel given; the determinism property above holds."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:205
-msgid "**Typed or eta-long readback.** Untyped readback cannot know where to eta-expand; eta-long normal forms are provided for typed terms by [stlc](../stlc.md)."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:208
-msgid "**Host-language closures (HOAS).** Representing $\\mathsf{clo}$ as a MoonBit function would be faster but makes fuel accounting and inspection of values impossible, and the values could not be quoted without a fresh-variable trick on the host side. A first-order closure keeps everything observable."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:212
-msgid "**Named environments.** Indexing the environment by De Bruijn index makes lookup positional and needs no fresh names during evaluation."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:217
-msgid "Beta only: no eta, no reduction of constants."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:218
-msgid "Not total: `FuelExhausted` is the expected outcome for divergent terms and does not prove divergence."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:220
-msgid "No sharing of delayed arguments."
-msgstr ""
-
-#: manual/design/utlc/nbe.md:221
-msgid "Normal forms use unary applications."
+#: manual/design/utlc/nbe.md:211
+msgid "*Bounded stacks.* The machine is a single loop, so its host stack depth is constant. The frame stack $K$ grows only in the $\\mathsf{ev}(t\\,\\vec u, \\rho)$ rule, which spends a unit, and in the $\\mathsf{spine}$ rule, which replaces one frame by at most two and is followed by a $\\mathsf{fo}$ step that spends a unit or stops. Hence, at every step,"
 msgstr ""
 
 #: manual/design/utlc/nbe.md:222
+msgid "and the pending work lives in the heap, bounded by the initial budget $f_0$. On $\\Omega$ the stack never holds more than one frame: applying the closure to the last argument of the spine leaves nothing below the $\\mathsf{to}$ frame, and the $\\mathsf{to}$ rule pops it before the body is evaluated, so this tail call runs in constant space. A term that grows, such as $(\\lambda.\\,0\\,0\\,0)\\,(\\lambda.\\,0\\,0\\,0)$, keeps one $\\mathsf{spine}$ frame per unfolding for its last argument; its stack grows in the heap, within the bound."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:231
+msgid "Readback is transformed in the same way, with controls $\\mathsf{rb}(d, n)$ (read $d$ back under $n$ binders) and $\\mathsf{emit}(u)$ (pass a term to the top frame) and frames"
+msgstr ""
+
+#: manual/design/utlc/nbe.md:239
+msgid "(`QuoteControl` and `QuoteFrame` in the code). A step $\\mathsf{rb}(d, n)$ spends one unit and forces $d$ to $d'$; a constant, a free name or a level emits the corresponding term, an application $\\mathsf{app}(d_1, e)$ continues with $\\mathsf{rb}(d_1, n)$ under the frame $\\mathsf{arg}(e, n)$, and a closure $\\mathsf{clo}(t, \\rho)$ evaluates $t$ in $\\mathsf{lvl}(n) \\cdot \\rho$ to $d''$ and continues with $\\mathsf{rb}(d'', n + 1)$ under $\\mathsf{bind}$. An emitted $u$ meets its frame:"
+msgstr ""
+
+#: manual/design/utlc/nbe.md:254
+msgid "These are the readback equations above, with the head of a neutral read before its argument as before. The forcing and the evaluation inside an $\\mathsf{rb}$ step run the evaluation machine to its end and return to the readback loop, so the host stack holds at most the two loops, and $Q$, like $K$, is bounded by the units spent."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:260
+msgid "M. Felleisen and D. P. Friedman, \"Control operators, the SECD-machine, and the λ-calculus\", 1986, for the CEK machine; M. S. Ager, D. Biernacki, O. Danvy and J. Midtgaard, \"A functional correspondence between evaluators and abstract machines\", PPDP 2003, for deriving it from an evaluator by CPS transformation and defunctionalization."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:262
+msgid "Laziness without sharing"
+msgstr ""
+
+#: manual/design/utlc/nbe.md:264
+msgid "**Problem.** Strict evaluation (call by value) diverges on $(\\lambda.\\,7)\\,\\Omega$, although the term has the normal form $7$."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:267
+msgid "**Choice.** Arguments are delayed. Together with readback, which evaluates the head of every neutral first and its arguments afterwards, and enters closures only after their head is known, this realizes normal-order (leftmost-outermost) reduction, the normalizing strategy of the [eval design](../eval.md). Call by need would share delayed results; it is not used because it needs mutable thunks, and the budget keeps the cost of recomputation bounded and visible."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:275
+msgid "Opaque semantic values"
+msgstr ""
+
+#: manual/design/utlc/nbe.md:277
+msgid "`Semantic[T]` is a struct around a private enum. Callers can create neutral values (`reflect_free`, `reflect_level`), evaluate, and quote, but cannot build closures with ill-scoped environments. This keeps the invariant that every closure environment matches the scope of its body, which is why `eval` validates its input once and can then trust every index lookup."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:283
+msgid "Unary applications in normal forms"
+msgstr ""
+
+#: manual/design/utlc/nbe.md:285
+msgid "Readback produces $R_n(\\mathsf{app}(d, e)) = R_n(d)\\,R_n(e)$ as a unary `Apply`, so the spine $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`. The small-step reducer keeps the n-ary `Apply(f, [a, b])` of its input. Both denote the same curried application; comparisons between the two normalizers must flatten spines first."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:293
+msgid "**Theorem (soundness).** If `normalize(t, fuel)` returns `NormalForm(u, _)`, then $u$ is beta-normal and $t =_\\beta u$ (up to spine flattening)."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:296
+msgid "*Sketch.* Define the *denotation* $\\lfloor d \\rfloor_n$ of a value under $n$ binders as the term it stands for: $\\lfloor \\mathsf{clo}(t, \\rho) \\rfloor_n = \\lambda.\\,t[\\rho]$, $\\lfloor \\mathsf{delay}(t, \\rho) \\rfloor_n = t[\\rho]$, $\\lfloor \\mathsf{lvl}(\\ell) \\rfloor_n = n - 1 - \\ell$, and so on, where $t[\\rho]$ substitutes the denotations of $\\rho$ for the free indices of $t$. By induction on evaluation, $t[\\rho] \\to_\\beta^{*} \\lfloor \\llbracket t \\rrbracket\\rho \\rfloor_n$: the only non-trivial case is $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$, which is the beta step $(\\lambda.\\,t[\\rho])\\,\\lfloor e \\rfloor \\to_\\beta t[\\lfloor e \\rfloor \\cdot \\rho]$ (substitution lemma of the [debruijn attachment](../../../attachments/design_debruijn_index-lemmas.typ)). Readback inserts only beta steps under binders, so $t \\to_\\beta^{*} u$. For normality: $R$ produces $\\lambda$ only from closures, and applications only from $\\mathsf{app}(d, e)$, whose head $d$ is a neutral or a constant, never a closure (application of a closure is evaluated, not stored). Hence the output follows the grammar"
+msgstr ""
+
+#: manual/design/utlc/nbe.md:315
+msgid "which contains no redex $(\\lambda.\\,t)\\,u$. $\\square$"
+msgstr ""
+
+#: manual/design/utlc/nbe.md:317
+msgid "**Completeness (sketch).** If $t$ has a beta normal form, `normalize` returns it for sufficient fuel. Evaluation computes the weak head normal form by call by name, and readback recursively normalizes the body of a closure and the arguments of a neutral after its head: this is the leftmost-outermost strategy decomposed into head and arguments. By the normalization theorem (Barendregt 13.2.2) this strategy terminates on every term with a normal form, and by confluence the normal form is unique.[^nbe]"
+msgstr ""
+
+#: manual/design/utlc/nbe.md:325
+msgid "For untyped NbE see K. Aehlig and F. Joachimski, \"Operational aspects of untyped normalisation by evaluation\", Mathematical Structures in Computer Science 14, 2004; for strong reduction by evaluation, B. Grégoire and X. Leroy, \"A compiled implementation of strong reduction\", ICFP 2002."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:327
+msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices. Further tests run $\\Omega$, a divergent term whose head grows, and two terms with infinite normal forms with budgets of thirty million units on every backend, and pin the exact cost of Church numeral arithmetic together with its reproducibility at `consumed` and `consumed - 1`."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:342
+msgid "Other invariants:"
+msgstr ""
+
+#: manual/design/utlc/nbe.md:344
+msgid "With positive fuel, `eval` and `normalize` reject ill-scoped input with `ScopeFailure` and `consumed=0` before doing any work; with fuel `<= 0` they return `FuelExhausted(consumed=0)` without looking at the term."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:347
+msgid "`quote(value, n, _)` returns `ScopeFailure` only when $n < 0$ or a level variable is not below $n$. Values produced by `eval` contain no level variables, so quoting them at any level $n \\ge 0$ never fails this way."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:350
+msgid "Fuel: `consumed` never exceeds the fuel given; the determinism property above holds."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:352
+msgid "Stack: evaluation and readback use a constant depth of host stack; their frame stacks live in the heap and are bounded by the budget."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:357
+msgid "**Typed or eta-long readback.** Untyped readback cannot know where to eta-expand; eta-long normal forms are provided for typed terms by [stlc](../stlc.md)."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:360
+msgid "**Host-language closures (HOAS).** Representing $\\mathsf{clo}$ as a MoonBit function would be faster but makes fuel accounting and inspection of values impossible, and the values could not be quoted without a fresh-variable trick on the host side. A first-order closure keeps everything observable."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:364
+msgid "**Named environments.** Indexing the environment by De Bruijn index makes lookup positional and needs no fresh names during evaluation."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:366
+msgid "**Direct recursion with a larger stack.** The js and wasm hosts fix the stack size, and any fixed stack is exhausted by some budget, so the outcome would depend on the backend."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:369
+msgid "**Trampolining through host closures.** Returning a closure for the rest of the computation also bounds the stack, but allocates a host function per step and hides the pending work. First-order frames keep the machine observable, for the same reason as first-order semantic closures."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:376
+msgid "Beta only: no eta, no reduction of constants."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:377
+msgid "Not total: `FuelExhausted` is the expected outcome for divergent terms and does not prove divergence."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:379
+msgid "No sharing of delayed arguments."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:380
+msgid "Only evaluation and readback have a bounded host stack. `eval` and `normalize` first validate their input with `@debruijn.validate`, which recurses over the term, so the stack depth they need still grows with the nesting depth of the input term."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:384
+msgid "Normal forms use unary applications."
+msgstr ""
+
+#: manual/design/utlc/nbe.md:385
 msgid "Input must be De Bruijn syntax; convert named terms with `@debruijn.from_named` and results back with `@debruijn.to_named`."
 msgstr ""
 
