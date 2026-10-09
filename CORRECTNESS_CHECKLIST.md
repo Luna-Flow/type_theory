@@ -23,9 +23,9 @@ Last audited: 2026-10-09
 - `Term[T]` assumes `T` is closed with respect to shared names.
 - `Debug`/`Repr` of deeply nested terms, types and errors is recursive and can
   overflow the host stack; the #13 contract covers the algorithms, not derived
-  formatting.
+  formatting (#28).
 - `normalize_eta_long` can take quadratic time on deeply nested redexes and
-  argument spines; this performance issue is tracked separately from #13.
+  argument spines (#27).
 - `alpha_equal` is the payload equality lifted through binders. With a
   non-reflexive `==`, such as `Double` with `NaN`, a term is not alpha-equal
   to itself.
@@ -49,9 +49,9 @@ Last audited: 2026-10-09
 
 Open:
 
-None in this checklist. `normalize_eta_long` performance and deep `Debug`
-formatting remain explicit boundaries above; they are not claimed as fixed by
-#13.
+None in this checklist. `normalize_eta_long` performance (#27) and deep
+`Debug` formatting (#28) remain explicit boundaries above; they are not
+claimed as fixed by #13.
 
 Fixed on 2026-10-09:
 
