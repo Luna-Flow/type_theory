@@ -398,33 +398,28 @@ continuation, like the untyped evaluator of [utlc/nbe](utlc/nbe.md): a
 control says what to compute next, and a stack of frames in the heap holds
 the rest of the callers. A call in tail position replaces the control; a
 call whose result is still needed first pushes a frame for the rest of its
-caller. For the checker, the controls and frames are
+caller. The single bidirectional machine is `build_typed_plan`, with
+`PlanControl` and `PlanFrame` in the code. `infer` starts it in inference mode
+and returns the plan's type; `check` starts it in checking mode and discards
+the plan; `normalize_eta_long` starts it in checking mode and evaluates the
+plan. Their typing rules and first-error order cannot diverge through separate
+implementations (#32).
 
-$$
-\begin{aligned}
-c \;&::=\; \mathsf{inf}(\Gamma, t) \mid \mathsf{chk}(\Gamma, t, \tau) \mid \mathsf{inf}^{*}(\Gamma, h, \vec a) \mid \mathsf{chk}^{*}(\Gamma, h, \vec a, \tau) \mid \mathsf{ret}(\tau) \mid \mathsf{ok}, \\
-k \;&::=\; \mathsf{head}(\Gamma, \vec a) \mid \mathsf{arg}(\Gamma, \vec a, i, \tau) \mid \mathsf{cmp}(\tau) \mid \mathsf{redex}(\Gamma, x', b', \vec a, m), \qquad m \in \{{\Rightarrow}\} \cup \{{\Leftarrow}\,\tau\},
-\end{aligned}
-$$
+The machine flattens each application spine, infers a non-lambda head, checks
+its operands in order and compares the result with the expected type when
+checking. A lambda body is checked against the codomain of its expected arrow.
+A redex parameter is renamed apart before its first argument is inferred;
+only after inference succeeds does `redex_finish` flatten the body and join
+the trailing arguments. The remaining spine continues in its original mode.
+Assembly frames record checked lambdas, applications and strict lets without
+introducing new failures. All pending work lives in heap arrays.
 
-(`CheckControl` and `CheckFrame` in the code). $\textsc{Lam}$ and the
-flattening of a spine are tail calls. $\textsc{Sub}$ pushes
-$\mathsf{cmp}(\tau)$ and infers; $\textsc{App}$ pushes
-$\mathsf{head}(\Gamma, \vec a)$ and infers $h$, and the inferred type
-$\tau_1 \to \cdots$ meeting $\mathsf{head}$ checks $a_1$ against $\tau_1$
-under $\mathsf{arg}(\Gamma, \vec a, 1, \tau_2 \to \cdots)$, and so on;
-$\textsc{Redex}$ and $\textsc{Redex}^{\Leftarrow}$ rename the parameter
-apart, push $\mathsf{redex}(\Gamma, x', b\{x \mapsto x'\}, \vec a, m)$ and
-infer $a_1$; the type $\sigma$ meeting that frame flattens
-$b\{x \mapsto x'\}\,a_2 \cdots a_n$ and continues with
-$\mathsf{inf}^{*}$ or $\mathsf{chk}^{*}$ under $\Gamma, x'{:}\sigma$.
-Typed evaluation runs a private typed plan rather than reconstructing types
-from source terms. Its controls evaluate a plan, apply a semantic value, or
-return a value; its frames wait for a function, an operand, or a strict-let
-argument. Applying a closure and entering a strict-let body are tail calls.
-Readback retains controls for $\downarrow^\tau$, for $\mathrm{quote}$ and
-for returning a term, and frames for a binder, an argument still to read back,
-and a function waiting for its argument.
+Typed evaluation runs the private plan. Its controls evaluate a plan, apply a
+semantic value, or return a value; its frames wait for a function, an operand,
+or a strict-let argument. Applying a closure and entering a strict-let body
+are tail calls. Readback retains controls for $\downarrow^\tau$, for
+$\mathrm{quote}$ and for returning a term, and frames for a binder, an
+argument still to read back, and a function waiting for its argument.
 
 *Same results, same errors.* Read a frame as the function that the rest of
 its caller applies to the returned value, and a state as the stack applied to
@@ -474,13 +469,15 @@ execute these plans and never call `check` or `infer`.
 **Error correspondence.** Erase the plan returned by each control to its type
 (for inference) or successful check (for checking). `PlanHead`, `PlanArgument`
 and `PlanCompare` perform the same head inference, argument check and type
-comparison as their checker counterparts. `PlanRedexFirst` renames before
+comparison prescribed by the bidirectional rules. `PlanRedexFirst` renames before
 inferring the first argument, calls `redex_finish` only after it succeeds,
 and continues the remaining spine in the original inference/checking mode.
 `PlanBindBody` and `PlanRedexRest` only assemble successful plans; neither can
 fail. Induction over machine transitions therefore gives the same acceptance
-and first `TypeError` as `check`. The public checker remains an independent
-implementation used for comparison.
+and first `TypeError` as the original checker. Public `check` and
+`normalize_eta_long` now start this same machine in the same checking mode
+(#32), so their typing acceptance and first error have one implementation.
+The frozen baseline remains available for compatibility comparisons.
 
 **Semantic correspondence.** A planned application evaluates its function,
 then its operand, then applies the value. A planned redex implements
@@ -497,7 +494,11 @@ These are structural arguments, not machine-checked proofs.
 
 **Cost and limits.** Each successful typing visit creates a constant number of
 plan nodes; $p$ such visits add $O(p)$ plan storage and $O(d)$ pending frames
-at traversal depth $d$. The retained plan can live as long as a closure.
+at traversal depth $d$. Public `infer` and `check` also build a plan and
+discard it, adding $O(p)$ temporary plan storage compared with the former
+checker. This allocation is the explicit tradeoff for one rule implementation
+(#32); no allocation-free checking mode is provided. The retained plan can
+live as long as a closure.
 Evaluation traverses plans without the repeated type-inference suffixes. For
 the nested identity-redex regression with fixed signature and empty initial
 context, checking, plan construction and evaluation take $O(n)$ work and
@@ -513,7 +514,8 @@ readback is unchanged.
 with exact binder-name comparison. `python3 tools/verify_stlc_plan.py --target
 all` compares 43,120 bounded term/type combinations per backend with the
 frozen PR #30 implementation at `db53d775e9248e8712a240adc8327be72675c80f`,
-including exact output names and error values. It requires that Git object
+including exact output names and error values. It also compares public
+`check` on those combinations and `infer` on all 8,624 generated terms. It requires that Git object
 locally and removes its temporary oracle afterward. The corpus is finite;
 it supports compatibility but does not establish a universal theorem.
 

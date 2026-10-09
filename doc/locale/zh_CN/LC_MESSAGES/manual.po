@@ -257,8 +257,8 @@ msgstr "它是提升的 `Eq` 实现；新代码中请使用 `==`。"
 
 #: manual/api/core.md:366
 #: manual/api/core.md:368
-#: manual/api/stlc.md:357
 #: manual/api/stlc.md:359
+#: manual/api/stlc.md:361
 #: manual/api/syntax.md:367
 #: manual/api/syntax.md:369
 #: manual/index.md:103
@@ -266,7 +266,7 @@ msgid "Deprecated"
 msgstr "已弃用"
 
 #: manual/api/core.md:368
-#: manual/api/stlc.md:359
+#: manual/api/stlc.md:361
 #: manual/api/syntax.md:369
 msgid "Replacement"
 msgstr "替代项"
@@ -939,18 +939,18 @@ msgid "On a type error it returns `Err` without reducing. Otherwise it returns `
 msgstr "遇到类型错误时，它返回 `Err` 而不进行归约。否则返回 `Ok(@lambda.normalize(term, max_steps))`：带步数上限的正规序 β-η 归约。其范式是 β-范式且 η-*短*的（针对一元应用，见 [`@lambda.eta_rule`](utlc/lambda.md)）。由于每个良类型项都是强范式化的，足够大的 `max_steps` 总会得到 `NormalForm`。"
 
 #: manual/api/stlc.md:317
-msgid "`normalize_eta_long` checks a term against a type and returns its beta-normal, eta-long form, computed by typed normalization by evaluation. The checking pass builds a private typed execution plan, so evaluation and closure application reuse established types without rechecking or inferring source subterms. Plan construction preserves the first error reported by `check`; the public term representation is unchanged."
-msgstr "`normalize_eta_long` 检查项是否具有给定类型，并通过带类型的求值规范化返回其 beta 正规、eta 长形式。检查过程构造私有的带类型执行计划，因此求值和闭包应用会复用已确定的类型，无需重新检查或推断源子项。计划构造保持 `check` 报告的首个错误；公开的项表示不变。"
+msgid "`normalize_eta_long` checks a term against a type and returns its beta-normal, eta-long form, computed by typed normalization by evaluation. The checking pass builds a private typed execution plan, so evaluation and closure application reuse established types without rechecking or inferring source subterms. Plan construction preserves the first error reported by `check`; the public term representation is unchanged. Public `check` and `infer` use the same plan-building machine and discard the resulting plan, adding temporary plan storage proportional to successful typing visits."
+msgstr "`normalize_eta_long` 检查项是否具有给定类型，并通过带类型的求值规范化返回其 beta 正规、eta 长形式。检查过程构造私有的带类型执行计划，因此求值和闭包应用会复用已确定的类型，无需重新检查或推断源子项。计划构造保持 `check` 报告的首个错误；公开的项表示不变。公开 `check` 和 `infer` 使用同一个计划构造机器，并丢弃结果计划，因此会增加与成功类型访问次数成正比的临时计划存储。"
 
-#: manual/api/stlc.md:328
+#: manual/api/stlc.md:330
 msgid "In the result, every subterm of arrow type is a lambda, and every application has a variable or a constant at its head. Variables of the context and constants of the signature are kept as they are and eta-expanded according to their types. No step limit is needed: well-typed terms always normalize. New binder names are `x`, `x_1`, … chosen to avoid every name of the term and the context."
 msgstr "在结果中，每个箭头类型的子项都是 lambda，每个应用的头部都是变量或常量。上下文中的变量和签名中的常量保持原样，并按其类型进行 η-展开。不需要步数上限：良类型的项总能范式化。新的绑定子名称为 `x`、`x_1`、…，其选取会避开项和上下文中的所有名字。"
 
-#: manual/api/stlc.md:364
+#: manual/api/stlc.md:366
 msgid "The hidden method forms `not_equal` and `to_repr` on the types of this package are deprecated; use `!=` and `Repr(x)`."
 msgstr "本包中各类型上隐藏的方法形式 `not_equal` 和 `to_repr` 已弃用；请使用 `!=` 和 `Repr(x)`。"
 
-#: manual/api/stlc.md:367
+#: manual/api/stlc.md:369
 msgid "The field `entries` of `Signature` and of `TypeContext` is no longer public; use `lookup`, `length` and `to_array` instead."
 msgstr "`Signature` 和 `TypeContext` 的字段 `entries` 不再公开；请改用 `lookup`、`length` 和 `to_array`。"
 
@@ -1620,7 +1620,7 @@ msgstr "下游变量类型通过单射（不同变量映射到不同名）转换
 #: manual/design/debruijn.md:327
 #: manual/design/eval.md:236
 #: manual/design/rewrite.md:259
-#: manual/design/stlc.md:520
+#: manual/design/stlc.md:522
 #: manual/design/substitution.md:130
 #: manual/design/syntax.md:374
 #: manual/design/utlc/lambda.md:237
@@ -1673,7 +1673,7 @@ msgstr "下游 adapter 应为自己的节点种类添加 (V1)–(V5) 的测试�
 #: manual/design/debruijn.md:354
 #: manual/design/eval.md:262
 #: manual/design/rewrite.md:293
-#: manual/design/stlc.md:549
+#: manual/design/stlc.md:551
 #: manual/design/substitution.md:386
 #: manual/design/syntax.md:399
 #: manual/design/utlc/lambda.md:267
@@ -1698,7 +1698,7 @@ msgstr "**在运行时检查定律。** 这些定律是关于所有节点的等�
 #: manual/design/debruijn.md:366
 #: manual/design/eval.md:276
 #: manual/design/rewrite.md:305
-#: manual/design/stlc.md:562
+#: manual/design/stlc.md:564
 #: manual/design/substitution.md:400
 #: manual/design/syntax.md:413
 #: manual/design/utlc/lambda.md:278
@@ -2914,118 +2914,122 @@ msgid "**Problem.** Written as host functions, the checker (`infer`, `check`, th
 msgstr "**问题。** 若将类型检查器（`infer`、`check`、它们的脊版本以及遍历 $\\textsc{App}$ 参数的循环）、类型化求值、读回和派生的类型相等写成宿主函数，它们会针对项、类型或范式的每一层递归一次。js、wasm 和 wasm-gc 的栈在数千层时就会溢出，因此深层绑定子、深层参数位置、长柯里化脊、嵌套可约式以及定义域中嵌套的类型都会使包崩溃（issue #13）。"
 
 #: manual/design/stlc.md:396
-msgid "**Choice.** Each of the three algorithms runs as one loop over an explicit continuation, like the untyped evaluator of [utlc/nbe](utlc/nbe.md): a control says what to compute next, and a stack of frames in the heap holds the rest of the callers. A call in tail position replaces the control; a call whose result is still needed first pushes a frame for the rest of its caller. For the checker, the controls and frames are"
-msgstr "**选择。** 这三种算法各自都通过一个循环处理显式续延，与 [utlc/nbe](utlc/nbe.md) 的无类型求值器类似：控制项指明下一步计算什么，堆上的帧栈保存其余调用者。尾位置调用会替换控制项；若仍需使用调用结果，则先压入一个帧来保存调用者剩余工作。对于类型检查器，控制项和帧如下："
+msgid "**Choice.** Each of the three algorithms runs as one loop over an explicit continuation, like the untyped evaluator of [utlc/nbe](utlc/nbe.md): a control says what to compute next, and a stack of frames in the heap holds the rest of the callers. A call in tail position replaces the control; a call whose result is still needed first pushes a frame for the rest of its caller. The single bidirectional machine is `build_typed_plan`, with `PlanControl` and `PlanFrame` in the code. `infer` starts it in inference mode and returns the plan's type; `check` starts it in checking mode and discards the plan; `normalize_eta_long` starts it in checking mode and evaluates the plan. Their typing rules and first-error order cannot diverge through separate implementations (#32)."
+msgstr "**选择。** 三种算法各自作为一个显式续延循环运行，与 [utlc/nbe](utlc/nbe.md) 的无类型求值器一样：控制项说明下一步要计算什么，堆中的帧栈保存调用者的剩余工作。尾调用替换控制项；结果仍需使用的调用先压入调用者余下工作的帧。唯一的双向类型机器是 `build_typed_plan`，代码中使用 `PlanControl` 和 `PlanFrame`。`infer` 以推断模式启动它并返回计划的类型；`check` 以检查模式启动它并丢弃计划；`normalize_eta_long` 以检查模式启动它并求值计划。它们的类型规则和首个错误顺序不会因独立实现而分叉（#32）。"
 
-#: manual/design/stlc.md:410
-msgid "(`CheckControl` and `CheckFrame` in the code). $\\textsc{Lam}$ and the flattening of a spine are tail calls. $\\textsc{Sub}$ pushes $\\mathsf{cmp}(\\tau)$ and infers; $\\textsc{App}$ pushes $\\mathsf{head}(\\Gamma, \\vec a)$ and infers $h$, and the inferred type $\\tau_1 \\to \\cdots$ meeting $\\mathsf{head}$ checks $a_1$ against $\\tau_1$ under $\\mathsf{arg}(\\Gamma, \\vec a, 1, \\tau_2 \\to \\cdots)$, and so on; $\\textsc{Redex}$ and $\\textsc{Redex}^{\\Leftarrow}$ rename the parameter apart, push $\\mathsf{redex}(\\Gamma, x', b\\{x \\mapsto x'\\}, \\vec a, m)$ and infer $a_1$; the type $\\sigma$ meeting that frame flattens $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ and continues with $\\mathsf{inf}^{*}$ or $\\mathsf{chk}^{*}$ under $\\Gamma, x'{:}\\sigma$. Typed evaluation runs a private typed plan rather than reconstructing types from source terms. Its controls evaluate a plan, apply a semantic value, or return a value; its frames wait for a function, an operand, or a strict-let argument. Applying a closure and entering a strict-let body are tail calls. Readback retains controls for $\\downarrow^\\tau$, for $\\mathrm{quote}$ and for returning a term, and frames for a binder, an argument still to read back, and a function waiting for its argument."
-msgstr "（代码中的 `CheckControl` 和 `CheckFrame`。）$\\textsc{Lam}$ 和脊展平是尾调用。$\\textsc{Sub}$ 压入 $\\mathsf{cmp}(\\tau)$ 并进行类型推断；$\\textsc{App}$ 压入 $\\mathsf{head}(\\Gamma, \\vec a)$ 并推断 $h$，与该帧匹配的推断类型 $\\tau_1 \\to \\cdots$ 会在 $\\mathsf{arg}(\\Gamma, \\vec a, 1, \\tau_2 \\to \\cdots)$ 下检查 $a_1$ 是否具有类型 $\\tau_1$，后续参数依此类推；$\\textsc{Redex}$ 和 $\\textsc{Redex}^{\\Leftarrow}$ 会将形参改名以避免冲突，压入 $\\mathsf{redex}(\\Gamma, x', b\\{x \\mapsto x'\\}, \\vec a, m)$ 并推断 $a_1$；与该帧匹配的类型 $\\sigma$ 会展平 $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$，并在 $\\Gamma, x'{:}\\sigma$ 下继续执行 $\\mathsf{inf}^{*}$ 或 $\\mathsf{chk}^{*}$。类型化求值执行私有的带类型计划，而不从源项重建类型。其控制项用于求值计划、应用语义值和返回值；帧等待函数、操作数或严格 let 的参数。应用闭包和进入严格 let 函数体是尾调用。读回保留用于 $\\downarrow^\\tau$、$\\mathrm{quote}$ 和返回项的控制项，以及用于绑定子、待读回参数和等待参数的函数的帧。"
+#: manual/design/stlc.md:408
+msgid "The machine flattens each application spine, infers a non-lambda head, checks its operands in order and compares the result with the expected type when checking. A lambda body is checked against the codomain of its expected arrow. A redex parameter is renamed apart before its first argument is inferred; only after inference succeeds does `redex_finish` flatten the body and join the trailing arguments. The remaining spine continues in its original mode. Assembly frames record checked lambdas, applications and strict lets without introducing new failures. All pending work lives in heap arrays."
+msgstr "机器展平每个应用脊，推断非 lambda 头部，依次检查操作数，并在检查模式下将结果与预期类型比较。lambda 函数体按预期箭头的陪域检查。redex 形参在推断首参数前改名以避开冲突；只有推断成功后，`redex_finish` 才展平函数体并合并尾随参数。剩余脊以原模式继续处理。组装帧记录已检查的 lambda、应用和严格 let，不引入新的失败。所有待处理工作都保存在堆数组中。"
 
-#: manual/design/stlc.md:429
+#: manual/design/stlc.md:417
+msgid "Typed evaluation runs the private plan. Its controls evaluate a plan, apply a semantic value, or return a value; its frames wait for a function, an operand, or a strict-let argument. Applying a closure and entering a strict-let body are tail calls. Readback retains controls for $\\downarrow^\\tau$, for $\\mathrm{quote}$ and for returning a term, and frames for a binder, an argument still to read back, and a function waiting for its argument."
+msgstr "带类型求值执行私有计划。控制项用于求值计划、应用语义值和返回值；帧等待函数、操作数或严格 let 的参数。应用闭包和进入严格 let 函数体是尾调用。读回保留用于 $\\downarrow^\\tau$、$\\mathrm{quote}$ 和返回项的控制项，以及用于绑定子、待读回参数和等待参数的函数的帧。"
+
+#: manual/design/stlc.md:424
 msgid "*Same results, same errors.* Read a frame as the function that the rest of its caller applies to the returned value, and a state as the stack applied to the value of its control. Every transition is one equation of the recursive definition, so it preserves that reading, and a run ends with the value the recursive functions return. The machines make the calls of the definition in its order, and no rule of the definition catches an error: every `Err` propagates unchanged to the top. The result of the recursive functions is therefore the first error met in that order, and the machines stop at the same one; which `TypeError` is reported does not change."
 msgstr "*结果相同，错误也相同。* 将一个帧理解为调用者其余部分施加于返回值的函数，将一个状态理解为帧栈施加于控制项的值。每个状态转移都对应递归定义中的一个等式，因此保留这种解释；执行结束时得到的值与递归函数的返回值相同。机器按定义中的顺序进行调用，且定义中的规则不会捕获错误：每个 `Err` 都原样向上传播。因此，递归函数的结果是按该顺序遇到的第一个错误，机器也会在同一个错误处停止；报告的 `TypeError` 不变。"
 
-#: manual/design/stlc.md:439
+#: manual/design/stlc.md:434
 msgid "*Equality of types.* `Ty` has a hand-written `Eq` that compares a heap array of pending pairs, and skips a pair of physically equal types, which is sound because the equality is reflexive."
 msgstr "*类型相等。* `Ty` 使用手写的 `Eq`，比较保存在堆数组中的待比较类型对；对于物理上相同的类型会跳过该对。这是可靠的，因为相等关系具有自反性。"
 
-#: manual/design/stlc.md:443
+#: manual/design/stlc.md:438
 msgid "*Linear time.* Two hidden quadratic costs would dominate at depth $100\\,000$, so they are removed without changing results. Contexts and environments built from one another share an append-only array and read only their own prefix, so entering $n$ binders costs $O(n)$ instead of $O(n^2)$. Readback chooses binder names with $\\operatorname{fresh}(x, U)$, the first of the candidates $c_0 = x$, $c_1 = x\\_1$, $c_2 = x\\_2$, … not in $U$, and eta-expanding at a type nested $n$ levels deep would retry the $n$ names chosen before. It carries, with $U$, a position $p$ such that every $c_q$ with $q < p$ is in $U$, and starts the search there. If $c_{p'}$ is chosen, every $c_q$ with $q \\le p'$ is in $U \\cup \\{c_{p'}\\}$, so $p' + 1$ is a valid position for the extended set; readback only ever adds names to $U$, so the position stays valid along the path, and the name found is the one $\\operatorname{fresh}$ returns."
 msgstr "*线性时间。* 两项隐藏的二次代价会在深度 $100\\,000$ 时占主导，因此在不改变结果的前提下将其消除。彼此构造的上下文和环境共享一个只追加的数组，并且只读取自己的前缀，所以进入 $n$ 个绑定子的代价从 $O(n^2)$ 降为 $O(n)$。读回使用 $\\operatorname{fresh}(x, U)$ 选择绑定子名，即在候选 $c_0 = x$、$c_1 = x\\_1$、$c_2 = x\\_2$、……中选取第一个不属于 $U$ 的名字；若在嵌套深度为 $n$ 的类型处进行 eta 扩展，就会重新检查此前选择的 $n$ 个名字。算法将一个位置 $p$ 与 $U$ 一起保存，使得每个 $q < p$ 的 $c_q$ 都属于 $U$，并从该位置开始搜索。若选中了 $c_{p'}$，则每个 $q \\le p'$ 的 $c_q$ 都属于 $U \\cup \\{c_{p'}\\}$，因此 $p' + 1$ 是扩展后集合的有效位置；读回只会向 $U$ 中添加名字，所以该位置沿路径始终有效，找到的名字也正是 $\\operatorname{fresh}$ 返回的名字。"
 
-#: manual/design/stlc.md:457
+#: manual/design/stlc.md:452
 msgid "Checking once for evaluation (issue #27)"
 msgstr "为求值只检查一次（issue #27）"
 
-#: manual/design/stlc.md:459
+#: manual/design/stlc.md:454
 msgid "The former evaluator reconstructed the type of each redex head by inferring its first argument again. For nested identity redexes in argument position, that revisited suffixes of sizes $n, n-1, \\ldots, 1$, even after the initial check succeeded. Removing repeated argument checks in PR #30 left this second source of quadratic traversal."
 msgstr "原求值器通过再次推断首参数来重建每个 redex 头部的类型。对于参数位置中的嵌套恒等 redex，即使初始检查已经成功，它仍会重复访问大小为 $n, n-1, \\ldots, 1$ 的后缀。PR #30 移除了重复参数检查，但留下了这一导致二次遍历的来源。"
 
-#: manual/design/stlc.md:465
+#: manual/design/stlc.md:460
 msgid "`build_typed_plan` now performs the bidirectional checking rules while recording a private `TypedPlan`. Values and variables record their inferred type; lambdas record their expected arrow and checked body; each application records its domain and checked operand. The redex rule records a strict let: first evaluate the inferred argument, bind the renamed parameter, then run the plan for the body joined with the trailing arguments. The public syntax, `check` and `infer` APIs are unchanged. Evaluation and closure application execute these plans and never call `check` or `infer`."
 msgstr "`build_typed_plan` 现在执行双向检查规则，同时记录私有的 `TypedPlan`。值和变量记录其推断类型；lambda 记录预期的箭头类型及已检查的函数体；每个应用记录定义域和已检查的操作数。redex 规则记录一个严格 let：先求值已推断的参数，绑定改名后的形参，再执行函数体与尾随参数合并后的计划。公开语法、`check` 和 `infer` API 不变。求值和闭包应用执行这些计划，不再调用 `check` 或 `infer`。"
 
-#: manual/design/stlc.md:474
-msgid "**Error correspondence.** Erase the plan returned by each control to its type (for inference) or successful check (for checking). `PlanHead`, `PlanArgument` and `PlanCompare` perform the same head inference, argument check and type comparison as their checker counterparts. `PlanRedexFirst` renames before inferring the first argument, calls `redex_finish` only after it succeeds, and continues the remaining spine in the original inference/checking mode. `PlanBindBody` and `PlanRedexRest` only assemble successful plans; neither can fail. Induction over machine transitions therefore gives the same acceptance and first `TypeError` as `check`. The public checker remains an independent implementation used for comparison."
-msgstr "**错误对应。** 将每个控制项返回的计划擦除为其类型（推断模式）或成功检查（检查模式）。`PlanHead`、`PlanArgument` 和 `PlanCompare` 执行与检查器对应帧相同的头部推断、参数检查和类型比较。`PlanRedexFirst` 在推断首参数前改名，仅在推断成功后调用 `redex_finish`，并以原推断或检查模式继续处理剩余脊。`PlanBindBody` 和 `PlanRedexRest` 只组装成功的计划，不会失败。因此，对机器转换归纳可得与 `check` 相同的接受条件和首个 `TypeError`。公开检查器保留为用于对照的独立实现。"
+#: manual/design/stlc.md:469
+msgid "**Error correspondence.** Erase the plan returned by each control to its type (for inference) or successful check (for checking). `PlanHead`, `PlanArgument` and `PlanCompare` perform the same head inference, argument check and type comparison prescribed by the bidirectional rules. `PlanRedexFirst` renames before inferring the first argument, calls `redex_finish` only after it succeeds, and continues the remaining spine in the original inference/checking mode. `PlanBindBody` and `PlanRedexRest` only assemble successful plans; neither can fail. Induction over machine transitions therefore gives the same acceptance and first `TypeError` as the original checker. Public `check` and `normalize_eta_long` now start this same machine in the same checking mode (#32), so their typing acceptance and first error have one implementation. The frozen baseline remains available for compatibility comparisons."
+msgstr "**错误对应。** 将每个控制项返回的计划擦除为其类型（推断模式）或成功检查（检查模式）。`PlanHead`、`PlanArgument` 和 `PlanCompare` 执行双向规则规定的头部推断、参数检查和类型比较。`PlanRedexFirst` 在推断首参数前改名，仅在推断成功后调用 `redex_finish`，并以原推断或检查模式继续处理剩余脊。`PlanBindBody` 和 `PlanRedexRest` 只组装成功的计划，不会失败。因此，对机器转换归纳可得与原检查器相同的接受条件和首个 `TypeError`。公开 `check` 和 `normalize_eta_long` 现在以相同检查模式启动同一机器（#32），因此类型接受条件和首个错误只有一份实现。冻结的基线仍用于兼容性对照。"
 
-#: manual/design/stlc.md:485
+#: manual/design/stlc.md:482
 msgid "**Semantic correspondence.** A planned application evaluates its function, then its operand, then applies the value. A planned redex implements $(\\lambda x.b)\\,a_1\\,a_2\\cdots a_n$ by evaluating $a_1$ and continuing $b\\,a_2\\cdots a_n$ under its value. The existing capture-avoidance step renames $x$ away from the free variables of every trailing argument; adding that binding therefore leaves their meanings unchanged (environment weakening). Induction on the successful typing derivation relates the plan to the source term in the same STLC semantic domain. Readback is unchanged. Environment entries retain both the internal lookup name and its source name: internal capture-avoidance names must not occupy additional output binder candidates. Source names are already in the initial avoidance set. These are structural arguments, not machine-checked proofs."
 msgstr "**语义对应。** 计划中的应用先求值函数，再求值操作数，最后应用得到的值。计划中的 redex 通过求值 $a_1$，并在其值绑定的环境下继续执行 $b\\,a_2\\cdots a_n$，实现 $(\\lambda x.b)\\,a_1\\,a_2\\cdots a_n$。现有的捕获规避步骤将 $x$ 改名，使其避开每个尾随参数的自由变量；因此添加该绑定不改变它们的含义（环境弱化）。对成功的类型推导归纳，将计划与源项关联于同一个 STLC 语义域。读回不变。环境条目同时保存内部查找名和源名称：内部捕获规避名称不能额外占用输出绑定子的候选名称。源名称已在初始避让集合中。这些是结构论证，并非机器检查的证明。"
 
-#: manual/design/stlc.md:498
-msgid "**Cost and limits.** Each successful typing visit creates a constant number of plan nodes; $p$ such visits add $O(p)$ plan storage and $O(d)$ pending frames at traversal depth $d$. The retained plan can live as long as a closure. Evaluation traverses plans without the repeated type-inference suffixes. For the nested identity-redex regression with fixed signature and empty initial context, checking, plan construction and evaluation take $O(n)$ work and $O(n)$ heap storage. This is not a linear-time bound for arbitrary STLC normalization: reduction can duplicate work and normal forms can grow; context lookup, branch-prefix copies, type equality, spine copying and name analysis retain their existing costs. In particular, capture avoidance may scan trailing arguments at multiple redexes, and name collection for closure readback is unchanged."
-msgstr "**成本和边界。** 每次成功的类型访问创建常数个计划节点；$p$ 次访问增加 $O(p)$ 的计划存储，遍历深度 $d$ 时有 $O(d)$ 个待处理帧。保留的计划可以与闭包存活同样久。求值遍历计划，不再重复推断类型后缀。对于固定签名、空初始上下文的嵌套恒等 redex 回归，检查、计划构造和求值耗费 $O(n)$ 工作及 $O(n)$ 堆存储。这不是任意 STLC 规范化的线性时间界：归约可能重复工作，正规形式可能增长；上下文查找、分支前缀复制、类型相等比较、脊复制和名称分析仍保留原有成本。尤其是捕获规避可能在多个 redex 处扫描尾随参数，闭包读回的名称收集也不变。"
+#: manual/design/stlc.md:495
+msgid "**Cost and limits.** Each successful typing visit creates a constant number of plan nodes; $p$ such visits add $O(p)$ plan storage and $O(d)$ pending frames at traversal depth $d$. Public `infer` and `check` also build a plan and discard it, adding $O(p)$ temporary plan storage compared with the former checker. This allocation is the explicit tradeoff for one rule implementation (#32); no allocation-free checking mode is provided. The retained plan can live as long as a closure. Evaluation traverses plans without the repeated type-inference suffixes. For the nested identity-redex regression with fixed signature and empty initial context, checking, plan construction and evaluation take $O(n)$ work and $O(n)$ heap storage. This is not a linear-time bound for arbitrary STLC normalization: reduction can duplicate work and normal forms can grow; context lookup, branch-prefix copies, type equality, spine copying and name analysis retain their existing costs. In particular, capture avoidance may scan trailing arguments at multiple redexes, and name collection for closure readback is unchanged."
+msgstr "**成本和边界。** 每次成功的类型访问创建常数个计划节点；$p$ 次访问增加 $O(p)$ 的计划存储，遍历深度 $d$ 时有 $O(d)$ 个待处理帧。公开 `infer` 和 `check` 也构造并丢弃计划，与原检查器相比增加 $O(p)$ 的临时计划存储。这是统一规则实现的明确取舍（#32）；没有提供不分配计划的检查模式。保留的计划可以与闭包存活同样久。求值遍历计划，不再重复推断类型后缀。对于固定签名、空初始上下文的嵌套恒等 redex 回归，检查、计划构造和求值耗费 $O(n)$ 工作及 $O(n)$ 堆存储。这不是任意 STLC 规范化的线性时间界：归约可能重复工作，正规形式可能增长；上下文查找、分支前缀复制、类型相等比较、脊复制和名称分析仍保留原有成本。尤其是捕获规避可能在多个 redex 处扫描尾随参数，闭包读回的名称收集也不变。"
 
-#: manual/design/stlc.md:511
-msgid "**Evidence.** `src/stlc/issue27_test.mbt` covers 100,000 nested identity redexes, 100,000 neutral argument positions, first-error ordering and a capture case with exact binder-name comparison. `python3 tools/verify_stlc_plan.py --target all` compares 43,120 bounded term/type combinations per backend with the frozen PR #30 implementation at `db53d775e9248e8712a240adc8327be72675c80f`, including exact output names and error values. It requires that Git object locally and removes its temporary oracle afterward. The corpus is finite; it supports compatibility but does not establish a universal theorem."
-msgstr "**证据。** `src/stlc/issue27_test.mbt` 覆盖 100,000 层嵌套恒等 redex、100,000 层中性参数位置、首个错误顺序，以及精确比较绑定子名称的捕获用例。`python3 tools/verify_stlc_plan.py --target all` 在每个后端将 43,120 个有界项与类型组合和提交 `db53d775e9248e8712a240adc8327be72675c80f` 中冻结的 PR #30 实现进行比较，包括精确的输出名称和错误值。它要求本地存在该 Git 对象，并在运行后删除临时对照代码。语料有限，只支持兼容性验证，不能确立普遍定理。"
+#: manual/design/stlc.md:512
+msgid "**Evidence.** `src/stlc/issue27_test.mbt` covers 100,000 nested identity redexes, 100,000 neutral argument positions, first-error ordering and a capture case with exact binder-name comparison. `python3 tools/verify_stlc_plan.py --target all` compares 43,120 bounded term/type combinations per backend with the frozen PR #30 implementation at `db53d775e9248e8712a240adc8327be72675c80f`, including exact output names and error values. It also compares public `check` on those combinations and `infer` on all 8,624 generated terms. It requires that Git object locally and removes its temporary oracle afterward. The corpus is finite; it supports compatibility but does not establish a universal theorem."
+msgstr "**证据。** `src/stlc/issue27_test.mbt` 覆盖 100,000 层嵌套恒等 redex、100,000 层中性参数位置、首个错误顺序，以及精确比较绑定子名称的捕获用例。`python3 tools/verify_stlc_plan.py --target all` 在每个后端将 43,120 个有界项与类型组合和提交 `db53d775e9248e8712a240adc8327be72675c80f` 中冻结的 PR #30 实现进行比较，包括精确的输出名称和错误值。它还比较这些组合上的公开 `check`，以及全部 8,624 个生成项上的 `infer`。它要求本地存在该 Git 对象，并在运行后删除临时对照代码。语料有限，只支持兼容性验证，不能确立普遍定理。"
 
-#: manual/design/stlc.md:522
+#: manual/design/stlc.md:524
 msgid "`check` and `infer` terminate; on success, the term is declaratively typable at the reported type (soundness theorem). The regression tests include redexes whose parameter occurs free in a trailing argument."
 msgstr "`check` 与 `infer` 会终止；成功时，该项在所报告的类型下是声明式可定型的（可靠性定理）。回归测试包含形参在后续参数中自由出现的可约式。"
 
-#: manual/design/stlc.md:525
+#: manual/design/stlc.md:527
 msgid "`check` accepts every well-typed beta-normal term, and every well-typed term in which each argument given to a lambda head is inferable, including redexes that return a lambda."
 msgstr "`check` 接受每个良类型的 beta 范式项，以及每个交给 lambda 头部的参数都可推断的良类型项，包括返回 lambda 的可约式。"
 
-#: manual/design/stlc.md:528
+#: manual/design/stlc.md:530
 msgid "`normalize_eta_long` returns `Ok` exactly for terms that `check` accepts; its result is in $\\mathit{Nf}^\\tau$, is $\\beta\\eta$-equal to the input, and is the same (up to $=_\\alpha$) for $\\beta\\eta$-equal inputs."
 msgstr "`normalize_eta_long` 恰好对 `check` 接受的项返回 `Ok`；其结果属于 $\\mathit{Nf}^\\tau$，与输入 $\\beta\\eta$-相等，并且对 $\\beta\\eta$-相等的输入结果相同（在 $=_\\alpha$ 意义下）。"
 
-#: manual/design/stlc.md:532
+#: manual/design/stlc.md:534
 msgid "`normalize_checked` returns `Err` before any reduction for ill-typed input."
 msgstr "对于类型不正确的输入，`normalize_checked` 会在任何归约之前返回 `Err`。"
 
-#: manual/design/stlc.md:533
+#: manual/design/stlc.md:535
 msgid "`NormalizationError` signals a violated internal invariant and is not produced for checked input."
 msgstr "`NormalizationError` 表示内部不变式被违反，对已检查的输入不会产生。"
 
-#: manual/design/stlc.md:535
+#: manual/design/stlc.md:537
 msgid "`check`, `infer`, `normalize_checked`, `normalize_eta_long` and `==` on types use a constant host stack depth; terms and types nested 100 000 levels deep are handled on every backend (`src/stlc/deep_test.mbt`)."
 msgstr "`check`、`infer`、`normalize_checked`、`normalize_eta_long` 以及类型上的 `==` 使用的宿主栈深度均为常数；每个后端都能处理嵌套深度达 100 000 层的项和类型（`src/stlc/deep_test.mbt`）。"
 
-#: manual/design/stlc.md:539
+#: manual/design/stlc.md:541
 msgid "The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing, eta expansion of open variables and of constants (including nested arrow types and higher-order arguments), agreement of the two normalizers on small terms, and agreement of `check` and `normalize_eta_long` on redexes with curried heads, mixed flat and nested spines, and bodies that consume the outer arguments. They also cover redexes checked against an arrow ($\\textsc{Redex}^{\\Leftarrow}$): redexes that return a lambda, alone and as arguments, in curried and flat spines, nested ones, the renaming shape above in checking mode, and ill-typed variants that are still rejected."
 msgstr "`src/stlc/stlc_test.mbt` 中的测试覆盖了类型化与拒绝、遮蔽、开放变量和常量的 η-展开（包括嵌套箭头类型和高阶参数）、两个范式化器在小项上的一致性，以及 `check` 与 `normalize_eta_long` 在可约式上的一致性，这些可约式包括柯里化的头部、扁平与嵌套混合的脊柱，以及消耗外层参数的体。测试还覆盖了对照箭头类型检查的可约式（$\\textsc{Redex}^{\\Leftarrow}$）：返回 lambda 的可约式（单独出现以及作为参数）、柯里化与扁平的脊柱、嵌套的可约式、检查模式下上述的改名情形，以及仍被拒绝的类型错误变体。"
 
-#: manual/design/stlc.md:551
+#: manual/design/stlc.md:553
 msgid "**Church-style annotated lambdas.** Annotations would make inference complete but change the shared `Term` syntax; the bidirectional checker keeps terms unannotated."
 msgstr "**Church 风格的带标注 lambda。** 标注会使类型推断完备，但会改变共享的 `Term` 语法；双向检查器使项保持无标注。"
 
-#: manual/design/stlc.md:554
+#: manual/design/stlc.md:556
 msgid "**Hindley–Milner inference.** Unification would infer types of unannotated lambdas, but polymorphism and type variables are beyond this calculus."
 msgstr "**Hindley–Milner 推断。** 合一可以推断无标注 lambda 的类型，但多态与类型变量超出了本演算的范围。"
 
-#: manual/design/stlc.md:556
+#: manual/design/stlc.md:558
 msgid "**Fuel for typed NbE.** Unnecessary by strong normalization; the untyped [utlc/nbe](utlc/nbe.md) keeps fuel because it needs it."
 msgstr "**带类型 NbE 的燃料。** 由强范式化性可知不必要；无类型的 [utlc/nbe](utlc/nbe.md) 保留燃料，是因为它确实需要。"
 
-#: manual/design/stlc.md:558
+#: manual/design/stlc.md:560
 msgid "**Eta for the unit type.** Implementable by reifying every neutral of type $\\mathsf{Unit}$ as $()$; not done, so that neutrals stay observable. The decided equality is $\\beta\\eta$ for arrows only."
 msgstr "**单位类型的 η。** 可以通过把每个 $\\mathsf{Unit}$ 类型的中性项具体化为 $()$ 来实现；之所以没有这样做，是为了让中性项保持可观察。所判定的相等只是箭头类型上的 $\\beta\\eta$。"
 
-#: manual/design/stlc.md:564
+#: manual/design/stlc.md:566
 msgid "Types are $b$, $\\mathsf{Unit}$ and arrows: no products, sums, polymorphism or dependent types."
 msgstr "类型只有 $b$、$\\mathsf{Unit}$ 和箭头：没有积、和、多态或依赖类型。"
 
-#: manual/design/stlc.md:566
+#: manual/design/stlc.md:568
 msgid "No unit eta; normal forms are eta-long for arrow types only."
 msgstr "没有单位类型的 η；范式只在箭头类型上是 η-长的。"
 
-#: manual/design/stlc.md:567
+#: manual/design/stlc.md:569
 msgid "Constants are opaque: there are no delta rules."
 msgstr "常量是不透明的：没有 δ 规则。"
 
-#: manual/design/stlc.md:568
+#: manual/design/stlc.md:570
 msgid "`normalize_checked` is bounded by a step limit because it reuses the untyped reducer."
 msgstr "`normalize_checked` 受步数上限约束，因为它复用了无类型归约器。"
 
-#: manual/design/stlc.md:570
+#: manual/design/stlc.md:572
 msgid "`normalize_eta_long` executes a plan produced by one checking pass, with no type inference during evaluation (#27). It does not promise linear time for arbitrary terms: reduction, context lookup, capture avoidance, spine copying and readback can still require more work than the input size."
 msgstr "`normalize_eta_long` 执行一次检查过程生成的计划，求值期间不做类型推断（#27）。它不承诺任意项上的线性时间：归约、上下文查找、捕获规避、脊复制和读回仍可能需要超过输入大小的工作量。"
 
-#: manual/design/stlc.md:574
+#: manual/design/stlc.md:576
 msgid "`Debug` of a deep term, type or error recurses and can overflow the stack."
 msgstr "对深层项、类型或错误执行 `Debug` 时会递归，可能导致栈溢出。"
 
@@ -6051,6 +6055,9 @@ msgstr "[utlc/nbe 设计](../../design/utlc/nbe.md)：语义域与可靠性论�
 #: manual/tutorial/utlc/nbe.md:203
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc 教程](../stlc.md)：带类型的 η-长形式 NbE。"
+
+#~ msgid "(`CheckControl` and `CheckFrame` in the code). $\\textsc{Lam}$ and the flattening of a spine are tail calls. $\\textsc{Sub}$ pushes $\\mathsf{cmp}(\\tau)$ and infers; $\\textsc{App}$ pushes $\\mathsf{head}(\\Gamma, \\vec a)$ and infers $h$, and the inferred type $\\tau_1 \\to \\cdots$ meeting $\\mathsf{head}$ checks $a_1$ against $\\tau_1$ under $\\mathsf{arg}(\\Gamma, \\vec a, 1, \\tau_2 \\to \\cdots)$, and so on; $\\textsc{Redex}$ and $\\textsc{Redex}^{\\Leftarrow}$ rename the parameter apart, push $\\mathsf{redex}(\\Gamma, x', b\\{x \\mapsto x'\\}, \\vec a, m)$ and infer $a_1$; the type $\\sigma$ meeting that frame flattens $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ and continues with $\\mathsf{inf}^{*}$ or $\\mathsf{chk}^{*}$ under $\\Gamma, x'{:}\\sigma$. Typed evaluation runs a private typed plan rather than reconstructing types from source terms. Its controls evaluate a plan, apply a semantic value, or return a value; its frames wait for a function, an operand, or a strict-let argument. Applying a closure and entering a strict-let body are tail calls. Readback retains controls for $\\downarrow^\\tau$, for $\\mathrm{quote}$ and for returning a term, and frames for a binder, an argument still to read back, and a function waiting for its argument."
+#~ msgstr "（代码中的 `CheckControl` 和 `CheckFrame`。）$\\textsc{Lam}$ 和脊展平是尾调用。$\\textsc{Sub}$ 压入 $\\mathsf{cmp}(\\tau)$ 并进行类型推断；$\\textsc{App}$ 压入 $\\mathsf{head}(\\Gamma, \\vec a)$ 并推断 $h$，与该帧匹配的推断类型 $\\tau_1 \\to \\cdots$ 会在 $\\mathsf{arg}(\\Gamma, \\vec a, 1, \\tau_2 \\to \\cdots)$ 下检查 $a_1$ 是否具有类型 $\\tau_1$，后续参数依此类推；$\\textsc{Redex}$ 和 $\\textsc{Redex}^{\\Leftarrow}$ 会将形参改名以避免冲突，压入 $\\mathsf{redex}(\\Gamma, x', b\\{x \\mapsto x'\\}, \\vec a, m)$ 并推断 $a_1$；与该帧匹配的类型 $\\sigma$ 会展平 $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$，并在 $\\Gamma, x'{:}\\sigma$ 下继续执行 $\\mathsf{inf}^{*}$ 或 $\\mathsf{chk}^{*}$。类型化求值执行私有的带类型计划，而不从源项重建类型。其控制项用于求值计划、应用语义值和返回值；帧等待函数、操作数或严格 let 的参数。应用闭包和进入严格 let 函数体是尾调用。读回保留用于 $\\downarrow^\\tau$、$\\mathrm{quote}$ 和返回项的控制项，以及用于绑定子、待读回参数和等待参数的函数的帧。"
 
 #~ msgid "`normalize_eta_long` checks a term against a type and returns its beta-normal, eta-long form, computed by typed normalization by evaluation."
 #~ msgstr "`normalize_eta_long` 将项对照类型进行检查，并返回其 β-范式、η-长形式，该形式通过带类型的求值范式化计算得到。"

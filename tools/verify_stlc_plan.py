@@ -37,7 +37,9 @@ test "issue 27: bounded differential oracle from merged PR30" {
   }
   let mut count = 0
   for term in terms {
+    assert_eq(infer(sig, ctx, term), oracle_infer(sig, ctx, term))
     for ty in [a, u, aa, Ty::Arrow(u, aa), Ty::Arrow(aa, a)] {
+      assert_eq(check(sig, ctx, term, ty), oracle_check(sig, ctx, term, ty))
       let expected = oracle_normalize_eta_long(sig, ctx, term, ty)
       let actual = normalize_eta_long(sig, ctx, term, ty)
       // Compare exact output, including generated names, as well as errors.

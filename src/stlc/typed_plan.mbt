@@ -62,7 +62,8 @@ fn plan_arguments(
 }
 
 ///|
-/// Same traversal and failure order as run_typing: rename, infer the first
+/// Single source of typing rules for infer, check and normalization:
+/// rename, infer the first
 /// redex argument, flatten the body, then check/infer the remaining spine.
 /// Successful continuations additionally assemble a typed execution plan.
 fn build_typed_plan(
