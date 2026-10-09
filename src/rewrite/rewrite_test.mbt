@@ -47,3 +47,50 @@ test "normalizer and trace are built from single steps" {
     reduction_trace.result() == StepLimitReached(term=@syntax.Value(1), steps=1),
   )
 }
+
+///|
+test "reduction path to_array returns a copy" {
+  let path = @rewrite.ReductionPath::root()
+    .prepend(ApplyArgument(0))
+    .prepend(BinderBody)
+  let frames = path.to_array()
+  frames.push(ApplyHead)
+  frames[0] = ApplyHead
+  assert_eq(path.length(), 2)
+  assert_true(path.to_array() == [BinderBody, ApplyArgument(0)])
+  assert_true(
+    path ==
+    @rewrite.ReductionPath::root().prepend(ApplyArgument(0)).prepend(BinderBody),
+  )
+  assert_eq(@rewrite.ReductionPath::root().length(), 0)
+}
+
+///|
+test "reduction trace steps returns a copy" {
+  let decrement = fn(term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
+    match term {
+      Value(value) if value > 0 => Some(Value(value - 1))
+      _ => None
+    }
+  }
+  let rule = @rewrite.RuleName::unsafe_new("decrement")
+  let step = fn(term) { @rewrite.top_down_once(term, rule, decrement) }
+  let reduction_trace = @rewrite.trace(@syntax.Value(2), step, 5)
+  let steps = reduction_trace.steps()
+  steps.push(NoStep)
+  steps[0] = NoStep
+  assert_eq(reduction_trace.steps().length(), 2)
+  assert_true(
+    reduction_trace.steps()[0] ==
+    Reduced(
+      before=@syntax.Value(2),
+      after=@syntax.Value(1),
+      rule~,
+      path=@rewrite.ReductionPath::root(),
+    ),
+  )
+  assert_true(reduction_trace.initial() == @syntax.Value(2))
+  assert_true(
+    reduction_trace.result() == NormalForm(term=@syntax.Value(0), steps=2),
+  )
+}
