@@ -10,10 +10,8 @@ Last audited: 2026-10-09
 | Generic AST substitution | Correct | downstream adapter tests | inserted replacements are not revisited |
 | Structured reduction | Correct | path and trace tests; n-ary versus curried spine regression and lockstep property test for every strategy (#11) | one call contracts at most one redex; `ApplicativeOrder` reads spines curried |
 | Named/De Bruijn conversion | Correct | both round-trip laws | named round trip is alpha-equivalent |
-| De Bruijn scope | Correct | dangling and negative index tests, reducer scope regressions (#3) | invalid indices return `ScopeError`; `reduce_once` and `normalize` validate their input |
-| Shift and instantiation | Correct | nested binder beta tests, downward-shift capture regressions (#9) | standard cutoff-based shifting; a free index that would fall below the cutoff returns `NegativeShift` |
 | De Bruijn scope | Correct | dangling and negative index tests, reducer scope regressions (#3, #16) | invalid indices return `ScopeError`; `reduce_once` and `normalize` validate their input before any step |
-| Shift and instantiation | Correct | nested binder beta tests | standard cutoff-based shifting |
+| Shift and instantiation | Correct | nested binder beta tests, downward-shift capture regressions (#9) | standard cutoff-based shifting; a free index that would fall below the cutoff returns `NegativeShift` |
 | De Bruijn small-step | Correct | path, normalization and empty-application tests (#2) | leftmost-outermost beta; `Apply(h, [])` is read as `h` |
 | UTLC untyped NbE | Correct within fuel contract | small-step agreement, lazy argument, Omega tests, 30M-unit divergence tests on every backend and exact-cost tests (#12) | beta-normalization may exhaust fuel; evaluation and readback use a constant host stack |
 | STLC bidirectional typechecking | Correct | typing, rejection, shadowing and trailing-argument capture tests (#1) | inference is syntax-directed and lambdas check against arrows; a redex parameter is renamed apart from trailing arguments |
@@ -44,7 +42,16 @@ Last audited: 2026-10-09
 
 ## Known Issues
 
-None open. Fixed on 2026-10-09:
+Open:
+
+- `check` has no checking-mode redex rule, so it rejects well-typed redexes
+  whose result is a lambda in checking position (#8).
+- `@debruijn.shift` accepts a negative cutoff (#10).
+- Deeply nested input terms overflow the host stack on js, wasm and wasm-gc
+  (#13).
+- Public array fields let callers mutate values documented as immutable (#14).
+
+Fixed on 2026-10-09:
 
 - STLC redex inference typed the trailing arguments `a2 ... an` of
   `(λx. b) a1 a2 ... an` with the parameter `x` in scope, so `check` accepted
