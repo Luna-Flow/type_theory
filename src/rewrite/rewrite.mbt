@@ -45,36 +45,75 @@ pub(all) enum ReductionFrame {
 ///
 /// The type is abstract: its frames are not accessible outside the package.
 /// Use `length` and `to_array` to read it.
+///
+/// A path is built from the redex up, one `prepend` per level, so the frames
+/// are stored in that order, the reverse of the path. Paths built from one
+/// another share their array: `prepend` pushes onto it when `self` is the
+/// longest path stored there, and copies the prefix otherwise. A path only
+/// reads the first `length` entries, and entries are never changed once
+/// pushed, so a path cannot observe a longer one built from it. Building a
+/// path of `n` frames by prepending therefore takes amortized `O(n)` time
+/// instead of `O(n^2)` (issue #13).
 struct ReductionPath {
-  frames : Array[ReductionFrame]
-} derive(Eq, Debug)
-
-///|
-pub fn ReductionPath::root() -> ReductionPath {
-  { frames: [], }
+  /// The frames from the redex up to the root; only the first `length`
+  /// entries belong to this path.
+  reversed : Array[ReductionFrame]
+  /// The number of frames of this path.
+  length : Int
 }
 
 ///|
+pub impl Eq for ReductionPath with fn equal(self, other) {
+  if self.length != other.length {
+    return false
+  }
+  for i in 0..<self.length {
+    if self.reversed[i] != other.reversed[i] {
+      return false
+    }
+  }
+  true
+}
+
+///|
+/// Shows the frames from the root to the redex, as `{ frames: [...] }`.
+pub impl Debug for ReductionPath with fn to_repr(self) {
+  @debug.Repr::record({ "frames": @debug.Repr(self.to_array()) })
+}
+
+///|
+pub fn ReductionPath::root() -> ReductionPath {
+  { reversed: [], length: 0, }
+}
+
+///|
+/// Returns the path that takes `frame` from the root and then follows `self`.
+/// Takes amortized constant time when `self` is the longest path built so far
+/// from the same root path, as it is when a path is built from the redex up.
 pub fn ReductionPath::prepend(
   self : ReductionPath,
   frame : ReductionFrame,
 ) -> ReductionPath {
-  let frames = [frame]
-  frames.append(self.frames)
-  { frames, }
+  let reversed = if self.reversed.length() == self.length {
+    self.reversed
+  } else {
+    self.reversed[0:self.length].to_owned()
+  }
+  reversed.push(frame)
+  { reversed, length: self.length + 1, }
 }
 
 ///|
 /// Returns the number of frames. The root path has length zero.
 pub fn ReductionPath::length(self : ReductionPath) -> Int {
-  self.frames.length()
+  self.length
 }
 
 ///|
 /// Returns the frames from the root to the redex as a fresh array. Changing
 /// the returned array does not change `self`.
 pub fn ReductionPath::to_array(self : ReductionPath) -> Array[ReductionFrame] {
-  self.frames.copy()
+  Array::makei(self.length, fn(i) { self.reversed[self.length - 1 - i] })
 }
 
 ///|
@@ -129,154 +168,19 @@ pub fn[T] ReductionTrace::result(
 }
 
 ///|
-fn[T] lift_step(
-  before : @syntax.Term[T],
-  result : StepResult[T],
-  frame : ReductionFrame,
-  rebuild : (@syntax.Term[T]) -> @syntax.Term[T],
-) -> StepResult[T] {
-  match result {
-    NoStep => NoStep
-    Reduced(after=child_after, rule~, path~, ..) =>
-      Reduced(
-        before~,
-        after=rebuild(child_after),
-        rule~,
-        path=path.prepend(frame),
-      )
-  }
-}
-
-///|
-fn[T] top_down_step(
-  term : @syntax.Term[T],
-  rule_name : RuleName,
-  rule : (@syntax.Term[T]) -> @syntax.Term[T]?,
-) -> StepResult[T] {
-  match rule(term) {
-    Some(after) =>
-      Reduced(before=term, after~, rule=rule_name, path=ReductionPath::root())
-    None =>
-      match term {
-        Value(_) | Variable(_) => NoStep
-        Bind(name, body) =>
-          lift_step(term, top_down_step(body, rule_name, rule), BinderBody, fn(
-            next,
-          ) {
-            Bind(name, next)
-          })
-        Apply(head, arguments) => {
-          let head_step = top_down_step(head, rule_name, rule)
-          match head_step {
-            Reduced(_) =>
-              lift_step(term, head_step, ApplyHead, fn(next) {
-                Apply(next, arguments)
-              })
-            NoStep => {
-              for i in 0..<arguments.length() {
-                let argument_step = top_down_step(arguments[i], rule_name, rule)
-                match argument_step {
-                  Reduced(_) =>
-                    return lift_step(term, argument_step, ApplyArgument(i), fn(
-                      next,
-                    ) {
-                      let next_arguments = arguments.copy()
-                      next_arguments[i] = next
-                      Apply(head, next_arguments)
-                    })
-                  NoStep => continue
-                }
-              }
-              NoStep
-            }
-          }
-        }
-      }
-  }
-}
-
-///|
-fn[T] bottom_up_step(
-  term : @syntax.Term[T],
-  rule_name : RuleName,
-  rule : (@syntax.Term[T]) -> @syntax.Term[T]?,
-) -> StepResult[T] {
-  match term {
-    Value(_) | Variable(_) =>
-      match rule(term) {
-        Some(after) =>
-          Reduced(
-            before=term,
-            after~,
-            rule=rule_name,
-            path=ReductionPath::root(),
-          )
-        None => NoStep
-      }
-    Bind(name, body) => {
-      let body_step = bottom_up_step(body, rule_name, rule)
-      match body_step {
-        Reduced(_) =>
-          lift_step(term, body_step, BinderBody, fn(next) { Bind(name, next) })
-        NoStep =>
-          match rule(term) {
-            Some(after) =>
-              Reduced(
-                before=term,
-                after~,
-                rule=rule_name,
-                path=ReductionPath::root(),
-              )
-            None => NoStep
-          }
-      }
-    }
-    Apply(head, arguments) => {
-      let head_step = bottom_up_step(head, rule_name, rule)
-      match head_step {
-        Reduced(_) =>
-          lift_step(term, head_step, ApplyHead, fn(next) {
-            Apply(next, arguments)
-          })
-        NoStep => {
-          for i in 0..<arguments.length() {
-            let argument_step = bottom_up_step(arguments[i], rule_name, rule)
-            match argument_step {
-              Reduced(_) =>
-                return lift_step(term, argument_step, ApplyArgument(i), fn(
-                  next,
-                ) {
-                  let next_arguments = arguments.copy()
-                  next_arguments[i] = next
-                  Apply(head, next_arguments)
-                })
-              NoStep => continue
-            }
-          }
-          match rule(term) {
-            Some(after) =>
-              Reduced(
-                before=term,
-                after~,
-                rule=rule_name,
-                path=ReductionPath::root(),
-              )
-            None => NoStep
-          }
-        }
-      }
-    }
-  }
-}
-
-///|
 /// Rewrites the first matching node in pre-order.
 pub fn[T] top_down_once(
   term : @syntax.Term[T],
   rule_name : RuleName,
   rule : (@syntax.Term[T]) -> @syntax.Term[T]?,
 ) -> StepResult[T] {
-  top_down_step(term, rule_name, rule)
+  match search_top_down(term, rule) {
+    None => NoStep
+    Some(found) => {
+      let (after, path) = found.rebuild()
+      Reduced(before=term, after~, rule=rule_name, path~)
+    }
+  }
 }
 
 ///|
@@ -286,7 +190,13 @@ pub fn[T] bottom_up_once(
   rule_name : RuleName,
   rule : (@syntax.Term[T]) -> @syntax.Term[T]?,
 ) -> StepResult[T] {
-  bottom_up_step(term, rule_name, rule)
+  match search_bottom_up(term, rule) {
+    None => NoStep
+    Some(found) => {
+      let (after, path) = found.rebuild()
+      Reduced(before=term, after~, rule=rule_name, path~)
+    }
+  }
 }
 
 ///|

@@ -112,6 +112,38 @@ redex, but recognising it would require splitting the spine and rebuilding
 `Apply(f, [a])`. The rule stays syntactic; callers who build spines n-ary and
 need eta can normalize spines to unary form first.
 
+### Rules with a bounded host stack
+
+**Problem.** The rules look below the root of a term in two places: through
+empty applications `Apply(h, [])` around a head, a body or an argument, and
+into the function $f$ of an eta redex $\lambda x.\,f\,x$ to decide
+$x \notin \mathrm{FV}(f)$. A deep $f$, or a long chain of empty
+applications, must not overflow the js, wasm and wasm-gc stacks (issue #13).
+
+**Choice.** Stripping empty applications is a loop. The side condition of eta
+is decided by a search instead of computing $\mathrm{FV}(f)$: a heap array
+holds the subterms still to be searched, and the search answers "free" at
+the first occurrence of $x$ that is not under a binder of $x$. It computes
+the same answer, because
+
+$$
+\begin{aligned}
+x \in \mathrm{FV}(y) &\iff x = y, &
+x \in \mathrm{FV}(v) &\iff \bot, \\
+x \in \mathrm{FV}(h\,u_1 \cdots u_n) &\iff x \in \mathrm{FV}(h) \vee \textstyle\bigvee_i x \in \mathrm{FV}(u_i), &
+x \in \mathrm{FV}(\lambda y.\,b) &\iff x \ne y \wedge x \in \mathrm{FV}(b),
+\end{aligned}
+$$
+
+and the search unfolds exactly this disjunction: it pushes the head and the
+arguments of an application, and the body of a binder unless the binder is
+$x$. The order in which the disjuncts are tried does not matter, since the
+search has no other effect; stopping at the first occurrence also avoids
+building the set. Beta substitutes with the stack-safe
+[substitution](../substitution.md), and `normalize` runs the stack-safe
+normal-order search of [eval](../eval.md), so every function of the package
+uses a constant host stack depth.
+
 ### Normal order with one combined rule
 
 `normalize` runs `beta_eta_rule` with the `NormalOrder` strategy, so each step
@@ -205,8 +237,8 @@ fails and no agreement is claimed.
 ## Correctness and invariants
 
 - `beta_rule(t) = Some(u)` implies $t \to_\beta u$ at the root; `eta_rule`
-  likewise for $\eta$, with the side condition checked by
-  `@syntax.free_variables`.
+  likewise for $\eta$, with the side condition $x \notin \mathrm{FV}(f)$
+  decided by a search for a free occurrence (above).
 - `normalize` returns `NormalForm(u, n)` only for $u$ with no (unary)
   $\beta$ or $\eta$ redex anywhere ([rewrite](../rewrite.md) normal-form
   lemma).
@@ -224,6 +256,9 @@ fails and no agreement is claimed.
   and normalizes to $f$ here. The two are related by eta alone, but only
   modulo empty applications and for unary spines, as the theorem in "Beta
   then eta versus `normalize`" above states.
+- The rules and `normalize` use a constant host stack depth; terms nested
+  100 000 levels deep are handled on every backend
+  (`src/utlc/lambda/deep_test.mbt`).
 - With beta and eta combined, normal order is used as the strategy; that it
   reaches the $\beta\eta$ normal form of every normalizing term rests on the
   normalization theorem for beta and eta postponement, and is checked by tests

@@ -39,12 +39,12 @@ msgstr "独自の AST を適合させるために実装するインターフェ�
 #: manual/api/adapter.md:33
 #: manual/api/core.md:16
 #: manual/api/debruijn.md:14
-#: manual/api/eval.md:12
-#: manual/api/rewrite.md:17
-#: manual/api/stlc.md:15
+#: manual/api/eval.md:19
+#: manual/api/rewrite.md:29
+#: manual/api/stlc.md:23
 #: manual/api/substitution.md:22
 #: manual/api/syntax.md:23
-#: manual/api/utlc/lambda.md:14
+#: manual/api/utlc/lambda.md:21
 #: manual/api/utlc/nbe.md:14
 msgid "Importing"
 msgstr "インポート"
@@ -83,12 +83,12 @@ msgstr "`core` パッケージは、`type_theory` の他のすべてのパッケ
 
 #: manual/api/core.md:18
 #: manual/api/debruijn.md:16
-#: manual/api/eval.md:14
-#: manual/api/rewrite.md:19
-#: manual/api/stlc.md:17
+#: manual/api/eval.md:21
+#: manual/api/rewrite.md:31
+#: manual/api/stlc.md:25
 #: manual/api/substitution.md:24
 #: manual/api/syntax.md:25
-#: manual/api/utlc/lambda.md:16
+#: manual/api/utlc/lambda.md:23
 #: manual/api/utlc/nbe.md:16
 msgid "Add the package, and the packages whose types appear in its signatures, to your `moon.pkg`:"
 msgstr "このパッケージと、そのシグネチャに型が現れるパッケージを `moon.pkg` に追加する："
@@ -251,14 +251,14 @@ msgid "`Renaming::equal` compares two renamings entry by entry."
 msgstr "`Renaming::equal` は 2 つのリネーミングを項目ごとに比較する。"
 
 #: manual/api/core.md:364
-#: manual/api/eval.md:77
+#: manual/api/eval.md:84
 msgid "It is the promoted `Eq` implementation; use `==` in new code."
 msgstr "これは昇格された `Eq` 実装である。新しいコードでは `==` を使うこと。"
 
 #: manual/api/core.md:366
 #: manual/api/core.md:368
-#: manual/api/stlc.md:336
-#: manual/api/stlc.md:338
+#: manual/api/stlc.md:353
+#: manual/api/stlc.md:355
 #: manual/api/syntax.md:367
 #: manual/api/syntax.md:369
 #: manual/index.md:103
@@ -266,7 +266,7 @@ msgid "Deprecated"
 msgstr "非推奨"
 
 #: manual/api/core.md:368
-#: manual/api/stlc.md:338
+#: manual/api/stlc.md:355
 #: manual/api/syntax.md:369
 msgid "Replacement"
 msgstr "代替"
@@ -292,12 +292,12 @@ msgid "The definitions of shifting and instantiation, with derivations of their 
 msgstr "シフトとインスタンス化の定義、およびその性質の導出は [debruijn の設計](../design/debruijn.md)にある。"
 
 #: manual/api/debruijn.md:28
-#: manual/api/eval.md:25
-#: manual/api/rewrite.md:29
-#: manual/api/stlc.md:29
+#: manual/api/eval.md:32
+#: manual/api/rewrite.md:41
+#: manual/api/stlc.md:37
 #: manual/api/substitution.md:35
 #: manual/api/syntax.md:35
-#: manual/api/utlc/lambda.md:28
+#: manual/api/utlc/lambda.md:35
 #: manual/api/utlc/nbe.md:27
 msgid "The examples on this page refer to every name through its package alias, for example `@core.Name`."
 msgstr "このページの例では、すべての名前をパッケージの別名を通して参照する。たとえば `@core.Name` である。"
@@ -490,99 +490,103 @@ msgstr "`eval` パッケージは一般的な簡約戦略に名前を与え、�
 msgid "The strategies are defined precisely in the [eval design](../design/eval.md)."
 msgstr "戦略の正確な定義は [eval の設計](../design/eval.md)にある。"
 
-#: manual/api/eval.md:28
+#: manual/api/eval.md:12
+msgid "Every function of the package is stack-safe in the nesting depth of the term: each strategy keeps the ancestors of the position it searches in a heap array and uses a constant amount of host stack, so it finds and rewrites a redex nested 100 000 levels deep on every backend. The rule must itself be stack-safe on the subterms it is given. As in [rewrite](rewrite.md), `Debug` of a deep term or result is not stack-safe."
+msgstr "このパッケージのすべての関数は、項の入れ子の深さに関してスタックセーフである。各戦略は探索位置の祖先をヒープ配列に保持し、ホストスタックを一定量だけ使うため、どのバックエンドでも 100 000 階層まで入れ子になった簡約基を見つけて書き換える。規則自体も、渡された部分項に対してスタックセーフでなければならない。[rewrite](rewrite.md) と同様に、深い項や結果の `Debug` はスタックセーフではない。"
+
+#: manual/api/eval.md:35
 msgid "The examples use the beta rule of `Luna-Flow/type_theory/utlc/lambda` (alias `@lambda`), which you import as well."
 msgstr "例では `Luna-Flow/type_theory/utlc/lambda`（別名 `@lambda`）の β 規則を用いるので、これもインポートする。"
 
-#: manual/api/eval.md:31
+#: manual/api/eval.md:38
 #: manual/tutorial/rewrite.md:207
 msgid "Strategies"
 msgstr "戦略"
 
-#: manual/api/eval.md:35
+#: manual/api/eval.md:42
 msgid "`Strategy` selects where the next step is taken."
 msgstr "`Strategy` は次のステップを行う位置を選ぶ。"
 
-#: manual/api/eval.md:46
+#: manual/api/eval.md:53
 #: manual/semantics.md:44
 msgid "Strategy"
 msgstr "戦略"
 
-#: manual/api/eval.md:46
+#: manual/api/eval.md:53
 msgid "Next position"
 msgstr "次の位置"
 
-#: manual/api/eval.md:46
+#: manual/api/eval.md:53
 msgid "Enters binders and arguments"
 msgstr "束縛子と引数に入るか"
 
-#: manual/api/eval.md:48
+#: manual/api/eval.md:55
 msgid "leftmost-outermost redex (`@rewrite.top_down_once`)"
 msgstr "最左最外の簡約基（`@rewrite.top_down_once`）"
 
-#: manual/api/eval.md:48
-#: manual/api/eval.md:49
-#: manual/api/eval.md:51
+#: manual/api/eval.md:55
+#: manual/api/eval.md:56
+#: manual/api/eval.md:58
 msgid "yes"
 msgstr "はい"
 
-#: manual/api/eval.md:49
+#: manual/api/eval.md:56
 msgid "leftmost-innermost redex, spines read curried"
 msgstr "最左最内の簡約基、スパインはカリー化して読む"
 
-#: manual/api/eval.md:50
+#: manual/api/eval.md:57
 msgid "the root, else the head of an application, recursively"
 msgstr "根、そうでなければ適用の先頭、を再帰的に"
 
-#: manual/api/eval.md:50
+#: manual/api/eval.md:57
 msgid "no"
 msgstr "いいえ"
 
-#: manual/api/eval.md:51
+#: manual/api/eval.md:58
 msgid "same as `NormalOrder`"
 msgstr "`NormalOrder` と同じ"
 
-#: manual/api/eval.md:53
+#: manual/api/eval.md:60
 msgid "`FullNormal` currently selects the same traversal as `NormalOrder`; it names the intent \"reduce to full normal form\" and may diverge from `NormalOrder` if another full-normalization traversal is added."
 msgstr "`FullNormal` は現在 `NormalOrder` と同じ走査を選ぶ。これは「完全な正規形まで簡約する」という意図を表す名前であり、別の完全正規化の走査が追加されれば `NormalOrder` と異なるものになりうる。"
 
-#: manual/api/eval.md:57
+#: manual/api/eval.md:64
 msgid "Positions are compared on the curried reading of application spines: `Apply(f, [a1, a2])` is $(f\\,a_1)\\,a_2$. `ApplicativeOrder` therefore differs from `@rewrite.bottom_up_once`, which is post-order on the n-ary tree. It visits the head of `Apply(h, [a1, …, an])`, then the arguments from left to right; after argument `ai` with `i < n` it tries the rule on the whole application if the rule applies to the prefix `Apply(h, [a1, …, ai])`, and after `an` in any case. A prefix is never rewritten on its own, since it is not a position of the term. With `@lambda.beta_rule` every strategy takes the same steps on `Apply(f, [a1, a2])` and on `Apply(Apply(f, [a1]), [a2])`; a rule that matches applications of one arity only sees the n-ary post-order of `bottom_up_once`."
 msgstr "位置はアプリケーションのスパインのカリー化した読みで比較される：`Apply(f, [a1, a2])` は $(f\\,a_1)\\,a_2$ である。そのため `ApplicativeOrder` は、n 項の木の上の後行順である `@rewrite.bottom_up_once` とは異なる。`Apply(h, [a1, …, an])` のヘッドを訪れ、次に引数を左から右へ訪れる。`i < n` である引数 `ai` の後では、規則が接頭部 `Apply(h, [a1, …, ai])` に適用できるならば適用全体に対して規則を試し、`an` の後では常に試す。接頭部はそれ自体では決して書き換えられない。項の位置ではないからである。`@lambda.beta_rule` を使うと、どの戦略も `Apply(f, [a1, a2])` と `Apply(Apply(f, [a1]), [a2])` で同じステップを踏む。一つのアリティの適用だけに一致する規則には、`bottom_up_once` の n 項の後行順がそのまま現れる。"
 
-#: manual/api/eval.md:71
+#: manual/api/eval.md:78
 msgid "`Strategy::equal` compares two strategies."
 msgstr "`Strategy::equal` は 2 つの戦略を比較する。"
 
-#: manual/api/eval.md:79
+#: manual/api/eval.md:86
 msgid "Running a strategy"
 msgstr "戦略の実行"
 
-#: manual/api/eval.md:83
+#: manual/api/eval.md:90
 msgid "`reduce_once` performs at most one reduction step with a strategy."
 msgstr "`reduce_once` は戦略に従って高々 1 ステップの簡約を行う。"
 
-#: manual/api/eval.md:89
+#: manual/api/eval.md:96
 msgid "The result follows the contract of `@rewrite.StepResult`: `Reduced` reports one rewritten position and its path. For `NormalOrder`, `FullNormal` and `ApplicativeOrder`, `NoStep` means the rule applies nowhere. For `WeakHead`, `NoStep` means the rule applies neither at the root nor at any head position of the application spine; the term is then in weak head normal form for the rule, but may contain redexes under binders or in arguments."
 msgstr "結果は `@rewrite.StepResult` の契約に従う：`Reduced` は書き換えられた 1 つの位置とそのパスを報告する。`NormalOrder`、`FullNormal`、`ApplicativeOrder` では、`NoStep` は規則がどこにも適用できないことを意味する。`WeakHead` では、`NoStep` は規則が根にも適用スパインのどの先頭位置にも適用できないことを意味する。このとき項はその規則について弱頭部正規形であるが、束縛子の下や引数の中に簡約基を含みうる。"
 
-#: manual/api/eval.md:96
+#: manual/api/eval.md:103
 msgid "With `@lambda.beta_rule`, a redex is an `Apply` with a non-empty argument array whose head is a `Bind`, possibly wrapped in empty applications `Apply(h, [])`, which are read as `h`. Every strategy therefore contracts $(\\lambda x.\\,b)\\,a$ in `Apply(Apply(Bind(x, b), []), [a])`, at the root."
 msgstr "`@lambda.beta_rule` では、簡約基とは引数の配列が空でない `Apply` であり、その先頭が `Bind` であるもの（`h` と読まれる空の適用 `Apply(h, [])` に包まれていてもよい）である。したがってどの戦略も、`Apply(Apply(Bind(x, b), []), [a])` の根で $(\\lambda x.\\,b)\\,a$ を縮約する。"
 
-#: manual/api/eval.md:151
+#: manual/api/eval.md:158
 msgid "`evaluate` normalizes a term by repeating `reduce_once` with one strategy."
 msgstr "`evaluate` は 1 つの戦略で `reduce_once` を繰り返して項を正規化する。"
 
-#: manual/api/eval.md:157
+#: manual/api/eval.md:164
 msgid "`evaluate(term, name, rule, strategy, max_steps)` is `@rewrite.normalize(term, t => reduce_once(t, name, rule, strategy), max_steps)`, with the same step-count contract: at most `max_steps` steps, and `NormalForm` only for a term on which the strategy finds no step."
 msgstr "`evaluate(term, name, rule, strategy, max_steps)` は `@rewrite.normalize(term, t => reduce_once(t, name, rule, strategy), max_steps)` であり、同じステップ数の契約を持つ：高々 `max_steps` ステップであり、`NormalForm` は戦略がステップを見つけられない項に対してのみ返される。"
 
-#: manual/api/eval.md:184
+#: manual/api/eval.md:191
 msgid "`trace` normalizes like `evaluate` and records every step."
 msgstr "`trace` は `evaluate` と同様に正規化し、各ステップを記録する。"
 
-#: manual/api/eval.md:190
+#: manual/api/eval.md:197
 msgid "It is `@rewrite.trace` with the step function of the strategy. Every strategy reports its own input as `before`, so the trace satisfies the chaining invariants of `@rewrite.ReductionTrace`."
 msgstr "これはその戦略のステップ関数を与えた `@rewrite.trace` である。どの戦略も自分の入力を `before` として報告するので、トレースは `@rewrite.ReductionTrace` の連鎖不変条件を満たす。"
 
@@ -598,181 +602,189 @@ msgstr "`rewrite` パッケージは項の 1 つの位置で書き換え規則�
 msgid "A *rule* is a function `(Term[T]) -> Term[T]?` that returns `Some(result)` when it applies to a term as a whole and `None` otherwise. The traversal functions decide *where* the rule is tried. The theory is in the [rewrite design](../design/rewrite.md)."
 msgstr "*規則*とは関数 `(Term[T]) -> Term[T]?` であり、項全体に適用できるときは `Some(result)` を、そうでなければ `None` を返す。走査関数は規則を*どこで*試すかを決める。理論は [rewrite の設計](../design/rewrite.md)にある。"
 
-#: manual/api/rewrite.md:32
+#: manual/api/rewrite.md:17
+msgid "Every function of the package is stack-safe in the nesting depth of the term: a traversal keeps the ancestors of the position it searches in a heap array and uses a constant amount of host stack, so it finds and rewrites a redex nested 100 000 levels deep (in heads, arguments or binder bodies) on every backend. The rule is called on one subterm at a time and must itself be stack-safe on the subterms it is given; `normalize` and `trace` are loops and are stack-safe when the step function is. The generic functions are stack-safe when the `BindingSyntax` methods of the downstream type are, that is, when they look at one layer of a node. The exception is `Debug`: `@debug.to_string`, `Repr` and the messages of `assert_eq` and `inspect` recurse and can overflow the stack on a deep term or result."
+msgstr "このパッケージのすべての関数は、項の入れ子の深さに関してスタックセーフである。走査は探索位置の祖先をヒープ配列に保持し、ホストスタックを一定量だけ使うため、どのバックエンドでも（ヘッド、引数、束縛子の本体のいずれでも）100 000 階層まで入れ子になった簡約基を見つけて書き換える。規則は一度に 1 つの部分項に適用され、渡された部分項について規則自体もスタックセーフでなければならない。`normalize` と `trace` はループであり、ステップ関数がスタックセーフならそれらもスタックセーフである。ジェネリック関数は、下流型の `BindingSyntax` メソッドがスタックセーフ、すなわちノードの 1 層だけを見る場合にスタックセーフである。例外は `Debug` である。`@debug.to_string`、`Repr`、および `assert_eq` と `inspect` のメッセージは再帰するため、深い項や結果ではスタックを使い切ることがある。"
+
+#: manual/api/rewrite.md:44
 msgid "Rule names"
 msgstr "規則名"
 
-#: manual/api/rewrite.md:36
+#: manual/api/rewrite.md:48
 msgid "`RuleName` is a non-empty identifier for a reduction rule."
 msgstr "`RuleName` は簡約規則の空でない識別子である。"
 
-#: manual/api/rewrite.md:44
+#: manual/api/rewrite.md:56
 msgid "Rule names label steps in results and traces. They compare, order and hash by their text; the order is that of `String`: shorter texts first, then by UTF-16 code units."
 msgstr "規則名は結果やトレースでステップにラベルを付ける。テキストによって比較・順序付け・ハッシュされ、順序は `String` のもの、すなわち短いテキストが先、次に UTF-16 コード単位による。"
 
-#: manual/api/rewrite.md:50
+#: manual/api/rewrite.md:62
 msgid "`RuleName::new` validates and creates a rule name."
 msgstr "`RuleName::new` は規則名を検証して作成する。"
 
-#: manual/api/rewrite.md:56
+#: manual/api/rewrite.md:68
 msgid "Returns `Err(RuleNameError::Empty)` for the empty string and `Ok(name)` otherwise."
 msgstr "空文字列に対しては `Err(RuleNameError::Empty)` を、それ以外では `Ok(name)` を返す。"
 
-#: manual/api/rewrite.md:61
+#: manual/api/rewrite.md:73
 msgid "`RuleName::unsafe_new` creates a rule name from a string known to be non-empty."
 msgstr "`RuleName::unsafe_new` は空でないとわかっている文字列から規則名を作成する。"
 
-#: manual/api/rewrite.md:68
+#: manual/api/rewrite.md:80
 msgid "Aborts on the empty string. Use it for literals such as `\"beta\"`, where the invariant is evident; use `RuleName::new` for names that come from input."
 msgstr "空文字列に対しては中断する。`\"beta\"` のように不変条件が明らかなリテラルに使い、入力から来る名前には `RuleName::new` を使うこと。"
 
-#: manual/api/rewrite.md:73
+#: manual/api/rewrite.md:85
 msgid "`RuleName::value` returns the text of a rule name."
 msgstr "`RuleName::value` は規則名のテキストを返す。"
 
-#: manual/api/rewrite.md:81
+#: manual/api/rewrite.md:93
 msgid "These methods are the promoted `Eq`, `Compare` and `Hash` implementations."
 msgstr "これらのメソッドは昇格された `Eq`、`Compare`、`Hash` の実装である。"
 
-#: manual/api/rewrite.md:104
+#: manual/api/rewrite.md:116
 msgid "`RuleNameError` lists the reasons a rule name is invalid."
 msgstr "`RuleNameError` は規則名が無効である理由を列挙する。"
 
-#: manual/api/rewrite.md:113
+#: manual/api/rewrite.md:125
 msgid "`Empty` is the only case: rule names must not be empty."
 msgstr "`Empty` が唯一のケースである：規則名は空であってはならない。"
 
-#: manual/api/rewrite.md:115
+#: manual/api/rewrite.md:127
 msgid "Positions"
 msgstr "位置"
 
-#: manual/api/rewrite.md:119
+#: manual/api/rewrite.md:131
 msgid "`ReductionFrame` is one step from a node to one of its children."
 msgstr "`ReductionFrame` はノードからその子の 1 つへの 1 ステップである。"
 
-#: manual/api/rewrite.md:130
+#: manual/api/rewrite.md:142
 msgid "`BinderBody` enters the body of a `Bind`, `ApplyHead` the head of an `Apply`, and `ApplyArgument(i)` its argument number `i`, counting from 0."
 msgstr "`BinderBody` は `Bind` の本体に、`ApplyHead` は `Apply` の先頭に、`ApplyArgument(i)` は 0 から数えて `i` 番目の引数に入る。"
 
-#: manual/api/rewrite.md:135
+#: manual/api/rewrite.md:147
 msgid "`ReductionPath` is the sequence of frames from the root to a position."
 msgstr "`ReductionPath` は根からある位置までのフレームの列である。"
 
-#: manual/api/rewrite.md:141
-msgid "The empty path is the root. The type is abstract: a path is built only with `root` and `prepend` and cannot be changed afterwards."
+#: manual/api/rewrite.md:155
+#, fuzzy
+#| msgid "The empty path is the root. The type is abstract: a path is built only with `root` and `prepend` and cannot be changed afterwards."
+msgid "The empty path is the root. The type is abstract: a path is built only with `root` and `prepend` and cannot be changed afterwards. `Eq` and `Debug` are written by hand; they compare and show the frames from the root, as derived implementations on the frame array would."
 msgstr "空のパスは根を表す。この型は抽象型であり、パスは `root` と `prepend` でのみ作られ、作った後は変更できない。"
 
-#: manual/api/rewrite.md:146
+#: manual/api/rewrite.md:162
 msgid "These functions build and read paths."
 msgstr "これらの関数はパスを構築・読み取りする。"
 
-#: manual/api/rewrite.md:155
-msgid "`prepend(frame)` adds a frame at the root end, which is how a traversal lifts the path of a step in a child to the parent. `length` is the number of frames, 0 for the root. `to_array` returns the frames root first, as a fresh array: changing it does not change the path."
+#: manual/api/rewrite.md:171
+#, fuzzy
+#| msgid "`prepend(frame)` adds a frame at the root end, which is how a traversal lifts the path of a step in a child to the parent. `length` is the number of frames, 0 for the root. `to_array` returns the frames root first, as a fresh array: changing it does not change the path."
+msgid "`prepend(frame)` adds a frame at the root end, which is how a traversal lifts the path of a step in a child to the parent. It takes amortized constant time when it extends the longest path built so far from the same root path, as when a path is built from the redex up, so a path of $n$ frames costs $O(n)$; prepending to a path that has already been extended copies its frames. `length` is the number of frames, 0 for the root. `to_array` returns the frames root first, as a fresh array: changing it does not change the path."
 msgstr "`prepend(frame)` は根の側にフレームを追加する。走査はこれによって子でのステップのパスを親へ持ち上げる。`length` はフレームの個数で、根では 0 である。`to_array` は根から順にフレームを新しい配列として返し、それを変更してもパスは変わらない。"
 
-#: manual/api/rewrite.md:162
+#: manual/api/rewrite.md:181
 msgid "`ReductionPath::equal` compares two paths frame by frame."
 msgstr "`ReductionPath::equal` は 2 つのパスをフレームごとに比較する。"
 
-#: manual/api/rewrite.md:179
+#: manual/api/rewrite.md:198
 msgid "Single steps on `Term`"
 msgstr "`Term` 上の単一ステップ"
 
-#: manual/api/rewrite.md:183
+#: manual/api/rewrite.md:202
 msgid "`StepResult[T]` is the outcome of one reduction attempt."
 msgstr "`StepResult[T]` は簡約を 1 回試みた結果である。"
 
-#: manual/api/rewrite.md:193
+#: manual/api/rewrite.md:212
 msgid "`NoStep` means the traversal found no position where the rule applies. `Reduced` records the whole term `before`, the whole term `after`, the rule and the path of the rewritten position. Exactly one position was rewritten: the subterm of `before` at `path` is a redex of the rule, and `after` is `before` with that subterm replaced by the rule's result. `equal` is the promoted `Eq` implementation, which compares terms structurally."
 msgstr "`NoStep` は走査が規則の適用できる位置を見つけられなかったことを意味する。`Reduced` は項全体 `before`、項全体 `after`、規則、書き換えられた位置のパスを記録する。書き換えられた位置はちょうど 1 つである：`path` における `before` の部分項はその規則の簡約基であり、`after` はその部分項を規則の結果で置き換えた `before` である。`equal` は昇格された `Eq` の実装であり、項を構造的に比較する。"
 
-#: manual/api/rewrite.md:202
+#: manual/api/rewrite.md:221
 msgid "`top_down_once` rewrites the first position, in pre-order, at which the rule applies."
 msgstr "`top_down_once` は前順で規則が適用できる最初の位置を書き換える。"
 
-#: manual/api/rewrite.md:209
+#: manual/api/rewrite.md:228
 msgid "The rule is tried at a node before its children; children are visited head first, then arguments from left to right, and binder bodies are entered. The chosen position is the leftmost-outermost redex. `NoStep` means that the rule applies nowhere in the term."
 msgstr "規則はノード自身で子より先に試される。子はまず頭部、次に引数を左から右へと訪問され、束縛子の本体にも入る。選ばれる位置は最左最外の簡約基である。`NoStep` は規則が項のどこにも適用できないことを表す。"
 
-#: manual/api/rewrite.md:216
+#: manual/api/rewrite.md:235
 msgid "`bottom_up_once` rewrites the first position, in post-order, at which the rule applies."
 msgstr "`bottom_up_once` は、後行順で規則が適用できる最初の位置を書き換える。"
 
-#: manual/api/rewrite.md:223
+#: manual/api/rewrite.md:242
 msgid "Children are tried before their parent, in the same left-to-right order. The chosen position is the leftmost-innermost redex of the n-ary tree: an application `Apply(h, [a1, …, an])` is one node, tried after all of its arguments. `NoStep` again means that the rule applies nowhere. The lambda calculus reads such a node as the curried spine $h\\,a_1 \\cdots a_n$, in which the beta redex $(\\lambda x.\\,b)\\,a_1$ does not contain $a_2, \\dots, a_n$; the `ApplicativeOrder` strategy of [eval](eval.md) follows that reading."
 msgstr "子は親より先に、同じく左から右の順で試される。選ばれる位置は n 項の木の上の最左最内の簡約基である：適用 `Apply(h, [a1, …, an])` は一つのノードであり、そのすべての引数の後で試される。`NoStep` はここでも規則がどこにも適用できないことを表す。ラムダ計算はこのノードをカリー化されたスパイン $h\\,a_1 \\cdots a_n$ として読み、そこでは β 簡約基 $(\\lambda x.\\,b)\\,a_1$ は $a_2, \\dots, a_n$ を含まない。[eval](eval.md) の `ApplicativeOrder` 戦略はこの読み方に従う。"
 
-#: manual/api/rewrite.md:260
+#: manual/api/rewrite.md:279
 msgid "Repeating steps on `Term`"
 msgstr "`Term` 上でのステップの反復"
 
-#: manual/api/rewrite.md:264
+#: manual/api/rewrite.md:283
 msgid "`NormalizationResult[T]` is the outcome of bounded repetition of a step function."
 msgstr "`NormalizationResult[T]` はステップ関数を有界回数反復した結果である。"
 
-#: manual/api/rewrite.md:275
+#: manual/api/rewrite.md:294
 msgid "`NormalForm(term, steps)`: the step function returns `NoStep` on `term`, which was reached after `steps` steps. `StepLimitReached(term, steps)`: the limit of `steps` steps was used up and `term` can still be reduced."
 msgstr "`NormalForm(term, steps)`：ステップ関数が `term` に対して `NoStep` を返した。この項は `steps` ステップ後に到達したものである。`StepLimitReached(term, steps)`：`steps` ステップの上限を使い切り、`term` はまだ簡約可能である。"
 
-#: manual/api/rewrite.md:281
+#: manual/api/rewrite.md:300
 msgid "`normalize` applies a step function until it returns `NoStep` or a step limit is reached."
 msgstr "`normalize` は、ステップ関数が `NoStep` を返すかステップ上限に達するまで、ステップ関数を適用し続ける。"
 
-#: manual/api/rewrite.md:288
+#: manual/api/rewrite.md:307
 msgid "`normalize(term, step, max_steps)` performs at most `max_steps` successful steps and calls `step` at most `max_steps + 1` times: after the last allowed step it calls `step` once more to decide between `NormalForm` and `StepLimitReached`. With `max_steps <= 0` it performs no step and only classifies `term`. The step function decides the strategy; see [eval](eval.md) for ready-made ones."
 msgstr "`normalize(term, step, max_steps)` は成功するステップを高々 `max_steps` 回実行し、`step` を高々 `max_steps + 1` 回呼び出す。許された最後のステップの後、`NormalForm` と `StepLimitReached` のどちらであるかを判定するために `step` をもう一度呼び出す。`max_steps <= 0` の場合はステップを一切実行せず、`term` の分類だけを行う。簡約戦略はステップ関数が決める。既製のものについては [eval](eval.md) を参照。"
 
-#: manual/api/rewrite.md:297
+#: manual/api/rewrite.md:316
 msgid "`ReductionTrace[T]` records a bounded run: the initial term, every successful step and the final result."
 msgstr "`ReductionTrace[T]` は有界な実行を記録する。初期項、成功した各ステップ、および最終結果である。"
 
-#: manual/api/rewrite.md:308
+#: manual/api/rewrite.md:327
 msgid "The type is abstract: only `trace` builds a trace, and `initial()`, `steps()` and `result()` read its three parts. `steps()` returns a fresh array, so changing it does not change the trace; the terms inside are shared, not copied, and must be treated as immutable (see [`Term`](syntax.md)). `equal` is the promoted `Eq` implementation. Every element of `steps` is a `Reduced` value, and `steps().length()` equals the `steps` count of `result`. When the step function keeps the contract of `StepResult` (it reports its own input as `before`, as every traversal of this package and of [eval](eval.md) does), consecutive steps chain: the first `before` is `initial`, and the `after` of one step is the `before` of the next. `trace` stores whatever the step function returns, so a hand-written step that reports another `before` breaks the chain."
 msgstr "この型は抽象型であり、トレースを作るのは `trace` だけで、`initial()`、`steps()`、`result()` がその 3 つの部分を読み出す。`steps()` は新しい配列を返すので、それを変更してもトレースは変わらない。中の項はコピーされずに共有されるので、不変として扱わなければならない（[`Term`](syntax.md) を参照）。`equal` は昇格された `Eq` の実装である。`steps` の各要素は `Reduced` 値であり、`steps().length()` は `result` のステップ数に等しい。ステップ関数が `StepResult` の契約を守る（このパッケージと [eval](eval.md) のすべての走査のように、自分の入力を `before` として報告する）とき、連続するステップは連鎖する：最初の `before` は `initial` であり、あるステップの `after` は次のステップの `before` である。`trace` はステップ関数が返したものをそのまま記録するので、別の `before` を報告する手書きのステップは連鎖を壊す。"
 
-#: manual/api/rewrite.md:323
+#: manual/api/rewrite.md:342
 msgid "`trace` runs the same loop as `normalize` and records every step."
 msgstr "`trace` は `normalize` と同じループを実行し、各ステップを記録する。"
 
-#: manual/api/rewrite.md:351
+#: manual/api/rewrite.md:370
 #: manual/api/syntax.md:260
 msgid "Binding-aware ASTs"
 msgstr "束縛を扱う AST"
 
-#: manual/api/rewrite.md:355
+#: manual/api/rewrite.md:374
 msgid "`GenericStepResult[N]` is `StepResult` for a downstream AST `N`."
 msgstr "`GenericStepResult[N]` は下流の AST `N` 向けの `StepResult` である。"
 
-#: manual/api/rewrite.md:367
+#: manual/api/rewrite.md:386
 msgid "`generic_top_down_once` is `top_down_once` for any `BindingSyntax` AST."
 msgstr "`generic_top_down_once` は任意の `BindingSyntax` AST 向けの `top_down_once` である。"
 
-#: manual/api/rewrite.md:373
+#: manual/api/rewrite.md:392
 msgid "The traversal uses `BindingSyntax::project` to find children and the trait constructors to rebuild the parents of the rewritten node. `Opaque` and variable nodes have no children; the rule is still tried on them."
 msgstr "走査は `BindingSyntax::project` を使って子を見つけ、トレイトのコンストラクタを使って書き換えられたノードの親を再構築する。`Opaque` ノードと変数ノードには子がないが、規則はそれらに対しても試される。"
 
-#: manual/api/rewrite.md:379
+#: manual/api/rewrite.md:398
 msgid "`GenericNormalizationResult[N]` is `NormalizationResult` for a downstream AST."
 msgstr "`GenericNormalizationResult[N]` は下流の AST 向けの `NormalizationResult` である。"
 
-#: manual/api/rewrite.md:392
+#: manual/api/rewrite.md:411
 msgid "`generic_normalize` repeats `generic_top_down_once` with one rule until no step applies or the step limit is reached."
 msgstr "`generic_normalize` は一つの規則で `generic_top_down_once` を、適用できるステップがなくなるかステップ上限に達するまで繰り返す。"
 
-#: manual/api/rewrite.md:399
+#: manual/api/rewrite.md:418
 msgid "It has the same step-count contract as `normalize`, with the top-down strategy fixed."
 msgstr "ステップ数に関する約束は `normalize` と同じで、戦略はトップダウンに固定されている。"
 
-#: manual/api/rewrite.md:414
+#: manual/api/rewrite.md:433
 msgid "For a downstream AST see the [adapter tutorial](../tutorial/adapter.md)."
 msgstr "下流の AST については[アダプタのチュートリアル](../tutorial/adapter.md)を参照。"
 
-#: manual/api/rewrite.md:416
+#: manual/api/rewrite.md:435
 #: manual/api/substitution.md:278
 msgid "Removed fields"
 msgstr "削除されたフィールド"
 
-#: manual/api/rewrite.md:418
+#: manual/api/rewrite.md:437
 msgid "The fields `ReductionPath::frames` and `ReductionTrace::initial`, `steps` and `result` are no longer public. Use `ReductionPath::length` and `ReductionPath::to_array`, and the methods `ReductionTrace::initial`, `ReductionTrace::steps` and `ReductionTrace::result`."
 msgstr "フィールド `ReductionPath::frames` と `ReductionTrace::initial`、`steps`、`result` は公開されなくなった。`ReductionPath::length` と `ReductionPath::to_array`、およびメソッド `ReductionTrace::initial`、`ReductionTrace::steps`、`ReductionTrace::result` を使う。"
 
@@ -788,157 +800,163 @@ msgstr "`stlc` パッケージは、共有の名前付き構文上の単純型�
 msgid "Terms are `@syntax.Term[Atom]`: `Bind(x, b)` is $\\lambda x.\\,b$ (without a type annotation), `Apply` is application, `Variable` a variable, and `Value` holds an `Atom`. The typing rules and the NbE algorithm are given in the [stlc design](../design/stlc.md)."
 msgstr "項は `@syntax.Term[Atom]` である。`Bind(x, b)` は $\\lambda x.\\,b$（型注釈なし）、`Apply` は適用、`Variable` は変数であり、`Value` は `Atom` を保持する。型付け規則と NbE アルゴリズムは [stlc の設計](../design/stlc.md)に記載されている。"
 
-#: manual/api/stlc.md:32
+#: manual/api/stlc.md:15
+msgid "Every function of the package, `==` on types included, is stack-safe in the nesting depth of terms and types: type checking, evaluation and readback run as loops that keep pending work in heap arrays and use a constant amount of host stack. Terms nested 100 000 levels deep (binders, argument positions, curried spines, nested redexes) and types nested as deep (in codomains or in domains) are handled on every backend. `Debug` of such a term, type or error is not stack-safe."
+msgstr "このパッケージのすべての関数は、型に対する `==` も含め、項と型の入れ子の深さに関してスタックセーフである。型検査、評価、読み戻しは、保留中の処理をヒープ配列に保持するループとして動作し、ホストスタックを一定量だけ使う。どのバックエンドでも、項は束縛子、引数位置、カリー化されたスパイン、入れ子の簡約基を含めて 100 000 階層まで、型は余域または定義域で同じ深さまで扱える。そのような項、型、エラーの `Debug` はスタックセーフではない。"
+
+#: manual/api/stlc.md:40
 msgid "Syntax"
 msgstr "構文"
 
-#: manual/api/stlc.md:36
+#: manual/api/stlc.md:44
 msgid "`Atom` is a constant of the calculus."
 msgstr "`Atom` はこの計算体系の定数である。"
 
-#: manual/api/stlc.md:46
+#: manual/api/stlc.md:54
 msgid "`UnitLit` is the unit value $()$; `Const(c)` is a constant whose type is declared in a `Signature`."
 msgstr "`UnitLit` は単位値 $()$ である。`Const(c)` は型が `Signature` で宣言された定数である。"
 
-#: manual/api/stlc.md:51
+#: manual/api/stlc.md:59
 msgid "`Term` is the type of STLC terms."
 msgstr "`Term` は STLC の項の型である。"
 
-#: manual/api/stlc.md:57
+#: manual/api/stlc.md:65
 msgid "It is an alias, so all of [syntax](syntax.md), [substitution](substitution.md) and [rewrite](rewrite.md) apply to STLC terms."
 msgstr "これは別名なので、[syntax](syntax.md)、[substitution](substitution.md)、[rewrite](rewrite.md) のすべてが STLC の項に適用できる。"
 
-#: manual/api/stlc.md:62
+#: manual/api/stlc.md:70
 msgid "`Ty` is a simple type."
 msgstr "`Ty` は単純型である。"
 
-#: manual/api/stlc.md:73
-msgid "`Base(b)` is an uninterpreted base type, `Unit` the unit type, and `Arrow(a, b)` the function type $a \\to b$. Types are compared structurally (`Ty::equal`, the promoted `Eq` implementation); for simple types this is exactly type equality. `Atom::equal` likewise compares constants by name."
+#: manual/api/stlc.md:82
+#, fuzzy
+#| msgid "`Base(b)` is an uninterpreted base type, `Unit` the unit type, and `Arrow(a, b)` the function type $a \\to b$. Types are compared structurally (`Ty::equal`, the promoted `Eq` implementation); for simple types this is exactly type equality. `Atom::equal` likewise compares constants by name."
+msgid "`Base(b)` is an uninterpreted base type, `Unit` the unit type, and `Arrow(a, b)` the function type $a \\to b$. Types are compared structurally (`Ty::equal`, the promoted `Eq` implementation); for simple types this is exactly type equality. The implementation is written by hand rather than derived so that it is stack-safe; it has the semantics of the derived one. `Atom::equal` likewise compares constants by name."
 msgstr "`Base(b)` は解釈されない基本型、`Unit` は単位型、`Arrow(a, b)` は関数型 $a \\to b$ である。型は構造的に比較される（`Ty::equal`、昇格された `Eq` の実装）。単純型ではこれはちょうど型の等しさである。`Atom::equal` も同様に定数を名前で比較する。"
 
-#: manual/api/stlc.md:78
+#: manual/api/stlc.md:88
 msgid "Signatures and contexts"
 msgstr "シグネチャと文脈"
 
-#: manual/api/stlc.md:82
+#: manual/api/stlc.md:92
 msgid "`Signature` assigns types to constants."
 msgstr "`Signature` は定数に型を割り当てる。"
 
-#: manual/api/stlc.md:95
+#: manual/api/stlc.md:105
 msgid "The type is abstract: a signature is built only with `empty` and `extend_with` and cannot be changed afterwards. `empty()` has no constants. `extend_with(c, ty)` returns a new signature with `c : ty` added; a later entry for the same name shadows an earlier one, and `lookup` returns the latest, or `None`. `length` counts the entries, shadowed ones included. `to_array` returns a fresh array of the entries in insertion order, so changing it does not change the signature, and `equal` compares the entry lists."
 msgstr "この型は抽象型であり、シグネチャは `empty` と `extend_with` でのみ作られ、作った後は変更できない。`empty()` は定数を持たない。`extend_with(c, ty)` は `c : ty` を追加した新しいシグネチャを返す。同じ名前に対する後の項目は前の項目を隠し、`lookup` は最新のもの、または `None` を返す。`length` は隠された項目も含めて項目を数える。`to_array` は項目を挿入順に並べた新しい配列を返すので、それを変更してもシグネチャは変わらない。`equal` は項目のリストを比較する。"
 
-#: manual/api/stlc.md:106
+#: manual/api/stlc.md:116
 msgid "`TypeContext` assigns types to free variables."
 msgstr "`TypeContext` は自由変数に型を割り当てる。"
 
-#: manual/api/stlc.md:119
-msgid "The functions behave as those of `Signature`, with the same shadowing rule: the type checker extends the context when it enters a lambda, so the nearest binder of a name wins."
-msgstr "関数は `Signature` のものと同じように振る舞い、同じ隠蔽規則に従う：型検査器はラムダに入るときに文脈を拡張するので、名前に対して最も近い束縛子が優先される。"
+#: manual/api/stlc.md:131
+msgid "The functions behave as those of `Signature`, with the same shadowing rule: the type checker extends the context when it enters a lambda, so the nearest binder of a name wins. `extend_with` takes amortized constant time when it extends the longest context built so far from the same empty context, as the checker does under nested lambdas, so checking under $n$ binders costs $O(n)$ for the extensions; extending a context that has already been extended copies its entries. `Eq` and `Debug` are written by hand; they compare and show the entries in insertion order, as before."
+msgstr "関数の振る舞いは `Signature` のものと同じで、シャドーイング規則も共通する。型検査器はラムダに入るときに文脈を拡張するため、最も近い束縛子がその名前に対して有効になる。検査器が入れ子のラムダの下で行うように、同じ空文脈からこれまでに作られた最長の文脈を拡張する場合、`extend_with` は償却定数時間で動作する。そのため、$n$ 個の束縛子の下での検査では拡張のコストは $O(n)$ となる。すでに拡張済みの文脈をさらに拡張すると、項目がコピーされる。`Eq` と `Debug` は手書きであり、従来どおり挿入順に項目を比較・表示する。"
 
-#: manual/api/stlc.md:140
+#: manual/api/stlc.md:157
 msgid "Errors"
 msgstr "エラー"
 
-#: manual/api/stlc.md:144
+#: manual/api/stlc.md:161
 msgid "`TypeError` reports why a term is rejected."
 msgstr "`TypeError` は項が拒否された理由を報告する。"
 
-#: manual/api/stlc.md:160
+#: manual/api/stlc.md:177
 msgid "Case"
 msgstr "ケース"
 
-#: manual/api/stlc.md:160
+#: manual/api/stlc.md:177
 msgid "Meaning"
 msgstr "意味"
 
-#: manual/api/stlc.md:162
+#: manual/api/stlc.md:179
 msgid "`x` is not in the context."
 msgstr "`x` が文脈にない。"
 
-#: manual/api/stlc.md:163
+#: manual/api/stlc.md:180
 msgid "`c` is not in the signature."
 msgstr "`c` がシグネチャにない。"
 
-#: manual/api/stlc.md:164
+#: manual/api/stlc.md:181
 msgid "a lambda appears where its type must be inferred."
 msgstr "型を推論しなければならない位置にラムダが現れた。"
 
-#: manual/api/stlc.md:165
+#: manual/api/stlc.md:182
 msgid "a term of the non-function type `ty` is applied."
 msgstr "関数型でない型 `ty` の項が適用された。"
 
-#: manual/api/stlc.md:166
+#: manual/api/stlc.md:183
 msgid "the inferred type differs from the expected one."
 msgstr "推論された型が期待される型と異なる。"
 
-#: manual/api/stlc.md:167
+#: manual/api/stlc.md:184
 msgid "an application node, `Apply(head, [])`, has no argument."
 msgstr "適用ノード `Apply(head, [])` に引数がない。"
 
-#: manual/api/stlc.md:168
+#: manual/api/stlc.md:185
 msgid "reserved for De Bruijn scope failures; not produced by the current functions."
 msgstr "de Bruijn のスコープ失敗のために予約されている。現在の関数はこれを生成しない。"
 
-#: manual/api/stlc.md:169
+#: manual/api/stlc.md:186
 msgid "an internal invariant of typed NbE failed; not expected for checked input."
 msgstr "型付き NbE の内部不変条件が破れた。検査済みの入力では起こらないはずである。"
 
-#: manual/api/stlc.md:171
+#: manual/api/stlc.md:188
 msgid "Type checking"
 msgstr "型検査"
 
-#: manual/api/stlc.md:175
+#: manual/api/stlc.md:192
 msgid "`infer` synthesizes the type of a term."
 msgstr "`infer` は項の型を合成する。"
 
-#: manual/api/stlc.md:181
+#: manual/api/stlc.md:198
 msgid "The unit literal has type `Unit`, constants and variables have their declared types, and an application `f a_1 … a_n` has the result type of `f` after checking each argument against the corresponding domain. A lambda alone cannot be inferred (`CannotInferLambda`). A lambda applied directly to arguments, $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$, is inferred by inferring the type of $a_1$ and then typing $b\\,a_2 \\cdots a_n$ with $x$ given that type. If $x$ occurs free in $a_2, \\dots, a_n$, the parameter is first renamed to a fresh name, so those arguments keep the types they have in the context. An application with no arguments, at the root of a spine or nested in its head, gives `EmptyApplication`."
 msgstr "単位リテラルの型は `Unit` であり、定数と変数は宣言された型を持つ。適用 `f a_1 … a_n` は、各引数を対応する定義域に対して検査した後の `f` の結果型を持つ。単独のラムダは推論できない（`CannotInferLambda`）。引数に直接適用されたラムダ $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$ は、$a_1$ の型を推論し、$x$ にその型を与えて $b\\,a_2 \\cdots a_n$ を型付けすることで推論される。$x$ が $a_2, \\dots, a_n$ に自由に現れる場合は、まずパラメータを新しい名前に替えるので、それらの引数は文脈における型を保つ。引数のない適用は、スパインの根にあっても先頭に入れ子になっていても `EmptyApplication` になる。"
 
-#: manual/api/stlc.md:194
+#: manual/api/stlc.md:211
 msgid "`check` verifies a term against a type."
 msgstr "`check` は項を型に対して検査する。"
 
-#: manual/api/stlc.md:200
+#: manual/api/stlc.md:217
 msgid "A lambda checks against an arrow type by checking its body against the codomain, with the parameter given the domain. A lambda applied directly to arguments, $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$, is checked as `infer` types it, except that $b\\,a_2 \\cdots a_n$ is checked against the expected type instead of inferred: the type of $a_1$ is still inferred, and the parameter is renamed apart from $a_2, \\dots, a_n$ in the same way. So a redex whose result is a lambda, such as $(\\lambda x.\\,\\lambda y.\\,y)\\,()$, checks against an arrow type, also when it is the argument of a function. Every other term is inferred and compared with `==`; a difference gives `TypeMismatch`. An argument that is given to a lambda, such as $a_1$, must be inferable: a lambda there gives `CannotInferLambda`."
 msgstr "ラムダは矢印型に対して、パラメータに定義域を与えたうえで本体を値域に対して検査することで検査される。引数に直接適用されたラムダ $(\\lambda x.\\,b)\\,a_1 \\cdots a_n$ は `infer` が型付けするのと同じように検査されるが、$b\\,a_2 \\cdots a_n$ は推論されるのではなく期待される型に対して検査される。$a_1$ の型はやはり推論され、パラメータも同じように $a_2, \\dots, a_n$ と衝突しない名前に替えられる。したがって $(\\lambda x.\\,\\lambda y.\\,y)\\,()$ のように結果がラムダである簡約基は、関数の引数であっても矢印型に対して検査に通る。それ以外の項はすべて型を推論し `==` で比較する。異なれば `TypeMismatch` となる。$a_1$ のようにラムダに渡される引数は推論可能でなければならない。そこにラムダがあると `CannotInferLambda` となる。"
 
-#: manual/api/stlc.md:231
+#: manual/api/stlc.md:248
 msgid "A redex whose result is a lambda is checked against the expected arrow:"
 msgstr "結果がラムダである簡約基は、期待される矢印型に対して検査される："
 
-#: manual/api/stlc.md:257
+#: manual/api/stlc.md:274
 msgid "The trailing arguments of a redex are typed in the context of the redex, not under its parameter:"
 msgstr "簡約基の後続の引数は、そのパラメータの下ではなく、簡約基の文脈で型付けされる："
 
-#: manual/api/stlc.md:280
-#: manual/api/utlc/lambda.md:123
+#: manual/api/stlc.md:297
+#: manual/api/utlc/lambda.md:131
 #: manual/api/utlc/nbe.md:191
 msgid "Normalization"
 msgstr "正規化"
 
-#: manual/api/stlc.md:284
+#: manual/api/stlc.md:301
 msgid "`normalize_checked` checks a term against a type and then normalizes it with the untyped beta-eta reducer."
 msgstr "`normalize_checked` は項を型に対して検査し、その後、型なしの βη 簡約器で正規化する。"
 
-#: manual/api/stlc.md:291
+#: manual/api/stlc.md:308
 msgid "On a type error it returns `Err` without reducing. Otherwise it returns `Ok(@lambda.normalize(term, max_steps))`: normal-order beta-eta reduction with a step limit. Its normal forms are beta-normal and eta-*short* (for unary applications, see [`@lambda.eta_rule`](utlc/lambda.md)). Because every well-typed term is strongly normalizing, a large enough `max_steps` always gives `NormalForm`."
 msgstr "型エラーの場合は簡約せずに `Err` を返す。そうでなければ `Ok(@lambda.normalize(term, max_steps))` を返す。これはステップ上限付きの正規順序 βη 簡約である。その正規形は β 正規かつ η *短*形式である（単項適用について。[`@lambda.eta_rule`](utlc/lambda.md) を参照）。よく型付けされた項はすべて強正規化可能なので、`max_steps` を十分大きくすれば必ず `NormalForm` が得られる。"
 
-#: manual/api/stlc.md:300
+#: manual/api/stlc.md:317
 msgid "`normalize_eta_long` checks a term against a type and returns its beta-normal, eta-long form, computed by typed normalization by evaluation."
 msgstr "`normalize_eta_long` は項を型に対して検査し、その β 正規・η 長形式を返す。これは型付きの評価による正規化で計算される。"
 
-#: manual/api/stlc.md:307
+#: manual/api/stlc.md:324
 msgid "In the result, every subterm of arrow type is a lambda, and every application has a variable or a constant at its head. Variables of the context and constants of the signature are kept as they are and eta-expanded according to their types. No step limit is needed: well-typed terms always normalize. New binder names are `x`, `x_1`, … chosen to avoid every name of the term and the context."
 msgstr "結果において、矢印型の部分項はすべてラムダであり、すべての適用は頭部に変数または定数を持つ。文脈の変数とシグネチャの定数はそのまま保たれ、それぞれの型に従って η 展開される。ステップ上限は不要である。型の付く項は常に正規化されるからである。新しい束縛子の名前は `x`、`x_1`、… であり、項と文脈のすべての名前を避けるように選ばれる。"
 
-#: manual/api/stlc.md:343
+#: manual/api/stlc.md:360
 msgid "The hidden method forms `not_equal` and `to_repr` on the types of this package are deprecated; use `!=` and `Repr(x)`."
 msgstr "このパッケージの型にある隠されたメソッド形式 `not_equal` と `to_repr` は非推奨である。`!=` と `Repr(x)` を使うこと。"
 
-#: manual/api/stlc.md:346
+#: manual/api/stlc.md:363
 msgid "The field `entries` of `Signature` and of `TypeContext` is no longer public; use `lookup`, `length` and `to_array` instead."
 msgstr "`Signature` と `TypeContext` のフィールド `entries` は公開されなくなった。代わりに `lookup`、`length`、`to_array` を使う。"
 
@@ -1259,71 +1277,77 @@ msgstr "`utlc/lambda` パッケージは共有の名前付き構文 `@syntax.Ter
 msgid "In a lambda term, `Bind(x, b)` is $\\lambda x.\\,b$, `Apply(f, [a])` is $f\\,a$, and `Value(v)` is an opaque constant. The rules are explained in the [utlc/lambda design](../../design/utlc/lambda.md)."
 msgstr "ラムダ項において、`Bind(x, b)` は $\\lambda x.\\,b$、`Apply(f, [a])` は $f\\,a$、`Value(v)` は不透明な定数である。規則は [utlc/lambda の設計](../../design/utlc/lambda.md)で説明されている。"
 
-#: manual/api/utlc/lambda.md:31
+#: manual/api/utlc/lambda.md:14
+msgid "Every function of the package is stack-safe in the nesting depth of the term: the rules look through empty applications and search for free occurrences with loops, `beta_rule` substitutes with the stack-safe [substitution](../substitution.md), and `normalize` repeats the stack-safe normal-order step of [eval](../eval.md). A term nested 100 000 levels deep is handled on every backend. `Debug` of such a term is not stack-safe."
+msgstr "このパッケージのすべての関数は、項の入れ子の深さに関してスタックセーフである。規則はループで空の適用をたどり、自由出現を探索する。`beta_rule` はスタックセーフな [substitution](../substitution.md) で代入し、`normalize` はスタックセーフな [eval](../eval.md) の正規順序ステップを繰り返す。どのバックエンドでも 100 000 階層まで入れ子になった項を扱える。そのような項の `Debug` はスタックセーフではない。"
+
+#: manual/api/utlc/lambda.md:38
 msgid "The default alias of the package is `@lambda`."
 msgstr "このパッケージの既定の別名は `@lambda` である。"
 
-#: manual/api/utlc/lambda.md:33
+#: manual/api/utlc/lambda.md:40
 msgid "Constructors"
 msgstr "コンストラクタ"
 
-#: manual/api/utlc/lambda.md:37
+#: manual/api/utlc/lambda.md:44
 msgid "`abstraction` builds $\\lambda x.\\,body$."
 msgstr "`abstraction` は $\\lambda x.\\,body$ を構築する。"
 
-#: manual/api/utlc/lambda.md:43
+#: manual/api/utlc/lambda.md:50
 msgid "It returns `Bind(parameter, body)`."
 msgstr "`Bind(parameter, body)` を返す。"
 
-#: manual/api/utlc/lambda.md:47
+#: manual/api/utlc/lambda.md:54
 msgid "`application` builds the unary application $f\\,a$."
 msgstr "`application` は単項適用 $f\\,a$ を構築する。"
 
-#: manual/api/utlc/lambda.md:53
+#: manual/api/utlc/lambda.md:60
 msgid "It returns `Apply(function, [argument])`."
 msgstr "`Apply(function, [argument])` を返す。"
 
-#: manual/api/utlc/lambda.md:65
+#: manual/api/utlc/lambda.md:72
 msgid "Rules"
 msgstr "規則"
 
-#: manual/api/utlc/lambda.md:69
+#: manual/api/utlc/lambda.md:76
 msgid "`beta_rule` contracts a beta redex at the root of a term."
 msgstr "`beta_rule` は項の根にある β 簡約基を縮約する。"
 
-#: manual/api/utlc/lambda.md:75
+#: manual/api/utlc/lambda.md:82
 msgid "For `Apply(Bind(x, body), [a, ..rest])` it returns the capture-avoiding substitution `body[x := a]`, applied to `rest` when `rest` is not empty. For every other term it returns `None`. An empty application `Apply(h, [])` is read as `h`: `Apply(Apply(Bind(x, body), []), [a])` is a redex, while `Apply(Bind(x, body), [])` alone has no argument and is not. It works for any domain type `T`, because values are never inspected."
 msgstr "`Apply(Bind(x, body), [a, ..rest])` に対しては捕獲回避代入 `body[x := a]` を返し、`rest` が空でなければそれを `rest` に適用する。それ以外のすべての項に対しては `None` を返す。空の適用 `Apply(h, [])` は `h` と読まれる：`Apply(Apply(Bind(x, body), []), [a])` は簡約基であるが、`Apply(Bind(x, body), [])` だけでは引数がなく簡約基ではない。値は一切調べられないので、任意のドメイン型 `T` で動作する。"
 
-#: manual/api/utlc/lambda.md:84
+#: manual/api/utlc/lambda.md:91
 msgid "`eta_rule` contracts an eta redex at the root of a term."
 msgstr "`eta_rule` は項の根にある η 簡約基を縮約する。"
 
-#: manual/api/utlc/lambda.md:90
-msgid "For `Bind(x, Apply(f, [Variable(x)]))` with `x` not free in `f` it returns `f`; otherwise `None`. Only a unary application is an eta redex: `Bind(x, Apply(f, [a, Variable(x)]))` is not contracted. Empty applications around the body or the argument are read as their head, so `Bind(x, Apply(Apply(f, [Apply(Variable(x), [])]), []))` is contracted to `f` as well."
+#: manual/api/utlc/lambda.md:97
+#, fuzzy
+#| msgid "For `Bind(x, Apply(f, [Variable(x)]))` with `x` not free in `f` it returns `f`; otherwise `None`. Only a unary application is an eta redex: `Bind(x, Apply(f, [a, Variable(x)]))` is not contracted. Empty applications around the body or the argument are read as their head, so `Bind(x, Apply(Apply(f, [Apply(Variable(x), [])]), []))` is contracted to `f` as well."
+msgid "For `Bind(x, Apply(f, [Variable(x)]))` with `x` not free in `f` it returns `f`; otherwise `None`. Only a unary application is an eta redex: `Bind(x, Apply(f, [a, Variable(x)]))` is not contracted. Empty applications around the body or the argument are read as their head, so `Bind(x, Apply(Apply(f, [Apply(Variable(x), [])]), []))` is contracted to `f` as well. The side condition is decided by searching `f` for a free occurrence of `x`, which stops at the first one and builds no set."
 msgstr "`x` が `f` に自由に出現しない `Bind(x, Apply(f, [Variable(x)]))` に対しては `f` を返し、そうでなければ `None` を返す。単項適用だけが η 簡約基である。`Bind(x, Apply(f, [a, Variable(x)]))` は縮約されない。本体や引数を包む空の適用はその先頭と読まれるので、`Bind(x, Apply(Apply(f, [Apply(Variable(x), [])]), []))` も `f` に縮約される。"
 
-#: manual/api/utlc/lambda.md:99
+#: manual/api/utlc/lambda.md:107
 msgid "`beta_eta_rule` tries `beta_rule` and, if it does not apply, `eta_rule`."
 msgstr "`beta_eta_rule` は `beta_rule` を試し、適用できなければ `eta_rule` を試す。"
 
-#: manual/api/utlc/lambda.md:105
+#: manual/api/utlc/lambda.md:113
 msgid "A term cannot be both a beta and an eta redex at the root (one is an `Apply`, the other a `Bind`), so the order only documents priority."
 msgstr "項が根において β 簡約基と η 簡約基の両方であることはありえない（一方は `Apply`、他方は `Bind`）ので、順序は優先度を記述しているにすぎない。"
 
-#: manual/api/utlc/lambda.md:127
+#: manual/api/utlc/lambda.md:135
 msgid "`normalize` reduces a term to beta-eta normal form with normal-order reduction, within a step limit."
 msgstr "`normalize` は正規順序簡約により、ステップ数の上限内で項を beta-eta 正規形まで簡約する。"
 
-#: manual/api/utlc/lambda.md:134
+#: manual/api/utlc/lambda.md:142
 msgid "It is `@eval.evaluate(term, \"beta_eta\", beta_eta_rule, NormalOrder, max_steps)`: at each step it contracts the leftmost-outermost beta or eta redex, anywhere in the term, including under binders. `NormalForm(t, n)` means `t` has no beta or eta redex (in the unary sense above) and was reached in `n` steps; `StepLimitReached` means the limit was used up. Divergent terms such as $\\Omega$ always end with `StepLimitReached`."
 msgstr "これは `@eval.evaluate(term, \"beta_eta\", beta_eta_rule, NormalOrder, max_steps)` そのものである。各ステップで、項の任意の位置（束縛子の下も含む）にある最左最外の beta または eta 簡約基を縮約する。`NormalForm(t, n)` は `t` が（上述の単項の意味で）beta 簡約基も eta 簡約基も持たず、`n` ステップで到達したことを意味し、`StepLimitReached` は上限を使い切ったことを意味する。$\\Omega$ のような発散する項は必ず `StepLimitReached` で終わる。"
 
-#: manual/api/utlc/lambda.md:151
+#: manual/api/utlc/lambda.md:159
 msgid "The first step is beta and produces $\\lambda y_1.\\,y\\,y_1$; the second is eta."
 msgstr "最初のステップは beta で $\\lambda y_1.\\,y\\,y_1$ を生成し、2 番目は eta である。"
 
-#: manual/api/utlc/lambda.md:153
+#: manual/api/utlc/lambda.md:161
 msgid "Because `normalize` also contracts eta redexes, its result can differ from the beta normal form that `@debruijn.normalize` and `@nbe.normalize` return: $\\lambda x.\\,f\\,x$ normalizes to $f$ here and stays $\\lambda.\\,f\\,0$ there. Use `@eval.evaluate` with `beta_rule` and `NormalOrder` when you need the beta normal form."
 msgstr "`normalize` は η 簡約基も縮約するので、その結果は `@debruijn.normalize` や `@nbe.normalize` が返す β 正規形と異なりうる：$\\lambda x.\\,f\\,x$ はここでは $f$ に正規化されるが、あちらでは $\\lambda.\\,f\\,0$ のままである。β 正規形が必要なときは、`beta_rule` と `NormalOrder` を指定して `@eval.evaluate` を使うこと。"
 
@@ -1602,12 +1626,12 @@ msgstr "下流の変数型は単射（異なる変数を異なる名前へ写す
 #: manual/design/adapter.md:132
 #: manual/design/core.md:182
 #: manual/design/debruijn.md:327
-#: manual/design/eval.md:203
-#: manual/design/rewrite.md:184
-#: manual/design/stlc.md:386
+#: manual/design/eval.md:236
+#: manual/design/rewrite.md:259
+#: manual/design/stlc.md:471
 #: manual/design/substitution.md:130
 #: manual/design/syntax.md:374
-#: manual/design/utlc/lambda.md:205
+#: manual/design/utlc/lambda.md:237
 #: manual/design/utlc/nbe.md:335
 msgid "Correctness and invariants"
 msgstr "正しさと不変条件"
@@ -1655,12 +1679,12 @@ msgstr "下流の adapter は自身のノード種別について (V1)–(V5) �
 #: manual/design/adapter.md:147
 #: manual/design/core.md:199
 #: manual/design/debruijn.md:354
-#: manual/design/eval.md:226
-#: manual/design/rewrite.md:212
-#: manual/design/stlc.md:412
+#: manual/design/eval.md:262
+#: manual/design/rewrite.md:293
+#: manual/design/stlc.md:500
 #: manual/design/substitution.md:386
 #: manual/design/syntax.md:399
-#: manual/design/utlc/lambda.md:232
+#: manual/design/utlc/lambda.md:267
 #: manual/design/utlc/nbe.md:403
 msgid "Alternatives rejected"
 msgstr "却下した代替案"
@@ -1680,12 +1704,12 @@ msgstr "**実行時に法則を検査する。** 法則はすべてのノード�
 #: manual/design/adapter.md:158
 #: manual/design/core.md:212
 #: manual/design/debruijn.md:366
-#: manual/design/eval.md:240
-#: manual/design/rewrite.md:224
-#: manual/design/stlc.md:425
+#: manual/design/eval.md:276
+#: manual/design/rewrite.md:305
+#: manual/design/stlc.md:513
 #: manual/design/substitution.md:400
 #: manual/design/syntax.md:413
-#: manual/design/utlc/lambda.md:243
+#: manual/design/utlc/lambda.md:278
 #: manual/design/utlc/nbe.md:422
 msgid "Boundaries"
 msgstr "境界"
@@ -2356,62 +2380,90 @@ msgid "`evaluate` and `trace` add no reduction logic of their own: they pass the
 msgstr "`evaluate` と `trace` は独自の簡約ロジックを追加しない：戦略のステップ関数を `@rewrite.normalize` と `@rewrite.trace` に渡すだけである。その結果、すべての戦略がトレースをもち、ステップ数の契約はすべての戦略で同じになる。"
 
 #: manual/design/eval.md:195
+msgid "Searches with a bounded host stack"
+msgstr "ホストスタックを一定量に保つ探索"
+
+#: manual/design/eval.md:197
+msgid "**Problem.** Like the traversals of [rewrite](rewrite.md), the weak head and applicative searches were structural recursion, so a redex nested a few thousand levels deep overflowed the js, wasm and wasm-gc stacks (issue #13)."
+msgstr "**問題。** [rewrite](rewrite.md) の走査と同様に、弱頭部と適用順序の探索は構造的再帰だった。そのため、数千階層入れ子になった簡約基で js、wasm、wasm-gc のスタックがあふれていた（issue #13）。"
+
+#: manual/design/eval.md:201
+msgid "**Choice.** Both run as loops over the stack of ancestors described in \"A bounded host stack\" of the [rewrite design](rewrite.md): a heap array of parent nodes with the edge taken from each, root first, rebuilt from the innermost outwards when a step is found. `NormalOrder` and `FullNormal` use `@rewrite.top_down_once` itself."
+msgstr "**選択。** どちらも [rewrite の設計](rewrite.md)の「ホストスタックを一定量に保つ」に記した祖先スタック上のループとして実行する。これは、各親ノードとそこから通った辺を根から順に格納するヒープ配列であり、ステップが見つかったときは最内側から外側へ再構築する。`NormalOrder` と `FullNormal` は `@rewrite.top_down_once` 自体を使う。"
+
+#: manual/design/eval.md:207
+msgid "*Weak head.* The search tries $r$ at the root and, while it fails at an application, descends into the head. The ancestors are all `ApplyHead` entries; the loop tries the same nodes in the same order and rebuilds $h'\\,\\vec u_k \\cdots \\vec u_1$ around the result $h'$, which is what the recursion returned."
+msgstr "*弱頭部。* 探索は根で $r$ を試し、適用で失敗する間はヘッドへ降りる。祖先はすべて `ApplyHead` エントリである。ループは同じノードを同じ順序で試し、再帰が返したものと同じ結果 $h'\\,\\vec u_k \\cdots \\vec u_1$ を再構築する。"
+
+#: manual/design/eval.md:212
+msgid "*Applicative order.* The search is the post-order search of [rewrite](rewrite.md), with one change where an argument has been searched without a step: leaving argument $i$ of $s = h\\,a_0 \\cdots a_{n-1}$ with $i < n - 1$ first tries the prefix $h\\,a_0 \\cdots a_i$ and, if the prefix is a redex, the whole $s$, exactly as the recursive loop over the arguments does after each argument. The recursion keeps one local variable across that loop, `root_failed` (the early attempt at $s$ failed, so $s$ is not tried again after the last argument). The ancestor entry for argument $i$ carries it, $(s, \\mathsf{A}_i, \\mathit{failed})$, and passes it on to the entry for argument $i + 1$, so every attempt, at a node or at a prefix, happens in the order and with the outcome of the recursive definition."
+msgstr "*適用順序。* 探索は [rewrite](rewrite.md) の後行順探索であり、引数の探索でステップが見つからなかった場合に 1 点だけ異なる。$i < n - 1$ で $s = h\\,a_0 \\cdots a_{n-1}$ の引数 $i$ を抜ける際、まず接頭部 $h\\,a_0 \\cdots a_i$ を試し、それが簡約基なら全体の $s$ も試す。これは再帰的な引数ループが各引数の後に行う処理と正確に同じである。再帰版はこのループの間、局所変数 `root_failed` を保持する（$s$ への最初の試行が失敗した場合、最後の引数の後では $s$ を再試行しない）。引数 $i$ の祖先エントリはこれを $(s, \\mathsf{A}_i, \\mathit{failed})$ として保持し、引数 $i + 1$ のエントリに渡す。そのためノードまたは接頭部での各試行は、再帰定義と同じ順序で同じ結果になる。"
+
+#: manual/design/eval.md:225
+msgid "Steps, paths and traces are therefore unchanged; the host stack depth is constant, and the heap holds one entry per level of the current position."
+msgstr "したがってステップ、パス、トレースは変わらない。ホストスタックの深さは一定であり、ヒープには現在位置の各階層につき 1 エントリが保持される。"
+
+#: manual/design/eval.md:228
 msgid "`FullNormal` as a separate name"
 msgstr "独立した名前としての `FullNormal`"
 
-#: manual/design/eval.md:197
+#: manual/design/eval.md:230
 msgid "`FullNormal` maps to the same traversal as `NormalOrder` today. The distinction is one of intent: `NormalOrder` promises the order of steps (leftmost-outermost), `FullNormal` only promises a full normal form. Keeping two names lets a faster full normalizer replace `FullNormal` later without changing the meaning of `NormalOrder`."
 msgstr "現在 `FullNormal` は `NormalOrder` と同じ走査に対応している。違いは意図にある：`NormalOrder` はステップの順序（最左最外）を約束し、`FullNormal` は完全な正規形のみを約束する。二つの名前を保つことで、`NormalOrder` の意味を変えずに、将来 `FullNormal` をより高速な完全正規化器に置き換えられる。"
 
-#: manual/design/eval.md:205
+#: manual/design/eval.md:238
 msgid "`reduce_once` satisfies the one-redex contract of [rewrite](rewrite.md) for every strategy; the reported path of a `WeakHead` step consists of `ApplyHead` frames only."
 msgstr "`reduce_once` はすべての戦略について [rewrite](rewrite.md) の単一簡約基契約を満たす。`WeakHead` のステップで報告される経路は `ApplyHead` フレームのみからなる。"
 
-#: manual/design/eval.md:208
+#: manual/design/eval.md:241
 msgid "With the beta rule, every strategy takes the same steps on a term and on its curried form, in which every `Apply(f, [a1, …, an])` with $n > 0$ is nested into unary applications: after each step the two terms are again a term and its curried form, up to alpha-equivalence."
 msgstr "β 規則のもとでは、どの戦略も項とそのカリー化形で同じステップを踏む。カリー化形とは、$n > 0$ であるすべての `Apply(f, [a1, …, an])` を単項の適用の入れ子にしたものである。各ステップの後、二つの項は α 同値を除いて再び項とそのカリー化形になっている。"
 
-#: manual/design/eval.md:212
+#: manual/design/eval.md:245
 msgid "For `NormalOrder`, `FullNormal` and `ApplicativeOrder`, `NoStep` means the rule applies nowhere; for `WeakHead`, nowhere on the head spine."
 msgstr "`NormalOrder`、`FullNormal`、`ApplicativeOrder` では、`NoStep` は規則がどこにも適用できないことを意味する。`WeakHead` では、ヘッドスパイン上のどこにも適用できないことを意味する。"
 
-#: manual/design/eval.md:214
+#: manual/design/eval.md:247
 msgid "With the beta rule, `evaluate(t, _, beta, NormalOrder, k)` returns `NormalForm` for every $t$ that has a beta normal form, provided $k$ is at least the length of the normal-order reduction (normalization theorem)."
 msgstr "β 規則のもとで、β 正規形をもつすべての $t$ に対し、$k$ が正規順序簡約の長さ以上であれば、`evaluate(t, _, beta, NormalOrder, k)` は `NormalForm` を返す（正規化定理）。"
 
-#: manual/design/eval.md:217
+#: manual/design/eval.md:250
 msgid "If two strategies both return `NormalForm` for a confluent rule, the terms are alpha-equivalent (Church–Rosser)."
 msgstr "合流的な規則に対して二つの戦略がともに `NormalForm` を返すならば、それらの項は α同値である（Church–Rosser）。"
 
-#: manual/design/eval.md:220
+#: manual/design/eval.md:252
+msgid "Every strategy uses a constant host stack depth; a redex nested 100 000 levels deep is found and rewritten on every backend (`src/eval/deep_test.mbt`)."
+msgstr "すべての戦略でホストスタックの深さは一定である。どのバックエンドでも 100 000 階層入れ子になった簡約基を見つけて書き換える（`src/eval/deep_test.mbt`）。"
+
+#: manual/design/eval.md:256
 msgid "The library's tests check named and De Bruijn beta steps against each other and every strategy on random terms against their curried forms (`src/utlc/lambda/lambda_test.mbt`), applicative order with rules of fixed arity (`src/eval/eval_test.mbt`), and normal order against the NbE normalizer (`src/utlc/nbe/nbe_test.mbt`)."
 msgstr "ライブラリのテストは、名前付きと De Bruijn の β ステップを互いに照合し、ランダムな項で各戦略をそのカリー化形と照合し（`src/utlc/lambda/lambda_test.mbt`）、アリティが固定された規則で適用順序を検査し（`src/eval/eval_test.mbt`）、正規順序を NbE 正規化器と照合する（`src/utlc/nbe/nbe_test.mbt`）。"
 
-#: manual/design/eval.md:228
+#: manual/design/eval.md:264
 msgid "**Call-by-value evaluation to values.** The usual call-by-value strategy does not reduce under binders and treats abstractions as values. It is expressible as a custom step function, but it is not one of the full or head strategies the packages need, so it is not in the enum."
 msgstr "**値への値呼び評価。** 通常の値呼び戦略は束縛子の下で簡約せず、抽象を値として扱う。これは独自のステップ関数として表現できるが、パッケージが必要とする完全戦略やヘッド戦略の一つではないため、列挙型には含まれない。"
 
-#: manual/design/eval.md:232
+#: manual/design/eval.md:268
 msgid "**Head reduction under binders.** Head reduction (reducing $\\lambda \\bar x.\\,(\\lambda y.\\,b)\\,a\\,\\bar u$ under the outer binders) can be written as a custom step function; the enum keeps to the strategies that are used."
 msgstr "**束縛子の下での頭部簡約。** 頭部簡約（外側の束縛子の下で $\\lambda \\bar x.\\,(\\lambda y.\\,b)\\,a\\,\\bar u$ を簡約すること）は独自のステップ関数として書ける。列挙型は実際に使われる戦略に限っている。"
 
-#: manual/design/eval.md:236
+#: manual/design/eval.md:272
 msgid "**Strategy-specific result types.** All strategies share `NormalizationResult`, so callers can switch strategies without changing their code."
 msgstr "**戦略固有の結果型。** すべての戦略は `NormalizationResult` を共有するので、呼び出し側はコードを変えずに戦略を切り替えられる。"
 
-#: manual/design/eval.md:242
+#: manual/design/eval.md:278
 msgid "Strategies only choose positions; they never rename, share or memoize. Repeated subterms are reduced separately."
 msgstr "戦略は位置を選ぶだけであり、名前替え・共有・メモ化は一切行わない。繰り返し現れる部分項は別々に簡約される。"
 
-#: manual/design/eval.md:244
+#: manual/design/eval.md:280
 msgid "No call-by-value, call-by-need or head strategy is provided as a named case."
 msgstr "値呼び、必要呼び、頭部戦略は名前付きのケースとしては提供されない。"
 
-#: manual/design/eval.md:246
+#: manual/design/eval.md:282
 msgid "Termination is bounded by `max_steps`, not decided."
 msgstr "停止性は `max_steps` によって制限されるのであって、判定されるわけではない。"
 
-#: manual/design/eval.md:247
+#: manual/design/eval.md:283
 msgid "`eval` works on `Term[T]` only; downstream ASTs use `@rewrite.generic_normalize`, which is top-down."
 msgstr "`eval` は `Term[T]` のみを扱う。下流の AST はトップダウンの `@rewrite.generic_normalize` を使う。"
 
@@ -2563,63 +2615,101 @@ msgstr "ビューを介した汎用走査"
 msgid "`generic_top_down_once` is `top_down_once` with `project` for pattern matching and the trait constructors for rebuilding. It needs no knowledge of the downstream AST beyond the [view laws](adapter.md), so a polynomial or numeric-expression AST gets positions and traces for free. Only the top-down strategy is provided generically, because it is the one downstream simplifiers use and because it makes the normal-form lemma available."
 msgstr "`generic_top_down_once` は、パターンマッチに `project` を、再構築にトレイトのコンストラクタを用いる `top_down_once` である。[ビュー法則](adapter.md) 以外に下流 AST についての知識を必要としないので、多項式や数値式の AST は位置とトレースを無償で得られる。汎用に提供されるのはトップダウン戦略のみである。下流の簡約器が使うのはこれであり、また正規形補題が利用可能になるからである。"
 
+#: manual/design/rewrite.md:184
+#: manual/design/stlc.md:386
+#: manual/design/utlc/nbe.md:117
+msgid "A bounded host stack"
+msgstr "有界なホストスタック"
+
 #: manual/design/rewrite.md:186
+msgid "**Problem.** Written as host functions, the traversals recurse once per level: a redex nested $d$ levels deep keeps $d$ host frames alive while it is searched, and $d$ more while `after` and `path` are rebuilt. The js, wasm and wasm-gc stacks overflow at a depth of a few thousand, so a long chain of applications or binders, which a symbolic AST easily produces, crashed the traversal (issue #13)."
+msgstr "**問題。** ホスト関数として書かれた走査は各階層で再帰する。$d$ 階層入れ子になった簡約基の探索中にホストフレームが $d$ 個保持され、さらに `after` と `path` の再構築中にも $d$ 個保持される。js、wasm、wasm-gc のスタックは数千階層であふれるため、記号的 AST で容易に生じる長い適用列や束縛子列で走査がクラッシュしていた（issue #13）。"
+
+#: manual/design/rewrite.md:193
+msgid "**Choice.** The search keeps the part of the host stack it needs in a heap array of *ancestors*. An ancestor entry $(s, e)$ is a parent node $s$, with its fields already projected, and the edge $e$ (`BinderBody`, `ApplyHead`, `ApplyArgument(i)`) from $s$ to the child on the way to the current position. A state of the search is a stack $A = (s_1, e_1) \\cdots (s_k, e_k)$, root first, and a control: $\\mathsf{enter}(s)$ (search the subtree $s$), $\\mathsf{leave}$ (the subtree just searched has no redex) or, in post-order only, $\\mathsf{exit}(s)$ (every child of $s$ has been searched; try $s$ itself). Write $\\mathrm{first}(s)$ for the first child of $s$ with its edge (the body of a binder, the head of an application; none for a leaf) and $\\mathrm{next}(s, e)$ for the child after the one at $e$ (argument $0$ after the head, argument $i + 1$ after argument $i$; none after a body or the last argument). Pre-order search runs"
+msgstr "**選択。** 探索で必要となるホストスタックの内容を、*祖先*のヒープ配列に保持する。祖先エントリ $(s, e)$ は、フィールドが投影済みの親ノード $s$ と、現在位置に至る途中で $s$ から子へ進んだ辺 $e$（`BinderBody`、`ApplyHead`、`ApplyArgument(i)`）である。探索状態は根を先頭とするスタック $A = (s_1, e_1) \\cdots (s_k, e_k)$ と制御からなる。制御は $\\mathsf{enter}(s)$（部分木 $s$ を探索する）、$\\mathsf{leave}$（直前に探索した部分木に簡約基がない）、または後行順に限り $\\mathsf{exit}(s)$（$s$ のすべての子を探索済みなので $s$ 自体を試す）である。辺も含めた $s$ の最初の子を $\\mathrm{first}(s)$ と書く（束縛子の本体、適用のヘッド。葉にはない）。また、辺 $e$ の子の次に来る子を $\\mathrm{next}(s, e)$ と書く（ヘッドの次は引数 $0$、引数 $i$ の次は引数 $i + 1$、本体または最後の引数の次はない）。前順探索は次のように実行する。"
+
+#: manual/design/rewrite.md:217
+msgid "from $\\langle \\mathsf{enter}(t) \\mid \\varepsilon \\rangle$, and stops with `NoStep` at $\\langle \\mathsf{leave} \\mid \\varepsilon \\rangle$. Post-order search drops the first rule, so $\\mathsf{enter}(s)$ descends without trying $r$; where a node has no further child it tries the node instead of leaving it: the third rule becomes $\\langle \\mathsf{enter}(s) \\mid A \\rangle \\to \\langle \\mathsf{exit}(s) \\mid A \\rangle$, the last one $\\langle \\mathsf{leave} \\mid A \\cdot (s, e) \\rangle \\to \\langle \\mathsf{exit}(s) \\mid A \\rangle$, and $\\langle \\mathsf{exit}(s) \\mid A \\rangle$ steps to $\\textsf{found}(A, r(s))$ if $s \\in \\operatorname{dom} r$ and to $\\langle \\mathsf{leave} \\mid A \\rangle$ otherwise."
+msgstr "$\\langle \\mathsf{enter}(t) \\mid \\varepsilon \\rangle$ から開始し、$\\langle \\mathsf{leave} \\mid \\varepsilon \\rangle$ で `NoStep` として停止する。後行順探索では最初の規則を除くため、$\\mathsf{enter}(s)$ は $r$ を試さずに降りる。ノードに続く子がない場合は、そのノードを離れる代わりに試す。すなわち、第 3 規則は $\\langle \\mathsf{enter}(s) \\mid A \\rangle \\to \\langle \\mathsf{exit}(s) \\mid A \\rangle$ となり、最後の規則は $\\langle \\mathsf{leave} \\mid A \\cdot (s, e) \\rangle \\to \\langle \\mathsf{exit}(s) \\mid A \\rangle$ となる。$\\langle \\mathsf{exit}(s) \\mid A \\rangle$ は、$s \\in \\operatorname{dom} r$ なら $\\textsf{found}(A, r(s))$ に、そうでなければ $\\langle \\mathsf{leave} \\mid A \\rangle$ に遷移する。"
+
+#: manual/design/rewrite.md:229
+msgid "*Same redex.* Two invariants hold in every state: following the edges $e_1 \\cdots e_k$ of $A$ from the root reaches the node at hand, $t|_{e_1 \\cdots e_k} = s$, and $s_i = t|_{e_1 \\cdots e_{i-1}}$. By induction on $s$, a run from $\\langle \\mathsf{enter}(s) \\mid A \\rangle$ tries $r$ exactly at the positions of $s$, in the order in which the recursive traversal tries them, and either stops at the first attempt that succeeds or reaches $\\langle \\mathsf{leave} \\mid A \\rangle$ with $A$ unchanged; the stack holds exactly the frames that the recursion would keep on the host stack. Both traversals therefore make the same rule calls in the same order (which matters for a rule with side effects) and choose the same position."
+msgstr "*同じ簡約基。* すべての状態で次の 2 つの不変条件が成り立つ。根から $A$ の辺 $e_1 \\cdots e_k$ をたどると現在のノードに至り、$t|_{e_1 \\cdots e_k} = s$ となる。また、$s_i = t|_{e_1 \\cdots e_{i-1}}$ である。$s$ に関する帰納法により、$\\langle \\mathsf{enter}(s) \\mid A \\rangle$ からの実行は、再帰走査と同じ順序で $s$ の各位置に限って $r$ を試す。そして最初に成功した試行で停止するか、$A$ を変えずに $\\langle \\mathsf{leave} \\mid A \\rangle$ に到達する。スタックには再帰がホストスタックに保持するフレームとちょうど同じものが入る。したがって両走査は同じ順序で同じ規則呼び出しを行い（副作用のある規則ではこの点が重要である）、同じ位置を選ぶ。"
+
+#: manual/design/rewrite.md:240
+msgid "*Same result.* At $\\textsf{found}(A, u)$ the position is $p = e_1 \\cdots e_k$ and $u = r(t|_p)$. The rebuild runs from the innermost ancestor outwards, $u_k = u$ and $u_{i-1} = s_i[u_i]_{e_i}$, replacing one child with the same constructor and a copy of the same argument array, and prepends $e_i$ to the path at each step. Since $t[u]_{e \\cdot q} = t\\big[\\,t|_e[u]_q\\,\\big]_e$, the result is $u_0 = t[u]_p$, and the path is $p$: the values the recursion built while returning, built in the same order, with the same sharing of unchanged subterms."
+msgstr "*同じ結果。* $\\textsf{found}(A, u)$ では位置は $p = e_1 \\cdots e_k$、$u = r(t|_p)$ である。再構築は最内側の祖先から外へ進み、$u_k = u$ および $u_{i-1} = s_i[u_i]_{e_i}$ とする。各段階で同じ構築子を保って子を 1 つ置き換え、同じ引数配列のコピーを作り、パスの先頭に $e_i$ を加える。$t[u]_{e \\cdot q} = t\\big[\\,t|_e[u]_q\\,\\big]_e$ なので、結果は $u_0 = t[u]_p$、パスは $p$ となる。これは再帰が戻りながら作る値を同じ順序で組み立てたものであり、変更されない部分項の共有も同じである。"
+
+#: manual/design/rewrite.md:250
+msgid "The host stack depth is constant. The heap holds at most one entry per level of the current position and the rebuild touches only the nodes on the path, so one step costs $O(d)$ besides the rule attempts. The `ReductionPath` built by the rebuild stores its frames redex first in an array that the paths built from one another share; `prepend` pushes onto it when the path is the longest one stored there, so building a path of $d$ frames takes $O(d)$ instead of $O(d^2)$. `generic_top_down_once` and `top_down_once` run the same search, through `project` and the trait constructors."
+msgstr "ホストスタックの深さは一定である。ヒープには現在位置の各階層につき最大 1 エントリを保持し、再構築で触れるのはパス上のノードだけなので、規則の試行を除く 1 ステップのコストは $O(d)$ である。再構築で作る `ReductionPath` は、簡約基側を先頭とするフレームを配列に格納し、互いに組み立てたパス間でその配列を共有する。パスが格納済みの最長パスである場合、`prepend` は配列に追加するため、$d$ フレームのパス構築は $O(d^2)$ ではなく $O(d)$ となる。`generic_top_down_once` と `top_down_once` は `project` とトレイト構築子を介して同じ探索を実行する。"
+
+#: manual/design/rewrite.md:261
 msgid "One step rewrites at most one position, and the reported `path` addresses it in `before` (contract above). Tested by \"structured step records rule and root path\" and the path tests of [debruijn](debruijn.md)."
 msgstr "1 ステップは高々一つの位置を書き換え、報告される `path` は `before` におけるその位置を指す（上記の契約）。\"structured step records rule and root path\" と [debruijn](debruijn.md) の経路テストで検査される。"
 
-#: manual/design/rewrite.md:189
+#: manual/design/rewrite.md:264
 msgid "`NoStep` from `top_down_once`, `bottom_up_once` or `generic_top_down_once` means the term is normal for the rule (normal-form lemma)."
 msgstr "`top_down_once`、`bottom_up_once`、`generic_top_down_once` からの `NoStep` は、項がその規則について正規形であることを意味する（正規形補題）。"
 
-#: manual/design/rewrite.md:191
+#: manual/design/rewrite.md:266
 msgid "`normalize` and `trace` perform at most `max_steps` steps and call `step` at most `max_steps + 1` times; `NormalForm(t, n)` implies `step(t) = NoStep`."
 msgstr "`normalize` と `trace` は高々 `max_steps` ステップを実行し、`step` を高々 `max_steps + 1` 回呼ぶ。`NormalForm(t, n)` ならば `step(t) = NoStep` である。"
 
-#: manual/design/rewrite.md:193
+#: manual/design/rewrite.md:268
 msgid "In a `ReductionTrace` the final term of `result` is the last `after` (or `initial` when there are no steps), and the number of recorded steps is the count in `result`. If the step function reports its input as `before`, as every traversal of this package and of [eval](eval.md) does, then also `steps[0].before = initial` and `steps[i].after = steps[i+1].before`. `trace` records what the step function returns and does not check this."
 msgstr "`ReductionTrace` において、`result` の最終項は最後の `after`（ステップがなければ `initial`）であり、記録されたステップの数は `result` の数に等しい。このパッケージと [eval](eval.md) のすべての走査のようにステップ関数が自分の入力を `before` として報告するなら、さらに `steps[0].before = initial` かつ `steps[i].after = steps[i+1].before` である。`trace` はステップ関数が返したものを記録し、これを検査しない。"
 
-#: manual/design/rewrite.md:199
-msgid "`ReductionPath` and `ReductionTrace` are abstract and their accessors return copies of the stored arrays, so a path or a trace cannot change after it is built and the laws above, once true of it, stay true."
+#: manual/design/rewrite.md:274
+#, fuzzy
+#| msgid "`ReductionPath` and `ReductionTrace` are abstract and their accessors return copies of the stored arrays, so a path or a trace cannot change after it is built and the laws above, once true of it, stay true."
+msgid "`ReductionPath` and `ReductionTrace` are abstract and their accessors return copies of the stored arrays, so a path or a trace cannot change after it is built and the laws above, once true of it, stay true. Paths share their frame array, but a path reads only its own prefix and entries are never changed once pushed."
 msgstr "`ReductionPath` と `ReductionTrace` は抽象型であり、そのアクセサは格納された配列のコピーを返す。したがってパスやトレースは作られた後に変わらず、上の法則が一度成り立てば成り立ち続ける。"
 
-#: manual/design/rewrite.md:203
+#: manual/design/rewrite.md:279
+msgid "The traversals use a constant host stack depth; a redex nested 100 000 levels deep is found and rewritten on every backend (`src/rewrite/deep_test.mbt`)."
+msgstr "走査で使うホストスタックの深さは一定である。どのバックエンドでも 100 000 階層入れ子になった簡約基を見つけて書き換える（`src/rewrite/deep_test.mbt`）。"
+
+#: manual/design/rewrite.md:283
 msgid "**What is not checked.** The package does not decide termination or confluence of a rule. When the rule is confluent, every terminating strategy reaches the same normal form; when it is not, different strategies can legitimately return different normal forms, and the trace shows why."
 msgstr "**検査されないこと。** このパッケージは規則の停止性や合流性を判定しない。規則が合流的であれば、停止するすべての戦略は同じ正規形に到達する。そうでなければ、異なる戦略が正当に異なる正規形を返すことがあり、トレースがその理由を示す。"
 
-#: manual/design/rewrite.md:208
-msgid "Cost: one step costs $O(n)$ rule attempts for a term of size $n$, plus rebuilding the path; normalizing in $k$ steps costs $O(k \\cdot n)$ rule attempts."
+#: manual/design/rewrite.md:288
+#, fuzzy
+#| msgid "Cost: one step costs $O(n)$ rule attempts for a term of size $n$, plus rebuilding the path; normalizing in $k$ steps costs $O(k \\cdot n)$ rule attempts."
+msgid "Cost: one step costs $O(n)$ rule attempts for a term of size $n$, plus rebuilding the path, $O(d)$ for a redex at depth $d$ (and the copies of the argument arrays on it); normalizing in $k$ steps costs $O(k \\cdot n)$ rule attempts."
 msgstr "コスト：サイズ $n$ の項に対して 1 ステップは $O(n)$ 回の規則試行と経路の再構築を要する。$k$ ステップでの正規化は $O(k \\cdot n)$ 回の規則試行を要する。"
 
-#: manual/design/rewrite.md:214
+#: manual/design/rewrite.md:295
 msgid "**In-place or memoized rewriting.** Faster, but loses `before` and the path, and conflicts with immutable terms."
 msgstr "**その場書き換えまたはメモ化された書き換え。** より高速だが、`before` と経路が失われ、不変な項と相容れない。"
 
-#: manual/design/rewrite.md:216
+#: manual/design/rewrite.md:297
 msgid "**A fixed rule language (patterns with variables).** A pattern language would need matching and an occurs check; a rule as a MoonBit function can use pattern matching of the host language and any side condition."
 msgstr "**固定された規則言語（変数付きパターン）。** パターン言語にはマッチングと出現検査が必要になる。MoonBit 関数としての規則は、ホスト言語のパターンマッチと任意の副条件を使える。"
 
-#: manual/design/rewrite.md:219
+#: manual/design/rewrite.md:300
 msgid "**Capture-aware traversal.** The traversal could rename binders before passing an open subterm to a rule. Rules that need binding-aware behaviour use [substitution](substitution.md), which already renames; renaming in the traversal would change binder names behind the rule's back."
 msgstr "**捕獲を考慮した走査。** 走査は、開いた部分項を規則に渡す前に束縛子の名前替えを行うこともできる。束縛を考慮した振る舞いを必要とする規則は、すでに名前替えを行う [代入](substitution.md) を使う。走査の中で名前替えを行うと、規則の知らないところで束縛子名が変わってしまう。"
 
-#: manual/design/rewrite.md:226
+#: manual/design/rewrite.md:307
 msgid "Rules see subterms under binders as open terms; the traversal neither renames nor reports which binders are in scope. A rule must be correct on open terms."
 msgstr "規則は束縛子の下の部分項を開いた項として見る。走査は名前替えを行わず、どの束縛子がスコープ内にあるかも報告しない。規則は開いた項に対して正しくなければならない。"
 
-#: manual/design/rewrite.md:229
+#: manual/design/rewrite.md:310
 msgid "No matching modulo associativity, commutativity or alpha-equivalence; a rule matches with MoonBit patterns on the term as it is."
 msgstr "結合律・可換律・α同値を法としたマッチングはない。規則は項をそのままの形で MoonBit のパターンによりマッチする。"
 
-#: manual/design/rewrite.md:231
+#: manual/design/rewrite.md:312
 msgid "No termination, confluence or critical-pair analysis."
 msgstr "停止性・合流性・危険対の解析は行わない。"
 
-#: manual/design/rewrite.md:232
+#: manual/design/rewrite.md:313
 msgid "Generic versions exist only for the top-down strategy and for normalization without a trace."
 msgstr "汎用版はトップダウン戦略とトレースなしの正規化にのみ存在する。"
 
-#: manual/design/rewrite.md:234
+#: manual/design/rewrite.md:315
 msgid "The bound `max_steps` counts steps, not time or memory."
 msgstr "上限 `max_steps` が数えるのはステップ数であり、時間やメモリではない。"
 
@@ -2832,60 +2922,100 @@ msgid "Readback invents binder names with `fresh_name(\"x\", used)`, where `used
 msgstr "読み戻しは `fresh_name(\"x\", used)` によって束縛子の名前を生成する。ここで `used` は入力項と文脈のすべての名前、クロージャ環境内の名前、そして経路上ですでに導入された名前を含む。したがって生成された名前は同じ経路上で互いに異なり、入力のすべての名前とも異なるので、中立変数が後から導入される束縛子に捕獲されることはない。"
 
 #: manual/design/stlc.md:388
+msgid "**Problem.** Written as host functions, the checker (`infer`, `check`, their spine versions and the loop over the arguments of $\\textsc{App}$), typed evaluation, readback and the derived equality of types recurse once per level of the term, of the type or of the normal form. The js, wasm and wasm-gc stacks overflow at a depth of a few thousand, so deep binders, deep argument positions, long curried spines, nested redexes and types nested in their domains crashed the package (issue #13)."
+msgstr "**問題。** ホスト関数として書くと、型検査器（`infer`、`check`、それらのスパイン版、および $\\textsc{App}$ の引数を処理するループ）、型付き評価、読み戻し、導出された型の等価性は、項、型、または正規形の各階層で再帰する。js、wasm、wasm-gc のスタックは数千階層であふれるため、深い束縛子や引数位置、長いカリー化スパイン、入れ子の簡約基、定義域に入れ子の型でパッケージがクラッシュしていた（issue #13）。"
+
+#: manual/design/stlc.md:396
+msgid "**Choice.** Each of the three algorithms runs as one loop over an explicit continuation, like the untyped evaluator of [utlc/nbe](utlc/nbe.md): a control says what to compute next, and a stack of frames in the heap holds the rest of the callers. A call in tail position replaces the control; a call whose result is still needed first pushes a frame for the rest of its caller. For the checker, the controls and frames are"
+msgstr "**選択。** 3 つのアルゴリズムはそれぞれ、[utlc/nbe](utlc/nbe.md) の型なし評価器と同様、明示的な継続を使う 1 つのループとして実行する。制御が次に計算する内容を示し、ヒープ上のフレームスタックが呼び出し元の残りの処理を保持する。末尾位置の呼び出しは制御を置き換え、結果が後で必要な呼び出しでは、呼び出し元の残りの処理を表すフレームを先にプッシュする。型検査器の制御とフレームは次のとおりである。"
+
+#: manual/design/stlc.md:410
+msgid "(`CheckControl` and `CheckFrame` in the code). $\\textsc{Lam}$ and the flattening of a spine are tail calls. $\\textsc{Sub}$ pushes $\\mathsf{cmp}(\\tau)$ and infers; $\\textsc{App}$ pushes $\\mathsf{head}(\\Gamma, \\vec a)$ and infers $h$, and the inferred type $\\tau_1 \\to \\cdots$ meeting $\\mathsf{head}$ checks $a_1$ against $\\tau_1$ under $\\mathsf{arg}(\\Gamma, \\vec a, 1, \\tau_2 \\to \\cdots)$, and so on; $\\textsc{Redex}$ and $\\textsc{Redex}^{\\Leftarrow}$ rename the parameter apart, push $\\mathsf{redex}(\\Gamma, x', b\\{x \\mapsto x'\\}, \\vec a, m)$ and infer $a_1$; the type $\\sigma$ meeting that frame flattens $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ and continues with $\\mathsf{inf}^{*}$ or $\\mathsf{chk}^{*}$ under $\\Gamma, x'{:}\\sigma$. Typed evaluation has controls for evaluating a term at a type, applying a value and returning a value, and frames for the rest of a spine and for an argument being evaluated; applying a closure to the last argument of a spine pushes nothing, as in [utlc/nbe](utlc/nbe.md). Readback has controls for $\\downarrow^\\tau$, for $\\mathrm{quote}$ and for returning a term, and frames for a binder to wrap around a body, an argument still to read back and a function waiting for its argument. The head type of a redex spine, defined by recursion on the remaining spine and built while returning,"
+msgstr "（コード中の `CheckControl` と `CheckFrame`）。$\\textsc{Lam}$ とスパインの平坦化は末尾呼び出しである。$\\textsc{Sub}$ は $\\mathsf{cmp}(\\tau)$ をプッシュして推論する。$\\textsc{App}$ は $\\mathsf{head}(\\Gamma, \\vec a)$ をプッシュして $h$ を推論し、得られた型 $\\tau_1 \\to \\cdots$ が $\\mathsf{head}$ に合うとき、$\\mathsf{arg}(\\Gamma, \\vec a, 1, \\tau_2 \\to \\cdots)$ の下で $a_1$ を $\\tau_1$ に対して検査し、以降も同様に進める。$\\textsc{Redex}$ と $\\textsc{Redex}^{\\Leftarrow}$ はパラメータを別名にし、$\\mathsf{redex}(\\Gamma, x', b\\{x \\mapsto x'\\}, \\vec a, m)$ をプッシュして $a_1$ を推論する。そのフレームに合う型 $\\sigma$ を得たら、$b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ を平坦化し、$\\Gamma, x'{:}\\sigma$ の下で $\\mathsf{inf}^{*}$ または $\\mathsf{chk}^{*}$ を続ける。型付き評価には、ある型で項を評価する、値を適用する、値を返す制御と、スパインの残りや評価中の引数を表すフレームがある。[utlc/nbe](utlc/nbe.md) と同じく、スパインの最後の引数にクロージャを適用するときは何もプッシュしない。読み戻しには $\\downarrow^\\tau$、$\\mathrm{quote}$、項を返す制御と、本体を包む束縛子、読み戻し待ちの引数、引数を待つ関数を表すフレームがある。残りのスパイン上の再帰で定義され、戻りながら構築する簡約基スパインのヘッド型は、"
+
+#: manual/design/stlc.md:438
+msgid "(where $b$ flattens to $h'\\,\\vec b$), is computed by two loops: the first takes the redex steps down the spine and keeps them in a heap array, the second applies the $\\sigma \\to \\mathrm{drop}(-)$ steps from the innermost outwards."
+msgstr "（ここで $b$ は $h'\\,\\vec b$ に平坦化される）は 2 つのループで計算する。最初のループはスパイン上の簡約基ステップを進み、それらをヒープ配列に保持する。2 つ目のループは $\\sigma \\to \\mathrm{drop}(-)$ のステップを最内側から外側へ適用する。"
+
+#: manual/design/stlc.md:443
+msgid "*Same results, same errors.* Read a frame as the function that the rest of its caller applies to the returned value, and a state as the stack applied to the value of its control. Every transition is one equation of the recursive definition, so it preserves that reading, and a run ends with the value the recursive functions return. The machines make the calls of the definition in its order, and no rule of the definition catches an error: every `Err` propagates unchanged to the top. The result of the recursive functions is therefore the first error met in that order, and the machines stop at the same one; which `TypeError` is reported does not change."
+msgstr "*同じ結果、同じエラー。* フレームは、呼び出し元の残りの処理が返された値に適用する関数とみなす。状態は、その制御の値にスタックを適用したものとみなす。各遷移は再帰定義の 1 つの等式に対応し、その解釈を保つため、実行は再帰関数が返す値で終わる。機械は定義と同じ順序で呼び出しを行い、定義のどの規則もエラーを捕捉しない。すべての `Err` は変更されずに最上位まで伝播する。したがって再帰関数の結果はその順序で最初に現れるエラーであり、機械も同じエラーで停止する。報告される `TypeError` は変わらない。"
+
+#: manual/design/stlc.md:453
+msgid "*Equality of types.* `Ty` has a hand-written `Eq` that compares a heap array of pending pairs, and skips a pair of physically equal types, which is sound because the equality is reflexive."
+msgstr "*型の等価性。* `Ty` には手書きの `Eq` があり、保留中の型ペアをヒープ配列で比較する。物理的に同一な型のペアは、等価性が反射的であるため健全にスキップする。"
+
+#: manual/design/stlc.md:457
+msgid "*Linear time.* Two hidden quadratic costs would dominate at depth $100\\,000$, so they are removed without changing results. Contexts and environments built from one another share an append-only array and read only their own prefix, so entering $n$ binders costs $O(n)$ instead of $O(n^2)$. Readback chooses binder names with $\\operatorname{fresh}(x, U)$, the first of the candidates $c_0 = x$, $c_1 = x\\_1$, $c_2 = x\\_2$, … not in $U$, and eta-expanding at a type nested $n$ levels deep would retry the $n$ names chosen before. It carries, with $U$, a position $p$ such that every $c_q$ with $q < p$ is in $U$, and starts the search there. If $c_{p'}$ is chosen, every $c_q$ with $q \\le p'$ is in $U \\cup \\{c_{p'}\\}$, so $p' + 1$ is a valid position for the extended set; readback only ever adds names to $U$, so the position stays valid along the path, and the name found is the one $\\operatorname{fresh}$ returns."
+msgstr "*線形時間。* 深さ $100\\,000$ では 2 つの隠れた二次コストが支配的になるため、結果を変えずにこれらを取り除く。互いに構築される文脈と環境は追加専用配列を共有し、それぞれ自身の接頭部だけを読むので、$n$ 個の束縛子に入るコストは $O(n^2)$ ではなく $O(n)$ である。読み戻しは $\\operatorname{fresh}(x, U)$ を使って束縛子名を選ぶ。これは候補 $c_0 = x$、$c_1 = x\\_1$、$c_2 = x\\_2$、… のうち $U$ にない最初の名前である。深さ $n$ の型で η 展開すると、それ以前に選んだ $n$ 個の名前を再試行することになる。そこで $U$ とともに、$q < p$ ならすべての $c_q$ が $U$ に含まれるという位置 $p$ を保持し、そこから探索を始める。$c_{p'}$ を選んだ場合、$q \\le p'$ なるすべての $c_q$ は $U \\cup \\{c_{p'}\\}$ に含まれるため、拡張後の集合で $p' + 1$ は有効な位置である。読み戻しでは $U$ に名前を追加するだけなので、この位置は経路上で有効なままであり、見つかる名前は $\\operatorname{fresh}$ が返すものと同じである。"
+
+#: manual/design/stlc.md:473
 msgid "`check` and `infer` terminate; on success, the term is declaratively typable at the reported type (soundness theorem). The regression tests include redexes whose parameter occurs free in a trailing argument."
 msgstr "`check` と `infer` は停止する。成功した場合、その項は報告された型で宣言的に型付け可能である（健全性定理）。回帰テストには、パラメータが後続の引数に自由に現れる簡約基が含まれる。"
 
-#: manual/design/stlc.md:391
+#: manual/design/stlc.md:476
 msgid "`check` accepts every well-typed beta-normal term, and every well-typed term in which each argument given to a lambda head is inferable, including redexes that return a lambda."
 msgstr "`check` は、型の付くすべての β 正規な項と、ラムダの先頭に渡される各引数が推論可能である型の付くすべての項（ラムダを返す簡約基を含む）を受理する。"
 
-#: manual/design/stlc.md:394
+#: manual/design/stlc.md:479
 msgid "`normalize_eta_long` returns `Ok` exactly for terms that `check` accepts; its result is in $\\mathit{Nf}^\\tau$, is $\\beta\\eta$-equal to the input, and is the same (up to $=_\\alpha$) for $\\beta\\eta$-equal inputs."
 msgstr "`normalize_eta_long` はちょうど `check` が受理する項に対して `Ok` を返す。その結果は $\\mathit{Nf}^\\tau$ に属し、入力と $\\beta\\eta$ 等しく、$\\beta\\eta$ 等しい入力に対しては（$=_\\alpha$ を除いて）同じである。"
 
-#: manual/design/stlc.md:398
+#: manual/design/stlc.md:483
 msgid "`normalize_checked` returns `Err` before any reduction for ill-typed input."
 msgstr "型の誤った入力に対して、`normalize_checked` は簡約を行う前に `Err` を返す。"
 
-#: manual/design/stlc.md:399
+#: manual/design/stlc.md:484
 msgid "`NormalizationError` signals a violated internal invariant and is not produced for checked input."
 msgstr "`NormalizationError` は内部不変条件の違反を示し、検査済みの入力に対しては生じない。"
 
-#: manual/design/stlc.md:402
+#: manual/design/stlc.md:486
+msgid "`check`, `infer`, `normalize_checked`, `normalize_eta_long` and `==` on types use a constant host stack depth; terms and types nested 100 000 levels deep are handled on every backend (`src/stlc/deep_test.mbt`)."
+msgstr "`check`、`infer`、`normalize_checked`、`normalize_eta_long`、および型に対する `==` が使うホストスタックの深さは一定である。どのバックエンドでも 100 000 階層入れ子になった項と型を扱う（`src/stlc/deep_test.mbt`）。"
+
+#: manual/design/stlc.md:490
 msgid "The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing, eta expansion of open variables and of constants (including nested arrow types and higher-order arguments), agreement of the two normalizers on small terms, and agreement of `check` and `normalize_eta_long` on redexes with curried heads, mixed flat and nested spines, and bodies that consume the outer arguments. They also cover redexes checked against an arrow ($\\textsc{Redex}^{\\Leftarrow}$): redexes that return a lambda, alone and as arguments, in curried and flat spines, nested ones, the renaming shape above in checking mode, and ill-typed variants that are still rejected."
 msgstr "`src/stlc/stlc_test.mbt` のテストは、型付けと拒否、シャドーイング、開いた変数および定数の η展開（入れ子の矢印型や高階の引数を含む）、小さな項における二つの正規化器の一致、そしてカリー化された先頭、平坦なスパインと入れ子のスパインの混在、外側の引数を消費する本体を持つ簡約基における `check` と `normalize_eta_long` の一致を扱う。さらに、矢印型に対して検査される簡約基（$\\textsc{Redex}^{\\Leftarrow}$）も扱う。ラムダを返す簡約基（単独の場合と引数の場合）、カリー化されたスパインと平坦なスパイン、入れ子の簡約基、検査モードにおける上の名前替えの形、そして依然として拒否される型の誤った変種である。"
 
-#: manual/design/stlc.md:414
+#: manual/design/stlc.md:502
 msgid "**Church-style annotated lambdas.** Annotations would make inference complete but change the shared `Term` syntax; the bidirectional checker keeps terms unannotated."
 msgstr "**Church 流の注釈付きラムダ。** 注釈があれば型推論は完全になるが、共有の `Term` 構文を変えてしまう。双方向型検査器は項を注釈なしのまま保つ。"
 
-#: manual/design/stlc.md:417
+#: manual/design/stlc.md:505
 msgid "**Hindley–Milner inference.** Unification would infer types of unannotated lambdas, but polymorphism and type variables are beyond this calculus."
 msgstr "**Hindley–Milner 型推論。** 単一化により注釈なしラムダの型を推論できるが、多相性と型変数はこの計算の範囲外である。"
 
-#: manual/design/stlc.md:419
+#: manual/design/stlc.md:507
 msgid "**Fuel for typed NbE.** Unnecessary by strong normalization; the untyped [utlc/nbe](utlc/nbe.md) keeps fuel because it needs it."
 msgstr "**型付き NbE の燃料。** 強正規化性により不要である。型なしの [utlc/nbe](utlc/nbe.md) が燃料を保持するのは、それが必要だからである。"
 
-#: manual/design/stlc.md:421
+#: manual/design/stlc.md:509
 msgid "**Eta for the unit type.** Implementable by reifying every neutral of type $\\mathsf{Unit}$ as $()$; not done, so that neutrals stay observable. The decided equality is $\\beta\\eta$ for arrows only."
 msgstr "**unit 型の η。** $\\mathsf{Unit}$ 型のすべての中立項を $()$ として具象化すれば実装できるが、中立項を観測可能に保つため行っていない。決定される等価性は矢印型に対する $\\beta\\eta$ のみである。"
 
-#: manual/design/stlc.md:427
+#: manual/design/stlc.md:515
 msgid "Types are $b$, $\\mathsf{Unit}$ and arrows: no products, sums, polymorphism or dependent types."
 msgstr "型は $b$、$\\mathsf{Unit}$、矢印型のみである。直積、直和、多相性、依存型はない。"
 
-#: manual/design/stlc.md:429
+#: manual/design/stlc.md:517
 msgid "No unit eta; normal forms are eta-long for arrow types only."
 msgstr "unit 型の η はない。正規形が η 長であるのは矢印型についてのみである。"
 
-#: manual/design/stlc.md:430
+#: manual/design/stlc.md:518
 msgid "Constants are opaque: there are no delta rules."
 msgstr "定数は不透明である。δ 規則はない。"
 
-#: manual/design/stlc.md:431
+#: manual/design/stlc.md:519
 msgid "`normalize_checked` is bounded by a step limit because it reuses the untyped reducer."
 msgstr "`normalize_checked` は型なし簡約器を再利用するため、ステップ数の上限に縛られる。"
+
+#: manual/design/stlc.md:521
+msgid "`normalize_eta_long` is stack-safe but takes time quadratic in the depth of redexes and applications nested in argument positions: typed evaluation checks each argument again before evaluating it, and infers the first argument of each redex again to type its head."
+msgstr "`normalize_eta_long` はスタックセーフだが、引数位置に入れ子になった簡約基と適用の深さに対して二次時間がかかる。型付き評価は各引数を評価する前に再度検査し、各簡約基の最初の引数も再度推論してヘッドの型を決めるためである。"
+
+#: manual/design/stlc.md:525
+msgid "`Debug` of a deep term, type or error recurses and can overflow the stack."
+msgstr "深い項、型、またはエラーに対する `Debug` は再帰し、スタックを使い切ることがある。"
 
 #: manual/design/substitution.md:1
 msgid "substitution design"
@@ -3657,38 +3787,57 @@ msgid "`eta_rule` matches `Bind(x, Apply(f, [Variable(x)]))`. On the curried rea
 msgstr "`eta_rule` は `Bind(x, Apply(f, [Variable(x)]))` にマッチする。カリー化された読みでは $\\lambda x.\\,f\\,a\\,x$（`Apply(f, [a, x])` と書かれる）も η 簡約基であるが、それを認識するにはスパインを分割して `Apply(f, [a])` を再構築する必要がある。規則は構文的なままにしてある。n 項のスパインを作りつつ η を必要とする呼び出し側は、まずスパインを単項形式に正規化すればよい。"
 
 #: manual/design/utlc/lambda.md:115
+msgid "Rules with a bounded host stack"
+msgstr "ホストスタックを一定量に保つ規則"
+
+#: manual/design/utlc/lambda.md:117
+msgid ""
+"**Problem.** The rules look below the root of a term in two places: through empty applications `Apply(h, [])` around a head, a body or an argument, and into the function $f$ of an eta redex $\\lambda x.\\,f\\,x$ to decide $x \\n"
+"otin \\mathrm{FV}(f)$. A deep $f$, or a long chain of empty applications, must not overflow the js, wasm and wasm-gc stacks (issue #13)."
+msgstr "**問題。** 規則は項の根より下を 2 箇所で調べる。1 つはヘッド、本体、または引数の周囲にある空の適用 `Apply(h, [])` をたどる箇所であり、もう 1 つは η 簡約基 $f$ の関数部に入り、$x \\n"
+"otin \\mathrm{FV}(f)$ かを判定する箇所である。深い $f$ や長く連なる空の適用で js、wasm、wasm-gc のスタックがあふれてはならない（issue #13）。"
+
+#: manual/design/utlc/lambda.md:123
+msgid "**Choice.** Stripping empty applications is a loop. The side condition of eta is decided by a search instead of computing $\\mathrm{FV}(f)$: a heap array holds the subterms still to be searched, and the search answers \"free\" at the first occurrence of $x$ that is not under a binder of $x$. It computes the same answer, because"
+msgstr "**選択。** 空の適用の除去はループで行う。η の付帯条件は $\\mathrm{FV}(f)$ を計算せず、探索で判定する。探索対象の部分項をヒープ配列に保持し、$x$ を束縛する束縛子の下にない最初の $x$ の出現で「自由」と判定する。これは次の式と同じ結果になる。"
+
+#: manual/design/utlc/lambda.md:138
+msgid "and the search unfolds exactly this disjunction: it pushes the head and the arguments of an application, and the body of a binder unless the binder is $x$. The order in which the disjuncts are tried does not matter, since the search has no other effect; stopping at the first occurrence also avoids building the set. Beta substitutes with the stack-safe [substitution](../substitution.md), and `normalize` runs the stack-safe normal-order search of [eval](../eval.md), so every function of the package uses a constant host stack depth."
+msgstr "探索はこの選言をそのまま展開する。適用のヘッドと引数をプッシュし、束縛子が $x$ でない場合はその本体もプッシュする。探索には他の副作用がないため、選言を試す順序は問わない。また、最初の出現で停止することで集合の構築も避けられる。β 代入にはスタックセーフな [substitution](../substitution.md) を使い、`normalize` はスタックセーフな [eval](../eval.md) の正規順序探索を実行する。そのため、このパッケージのすべての関数が使うホストスタックの深さは一定である。"
+
+#: manual/design/utlc/lambda.md:147
 msgid "Normal order with one combined rule"
 msgstr "1 つの組み合わせ規則による正規順序"
 
-#: manual/design/utlc/lambda.md:117
+#: manual/design/utlc/lambda.md:149
 msgid "`normalize` runs `beta_eta_rule` with the `NormalOrder` strategy, so each step contracts the leftmost-outermost redex of either kind. The combined rule has one name, `\"beta_eta\"`; traces show positions but not which of the two rules fired. Because beta and eta redexes have different root constructors, the priority inside `beta_eta_rule` never changes the outcome of a step."
 msgstr "`normalize` は `beta_eta_rule` を `NormalOrder` 戦略で実行するので、各ステップはどちらかの種類の最左最外の簡約基を縮約する。組み合わせ規則の名前は `\"beta_eta\"` の 1 つだけであり、トレースは位置を示すが、2 つの規則のどちらが発火したかは示さない。β 簡約基と η 簡約基は根のコンストラクタが異なるため、`beta_eta_rule` 内部の優先順位がステップの結果を変えることはない。"
 
-#: manual/design/utlc/lambda.md:123
+#: manual/design/utlc/lambda.md:155
 msgid "Beta then eta versus `normalize`"
 msgstr "β の後に η と `normalize` の比較"
 
-#: manual/design/utlc/lambda.md:125
+#: manual/design/utlc/lambda.md:157
 msgid "**Problem.** A caller may compute the beta normal form $N$ first, with `@eval.evaluate(t, _, beta_rule, NormalOrder, _)`, and then its eta normal form $M$, with `eta_rule`. Does $M$ agree with the result $L$ of `normalize(t, _)`?"
 msgstr "**問題。** 呼び出し側は、まず `@eval.evaluate(t, _, beta_rule, NormalOrder, _)` で β 正規形 $N$ を求め、次に `eta_rule` でその η 正規形 $M$ を求めることができる。$M$ は `normalize(t, _)` の結果 $L$ と一致するか。"
 
-#: manual/design/utlc/lambda.md:130
+#: manual/design/utlc/lambda.md:162
 msgid "**Not literally.** The rules read `Apply(h, [])` as $h$ when they match a redex, but no rule removes the node. On $t = \\lambda z.\\,(\\lambda y.\\,y)\\,(z\\,())$, where $z\\,()$ is `Apply(Variable(z), [])`, beta alone gives $N = \\lambda z.\\,z\\,()$, and $\\lambda z.\\,z\\,()$ is no eta redex because its body is not an application to $z$; so $M = N$. `normalize` instead contracts the eta redex at the root first, reading the argument $z\\,()$ as $z$, and returns $L = \\lambda y.\\,y$. $M$ and $L$ are not alpha-equivalent."
 msgstr "**文字通りには一致しない。** 規則は簡約基を照合するとき `Apply(h, [])` を $h$ と読むが、そのノードを取り除く規則はない。$t = \\lambda z.\\,(\\lambda y.\\,y)\\,(z\\,())$（$z\\,()$ は `Apply(Variable(z), [])`）では、β だけで $N = \\lambda z.\\,z\\,()$ が得られ、$\\lambda z.\\,z\\,()$ は本体が $z$ への適用ではないので η 簡約基ではない。よって $M = N$ である。一方 `normalize` は根の η 簡約基を先に縮約し、引数 $z\\,()$ を $z$ と読んで $L = \\lambda y.\\,y$ を返す。$M$ と $L$ は α同値ではない。"
 
-#: manual/design/utlc/lambda.md:139
+#: manual/design/utlc/lambda.md:171
 msgid "**Agreement modulo empty applications.** Let $\\lfloor \\cdot \\rfloor$ erase every empty application:"
 msgstr "**空の適用を法とした一致。** $\\lfloor \\cdot \\rfloor$ をすべての空の適用を消去する写像とする："
 
-#: manual/design/utlc/lambda.md:152
+#: manual/design/utlc/lambda.md:184
 msgid "Call a term *unary* when each of its `Apply` nodes has at most one argument; terms built with `application` are unary. On a unary term, $\\lfloor \\cdot \\rfloor$ gives an ordinary lambda term with binary application."
 msgstr "項のすべての `Apply` ノードが高々 1 つの引数しか持たないとき、その項を*単項*と呼ぶ。`application` で構築した項は単項である。単項の項に対して $\\lfloor \\cdot \\rfloor$ は二項適用をもつ通常の λ 項を与える。"
 
-#: manual/design/utlc/lambda.md:157
+#: manual/design/utlc/lambda.md:189
 msgid "**Theorem.** Let $t$ be unary. If `@eval.evaluate(t, _, beta_rule, NormalOrder, _)` returns `NormalForm(N, _)`, `@eval.evaluate(N, _, eta_rule, NormalOrder, _)` returns `NormalForm(M, _)`, and `normalize(t, _)` returns `NormalForm(L, _)`, then $\\lfloor M \\rfloor =_\\alpha \\lfloor L \\rfloor$."
 msgstr "**定理。** $t$ を単項とする。`@eval.evaluate(t, _, beta_rule, NormalOrder, _)` が `NormalForm(N, _)` を返し、`@eval.evaluate(N, _, eta_rule, NormalOrder, _)` が `NormalForm(M, _)` を返し、`normalize(t, _)` が `NormalForm(L, _)` を返すならば、$\\lfloor M \\rfloor =_\\alpha \\lfloor L \\rfloor$ である。"
 
-#: manual/design/utlc/lambda.md:163
+#: manual/design/utlc/lambda.md:195
 msgid ""
 "*Proof.* (1) *Unary terms are closed under the rules.* Beta on a unary redex `Apply(h, [a])` returns $b[x := a]$ with no remaining spine; substitution copies the unary term $a$ into the unary term $b$; eta returns a subterm. (2) *Erasure is a step-by-step simulation on unary terms.* Erasure keeps every name, so it commutes with capture-avoiding substitution up to $=_\\alpha$: $\\lfloor b[x := a] \\rfloor =_\\alpha \\lfloor b \\rfloor[x := \\lfloor a \\rfloor]$. `beta_rule` fires on `Apply(h, [a])` exactly when $h$ is a `Bind` wrapped in empty applications, that is, when $\\lfloor \\texttt{Apply}(h, [a]) \\rfloor = (\\lambda x.\\,\\lfloor b \\rfloor)\\,\\lfloor a \\rfloor$ is a beta redex, and the contractum erases to its contractum. `eta_rule` fires on `Bind(x, B)` exactly when $B$ is `Apply(f, [a])` up to empty applications with $a$ a wrapped `Variable(x)` and $x \\n"
 "otin \\mathrm{FV}(f)$, that is, when $\\lambda x.\\,\\lfloor B \\rfloor = \\lambda x.\\,\\lfloor f \\rfloor\\,x$ is an eta redex. No rule fires on an empty application itself, and the redexes of $\\lfloor u \\rfloor$ are the images of the redexes of $u$, where an empty application contributes the redexes of its head. Hence a rule step $u \\to u'$ is a step $\\lfloor u \\rfloor \\to \\lfloor u' \\rfloor$ of the same kind up to $=_\\alpha$, and a term with no redex for the rules erases to a term with no redex. (3) By (2), $\\lfloor t \\rfloor \\to_\\beta^{*} \\lfloor N \\rfloor$ with $\\lfloor N \\rfloor$ beta-normal, then $\\lfloor N \\rfloor \\to_\\eta^{*} \\lfloor M \\rfloor$ with $\\lfloor M \\rfloor$ eta-normal. Eta steps keep a term beta-normal: a new beta redex would need $(\\lambda x.\\,f\\,x)\\,a$ or $\\lambda x.\\,(\\lambda y.\\,b)\\,x$ in the term, both beta redexes already. So $\\lfloor M \\rfloor$ is beta-eta normal and $\\lfloor t \\rfloor \\to_{\\beta\\eta}^{*} \\lfloor M \\rfloor$. Likewise $\\lfloor t \\rfloor \\to_{\\beta\\eta}^{*} \\lfloor L \\rfloor$ with $\\lfloor L \\rfloor$ beta-eta normal. By confluence of $\\to_{\\beta\\eta}$ the two normal forms are alpha-equivalent. $\\square$"
@@ -3696,67 +3845,75 @@ msgstr ""
 "*証明。* (1) *単項の項は規則で閉じている。* 単項の簡約基 `Apply(h, [a])` に対する β は残りのスパインなしに $b[x := a]$ を返す。代入は単項の項 $a$ を単項の項 $b$ に複写する。η は部分項を返す。(2) *消去は単項の項上の 1 ステップごとの模倣である。* 消去はすべての名前を保つので、$=_\\alpha$ を除いて捕獲回避代入と可換である：$\\lfloor b[x := a] \\rfloor =_\\alpha \\lfloor b \\rfloor[x := \\lfloor a \\rfloor]$。`beta_rule` が `Apply(h, [a])` で発火するのは $h$ が空の適用に包まれた `Bind` であるとき、すなわち $\\lfloor \\texttt{Apply}(h, [a]) \\rfloor = (\\lambda x.\\,\\lfloor b \\rfloor)\\,\\lfloor a \\rfloor$ が β 簡約基であるときに限り、その縮約結果を消去したものは後者の縮約結果である。`eta_rule` が `Bind(x, B)` で発火するのは、空の適用を除いて $B$ が `Apply(f, [a])` であり、$a$ が包まれた `Variable(x)` で $x \\n"
 "otin \\mathrm{FV}(f)$ であるとき、すなわち $\\lambda x.\\,\\lfloor B \\rfloor = \\lambda x.\\,\\lfloor f \\rfloor\\,x$ が η 簡約基であるときに限る。空の適用そのものではどの規則も発火せず、$\\lfloor u \\rfloor$ の簡約基はちょうど $u$ の簡約基の像である（空の適用はその頭部の簡約基を与える）。したがって規則による 1 ステップ $u \\to u'$ は、$=_\\alpha$ を除いて同じ種類の 1 ステップ $\\lfloor u \\rfloor \\to \\lfloor u' \\rfloor$ であり、規則の簡約基をもたない項は消去しても簡約基をもたない。(3) (2) により $\\lfloor t \\rfloor \\to_\\beta^{*} \\lfloor N \\rfloor$ で $\\lfloor N \\rfloor$ は β 正規であり、次に $\\lfloor N \\rfloor \\to_\\eta^{*} \\lfloor M \\rfloor$ で $\\lfloor M \\rfloor$ は η 正規である。η ステップは β 正規性を保つ（新しい β 簡約基ができるには項に $(\\lambda x.\\,f\\,x)\\,a$ か $\\lambda x.\\,(\\lambda y.\\,b)\\,x$ が必要だが、どちらもすでに β 簡約基である）。よって $\\lfloor M \\rfloor$ は βη 正規であり $\\lfloor t \\rfloor \\to_{\\beta\\eta}^{*} \\lfloor M \\rfloor$ である。同様に $\\lfloor t \\rfloor \\to_{\\beta\\eta}^{*} \\lfloor L \\rfloor$ で $\\lfloor L \\rfloor$ は βη 正規である。$\\to_{\\beta\\eta}$ の合流性により、二つの正規形は α同値である。$\\square$"
 
-#: manual/design/utlc/lambda.md:194
+#: manual/design/utlc/lambda.md:226
 msgid "On the example, $\\lfloor M \\rfloor = \\lambda z.\\,z$ and $\\lfloor L \\rfloor = \\lambda y.\\,y$. Equivalently, $M$ and $L$ are equal in the least congruence containing $=_\\alpha$ and `Apply(h, [])` $= h$; in particular their nameless, spine-flattened forms are equal."
 msgstr "上の例では $\\lfloor M \\rfloor = \\lambda z.\\,z$、$\\lfloor L \\rfloor = \\lambda y.\\,y$ である。同値な言い方をすれば、$M$ と $L$ は $=_\\alpha$ と `Apply(h, [])` $= h$ を含む最小の合同関係において等しい。特に、それらの名前なしでスパインを平坦化した形は等しい。"
 
-#: manual/design/utlc/lambda.md:199
+#: manual/design/utlc/lambda.md:231
 msgid "The unary hypothesis is needed for eta only. On the curried reading, `Bind(x, Apply(f, [a, Variable(x)]))` is the eta redex $\\lambda x.\\,(f\\,a)\\,x$, which `eta_rule` does not recognise (see \"Eta only on unary applications\" above), so for terms with longer spines step (2) fails and no agreement is claimed."
 msgstr "単項という仮定が必要なのは η についてだけである。カリー化された読み方では `Bind(x, Apply(f, [a, Variable(x)]))` は η 簡約基 $\\lambda x.\\,(f\\,a)\\,x$ だが、`eta_rule` はこれを認識しない（上の「η は単項適用のみ」を参照）。したがってより長いスパインをもつ項では (2) が成り立たず、一致は主張しない。"
 
-#: manual/design/utlc/lambda.md:207
-msgid "`beta_rule(t) = Some(u)` implies $t \\to_\\beta u$ at the root; `eta_rule` likewise for $\\eta$, with the side condition checked by `@syntax.free_variables`."
+#: manual/design/utlc/lambda.md:239
+#, fuzzy
+#| msgid "`beta_rule(t) = Some(u)` implies $t \\to_\\beta u$ at the root; `eta_rule` likewise for $\\eta$, with the side condition checked by `@syntax.free_variables`."
+msgid ""
+"`beta_rule(t) = Some(u)` implies $t \\to_\\beta u$ at the root; `eta_rule` likewise for $\\eta$, with the side condition $x \\n"
+"otin \\mathrm{FV}(f)$ decided by a search for a free occurrence (above)."
 msgstr "`beta_rule(t) = Some(u)` は根において $t \\to_\\beta u$ であることを含意する。`eta_rule` も $\\eta$ について同様であり、付帯条件は `@syntax.free_variables` によって検査される。"
 
-#: manual/design/utlc/lambda.md:210
+#: manual/design/utlc/lambda.md:242
 msgid "`normalize` returns `NormalForm(u, n)` only for $u$ with no (unary) $\\beta$ or $\\eta$ redex anywhere ([rewrite](../rewrite.md) normal-form lemma)."
 msgstr "`normalize` が `NormalForm(u, n)` を返すのは、どこにも（単項の）$\\beta$ 簡約基も $\\eta$ 簡約基もない $u$ に対してのみである（[rewrite](../rewrite.md) の正規形補題）。"
 
-#: manual/design/utlc/lambda.md:213
+#: manual/design/utlc/lambda.md:245
 msgid "By confluence of beta, the beta normal forms computed by `@eval.evaluate` with `beta_rule`, by [debruijn](../debruijn.md) and by [utlc/nbe](nbe.md) coincide after conversion and spine flattening. The test \"named and debruijn beta reduction agree modulo alpha\" checks a step that requires renaming."
 msgstr "β の合流性により、`beta_rule` を指定した `@eval.evaluate`、[debruijn](../debruijn.md)、[utlc/nbe](nbe.md) が計算する β 正規形は、変換とスパインの平坦化の後に一致する。テスト \"named and debruijn beta reduction agree modulo alpha\" はリネームを必要とするステップを検査する。"
 
-#: manual/design/utlc/lambda.md:218
+#: manual/design/utlc/lambda.md:250
 msgid "Every strategy of [eval](../eval.md) with `beta_rule` takes the same steps on a term and on its curried form, up to alpha-equivalence; the test \"every strategy takes the same steps on a term and its curried form\" checks this on 1000 random terms."
 msgstr "[eval](../eval.md) のどの戦略も `beta_rule` のもとで、項とそのカリー化形で α 同値を除いて同じステップを踏む。テスト \"every strategy takes the same steps on a term and its curried form\" が 1000 個のランダムな項でこれを検査する。"
 
-#: manual/design/utlc/lambda.md:222
+#: manual/design/utlc/lambda.md:254
 msgid "`normalize` returns a beta-eta normal form, which is in general *not* the beta normal form of the other normalizers: $\\lambda x.\\,f\\,x$ is beta-normal and normalizes to $f$ here. The two are related by eta alone, but only modulo empty applications and for unary spines, as the theorem in \"Beta then eta versus `normalize`\" above states."
 msgstr "`normalize` は βη 正規形を返し、これは一般に他の正規化器の β 正規形では*ない*：$\\lambda x.\\,f\\,x$ は β 正規であり、ここでは $f$ に正規化される。両者は η だけで関係づけられるが、それは空の適用を法とし、かつ単項スパインに対してのみであり、上の「β の後に η と `normalize` の比較」の定理がそれを述べている。"
 
-#: manual/design/utlc/lambda.md:227
+#: manual/design/utlc/lambda.md:259
+msgid "The rules and `normalize` use a constant host stack depth; terms nested 100 000 levels deep are handled on every backend (`src/utlc/lambda/deep_test.mbt`)."
+msgstr "規則と `normalize` が使うホストスタックの深さは一定である。どのバックエンドでも 100 000 階層入れ子になった項を扱える（`src/utlc/lambda/deep_test.mbt`）。"
+
+#: manual/design/utlc/lambda.md:262
 msgid "With beta and eta combined, normal order is used as the strategy; that it reaches the $\\beta\\eta$ normal form of every normalizing term rests on the normalization theorem for beta and eta postponement, and is checked by tests rather than proved here."
 msgstr "β と η を組み合わせる場合、戦略として正規順序を用いる。それが正規化可能なすべての項の $\\beta\\eta$ 正規形に到達することは、β の正規化定理と η の後回しに基づいており、ここでは証明せずテストで検査している。"
 
-#: manual/design/utlc/lambda.md:234
+#: manual/design/utlc/lambda.md:269
 msgid "**A separate lambda AST.** Using `Term[T]` keeps the calculus inside the shared substrate: the same analyses, substitution and traces apply, and domain values ride along unchanged."
 msgstr "**独立したλ AST。** `Term[T]` を使うことで計算体系を共有基盤の内側に保てる：同じ解析、代入、トレースが適用でき、ドメインの値もそのまま運ばれる。"
 
-#: manual/design/utlc/lambda.md:237
+#: manual/design/utlc/lambda.md:272
 msgid "**Separate beta and eta normalizers.** Offered indirectly: pass `beta_rule` or `eta_rule` to [`@eval.evaluate`](../../api/eval.md) with any strategy."
 msgstr "**β と η の別々の正規化器。** 間接的に提供されている：`beta_rule` または `eta_rule` を任意の戦略とともに [`@eval.evaluate`](../../api/eval.md) に渡せばよい。"
 
-#: manual/design/utlc/lambda.md:240
+#: manual/design/utlc/lambda.md:275
 msgid "**Iterated substitution in beta.** Beta substitutes once; the argument is not re-substituted, as the calculus requires."
 msgstr "**β における反復代入。** β は一度だけ代入する。計算体系が要求するとおり、引数が再び代入されることはない。"
 
-#: manual/design/utlc/lambda.md:245
+#: manual/design/utlc/lambda.md:280
 msgid "No types: ill-behaved terms such as $\\Omega$ are accepted and end with `StepLimitReached`."
 msgstr "型はない：$\\Omega$ のような振る舞いの悪い項も受け付けられ、`StepLimitReached` で終わる。"
 
-#: manual/design/utlc/lambda.md:247
+#: manual/design/utlc/lambda.md:282
 msgid "No sharing: a duplicated argument is reduced once per copy. Use [utlc/nbe](nbe.md) for efficient normalization."
 msgstr "共有はない：複製された引数はコピーごとに 1 回ずつ簡約される。効率的な正規化には [utlc/nbe](nbe.md) を使うこと。"
 
-#: manual/design/utlc/lambda.md:249
+#: manual/design/utlc/lambda.md:284
 msgid "Eta recognises unary applications only."
 msgstr "η は単項適用のみを認識する。"
 
-#: manual/design/utlc/lambda.md:250
+#: manual/design/utlc/lambda.md:285
 msgid "An empty application `Apply(h, [])` is read as $h$ when a redex is matched, but it is not removed from the term (see the [eval design](../eval.md)). Results of different reduction orders, such as beta then eta and `normalize`, therefore agree only after empty applications are erased."
 msgstr "空の適用 `Apply(h, [])` は簡約基の照合で $h$ と読まれるが、項からは取り除かれない（[eval の設計](../eval.md)を参照）。したがって、β の後に η と `normalize` のような異なる簡約順序の結果は、空の適用を消去した後でしか一致しない。"
 
-#: manual/design/utlc/lambda.md:255
+#: manual/design/utlc/lambda.md:290
 msgid "Constants (`Value`) have no reduction rules here; add domain rules with [rewrite](../rewrite.md) or [eval](../eval.md)."
 msgstr "定数（`Value`）にはここでは簡約規則がない。ドメイン規則は [rewrite](../rewrite.md) または [eval](../eval.md) で追加すること。"
 
@@ -3831,10 +3988,6 @@ msgstr "**選択。** ノードの評価 1 回、`force` 1 回、読み戻しの
 #: manual/design/utlc/nbe.md:104
 msgid "**Determinism in the budget.** The computation does not inspect the fuel except to stop, so a run with fuel $f$ that ends with a normal form after consuming $c \\le f$ units performs exactly the same computation with any fuel $f' \\ge c$. The fuel is only tested by `fuel <= 0`, and every test that passes is followed by spending one unit. If $s$ units have been spent before some test of the original run, that test is followed by at least one more unit, so $s + 1 \\le c$; with fuel $f'$ the test sees $f' - s \\ge c - s \\ge 1$ and passes as well. Every test of the original run therefore passes again, the run takes the same path, and it stops with the same result. With $f' = c - 1$ the last test sees $0$ and fails. Results are therefore reproducible, and `consumed` is the exact minimum budget for that result."
 msgstr "**予算における決定性。** 計算は停止のため以外に燃料を調べないので、燃料 $f$ で $c \\le f$ 単位を消費して正規形で終わる実行は、$f' \\ge c$ の任意の燃料でもまったく同じ計算を行う。燃料は `fuel <= 0` によってのみ検査され、通過した検査の後には必ず 1 単位が消費される。元の実行のある検査の前に $s$ 単位が消費されていれば、その検査の後には少なくとも 1 単位がさらに消費されるので $s + 1 \\le c$ である。燃料 $f'$ ではその検査は $f' - s \\ge c - s \\ge 1$ を見るので、やはり通過する。したがって元の実行のすべての検査が再び通過し、実行は同じ経路をたどり、同じ結果で停止する。$f' = c - 1$ では最後の検査が $0$ を見て失敗する。したがって結果は再現可能であり、`consumed` はその結果に必要な正確な最小予算である。"
-
-#: manual/design/utlc/nbe.md:117
-msgid "A bounded host stack"
-msgstr "有界なホストスタック"
 
 #: manual/design/utlc/nbe.md:119
 msgid "**Problem.** Written as host functions, the equations of evaluation and readback are mutually recursive, and every call whose result is still needed keeps a host stack frame. On $\\Omega$, applying $\\mathsf{clo}(0\\,0, [\\,])$ evaluates $0\\,0$, which applies the closure again, and none of these calls returns before the fuel runs out: the host stack grows with the fuel spent. The js, wasm and wasm-gc stacks are much smaller than a budget of a few million units needs, so such a run overflowed the stack instead of ending with `FuelExhausted`, against the constraint that every phase is bounded. Readback has the same problem on a term with an infinite normal form, such as $(\\lambda.\\,f\\,(0\\,0))\\,(\\lambda.\\,f\\,(0\\,0))$, whose readback $f\\,(f\\,(f \\cdots))$ nests one call of $R_n$ per argument."
@@ -5885,6 +6038,9 @@ msgstr "[utlc/nbe の設計](../../design/utlc/nbe.md)：意味領域と健全�
 #: manual/tutorial/utlc/nbe.md:203
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc チュートリアル](../stlc.md)：型付きの η 長形式 NbE。"
+
+#~ msgid "The functions behave as those of `Signature`, with the same shadowing rule: the type checker extends the context when it enters a lambda, so the nearest binder of a name wins."
+#~ msgstr "関数は `Signature` のものと同じように振る舞い、同じ隠蔽規則に従う：型検査器はラムダに入るときに文脈を拡張するので、名前に対して最も近い束縛子が優先される。"
 
 #~ msgid "`DbTerm::equal` compares two terms structurally."
 #~ msgstr "`DbTerm::equal` は 2 つの項を構造的に比較する。"

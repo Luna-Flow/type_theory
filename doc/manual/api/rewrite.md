@@ -14,6 +14,18 @@ when it applies to a term as a whole and `None` otherwise. The traversal
 functions decide *where* the rule is tried. The theory is in the
 [rewrite design](../design/rewrite.md).
 
+Every function of the package is stack-safe in the nesting depth of the
+term: a traversal keeps the ancestors of the position it searches in a heap
+array and uses a constant amount of host stack, so it finds and rewrites a
+redex nested 100 000 levels deep (in heads, arguments or binder bodies) on
+every backend. The rule is called on one subterm at a time and must itself
+be stack-safe on the subterms it is given; `normalize` and `trace` are loops
+and are stack-safe when the step function is. The generic functions are
+stack-safe when the `BindingSyntax` methods of the downstream type are, that
+is, when they look at one layer of a node. The exception is `Debug`:
+`@debug.to_string`, `Repr` and the messages of `assert_eq` and `inspect`
+recurse and can overflow the stack on a deep term or result.
+
 ## Importing
 
 Add the package, and the packages whose types appear in its signatures, to
@@ -135,11 +147,15 @@ pub fn ReductionFrame::equal(Self, Self) -> Bool
 `ReductionPath` is the sequence of frames from the root to a position.
 
 ```mbti
-type ReductionPath derive(Eq, @debug.Debug)
+type ReductionPath
+pub impl Eq for ReductionPath
+pub impl @debug.Debug for ReductionPath
 ```
 
 The empty path is the root. The type is abstract: a path is built only with
-`root` and `prepend` and cannot be changed afterwards.
+`root` and `prepend` and cannot be changed afterwards. `Eq` and `Debug` are
+written by hand; they compare and show the frames from the root, as derived
+implementations on the frame array would.
 
 ### `ReductionPath::root`, `ReductionPath::prepend`, `ReductionPath::length`, `ReductionPath::to_array`
 
@@ -153,8 +169,11 @@ pub fn ReductionPath::to_array(Self) -> Array[ReductionFrame]
 ```
 
 `prepend(frame)` adds a frame at the root end, which is how a traversal
-lifts the path of a step in a child to the parent. `length` is the number of
-frames, 0 for the root. `to_array` returns the frames root first, as a fresh
+lifts the path of a step in a child to the parent. It takes amortized constant
+time when it extends the longest path built so far from the same root path,
+as when a path is built from the redex up, so a path of $n$ frames costs
+$O(n)$; prepending to a path that has already been extended copies its frames.
+`length` is the number of frames, 0 for the root. `to_array` returns the frames root first, as a fresh
 array: changing it does not change the path.
 
 ### `ReductionPath::equal`

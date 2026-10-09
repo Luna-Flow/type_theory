@@ -22,10 +22,37 @@ pub fn[T] application(
 /// An application with no arguments is read as its head, so it never hides a
 /// redex or an eta-reducible argument.
 fn[T] strip_empty_applications(term : @syntax.Term[T]) -> @syntax.Term[T] {
-  match term {
-    Apply(head, []) => strip_empty_applications(head)
-    _ => term
+  for current = term {
+    match current {
+      Apply(head, []) => continue head
+      _ => break current
+    }
   }
+}
+
+///|
+/// Whether `name` occurs free in `term`, that is
+/// `@syntax.free_variables(term).contains(name)`.
+///
+/// The term is searched with a heap array of pending subterms instead of host
+/// recursion (issue #13), and a binder of `name` hides its whole body, so the
+/// search stops at the first free occurrence without building a set.
+fn[T] occurs_free(name : @core.Name, term : @syntax.Term[T]) -> Bool {
+  let pending = [term]
+  while pending.pop() is Some(current) {
+    match current {
+      Value(_) => ()
+      Variable(variable) => if variable == name { return true }
+      Apply(head, arguments) => {
+        pending.push(head)
+        for argument in arguments {
+          pending.push(argument)
+        }
+      }
+      Bind(binder, body) => if binder != name { pending.push(body) }
+    }
+  }
+  false
 }
 
 ///|
@@ -66,8 +93,7 @@ pub fn[T] eta_rule(term : @syntax.Term[T]) -> @syntax.Term[T]? {
         Apply(function, [argument]) =>
           match strip_empty_applications(argument) {
             Variable(name) =>
-              if name == parameter &&
-                !@syntax.free_variables(function).contains(parameter) {
+              if name == parameter && !occurs_free(parameter, function) {
                 Some(function)
               } else {
                 None

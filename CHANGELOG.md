@@ -56,6 +56,13 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
 
 ### Fixed
 
+- **#13:** `rewrite`, `eval`, `utlc/lambda` and `stlc` now keep traversal,
+  type-checking, typed evaluation and readback work in heap arrays instead of
+  recursive host calls. The regression suite covers terms and types nested
+  100,000 levels deep on JS, wasm, wasm-gc and native. This does not make
+  derived `Debug` stack-safe (#28); `normalize_eta_long` also retains the
+  quadratic argument-spine behavior tracked in #27 and documented in the STLC
+  design page.
 - `stlc`: `infer` and `check` typed the trailing arguments `a2 ... an` of a
   redex `(λx. b) a1 a2 ... an` with the parameter `x` in scope, so a free `x`
   in those arguments was captured and the checker could accept a wrong type.

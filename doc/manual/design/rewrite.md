@@ -181,6 +181,81 @@ numeric-expression AST gets positions and traces for free. Only the top-down
 strategy is provided generically, because it is the one downstream
 simplifiers use and because it makes the normal-form lemma available.
 
+### A bounded host stack
+
+**Problem.** Written as host functions, the traversals recurse once per
+level: a redex nested $d$ levels deep keeps $d$ host frames alive while it
+is searched, and $d$ more while `after` and `path` are rebuilt. The js, wasm
+and wasm-gc stacks overflow at a depth of a few thousand, so a long chain of
+applications or binders, which a symbolic AST easily produces, crashed the
+traversal (issue #13).
+
+**Choice.** The search keeps the part of the host stack it needs in a heap
+array of *ancestors*. An ancestor entry $(s, e)$ is a parent node $s$, with
+its fields already projected, and the edge $e$ (`BinderBody`, `ApplyHead`,
+`ApplyArgument(i)`) from $s$ to the child on the way to the current
+position. A state of the search is a stack $A = (s_1, e_1) \cdots (s_k, e_k)$,
+root first, and a control: $\mathsf{enter}(s)$ (search the subtree $s$),
+$\mathsf{leave}$ (the subtree just searched has no redex) or, in post-order
+only, $\mathsf{exit}(s)$ (every child of $s$ has been searched; try $s$
+itself). Write $\mathrm{first}(s)$ for the first child of $s$ with its edge
+(the body of a binder, the head of an application; none for a leaf) and
+$\mathrm{next}(s, e)$ for the child after the one at $e$ (argument $0$ after
+the head, argument $i + 1$ after argument $i$; none after a body or the last
+argument). Pre-order search runs
+
+$$
+\begin{aligned}
+\langle \mathsf{enter}(s) \mid A \rangle &\to \textsf{found}(A, r(s)) && \text{if } s \in \operatorname{dom} r, \\
+\langle \mathsf{enter}(s) \mid A \rangle &\to \langle \mathsf{enter}(c) \mid A \cdot (s, e) \rangle && \text{else if } \mathrm{first}(s) = (c, e), \\
+\langle \mathsf{enter}(s) \mid A \rangle &\to \langle \mathsf{leave} \mid A \rangle && \text{otherwise}, \\
+\langle \mathsf{leave} \mid A \cdot (s, e) \rangle &\to \langle \mathsf{enter}(c') \mid A \cdot (s, e') \rangle && \text{if } \mathrm{next}(s, e) = (c', e'), \\
+\langle \mathsf{leave} \mid A \cdot (s, e) \rangle &\to \langle \mathsf{leave} \mid A \rangle && \text{otherwise},
+\end{aligned}
+$$
+
+from $\langle \mathsf{enter}(t) \mid \varepsilon \rangle$, and stops with
+`NoStep` at $\langle \mathsf{leave} \mid \varepsilon \rangle$. Post-order
+search drops the first rule, so $\mathsf{enter}(s)$ descends without trying
+$r$; where a node has no further child it tries the node instead of
+leaving it: the third rule becomes
+$\langle \mathsf{enter}(s) \mid A \rangle \to \langle \mathsf{exit}(s) \mid A \rangle$,
+the last one
+$\langle \mathsf{leave} \mid A \cdot (s, e) \rangle \to \langle \mathsf{exit}(s) \mid A \rangle$,
+and $\langle \mathsf{exit}(s) \mid A \rangle$ steps to
+$\textsf{found}(A, r(s))$ if $s \in \operatorname{dom} r$ and to
+$\langle \mathsf{leave} \mid A \rangle$ otherwise.
+
+*Same redex.* Two invariants hold in every state: following the edges
+$e_1 \cdots e_k$ of $A$ from the root reaches the node at hand,
+$t|_{e_1 \cdots e_k} = s$, and $s_i = t|_{e_1 \cdots e_{i-1}}$. By induction
+on $s$, a run from $\langle \mathsf{enter}(s) \mid A \rangle$ tries $r$
+exactly at the positions of $s$, in the order in which the recursive
+traversal tries them, and either stops at the first attempt that succeeds or
+reaches $\langle \mathsf{leave} \mid A \rangle$ with $A$ unchanged; the stack
+holds exactly the frames that the recursion would keep on the host stack.
+Both traversals therefore make the same rule calls in the same order (which
+matters for a rule with side effects) and choose the same position.
+
+*Same result.* At $\textsf{found}(A, u)$ the position is
+$p = e_1 \cdots e_k$ and $u = r(t|_p)$. The rebuild runs from the innermost
+ancestor outwards, $u_k = u$ and $u_{i-1} = s_i[u_i]_{e_i}$, replacing one
+child with the same constructor and a copy of the same argument array, and
+prepends $e_i$ to the path at each step. Since
+$t[u]_{e \cdot q} = t\big[\,t|_e[u]_q\,\big]_e$, the result is
+$u_0 = t[u]_p$, and the path is $p$: the values the recursion built while
+returning, built in the same order, with the same sharing of unchanged
+subterms.
+
+The host stack depth is constant. The heap holds at most one entry per level
+of the current position and the rebuild touches only the nodes on the path,
+so one step costs $O(d)$ besides the rule attempts. The `ReductionPath`
+built by the rebuild stores its frames redex first in an array that the
+paths built from one another share; `prepend` pushes onto it when the path
+is the longest one stored there, so building a path of $d$ frames takes
+$O(d)$ instead of $O(d^2)$. `generic_top_down_once` and `top_down_once` run
+the same search, through `project` and the trait constructors.
+
 ## Correctness and invariants
 
 - One step rewrites at most one position, and the reported `path` addresses
@@ -198,7 +273,12 @@ simplifiers use and because it makes the normal-form lemma available.
   `trace` records what the step function returns and does not check this.
 - `ReductionPath` and `ReductionTrace` are abstract and their accessors
   return copies of the stored arrays, so a path or a trace cannot change
-  after it is built and the laws above, once true of it, stay true.
+  after it is built and the laws above, once true of it, stay true. Paths
+  share their frame array, but a path reads only its own prefix and entries
+  are never changed once pushed.
+- The traversals use a constant host stack depth; a redex nested 100 000
+  levels deep is found and rewritten on every backend
+  (`src/rewrite/deep_test.mbt`).
 
 **What is not checked.** The package does not decide termination or
 confluence of a rule. When the rule is confluent, every terminating strategy
@@ -206,7 +286,8 @@ reaches the same normal form; when it is not, different strategies can
 legitimately return different normal forms, and the trace shows why.
 
 Cost: one step costs $O(n)$ rule attempts for a term of size $n$, plus
-rebuilding the path; normalizing in $k$ steps costs $O(k \cdot n)$ rule
+rebuilding the path, $O(d)$ for a redex at depth $d$ (and the copies of the
+argument arrays on it); normalizing in $k$ steps costs $O(k \cdot n)$ rule
 attempts.
 
 ## Alternatives rejected
