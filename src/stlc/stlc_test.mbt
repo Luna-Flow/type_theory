@@ -914,3 +914,30 @@ test "checking mode needs every argument given to a lambda head to be inferable"
     )
   }
 }
+
+///|
+test "signature to_array returns a copy" {
+  let c = @core.Name::new("c")
+  let signature = @stlc.Signature::empty().extend_with(c, base("A"))
+  let entries = signature.to_array()
+  entries.push((c, base("B")))
+  entries[0] = (c, base("C"))
+  assert_eq(signature.length(), 1)
+  assert_true(signature.lookup(c) == Some(base("A")))
+  assert_true(signature.to_array() == [(c, base("A"))])
+  assert_true(signature == @stlc.Signature::empty().extend_with(c, base("A")))
+}
+
+///|
+test "type context to_array returns a copy" {
+  let x = @core.Name::new("x")
+  let context = @stlc.TypeContext::empty()
+    .extend_with(x, base("A"))
+    .extend_with(x, base("B"))
+  let entries = context.to_array()
+  entries.push((x, base("C")))
+  entries[1] = (x, base("D"))
+  assert_eq(context.length(), 2)
+  assert_true(context.lookup(x) == Some(base("B")))
+  assert_true(context.to_array() == [(x, base("A")), (x, base("B"))])
+}
