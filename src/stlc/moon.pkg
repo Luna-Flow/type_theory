@@ -4,5 +4,6 @@ import {
   "Luna-Flow/type_theory/rewrite",
   "Luna-Flow/type_theory/syntax",
   "Luna-Flow/type_theory/utlc/lambda" @utlc_lambda,
+  "moonbitlang/core/debug",
   "moonbitlang/core/immut/hashset",
 }

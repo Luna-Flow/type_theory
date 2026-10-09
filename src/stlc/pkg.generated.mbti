@@ -40,10 +40,11 @@ pub(all) enum Ty {
   Base(@core.Name)
   Unit
   Arrow(Ty, Ty)
-} derive(Eq, @debug.Debug)
+} derive(@debug.Debug)
 pub fn Ty::equal(Self, Self) -> Bool
+pub impl Eq for Ty
 
-type TypeContext derive(Eq, @debug.Debug)
+type TypeContext
 pub fn TypeContext::empty() -> Self
 pub fn TypeContext::equal(Self, Self) -> Bool
 #alias(extend, deprecated)
@@ -51,6 +52,8 @@ pub fn TypeContext::extend_with(Self, @core.Name, Ty) -> Self
 pub fn TypeContext::length(Self) -> Int
 pub fn TypeContext::lookup(Self, @core.Name) -> Ty?
 pub fn TypeContext::to_array(Self) -> Array[(@core.Name, Ty)]
+pub impl Eq for TypeContext
+pub impl @debug.Debug for TypeContext
 
 pub(all) enum TypeError {
   UnboundVariable(@core.Name)
