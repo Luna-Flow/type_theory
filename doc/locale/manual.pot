@@ -2986,10 +2986,10 @@ msgid "`normalize_checked` is bounded by a step limit because it reuses the unty
 msgstr ""
 
 #: manual/design/stlc.md:521
-msgid "`normalize_eta_long` is stack-safe but takes time quadratic in the depth of redexes and applications nested in argument positions: typed evaluation checks each argument again before evaluating it, and infers the first argument of each redex again to type its head."
+msgid "`normalize_eta_long` is stack-safe. Its typed evaluator reuses the complete check performed before evaluation, so it does not check each application argument a second time. Deep redexes can still take quadratic time because `head_type_for_application` infers the first argument of each redex again while reconstructing the head type; issue #27 tracks that remaining cost."
 msgstr ""
 
-#: manual/design/stlc.md:525
+#: manual/design/stlc.md:526
 msgid "`Debug` of a deep term, type or error recurses and can overflow the stack."
 msgstr ""
 

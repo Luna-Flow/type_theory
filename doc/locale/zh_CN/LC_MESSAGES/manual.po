@@ -2998,10 +2998,10 @@ msgid "`normalize_checked` is bounded by a step limit because it reuses the unty
 msgstr "`normalize_checked` 受步数上限约束，因为它复用了无类型归约器。"
 
 #: manual/design/stlc.md:521
-msgid "`normalize_eta_long` is stack-safe but takes time quadratic in the depth of redexes and applications nested in argument positions: typed evaluation checks each argument again before evaluating it, and infers the first argument of each redex again to type its head."
-msgstr "`normalize_eta_long` 是栈安全的，但对于嵌套在参数位置中的可约式和应用，其运行时间与嵌套深度呈二次关系：类型化求值会在求值前再次检查每个参数，并再次推断每个可约式的首个参数，以确定其头部的类型。"
+msgid "`normalize_eta_long` is stack-safe. Its typed evaluator reuses the complete check performed before evaluation, so it does not check each application argument a second time. Deep redexes can still take quadratic time because `head_type_for_application` infers the first argument of each redex again while reconstructing the head type; issue #27 tracks that remaining cost."
+msgstr "`normalize_eta_long` 是栈安全的。其带类型求值器复用求值前完成的完整检查，因此不会再次检查每个应用参数。深层 redex 仍可能耗费二次时间，因为 `head_type_for_application` 在重建头部类型时会再次推断每个 redex 的首参数；issue #27 跟踪这一剩余成本。"
 
-#: manual/design/stlc.md:525
+#: manual/design/stlc.md:526
 msgid "`Debug` of a deep term, type or error recurses and can overflow the stack."
 msgstr "对深层项、类型或错误执行 `Debug` 时会递归，可能导致栈溢出。"
 
@@ -3782,7 +3782,8 @@ msgstr "使用有界宿主栈的规则"
 msgid ""
 "**Problem.** The rules look below the root of a term in two places: through empty applications `Apply(h, [])` around a head, a body or an argument, and into the function $f$ of an eta redex $\\lambda x.\\,f\\,x$ to decide $x \\n"
 "otin \\mathrm{FV}(f)$. A deep $f$, or a long chain of empty applications, must not overflow the js, wasm and wasm-gc stacks (issue #13)."
-msgstr "**问题。** 这些规则会在两处查看项根部以下的结构：一是穿过包裹头部、体或参数的空应用 `Apply(h, [])`，二是查看 eta 可约式 $\\lambda x.\\,f\\,x$ 中的函数 $f$，以判断 $x \\n"
+msgstr ""
+"**问题。** 这些规则会在两处查看项根部以下的结构：一是穿过包裹头部、体或参数的空应用 `Apply(h, [])`，二是查看 eta 可约式 $\\lambda x.\\,f\\,x$ 中的函数 $f$，以判断 $x \\n"
 "otin \\mathrm{FV}(f)$。深层的 $f$ 或长链空应用都不能导致 js、wasm 和 wasm-gc 栈溢出（issue #13）。"
 
 #: manual/design/utlc/lambda.md:123
@@ -3845,7 +3846,8 @@ msgstr "一元假设只对 η 是必要的。在柯里化的读法下，`Bind(x,
 msgid ""
 "`beta_rule(t) = Some(u)` implies $t \\to_\\beta u$ at the root; `eta_rule` likewise for $\\eta$, with the side condition $x \\n"
 "otin \\mathrm{FV}(f)$ decided by a search for a free occurrence (above)."
-msgstr "`beta_rule(t) = Some(u)` 蕴含在根处 $t \\to_\\beta u$；`eta_rule` 对 $\\eta$ 同理，其附加条件 $x \\n"
+msgstr ""
+"`beta_rule(t) = Some(u)` 蕴含在根处 $t \\to_\\beta u$；`eta_rule` 对 $\\eta$ 同理，其附加条件 $x \\n"
 "otin \\mathrm{FV}(f)$ 通过搜索自由出现来判断（见上文）。"
 
 #: manual/design/utlc/lambda.md:242
@@ -6025,6 +6027,9 @@ msgstr "[utlc/nbe 设计](../../design/utlc/nbe.md)：语义域与可靠性论�
 #: manual/tutorial/utlc/nbe.md:203
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc 教程](../stlc.md)：带类型的 η-长形式 NbE。"
+
+#~ msgid "`normalize_eta_long` is stack-safe but takes time quadratic in the depth of redexes and applications nested in argument positions: typed evaluation checks each argument again before evaluating it, and infers the first argument of each redex again to type its head."
+#~ msgstr "`normalize_eta_long` 是栈安全的，但对于嵌套在参数位置中的可约式和应用，其运行时间与嵌套深度呈二次关系：类型化求值会在求值前再次检查每个参数，并再次推断每个可约式的首个参数，以确定其头部的类型。"
 
 #~ msgid "The functions behave as those of `Signature`, with the same shadowing rule: the type checker extends the context when it enters a lambda, so the nearest binder of a name wins."
 #~ msgstr "这些函数的行为与 `Signature` 的相应函数相同，遮蔽规则也相同：类型检查器在进入 lambda 时扩展上下文，因此一个名字由最近的绑定子决定。"

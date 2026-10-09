@@ -3010,10 +3010,10 @@ msgid "`normalize_checked` is bounded by a step limit because it reuses the unty
 msgstr "`normalize_checked` は型なし簡約器を再利用するため、ステップ数の上限に縛られる。"
 
 #: manual/design/stlc.md:521
-msgid "`normalize_eta_long` is stack-safe but takes time quadratic in the depth of redexes and applications nested in argument positions: typed evaluation checks each argument again before evaluating it, and infers the first argument of each redex again to type its head."
-msgstr "`normalize_eta_long` はスタックセーフだが、引数位置に入れ子になった簡約基と適用の深さに対して二次時間がかかる。型付き評価は各引数を評価する前に再度検査し、各簡約基の最初の引数も再度推論してヘッドの型を決めるためである。"
+msgid "`normalize_eta_long` is stack-safe. Its typed evaluator reuses the complete check performed before evaluation, so it does not check each application argument a second time. Deep redexes can still take quadratic time because `head_type_for_application` infers the first argument of each redex again while reconstructing the head type; issue #27 tracks that remaining cost."
+msgstr "`normalize_eta_long` はスタックセーフである。型付き評価器は評価前に完了した全体の検査を再利用するため、各適用引数を再検査しない。深く入れ子になった redex では、`head_type_for_application` が頭部の型を再構築する際に各 redex の最初の引数を再推論するため、依然として二次時間を要する場合がある。この残るコストは issue #27 で追跡する。"
 
-#: manual/design/stlc.md:525
+#: manual/design/stlc.md:526
 msgid "`Debug` of a deep term, type or error recurses and can overflow the stack."
 msgstr "深い項、型、またはエラーに対する `Debug` は再帰し、スタックを使い切ることがある。"
 
@@ -3794,7 +3794,8 @@ msgstr "ホストスタックを一定量に保つ規則"
 msgid ""
 "**Problem.** The rules look below the root of a term in two places: through empty applications `Apply(h, [])` around a head, a body or an argument, and into the function $f$ of an eta redex $\\lambda x.\\,f\\,x$ to decide $x \\n"
 "otin \\mathrm{FV}(f)$. A deep $f$, or a long chain of empty applications, must not overflow the js, wasm and wasm-gc stacks (issue #13)."
-msgstr "**問題。** 規則は項の根より下を 2 箇所で調べる。1 つはヘッド、本体、または引数の周囲にある空の適用 `Apply(h, [])` をたどる箇所であり、もう 1 つは η 簡約基 $f$ の関数部に入り、$x \\n"
+msgstr ""
+"**問題。** 規則は項の根より下を 2 箇所で調べる。1 つはヘッド、本体、または引数の周囲にある空の適用 `Apply(h, [])` をたどる箇所であり、もう 1 つは η 簡約基 $f$ の関数部に入り、$x \\n"
 "otin \\mathrm{FV}(f)$ かを判定する箇所である。深い $f$ や長く連なる空の適用で js、wasm、wasm-gc のスタックがあふれてはならない（issue #13）。"
 
 #: manual/design/utlc/lambda.md:123
@@ -6038,6 +6039,9 @@ msgstr "[utlc/nbe の設計](../../design/utlc/nbe.md)：意味領域と健全�
 #: manual/tutorial/utlc/nbe.md:203
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc チュートリアル](../stlc.md)：型付きの η 長形式 NbE。"
+
+#~ msgid "`normalize_eta_long` is stack-safe but takes time quadratic in the depth of redexes and applications nested in argument positions: typed evaluation checks each argument again before evaluating it, and infers the first argument of each redex again to type its head."
+#~ msgstr "`normalize_eta_long` はスタックセーフだが、引数位置に入れ子になった簡約基と適用の深さに対して二次時間がかかる。型付き評価は各引数を評価する前に再度検査し、各簡約基の最初の引数も再度推論してヘッドの型を決めるためである。"
 
 #~ msgid "The functions behave as those of `Signature`, with the same shadowing rule: the type checker extends the context when it enters a lambda, so the nearest binder of a name wins."
 #~ msgstr "関数は `Signature` のものと同じように振る舞い、同じ隠蔽規則に従う：型検査器はラムダに入るときに文脈を拡張するので、名前に対して最も近い束縛子が優先される。"
