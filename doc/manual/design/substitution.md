@@ -316,14 +316,15 @@ while `apply` freshens it only when an inserted variable would be captured.
 
 ### Cost
 
-At each binder, `apply` computes the free variables of the body and of the
-replacements that are inserted into it, and removes one entry from the
-substitution. For a term of size $n$ and binder depth $d$ this is
-$O(n \cdot d)$ hash-set operations, plus $O(|\sigma|)$ work and the free
-variables of the relevant replacements per binder, plus one traversal of the
-body for each renamed binder. `then` costs one `apply` and one `set` per
-entry of `self`, so $O(k^2)$ entry copies for $k$ entries besides the
-applications.
+`apply` computes the free variables of every replacement once. At each
+binder it removes one entry from the substitution and looks for entries
+whose replacement has the binder free; only if there is one does it compute
+the free variables of the body (see the capture test below). So a term of
+size $n$ costs $O(n \cdot |\sigma|)$ besides the free variables of the
+replacements, and each binder that is a candidate for capture adds one
+traversal of its body, each renamed binder one more. `then` costs one
+`apply` and one `set` per entry of `self`, so $O(k^2)$ entry copies for $k$
+entries besides the applications.
 
 ### Generic substitution
 
@@ -332,6 +333,55 @@ constructor replaced by its `BindingSyntax` counterpart. Reading a node
 through its view gives a named term, so Lemmas 0–3 hold for any
 implementation that satisfies the view laws of the
 [adapter design](adapter.md). On `Term[T]` the two algorithms coincide.
+
+### Traversal with an explicit work stack
+
+**Problem.** The definition of $t\sigma$ is a structural recursion, and run
+as host recursion it overflows the js, wasm and wasm-gc stacks on terms
+nested a few thousand levels deep.
+
+**Choice.** `Substitution::apply` and `GenericSubstitution::apply_once` are
+one private loop, `substitute`, over the view of the generic substitution
+above. It is an instance of the rebuild scheme of the
+[syntax design](syntax.md) with the context $c = \sigma$ and
+
+$$
+\operatorname{binder}(x, t, \sigma) =
+\begin{cases}
+(x,\ t,\ \sigma') & \text{if } x \notin R_{\sigma'}(\mathrm{FV}(t)),\\
+(x',\ t\{x \mapsto x'\},\ \sigma' \setminus x') & \text{otherwise,}
+\end{cases}
+$$
+
+with $\sigma' = \sigma \setminus x$ and $x'$ as in the definition. By the
+rebuild lemma the loop computes exactly $t\sigma$, the same term and the
+same fresh names as the recursion, using a constant amount of host stack;
+the analyses it calls ($\mathrm{FV}$, $\mathrm{names}$ and the checked bound
+renaming) are stack-safe as well. On `Term[T]`, `Value` and the variables
+outside the domain are returned as they are instead of being rebuilt, which
+gives an equal term.
+
+**The capture test.** The condition $x \in R_{\sigma'}(\mathrm{FV}(t))$ is
+decided in a cheaper order. Unfolding $R$,
+
+$$
+x \in R_{\sigma'}(\mathrm{FV}(t))
+\iff \exists z \in \operatorname{dom}\sigma'.\;
+  x \in \mathrm{FV}(\sigma'(z)) \,\wedge\, z \in \mathrm{FV}(t)
+\iff \exists z \in C.\; z \in \mathrm{FV}(t),
+$$
+
+where $C = \{z \in \operatorname{dom}\sigma' \mid x \in \mathrm{FV}(\sigma'(z))\}$
+is the set of *candidates*. The sets $\mathrm{FV}(\sigma(z))$ are computed
+once per call, and since $\sigma' \subseteq \sigma$ as a set of entries they
+serve every binder. If $C = \varnothing$ the condition is false without
+looking at $t$; otherwise $\mathrm{FV}(t)$ is computed once. The boolean is
+the same, so the result is too, but a chain of $n$ binders none of which
+can capture now costs $O(n)$ instead of $O(n^2)$.
+
+The tests in `src/substitution/stack_safety_test.mbt` run substitution,
+freshening at the outermost binder, deep replacements, composition and the
+generic substitution on terms nested 100 000 levels deep, on every backend.
 
 ## Alternatives rejected
 
@@ -355,5 +405,8 @@ implementation that satisfies the view laws of the
   substitutions by applying them in turn.
 - Results are equal to the textbook definition only up to $=_\alpha$; use
   `@syntax.alpha_equal` to compare them.
+- Stack safety is in the nesting depth, not in the cost: a chain of $n$
+  binders every one of which is renamed still costs $O(n^2)$, because each
+  renaming traverses the body below it.
 - Values are never entered, so a `Value` payload that contains variables is
   not substituted into.
