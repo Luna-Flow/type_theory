@@ -37,13 +37,13 @@ msgid "The interface you implement to adapt your own AST is [`@syntax.BindingSyn
 msgstr "独自の AST を適合させるために実装するインターフェースは [`@syntax.BindingSyntax`](syntax.md) であり、それによって得られるアルゴリズムは [`@syntax.generic_free_variables`](syntax.md)、[`@substitution.GenericSubstitution`](substitution.md)、[`@rewrite.generic_top_down_once`](rewrite.md) である。契約は [adapter の設計](../design/adapter.md)で説明されており、[adapter チュートリアル](../tutorial/adapter.md)ではアダプタを段階的に構築する。"
 
 #: manual/api/adapter.md:33
-#: manual/api/core.md:14
+#: manual/api/core.md:16
 #: manual/api/debruijn.md:14
 #: manual/api/eval.md:12
 #: manual/api/rewrite.md:17
 #: manual/api/stlc.md:15
-#: manual/api/substitution.md:15
-#: manual/api/syntax.md:14
+#: manual/api/substitution.md:22
+#: manual/api/syntax.md:23
 #: manual/api/utlc/lambda.md:14
 #: manual/api/utlc/nbe.md:14
 msgid "Importing"
@@ -78,204 +78,204 @@ msgid "core API"
 msgstr "core API"
 
 #: manual/api/core.md:5
-msgid "The `core` package defines the vocabulary that every other package of `type_theory` shares: variable names, fresh-name generation, ordered scopes, telescopes and finite renamings. All values are immutable: every operation that \"changes\" a value returns a new one and leaves its argument untouched. `Context`, `Telescope` and `Renaming` are abstract types, so their storage cannot be reached from outside the package, and every method that returns an array returns a fresh copy. The mathematics behind these definitions is in the [core design](../design/core.md)."
-msgstr "`core` パッケージは、`type_theory` の他のすべてのパッケージが共有する語彙を定義する：変数名、新しい名前の生成、順序付きスコープ、テレスコープ、有限リネーミングである。すべての値は不変であり、値を「変更する」操作はすべて新しい値を返し、引数には手を触れない。`Context`、`Telescope`、`Renaming` は抽象型なので、その格納領域にはパッケージ外から到達できず、配列を返すメソッドはすべて新しいコピーを返す。これらの定義の背後にある数学は [core の設計](../design/core.md)にある。"
+msgid "The `core` package defines the vocabulary that every other package of `type_theory` shares: variable names, fresh-name generation, ordered scopes, telescopes and finite renamings. All values are immutable: every operation that \"changes\" a value returns a new one and leaves its argument untouched. `Context`, `Telescope` and `Renaming` are abstract types, so their storage cannot be reached from outside the package, and every method that returns an array returns a fresh copy. None of these values is nested, so every operation, the derived `==`, `compare`, `hash` and `Debug` included, uses a constant amount of host stack. The mathematics behind these definitions is in the [core design](../design/core.md)."
+msgstr "`core` パッケージは、`type_theory` の他のすべてのパッケージが共有する語彙を定義する：変数名、新しい名前の生成、順序付きスコープ、テレスコープ、有限リネーミングである。すべての値は不変であり、値を「変更する」操作はすべて新しい値を返し、引数には手を触れない。`Context`、`Telescope`、`Renaming` は抽象型なので、その格納領域にはパッケージ外から到達できず、配列を返すメソッドはすべて新しいコピーを返す。これらの値は入れ子になっていないので、派生した `==`、`compare`、`hash`、`Debug` を含むすべての操作は一定量のホストスタックしか使わない。これらの定義の背後にある数学は [core の設計](../design/core.md)にある。"
 
-#: manual/api/core.md:16
+#: manual/api/core.md:18
 #: manual/api/debruijn.md:16
 #: manual/api/eval.md:14
 #: manual/api/rewrite.md:19
 #: manual/api/stlc.md:17
-#: manual/api/substitution.md:17
-#: manual/api/syntax.md:16
+#: manual/api/substitution.md:24
+#: manual/api/syntax.md:25
 #: manual/api/utlc/lambda.md:16
 #: manual/api/utlc/nbe.md:16
 msgid "Add the package, and the packages whose types appear in its signatures, to your `moon.pkg`:"
 msgstr "このパッケージと、そのシグネチャに型が現れるパッケージを `moon.pkg` に追加する："
 
-#: manual/api/core.md:26
+#: manual/api/core.md:28
 msgid "`hashset` is needed for the name sets that `fresh_name`, `Renaming::support` and `Renaming::targets` take or return. The examples on this page refer to every name through its package alias, for example `@core.Name`."
 msgstr "`hashset` は、`fresh_name`、`Renaming::support`、`Renaming::targets` が受け取る、または返す名前の集合のために必要である。このページの例では、すべての名前をパッケージの別名を通して参照する。たとえば `@core.Name` である。"
 
-#: manual/api/core.md:30
+#: manual/api/core.md:32
 msgid "Names"
 msgstr "名前"
 
-#: manual/api/core.md:34
+#: manual/api/core.md:36
 msgid "`Name` is a variable name, compared by its text."
 msgstr "`Name` は変数名であり、そのテキストで比較される。"
 
-#: manual/api/core.md:42
+#: manual/api/core.md:44
 msgid "Two names are the same variable exactly when their texts are equal. A name carries no scope, no unique identifier and no type: binding is decided by the syntax that contains the name. The field `text` is read-only outside the package; use `Name::new` and `Name::text`."
 msgstr "2 つの名前は、テキストが等しいときかつそのときに限り同じ変数である。名前はスコープも一意な識別子も型も持たない：束縛はその名前を含む構文によって決まる。フィールド `text` はパッケージ外からは読み取り専用である。`Name::new` と `Name::text` を使うこと。"
 
-#: manual/api/core.md:49
+#: manual/api/core.md:51
 msgid "`Name::new` makes a name from its text."
 msgstr "`Name::new` はテキストから名前を作る。"
 
-#: manual/api/core.md:55
+#: manual/api/core.md:57
 msgid "Any string is accepted, including the empty string and strings that look like generated names such as `x_1`. The library never parses the text, except that `fresh_name` appends `_<k>` suffixes to it."
 msgstr "空文字列や `x_1` のように生成された名前に見える文字列を含め、任意の文字列を受け付ける。ライブラリはテキストを解析することはなく、`fresh_name` がその後ろに `_<k>` 接尾辞を付けるだけである。"
 
-#: manual/api/core.md:61
+#: manual/api/core.md:63
 msgid "`Name::text` returns the text of a name."
 msgstr "`Name::text` は名前のテキストを返す。"
 
-#: manual/api/core.md:78
+#: manual/api/core.md:80
 msgid "These methods compare and hash names through their text."
 msgstr "これらのメソッドは名前をそのテキストによって比較・ハッシュする。"
 
-#: manual/api/core.md:86
+#: manual/api/core.md:88
 msgid "They are the `Eq`, `Compare` and `Hash` implementations promoted to methods. `compare` is the order of `String` on the texts: shorter texts first, then by UTF-16 code units. It is a total order, so names can be sorted for deterministic output; `hash` lets names live in `HashSet` and `HashMap`. Prefer the operators `==`, `!=`, `<` and friends in new code."
 msgstr "これらはメソッドに昇格された `Eq`、`Compare`、`Hash` の実装である。`compare` はテキスト上の `String` の順序であり、短いテキストが先、次に UTF-16 コード単位で比較する。これは全順序なので、決定的な出力のために名前をソートできる。`hash` により名前を `HashSet` や `HashMap` に格納できる。新しいコードでは演算子 `==`、`!=`、`<` などを優先すること。"
 
-#: manual/api/core.md:104
+#: manual/api/core.md:106
 msgid "`fresh_name` returns a name that does not occur in a set of used names, keeping a hint when possible."
 msgstr "`fresh_name` は使用済みの名前の集合に現れない名前を返し、可能であればヒントを保つ。"
 
-#: manual/api/core.md:111
+#: manual/api/core.md:113
 msgid "`fresh_name(hint, used)` returns `hint` itself when `hint` is not in `used`. Otherwise it tries `hint_1`, `hint_2`, … in order and returns the first candidate that is not in `used`. The result is a function of `hint` and `used` only, so repeated runs produce the same names. It always terminates: at most $|used| + 1$ candidates are tried."
 msgstr "`hint` が `used` に含まれないとき、`fresh_name(hint, used)` は `hint` 自身を返す。そうでなければ `hint_1`、`hint_2`、… を順に試し、`used` に含まれない最初の候補を返す。結果は `hint` と `used` のみの関数なので、繰り返し実行しても同じ名前が得られる。必ず停止する：試す候補は高々 $|used| + 1$ 個である。"
 
-#: manual/api/core.md:126
+#: manual/api/core.md:128
 msgid "Scopes"
 msgstr "スコープ"
 
-#: manual/api/core.md:130
+#: manual/api/core.md:132
 msgid "`Context` is an ordered list of names in scope, innermost last."
 msgstr "`Context` はスコープ内の名前の順序付きリストであり、最も内側のものが最後に来る。"
 
-#: manual/api/core.md:136
+#: manual/api/core.md:138
 msgid "A context may contain the same name more than once; a later entry shadows an earlier one. Two contexts are equal when they list the same names in the same order. The type is abstract: read a context with `length`, `contains` and `to_array`."
 msgstr "文脈は同じ名前を複数回含んでもよく、後の項目が前の項目を隠す。2 つの文脈は、同じ名前を同じ順序で並べているとき等しい。この型は抽象型であり、文脈は `length`、`contains`、`to_array` で読み出す。"
 
-#: manual/api/core.md:143
+#: manual/api/core.md:145
 msgid "These functions build a context with no names, or with the names of an array in order."
 msgstr "これらの関数は、名前を含まない文脈、または配列の名前を順に含む文脈を作る。"
 
-#: manual/api/core.md:151
+#: manual/api/core.md:153
 msgid "`from_array` copies the array, so later changes to the array do not affect the context."
 msgstr "`from_array` は配列をコピーするので、その後の配列への変更は文脈に影響しない。"
 
-#: manual/api/core.md:156
+#: manual/api/core.md:158
 msgid "`Context::extend_with` returns the context with one more name at the inner end."
 msgstr "`Context::extend_with` は内側の端に名前を 1 つ追加した文脈を返す。"
 
-#: manual/api/core.md:163
+#: manual/api/core.md:165
 msgid "The original context is unchanged. The call copies the names, so it costs $O(n)$ for a context of length $n$."
 msgstr "元の文脈は変更されない。この呼び出しは名前をコピーするため、長さ $n$ の文脈に対してコストは $O(n)$ である。"
 
-#: manual/api/core.md:168
+#: manual/api/core.md:170
 msgid "These methods query a context."
 msgstr "これらのメソッドは文脈を問い合わせる。"
 
-#: manual/api/core.md:177
+#: manual/api/core.md:179
 msgid "`contains` is a linear search. `to_array` returns a fresh array, outermost name first; changing it does not change the context. `equal` is the promoted `Eq` implementation."
 msgstr "`contains` は線形探索である。`to_array` は最も外側の名前を先頭とする新しい配列を返し、それを変更しても文脈は変わらない。`equal` は昇格された `Eq` 実装である。"
 
-#: manual/api/core.md:195
+#: manual/api/core.md:197
 msgid "`Telescope[T]` is a sequence of binders, each with an annotation of type `T`, in dependency order."
 msgstr "`Telescope[T]` は依存順に並んだ束縛子の列であり、各束縛子は型 `T` の注釈を持つ。"
 
-#: manual/api/core.md:202
+#: manual/api/core.md:204
 msgid "In a telescope $x_1 : A_1, \\dots, x_n : A_n$ the annotation $A_i$ may refer to $x_1, \\dots, x_{i-1}$. `Telescope` records the order; it does not check what the annotations mention. The type is abstract: read a telescope with `length` and `to_array`."
 msgstr "テレスコープ $x_1 : A_1, \\dots, x_n : A_n$ において、注釈 $A_i$ は $x_1, \\dots, x_{i-1}$ を参照してよい。`Telescope` は順序を記録するだけであり、注釈が何を参照しているかは検査しない。この型は抽象型であり、テレスコープは `length` と `to_array` で読み出す。"
 
-#: manual/api/core.md:209
+#: manual/api/core.md:211
 msgid "These functions build and read a telescope."
 msgstr "これらの関数はテレスコープを構築・読み取りする。"
 
-#: manual/api/core.md:219
+#: manual/api/core.md:221
 msgid "`extend_with` appends one binder and returns a new telescope; `to_array` returns a fresh array of the entries, first binder first, and changing it does not change the telescope."
 msgstr "`extend_with` は束縛子を 1 つ追加して新しいテレスコープを返す。`to_array` は最初の束縛子を先頭とする項目の新しい配列を返し、それを変更してもテレスコープは変わらない。"
 
-#: manual/api/core.md:235
+#: manual/api/core.md:237
 #: manual/design/core.md:66
 msgid "Renamings"
 msgstr "リネーミング"
 
-#: manual/api/core.md:239
+#: manual/api/core.md:241
 msgid "`Renaming` is a finite map from names to names; names outside its domain are left unchanged."
 msgstr "`Renaming` は名前から名前への有限写像であり、定義域外の名前は変更されない。"
 
-#: manual/api/core.md:246
+#: manual/api/core.md:248
 msgid "A renaming $\\rho$ denotes the total function $\\rho(n) = m$ if $(n, m)$ is an entry and $\\rho(n) = n$ otherwise. It is applied simultaneously: the image of a name is never renamed again. A renaming need not be injective. The type is abstract, so the only way to build a renaming is through the functions below, and each name has at most one entry. Equality (`Renaming::equal`) compares the entry lists, so two renamings that denote the same function can still be different values."
 msgstr "リネーミング $\\rho$ は、$(n, m)$ が項目であれば $\\rho(n) = m$、そうでなければ $\\rho(n) = n$ となる全域関数を表す。これは同時に適用される：名前の像が再びリネームされることはない。リネーミングは単射である必要はない。この型は抽象型なので、リネーミングを作る方法は以下の関数だけであり、各名前につき項目は高々 1 つである。等価性（`Renaming::equal`）は項目のリストを比較するため、同じ関数を表す 2 つのリネーミングが異なる値になることもある。"
 
-#: manual/api/core.md:256
+#: manual/api/core.md:258
 msgid "These functions build renamings."
 msgstr "これらの関数はリネーミングを構築する。"
 
-#: manual/api/core.md:264
+#: manual/api/core.md:266
 msgid "`set(from, to_)` adds the entry `from ↦ to_`, replacing an existing image of `from` in place."
 msgstr "`set(from, to_)` は項目 `from ↦ to_` を追加し、`from` の既存の像があればその場で置き換える。"
 
-#: manual/api/core.md:269
+#: manual/api/core.md:271
 msgid "`Renaming::apply` returns the image of a name."
 msgstr "`Renaming::apply` は名前の像を返す。"
 
-#: manual/api/core.md:277
+#: manual/api/core.md:279
 msgid "These methods read the entries of a renaming."
 msgstr "これらのメソッドはリネーミングの項目を読み出す。"
 
-#: manual/api/core.md:284
+#: manual/api/core.md:286
 msgid "`length` is the number of names in the domain. `to_array` returns the entries `(from, to_)` as a fresh array, in the order the names were first added; changing the array does not change the renaming. An entry may map a name to itself, so `length` can count names that `apply` leaves unchanged."
 msgstr "`length` は定義域にある名前の個数である。`to_array` は項目 `(from, to_)` を、名前が最初に追加された順に並べた新しい配列として返す。その配列を変更してもリネーミングは変わらない。項目は名前をそれ自身に写してもよいので、`length` は `apply` が変えない名前も数えることがある。"
 
-#: manual/api/core.md:306
+#: manual/api/core.md:308
 msgid "`Renaming::without` removes a name from the domain."
 msgstr "`Renaming::without` は定義域から名前を 1 つ取り除く。"
 
-#: manual/api/core.md:312
+#: manual/api/core.md:314
 msgid "This is the operation a binder performs: under a binder for `x`, free occurrences of `x` are no longer the `x` of the renaming."
 msgstr "これは束縛子が行う操作である：`x` の束縛子の下では、`x` の自由な出現はもはやリネーミングの `x` ではない。"
 
-#: manual/api/core.md:317
+#: manual/api/core.md:319
 msgid "These methods return the names a renaming mentions."
 msgstr "これらのメソッドはリネーミングが言及する名前を返す。"
 
-#: manual/api/core.md:324
+#: manual/api/core.md:326
 msgid "`support` contains every source and every target of an entry; `targets` contains only the targets. Capture-avoiding operations use them to choose fresh binder names."
 msgstr "`support` は各項目のすべての元とすべての先を含み、`targets` は先のみを含む。捕獲回避の操作はこれらを用いて新しい束縛子名を選ぶ。"
 
-#: manual/api/core.md:330
+#: manual/api/core.md:332
 msgid "`Renaming::then` composes two renamings, applying `self` first."
 msgstr "`Renaming::then` は 2 つのリネーミングを合成し、`self` を先に適用する。"
 
-#: manual/api/core.md:336
+#: manual/api/core.md:338
 msgid "For every name $n$, `r.then(s).apply(n) == s.apply(r.apply(n))`."
 msgstr "任意の名前 $n$ について `r.then(s).apply(n) == s.apply(r.apply(n))` が成り立つ。"
 
-#: manual/api/core.md:356
+#: manual/api/core.md:358
 msgid "`Renaming::equal` compares two renamings entry by entry."
 msgstr "`Renaming::equal` は 2 つのリネーミングを項目ごとに比較する。"
 
-#: manual/api/core.md:362
+#: manual/api/core.md:364
 #: manual/api/eval.md:77
 msgid "It is the promoted `Eq` implementation; use `==` in new code."
 msgstr "これは昇格された `Eq` 実装である。新しいコードでは `==` を使うこと。"
 
-#: manual/api/core.md:364
 #: manual/api/core.md:366
+#: manual/api/core.md:368
 #: manual/api/stlc.md:336
 #: manual/api/stlc.md:338
-#: manual/api/syntax.md:353
-#: manual/api/syntax.md:355
+#: manual/api/syntax.md:367
+#: manual/api/syntax.md:369
 #: manual/index.md:103
 msgid "Deprecated"
 msgstr "非推奨"
 
-#: manual/api/core.md:366
+#: manual/api/core.md:368
 #: manual/api/stlc.md:338
-#: manual/api/syntax.md:355
+#: manual/api/syntax.md:369
 msgid "Replacement"
 msgstr "代替"
 
-#: manual/api/core.md:371
+#: manual/api/core.md:373
 msgid "The fields `Context::names`, `Telescope::entries` and `Renaming::entries` are no longer public; use `to_array`, `length`, `contains` and `apply` instead."
 msgstr "フィールド `Context::names`、`Telescope::entries`、`Renaming::entries` は公開されなくなった。代わりに `to_array`、`length`、`contains`、`apply` を使う。"
 
-#: manual/api/core.md:375
+#: manual/api/core.md:377
 msgid "`extend` became a reserved word in MoonBit 0.10, so the methods were renamed. The old names remain as deprecated aliases. The method forms `not_equal`, `op_lt`, `op_le`, `op_gt`, `op_ge`, `hash_combine` and `to_repr` on these types are hidden and deprecated; use the operators `!=`, `<`, `<=`, `>`, `>=`, the `Hash` trait and `Repr(x)` instead."
 msgstr "`extend` は MoonBit 0.10 で予約語になったため、これらのメソッドは名前が変更された。旧名は非推奨のエイリアスとして残っている。これらの型上のメソッド形式 `not_equal`、`op_lt`、`op_le`、`op_gt`、`op_ge`、`hash_combine`、`to_repr` は非公開かつ非推奨である。代わりに演算子 `!=`、`<`、`<=`、`>`、`>=`、`Hash` トレイト、`Repr(x)` を使うこと。"
 
@@ -295,8 +295,8 @@ msgstr "シフトとインスタンス化の定義、およびその性質の導
 #: manual/api/eval.md:25
 #: manual/api/rewrite.md:29
 #: manual/api/stlc.md:29
-#: manual/api/substitution.md:28
-#: manual/api/syntax.md:26
+#: manual/api/substitution.md:35
+#: manual/api/syntax.md:35
 #: manual/api/utlc/lambda.md:28
 #: manual/api/utlc/nbe.md:27
 msgid "The examples on this page refer to every name through its package alias, for example `@core.Name`."
@@ -339,126 +339,142 @@ msgid "As with `@syntax.Term`, terms are shared, not copied: treat the argument 
 msgstr "`@syntax.Term` と同様に、項はコピーされずに共有される。`Apply` の引数配列は不変として扱い、変更する代わりに新しいノードを作る。"
 
 #: manual/api/debruijn.md:63
-msgid "`DbTerm::equal` compares two terms structurally."
-msgstr "`DbTerm::equal` は 2 つの項を構造的に比較する。"
+msgid "`DbTerm::equal` compares two terms structurally. It implements `Eq`, so it is also the `==` of `DbTerm`."
+msgstr "`DbTerm::equal` は 2 つの項を構造的に比較する。`Eq` を実装しているので、`DbTerm` の `==` でもある。"
 
 #: manual/api/debruijn.md:71
+msgid "The implementation is written by hand rather than derived, so that it handles terms of any nesting depth (see below); it is the same relation a derived `Eq` would compute."
+msgstr "この実装は派生ではなく手書きであり、任意の入れ子の深さの項を扱える（後述）。派生した `Eq` が計算するのと同じ関係である。"
+
+#: manual/api/debruijn.md:75
+msgid "Nesting depth"
+msgstr "入れ子の深さ"
+
+#: manual/api/debruijn.md:77
+msgid "Every function of this package, and `==` on its types, works on terms of any nesting depth on every backend: long application chains in head or argument position, long chains of binders, and any mixture of these. The traversals keep their pending work in arrays on the heap, so the host call stack they use does not grow with the depth of the term, and the js, wasm and wasm-gc backends, whose stacks are small, give the same results as native. The tests run every operation on terms nested to depth 100 000 on all four backends."
+msgstr "このパッケージのすべての関数と、その型に対する `==` は、すべてのバックエンドで任意の入れ子の深さの項を扱える：頭部や引数の位置にある長い適用の連鎖、長い束縛子の連鎖、およびそれらの任意の組み合わせである。走査は保留中の作業をヒープ上の配列に保持するので、使用するホストのコールスタックは項の深さに応じて増えず、スタックの小さい js、wasm、wasm-gc バックエンドでも native と同じ結果になる。テストは、4 つのバックエンドすべてで、入れ子の深さ 100 000 の項に対してすべての操作を実行する。"
+
+#: manual/api/debruijn.md:86
+msgid "The exception is the derived `Debug`: `@debug.to_string`, `inspect` and the failure message of `assert_eq` recurse over the term and can overflow the host stack on a deep term. To check deep terms in tests, compare them with `==` (for example `assert_true(a == b)`), which renders nothing."
+msgstr "例外は派生した `Debug` である：`@debug.to_string`、`inspect`、`assert_eq` の失敗メッセージは項を再帰的にたどるので、深い項ではホストスタックがあふれることがある。テストで深い項を検査するには、何も描画しない `==` で比較する（たとえば `assert_true(a == b)`）。"
+
+#: manual/api/debruijn.md:108
 msgid "`ScopeError` describes an index that does not refer to a binder."
 msgstr "`ScopeError` は束縛子を指さないインデックスを表す。"
 
-#: manual/api/debruijn.md:83
+#: manual/api/debruijn.md:120
 msgid "`UnboundIndex(index, depth)`: `Bound(index)` occurs under only `depth` binders."
 msgstr "`UnboundIndex(index, depth)`：`Bound(index)` が `depth` 個の束縛子の下にしか出現しない。"
 
-#: manual/api/debruijn.md:85
+#: manual/api/debruijn.md:122
 msgid "`NegativeIndex(index)`: a negative index."
 msgstr "`NegativeIndex(index)`：負のインデックス。"
 
-#: manual/api/debruijn.md:86
+#: manual/api/debruijn.md:123
 msgid "`NegativeShift(index, delta, cutoff)`: shifting the free `Bound(index)` by `delta` would move it below `cutoff`, the effective cutoff at the occurrence, where it would be captured by an enclosing binder or become negative."
 msgstr "`NegativeShift(index, delta, cutoff)`：自由な `Bound(index)` を `delta` だけシフトすると、その出現位置での実効カットオフ `cutoff` を下回り、外側の束縛子に捕獲されるか負になる。"
 
-#: manual/api/debruijn.md:90
+#: manual/api/debruijn.md:127
 msgid "`NegativeCutoff(cutoff)`: `shift` was called with a negative `cutoff`."
 msgstr "`NegativeCutoff(cutoff)`：`shift` が負の `cutoff` で呼び出された。"
 
-#: manual/api/debruijn.md:92
+#: manual/api/debruijn.md:129
 msgid "Conversion and validation"
 msgstr "変換と検証"
 
-#: manual/api/debruijn.md:96
+#: manual/api/debruijn.md:133
 msgid "`from_named` converts named syntax to De Bruijn syntax."
 msgstr "`from_named` は名前付き構文を De Bruijn 構文に変換する。"
 
-#: manual/api/debruijn.md:102
+#: manual/api/debruijn.md:139
 msgid "A variable bound by an enclosing `Bind` becomes `Bound(i)`, where `i` counts the binders between the occurrence and its binder (the nearest binder of that name wins). Free variables become `Free`. The result is always well scoped, and alpha-equivalent named terms give equal results."
 msgstr "外側の `Bind` によって束縛された変数は `Bound(i)` になる。ここで `i` は出現とその束縛子の間にある束縛子の数である（同名の場合は最も近い束縛子が優先される）。自由変数は `Free` になる。結果は常にスコープが正しく、α同値な名前付き項からは等しい結果が得られる。"
 
-#: manual/api/debruijn.md:109
+#: manual/api/debruijn.md:146
 msgid "`to_named` converts De Bruijn syntax back to named syntax with deterministic binder names."
 msgstr "`to_named` は De Bruijn 構文を、決定的な束縛子名を用いて名前付き構文に戻す。"
 
-#: manual/api/debruijn.md:116
+#: manual/api/debruijn.md:153
 msgid "Binders are named `x`, `x_1`, `x_2`, …: each one gets the first name of that sequence that is neither a free name of the term nor the name of an enclosing binder. Returns `Err(NegativeIndex)` or `Err(UnboundIndex)` for an ill-scoped term. For a well-scoped `d`, `from_named(to_named(d))` is `d`; for a named `t`, `to_named(from_named(t))` is alpha-equivalent to `t`."
 msgstr "束縛子には `x`、`x_1`、`x_2`、… と名前が付けられる：各束縛子には、この列のうち項の自由な名前でも外側の束縛子の名前でもない最初の名前が割り当てられる。スコープが正しくない項に対しては `Err(NegativeIndex)` または `Err(UnboundIndex)` を返す。スコープが正しい `d` について `from_named(to_named(d))` は `d` であり、名前付きの `t` について `to_named(from_named(t))` は `t` と α同値である。"
 
-#: manual/api/debruijn.md:139
+#: manual/api/debruijn.md:176
 msgid "The binder becomes `x_1` because `x` is a free name of the term."
 msgstr "`x` は項の自由な名前なので、束縛子は `x_1` になる。"
 
-#: manual/api/debruijn.md:143
+#: manual/api/debruijn.md:180
 msgid "`validate` checks that every bound index refers to an enclosing binder."
 msgstr "`validate` はすべての束縛インデックスが外側の束縛子を指していることを検査する。"
 
-#: manual/api/debruijn.md:149
+#: manual/api/debruijn.md:186
 msgid "Returns `Ok(())` for a well-scoped term and otherwise the first error found in pre-order."
 msgstr "スコープが正しい項に対しては `Ok(())` を返し、そうでなければ前順で最初に見つかったエラーを返す。"
 
-#: manual/api/debruijn.md:161
+#: manual/api/debruijn.md:198
 msgid "Index operations"
 msgstr "インデックス操作"
 
-#: manual/api/debruijn.md:165
+#: manual/api/debruijn.md:202
 msgid "`shift` adds `delta` to every index that is free relative to a cutoff."
 msgstr "`shift` はカットオフに関して自由なすべてのインデックスに `delta` を加える。"
 
-#: manual/api/debruijn.md:171
+#: manual/api/debruijn.md:208
 msgid "`shift(t, delta, cutoff)` is the operation $\\uparrow^{delta}_{cutoff}$: under `k` binders, an index `i >= cutoff + k` becomes `i + delta`, and smaller indices are left alone. It requires `cutoff >= 0`: a negative cutoff would treat indices bound inside `t` as free, so `shift` returns `Err(NegativeCutoff(cutoff~))` for it before looking at `t`, even when `t` has no index at all. The shift is defined when no index falls below the cutoff, that is, there is no `i >= cutoff + k` with `i + delta < cutoff + k`. Returns `Err(NegativeShift)` if an index would fall below the cutoff, where it would be captured by an enclosing binder or become negative, and `Err(NegativeIndex)` if the input contains a negative index."
 msgstr "`shift(t, delta, cutoff)` は操作 $\\uparrow^{delta}_{cutoff}$ である：`k` 個の束縛子の下で、インデックス `i >= cutoff + k` は `i + delta` になり、それより小さいインデックスはそのままである。`cutoff >= 0` を要求する：負のカットオフは `t` の内部で束縛されたインデックスを自由とみなしてしまうので、`shift` は `t` を調べる前に `Err(NegativeCutoff(cutoff~))` を返す。`t` にインデックスがまったくなくても同様である。シフトが定義されるのは、どのインデックスもカットオフを下回らないとき、すなわち `i + delta < cutoff + k` となる `i >= cutoff + k` が存在しないときである。インデックスがカットオフを下回る（外側の束縛子に捕獲されるか負になる）場合は `Err(NegativeShift)` を、入力に負のインデックスが含まれる場合は `Err(NegativeIndex)` を返す。"
 
-#: manual/api/debruijn.md:184
+#: manual/api/debruijn.md:221
 msgid "`substitute_bound` replaces a free index by a term."
 msgstr "`substitute_bound` は自由なインデックスを項で置き換える。"
 
-#: manual/api/debruijn.md:190
+#: manual/api/debruijn.md:227
 msgid "`substitute_bound(t, j, s)` is $[j \\mapsto s]\\,t$: under `k` binders, `Bound(j + k)` is replaced by `s` shifted up by `k`, so that the free indices of `s` keep pointing at the same binders. Other indices are unchanged; the binder count of the result is not adjusted. Returns `Err(NegativeIndex)` for a negative `j` or a negative index in `t`. It does not check for unbound indices; use `validate` for that."
 msgstr "`substitute_bound(t, j, s)` は $[j \\mapsto s]\\,t$ である：`k` 個の束縛子の下で、`Bound(j + k)` は `k` だけ上にシフトした `s` で置き換えられ、`s` の自由なインデックスが同じ束縛子を指し続けるようにする。他のインデックスは変わらず、結果の束縛子の数は調整されない。負の `j` や `t` 内の負のインデックスに対しては `Err(NegativeIndex)` を返す。未束縛のインデックスは検査しないので、それには `validate` を使うこと。"
 
-#: manual/api/debruijn.md:199
+#: manual/api/debruijn.md:236
 msgid "`instantiate` opens a binder body with an argument."
 msgstr "`instantiate` は束縛子の本体を引数で開く。"
 
-#: manual/api/debruijn.md:205
+#: manual/api/debruijn.md:242
 msgid "`instantiate(body, arg)` computes $\\uparrow^{-1}_0\\big([0 \\mapsto \\uparrow^{1}_0 arg]\\,body\\big)$, the result of the beta step $(\\lambda.\\,body)\\,arg$. On well-scoped input it never returns an error."
 msgstr "`instantiate(body, arg)` は $\\uparrow^{-1}_0\\big([0 \\mapsto \\uparrow^{1}_0 arg]\\,body\\big)$、すなわち β ステップ $(\\lambda.\\,body)\\,arg$ の結果を計算する。スコープが正しい入力に対してはエラーを返さない。"
 
-#: manual/api/debruijn.md:241
+#: manual/api/debruijn.md:278
 msgid "Reduction"
 msgstr "簡約"
 
-#: manual/api/debruijn.md:245
+#: manual/api/debruijn.md:282
 msgid "`DbStepResult[T]` is the outcome of one De Bruijn reduction attempt."
 msgstr "`DbStepResult[T]` は De Bruijn 簡約を 1 回試みた結果である。"
 
-#: manual/api/debruijn.md:256
+#: manual/api/debruijn.md:293
 msgid "`NoStep` and `Reduced` have the meaning of `@rewrite.StepResult`; the rule name is always `\"beta\"`. `ScopeFailure` reports that the input is ill scoped: `reduce_once` validates the whole term before searching for a redex, and the error is the first one `validate` finds. No step is taken in that case."
 msgstr "`NoStep` と `Reduced` の意味は `@rewrite.StepResult` と同じであり、規則名は常に `\"beta\"` である。`ScopeFailure` は入力のスコープが正しくないことを報告する：`reduce_once` は簡約基を探す前に項全体を検証し、エラーは `validate` が最初に見つけるものである。この場合ステップは一つも行われない。"
 
-#: manual/api/debruijn.md:264
+#: manual/api/debruijn.md:301
 msgid "`reduce_once` performs one leftmost-outermost beta step."
 msgstr "`reduce_once` は最左最外の β ステップを 1 回行う。"
 
-#: manual/api/debruijn.md:270
+#: manual/api/debruijn.md:307
 msgid "A redex is `Apply(Bind(body), [a, ..rest])`; it becomes `instantiate(body, a)`, applied to `rest` if `rest` is not empty. An empty application `Apply(h, [])` is read as `h`, so a head wrapped in empty applications, as in `Apply(Apply(Bind(body), []), [a])`, still forms a redex; `Apply(Bind(body), [])` alone has no argument and is not one. The search order is the root, then the head, then the arguments from left to right, and binder bodies are entered."
 msgstr "簡約基は `Apply(Bind(body), [a, ..rest])` であり、`instantiate(body, a)` になる。`rest` が空でなければそれを `rest` に適用する。空の適用 `Apply(h, [])` は `h` と読まれるので、`Apply(Apply(Bind(body), []), [a])` のように空の適用に包まれた先頭も簡約基をなす。`Apply(Bind(body), [])` だけでは引数がなく、簡約基ではない。探索順序は根、次に先頭、次に引数を左から右へであり、束縛子の本体にも入る。"
 
-#: manual/api/debruijn.md:278
+#: manual/api/debruijn.md:315
 msgid "`reduce_once` validates the whole term first, as `validate` does: an ill-scoped term gives `ScopeFailure` with the first error in pre-order, wherever the bad index is, for example `ScopeFailure(NegativeIndex(index=-1))` for `Bind(Bound(-1))` and `ScopeFailure(UnboundIndex(index=5, depth=1))` for `(λ. 5) 1`. A well-scoped term never gives `ScopeFailure`."
 msgstr "`reduce_once` は `validate` と同じように、まず項全体を検証する：スコープの正しくない項は、悪いインデックスがどこにあっても、前順序で最初のエラーを持つ `ScopeFailure` になる。たとえば `Bind(Bound(-1))` では `ScopeFailure(NegativeIndex(index=-1))`、`(λ. 5) 1` では `ScopeFailure(UnboundIndex(index=5, depth=1))` である。スコープの正しい項が `ScopeFailure` になることはない。"
 
-#: manual/api/debruijn.md:286
+#: manual/api/debruijn.md:323
 msgid "`DbNormalizationResult[T]` is the outcome of bounded De Bruijn normalization."
 msgstr "`DbNormalizationResult[T]` は上限付き De Bruijn 正規化の結果である。"
 
-#: manual/api/debruijn.md:297
+#: manual/api/debruijn.md:334
 msgid "`ScopeFailure` carries the term that was found ill scoped, the error and the number of steps taken before it; `normalize` reports it only for its input, with `steps=0`."
 msgstr "`ScopeFailure` は、スコープが正しくないと判明した項、エラー、それまでに行ったステップ数を持つ。`normalize` はこれを入力についてのみ、`steps=0` で報告する。"
 
-#: manual/api/debruijn.md:303
+#: manual/api/debruijn.md:340
 msgid "`normalize` repeats `reduce_once` until no step applies, a step fails, or a step limit is reached."
 msgstr "`normalize` は、適用できるステップがなくなるか、ステップが失敗するか、ステップ数の上限に達するまで `reduce_once` を繰り返す。"
 
-#: manual/api/debruijn.md:310
+#: manual/api/debruijn.md:347
 msgid "It has the step-count contract of `@rewrite.normalize`: at most `max_steps` steps, and one extra step attempt to classify the final term. It validates the input once: an ill-scoped term gives `ScopeFailure(term, error, steps=0)` without any step. Reducts of a well-scoped term are well scoped (see the [debruijn design](../design/debruijn.md)), so the later steps are not validated again, and the result is `ScopeFailure` exactly when the input is ill scoped."
 msgstr "`@rewrite.normalize` のステップ数の契約を持つ：最大 `max_steps` ステップと、最終項を分類するための追加のステップの試み 1 回である。入力は一度だけ検証される：スコープの正しくない項は、ステップを行わずに `ScopeFailure(term, error, steps=0)` になる。スコープの正しい項の簡約結果はスコープが正しい（[debruijn の設計](../design/debruijn.md)を参照）ので、後のステップは再検証されず、結果が `ScopeFailure` になるのはちょうど入力のスコープが正しくないときである。"
 
@@ -719,7 +735,7 @@ msgid "`trace` runs the same loop as `normalize` and records every step."
 msgstr "`trace` は `normalize` と同じループを実行し、各ステップを記録する。"
 
 #: manual/api/rewrite.md:351
-#: manual/api/syntax.md:246
+#: manual/api/syntax.md:260
 msgid "Binding-aware ASTs"
 msgstr "束縛を扱う AST"
 
@@ -752,7 +768,7 @@ msgid "For a downstream AST see the [adapter tutorial](../tutorial/adapter.md)."
 msgstr "下流の AST については[アダプタのチュートリアル](../tutorial/adapter.md)を参照。"
 
 #: manual/api/rewrite.md:416
-#: manual/api/substitution.md:271
+#: manual/api/substitution.md:278
 msgid "Removed fields"
 msgstr "削除されたフィールド"
 
@@ -898,7 +914,7 @@ msgstr "簡約基の後続の引数は、そのパラメータの下ではなく
 
 #: manual/api/stlc.md:280
 #: manual/api/utlc/lambda.md:123
-#: manual/api/utlc/nbe.md:182
+#: manual/api/utlc/nbe.md:191
 msgid "Normalization"
 msgstr "正規化"
 
@@ -935,106 +951,110 @@ msgid "The `substitution` package replaces free variables by terms without captu
 msgstr "`substitution` パッケージは、変数を捕獲することなく自由変数を項で置き換える。`Substitution[T]` は `@syntax.Term[T]` 上で動作し、`GenericSubstitution[N]` は `@syntax.BindingSyntax` を実装する任意の AST 上で動作する。どちらも有限・同時・不変である：抽象型であり、すべての操作は新しい値を返し、配列を返すメソッドはすべて新しいコピーを返す。"
 
 #: manual/api/substitution.md:12
+msgid "`Substitution::apply`, `Substitution::then` and `GenericSubstitution::apply_once` are stack-safe in the nesting depth of the term and of the replacements: they keep pending work in a heap array and use a constant amount of host stack, so terms nested 100 000 levels deep are handled on every backend. Formatting such a term with `Debug` is not stack-safe; see the [syntax API](syntax.md)."
+msgstr "`Substitution::apply`、`Substitution::then`、`GenericSubstitution::apply_once` は、項と置き換え項の入れ子の深さに対してスタック安全である：保留中の作業をヒープ上の配列に保持し、一定量のホストスタックしか使わないので、100 000 段入れ子になった項もすべてのバックエンドで扱える。そのような項を `Debug` で整形することはスタック安全ではない。[syntax API](syntax.md) を参照。"
+
+#: manual/api/substitution.md:19
 msgid "The definition of capture-avoiding substitution and the proofs of its laws are in the [substitution design](../design/substitution.md)."
 msgstr "捕獲回避代入の定義とその法則の証明は[代入の設計](../design/substitution.md)にある。"
 
-#: manual/api/substitution.md:31
+#: manual/api/substitution.md:38
 msgid "Substitutions on `Term`"
 msgstr "`Term` 上の代入"
 
-#: manual/api/substitution.md:35
+#: manual/api/substitution.md:42
 msgid "`Substitution[T]` is a finite map from names to replacement terms."
 msgstr "`Substitution[T]` は名前から置換項への有限写像である。"
 
-#: manual/api/substitution.md:41
+#: manual/api/substitution.md:48
 msgid "It denotes the map $\\sigma$ with $\\sigma(x) = s$ for an entry $(x, s)$ and $\\sigma(x) = x$ (the variable itself) for every other name. The type is abstract: the entries cannot be reached from outside the package, so the functions below are the only way to build a substitution, and each name has at most one entry."
 msgstr "これは、項目 $(x, s)$ について $\\sigma(x) = s$、それ以外のすべての名前について $\\sigma(x) = x$（変数そのもの）となる写像 $\\sigma$ を表す。この型は抽象型であり、項目にはパッケージ外から到達できない。したがって置換を作る方法は以下の関数だけであり、各名前につき項目は高々一つである。"
 
-#: manual/api/substitution.md:47
+#: manual/api/substitution.md:54
 msgid "Replacement terms are stored and returned as they are, not copied: `get`, `to_array` and `apply` return terms that share structure with the terms passed to `singleton` and `set`. `Term` is a plain enum whose `Apply` arguments are an `Array`, so treat terms as immutable values; changing the argument array of a term in place would also change every substitution that holds it."
 msgstr "置換先の項はコピーされず、そのまま格納され返される：`get`、`to_array`、`apply` が返す項は、`singleton` や `set` に渡された項と構造を共有する。`Term` は `Apply` の引数を `Array` で持つ通常の列挙型なので、項は不変の値として扱うこと。項の引数配列をその場で変更すると、その項を保持するすべての置換も変わってしまう。"
 
-#: manual/api/substitution.md:56
+#: manual/api/substitution.md:63
 msgid "These functions build substitutions."
 msgstr "以下の関数は代入を構築する。"
 
-#: manual/api/substitution.md:64
+#: manual/api/substitution.md:71
 msgid "`set(x, s)` adds $x \\mapsto s$, replacing an existing entry for `x` in place."
 msgstr "`set(x, s)` は $x \\mapsto s$ を追加する。`x` の項目が既にあればその場で置き換える。"
 
-#: manual/api/substitution.md:68
+#: manual/api/substitution.md:75
 msgid "`Substitution::get` returns the replacement for a name, if any."
 msgstr "`Substitution::get` は名前に対する置換項があればそれを返す。"
 
-#: manual/api/substitution.md:76
+#: manual/api/substitution.md:83
 msgid "These methods read the entries of a substitution."
 msgstr "これらのメソッドは置換の項目を読み出す。"
 
-#: manual/api/substitution.md:83
+#: manual/api/substitution.md:90
 msgid "`length` is the number of names in the domain. `to_array` returns the entries `(x, s)` as a fresh array, in the order the names were first added; changing the array does not change the substitution."
 msgstr "`length` は定義域にある名前の個数である。`to_array` は項目 `(x, s)` を、名前が最初に追加された順に並べた新しい配列として返す。その配列を変更しても置換は変わらない。"
 
-#: manual/api/substitution.md:105
+#: manual/api/substitution.md:112
 msgid "These methods shrink the domain of a substitution."
 msgstr "以下のメソッドは代入の定義域を縮小する。"
 
-#: manual/api/substitution.md:112
+#: manual/api/substitution.md:119
 msgid "`without(x)` drops the entry for `x`, which is what a binder for `x` does. `restrict(names)` keeps only the entries whose name is in `names`."
 msgstr "`without(x)` は `x` の項目を取り除く。これは `x` の束縛子が行うことと同じである。`restrict(names)` は名前が `names` に含まれる項目だけを残す。"
 
-#: manual/api/substitution.md:132
+#: manual/api/substitution.md:139
 msgid "`Substitution::apply` replaces the free variables of a term simultaneously, renaming binders to avoid capture."
 msgstr "`Substitution::apply` は項の自由変数を同時に置き換え、捕獲を避けるために束縛子の名前を変える。"
 
-#: manual/api/substitution.md:139
+#: manual/api/substitution.md:146
 msgid "Every free occurrence of a name `x` in the domain is replaced by its replacement; nothing is substituted inside an inserted replacement. Under `Bind(y, body)` the entry for `y` is ignored. When a replacement that is actually inserted into `body` has `y` free, the binder is renamed to a fresh name first, so free variables of replacements stay free. The result is determined up to the choice of fresh names, which is deterministic."
 msgstr "定義域にある名前 `x` のすべての自由な出現は、その置換項で置き換えられる。挿入された置換項の内部では代入は行われない。`Bind(y, body)` の下では `y` の項目は無視される。実際に `body` に挿入される置換項が `y` を自由に含む場合は、まず束縛子を新しい名前に変えるので、置換項の自由変数は自由なまま保たれる。結果は新しい名前の選び方を除いて一意に定まり、その選び方自体も決定的である。"
 
-#: manual/api/substitution.md:160
+#: manual/api/substitution.md:167
 msgid "`Substitution::then` composes two substitutions, applying `self` first."
 msgstr "`Substitution::then` は二つの代入を合成し、`self` を先に適用する。"
 
-#: manual/api/substitution.md:166
+#: manual/api/substitution.md:173
 msgid "`s.then(t)` maps each `x` in the domain of `s` to `t.apply(s(x))`, and each other `x` in the domain of `t` to `t(x)`. For every term, `s.then(t).apply(term)` is alpha-equivalent to `t.apply(s.apply(term))`."
 msgstr "`s.then(t)` は `s` の定義域の各 `x` を `t.apply(s(x))` に写し、`t` の定義域のそれ以外の各 `x` を `t(x)` に写す。任意の項について、`s.then(t).apply(term)` は `t.apply(s.apply(term))` と α同値である。"
 
-#: manual/api/substitution.md:190
+#: manual/api/substitution.md:197
 msgid "`from_renaming` turns a renaming into a substitution on a given set of names."
 msgstr "`from_renaming` は名前の付け替えを、与えられた名前の集合上の代入に変換する。"
 
-#: manual/api/substitution.md:196
+#: manual/api/substitution.md:203
 msgid "The result maps each listed name `x` with `renaming.apply(x) != x` to `Variable(renaming.apply(x))`. When the free variables of a term are among the listed names, applying the result is alpha-equivalent to `term.rename_free(renaming)`."
 msgstr "結果は、列挙された名前 `x` のうち `renaming.apply(x) != x` となるものそれぞれを `Variable(renaming.apply(x))` に写す。項の自由変数が列挙された名前に含まれるとき、結果を適用したものは `term.rename_free(renaming)` と α同値である。"
 
-#: manual/api/substitution.md:213
+#: manual/api/substitution.md:220
 msgid "Substitutions on binding-aware ASTs"
 msgstr "束縛を扱う AST 上の代入"
 
-#: manual/api/substitution.md:217
+#: manual/api/substitution.md:224
 msgid "`GenericSubstitution[N]` is a finite map from names to nodes of a downstream AST `N`."
 msgstr "`GenericSubstitution[N]` は名前から下流の AST `N` のノードへの有限写像である。"
 
-#: manual/api/substitution.md:224
+#: manual/api/substitution.md:231
 msgid "Like `Substitution`, the type is abstract and has at most one entry per name. Replacement nodes are stored and returned without copying."
 msgstr "`Substitution` と同様に、この型は抽象型であり、各名前につき項目は高々一つである。置換先のノードはコピーされずに格納され返される。"
 
-#: manual/api/substitution.md:229
+#: manual/api/substitution.md:236
 msgid "These functions build and query generic substitutions; they behave exactly like their `Substitution` counterparts."
 msgstr "以下の関数は汎用の代入を構築・照会する。その振る舞いは対応する `Substitution` 版とまったく同じである。"
 
-#: manual/api/substitution.md:244
+#: manual/api/substitution.md:251
 msgid "`GenericSubstitution::apply_once` applies the substitution to a node in one simultaneous, capture-avoiding pass."
 msgstr "`GenericSubstitution::apply_once` は、同時かつ捕獲回避の一回のパスで代入をノードに適用する。"
 
-#: manual/api/substitution.md:251
+#: manual/api/substitution.md:258
 msgid "The algorithm is the one of `Substitution::apply`, run through `BindingSyntax::project` and rebuilt with `variable`, `apply` and `bind`. `Opaque` nodes are returned unchanged. \"Once\" means that inserted replacements are not visited again: substituting $x \\mapsto y$ and $y \\mapsto 2$ in $x + y$ gives $y + 2$, not $2 + 2$."
 msgstr "アルゴリズムは `Substitution::apply` と同じもので、`BindingSyntax::project` を通して実行され、`variable`、`apply`、`bind` で再構築される。`Opaque` ノードはそのまま返される。「Once」とは、挿入された置換項を再び訪問しないという意味である。$x + y$ において $x \\mapsto y$ と $y \\mapsto 2$ を代入すると、$2 + 2$ ではなく $y + 2$ になる。"
 
-#: manual/api/substitution.md:268
+#: manual/api/substitution.md:275
 msgid "On `Term[T]`, `apply_once` agrees with `Substitution::apply`. For a downstream AST see the [adapter tutorial](../tutorial/adapter.md)."
 msgstr "`Term[T]` 上では、`apply_once` は `Substitution::apply` と一致する。下流の AST については[アダプタのチュートリアル](../tutorial/adapter.md)を参照。"
 
-#: manual/api/substitution.md:273
+#: manual/api/substitution.md:280
 msgid "The field `entries` of `Substitution` and of `GenericSubstitution` is no longer public. Read a substitution with `get`, `length` and `to_array`."
 msgstr "`Substitution` と `GenericSubstitution` のフィールド `entries` は公開されなくなった。置換は `get`、`length`、`to_array` で読み出す。"
 
@@ -1047,179 +1067,183 @@ msgid "The `syntax` package defines named syntax with binders: the generic term 
 msgstr "`syntax` パッケージは束縛子を持つ名前付き構文を定義する。汎用の項型 `Term[T]`、その上の解析（自由変数、全名前、α同値）、名前の付け替え、そしてオープンなトレイト `BindingSyntax` である。下流の AST はこのトレイトを通じて同じ解析と、他のパッケージの汎用代入・書き換えを利用できる。"
 
 #: manual/api/syntax.md:11
+msgid "Every operation of the package, `==` included, is stack-safe in the nesting depth of its input: it keeps pending work in a heap array and uses a constant amount of host stack, so a term nested 100 000 levels deep (a chain of applications or of binders) is handled on every backend. The exception is `Debug`: `@debug.to_string`, `Repr` and the messages of `assert_eq` and `inspect` recurse and can overflow the stack on such a term. The generic functions are stack-safe when the `BindingSyntax` methods of the downstream type are, that is, when they look at one layer of a node."
+msgstr "このパッケージのすべての操作は、`==` を含め、入力の入れ子の深さに対してスタック安全である：保留中の作業をヒープ上の配列に保持し、一定量のホストスタックしか使わないので、100 000 段入れ子になった項（適用の連鎖または束縛子の連鎖）もすべてのバックエンドで扱える。例外は `Debug` である：`@debug.to_string`、`Repr`、および `assert_eq` と `inspect` のメッセージは再帰するので、そのような項ではスタックがあふれることがある。ジェネリックな関数は、下流の型の `BindingSyntax` メソッドがスタック安全であるとき、すなわちノードの 1 層だけを見るときにスタック安全である。"
+
+#: manual/api/syntax.md:20
 msgid "The definitions behind these functions, and the proofs of their laws, are in the [syntax design](../design/syntax.md)."
 msgstr "これらの関数の背後にある定義とその法則の証明は[構文の設計](../design/syntax.md)にある。"
 
-#: manual/api/syntax.md:29
+#: manual/api/syntax.md:38
 #: manual/design/syntax.md:24
 msgid "Terms"
 msgstr "項"
 
-#: manual/api/syntax.md:33
+#: manual/api/syntax.md:42
 msgid "`Term[T]` is named syntax with domain values, variables, n-ary application and single-variable binding."
 msgstr "`Term[T]` は、ドメイン値、変数、n 項適用、単一変数の束縛を持つ名前付き構文である。"
 
-#: manual/api/syntax.md:45
+#: manual/api/syntax.md:55
 msgid "`Value(v)` is a domain constant. Its payload `T` is opaque: it is treated as closed, so no analysis looks inside it."
 msgstr "`Value(v)` はドメイン定数である。そのペイロード `T` は不透明であり、閉じたものとして扱われるため、どの解析もその内部を見ない。"
 
-#: manual/api/syntax.md:47
+#: manual/api/syntax.md:57
 msgid "`Variable(x)` is an occurrence of the name `x`."
 msgstr "`Variable(x)` は名前 `x` の出現である。"
 
-#: manual/api/syntax.md:48
+#: manual/api/syntax.md:58
 msgid "`Apply(head, args)` applies `head` to a sequence of arguments. The lambda calculus packages read it as the curried application $head\\ a_1\\ \\cdots\\ a_n$."
 msgstr "`Apply(head, args)` は `head` を引数の列に適用する。ラムダ計算のパッケージはこれをカリー化された適用 $head\\ a_1\\ \\cdots\\ a_n$ と読む。"
 
-#: manual/api/syntax.md:51
+#: manual/api/syntax.md:61
 msgid "`Bind(x, body)` binds `x` in `body`. In the lambda calculus it is $\\lambda x.\\,body$; a downstream language may read it as any one-variable binder."
 msgstr "`Bind(x, body)` は `body` の中で `x` を束縛する。ラムダ計算ではこれは $\\lambda x.\\,body$ である。下流の言語はこれを任意の一変数束縛子として読んでよい。"
 
-#: manual/api/syntax.md:55
+#: manual/api/syntax.md:65
 msgid "`==` (`Term::equal`) is structural equality: binder names must match literally. Use `alpha_equal` to compare terms up to renaming of bound variables."
 msgstr "`==`（`Term::equal`）は構造的等価性であり、束縛子の名前は字面どおり一致しなければならない。束縛変数の名前の付け替えを除いて項を比較するには `alpha_equal` を使う。"
 
-#: manual/api/syntax.md:59
+#: manual/api/syntax.md:69
 msgid "Terms are values that the library shares instead of copying: an operation may return its argument, a subterm of it, or a term stored in a substitution or a reduction trace. The argument list of `Apply` is an ordinary `Array`, so the compiler does not stop you from changing it in place, but doing so changes every term and every library value that shares it. Treat terms as immutable: build a new `Apply` node instead of changing the array of an existing one."
 msgstr "項は、ライブラリがコピーせずに共有する値である：操作はその引数、その部分項、あるいは置換や簡約トレースに格納された項を返すことがある。`Apply` の引数リストは通常の `Array` なので、コンパイラはその場での変更を止めないが、そうするとそれを共有するすべての項とライブラリの値が変わってしまう。項は不変として扱い、既存のノードの配列を変更する代わりに新しい `Apply` ノードを作ること。"
 
-#: manual/api/syntax.md:80
+#: manual/api/syntax.md:90
 msgid "`Term::equal` compares two terms structurally."
 msgstr "`Term::equal` は二つの項を構造的に比較する。"
 
-#: manual/api/syntax.md:86
-msgid "It is the promoted `Eq` implementation. `λx.x` and `λy.y` are not `equal`."
-msgstr "これは昇格された `Eq` の実装である。`λx.x` と `λy.y` は `equal` ではない。"
+#: manual/api/syntax.md:96
+msgid "It is the promoted `Eq` implementation: the same constructors, the same names and arities, and payloads compared with `T`'s `==`. `λx.x` and `λy.y` are not `equal`. The implementation is written by hand rather than derived so that it is stack-safe; it has the semantics of the derived one, including a `Double` `NaN` payload making a term unequal to itself."
+msgstr "昇格された `Eq` 実装である：コンストラクタ、名前、アリティが同じで、ペイロードが `T` の `==` で比較される。`λx.x` と `λy.y` は `equal` ではない。この実装は、スタック安全にするため派生ではなく手書きである。意味は派生版と同じで、`Double` の `NaN` ペイロードをもつ項が自分自身と等しくならないことも含む。"
 
-#: manual/api/syntax.md:90
+#: manual/api/syntax.md:104
 msgid "`Term::map_values` applies a function to every domain value and keeps the variables and binders."
 msgstr "`Term::map_values` はすべてのドメイン値に関数を適用し、変数と束縛子はそのまま保つ。"
 
-#: manual/api/syntax.md:97
+#: manual/api/syntax.md:111
 msgid "It is a functor map: `t.map_values(v => v)` is `t`, and mapping `f` then `g` equals mapping `v => g(f(v))`. Free variables are unchanged."
 msgstr "これは関手の写像である。`t.map_values(v => v)` は `t` であり、`f` を写してから `g` を写すことは `v => g(f(v))` を写すことに等しい。自由変数は変わらない。"
 
-#: manual/api/syntax.md:109
+#: manual/api/syntax.md:123
 msgid "Analyses"
 msgstr "解析"
 
-#: manual/api/syntax.md:113
+#: manual/api/syntax.md:127
 msgid "`free_variables` returns the names that occur free in a term."
 msgstr "`free_variables` は項に自由に出現する名前を返す。"
 
-#: manual/api/syntax.md:119
+#: manual/api/syntax.md:133
 msgid "An occurrence of `x` is free when no enclosing `Bind(x, _)` binds it. Values contribute no names. Cost: $O(n)$ set operations for a term of size $n$."
 msgstr "`x` の出現は、それを束縛する外側の `Bind(x, _)` がないとき自由である。値は名前を一切もたらさない。コスト：サイズ $n$ の項に対して $O(n)$ 回の集合演算。"
 
-#: manual/api/syntax.md:124
+#: manual/api/syntax.md:138
 msgid "`all_names` returns every name in a term: free variables, bound occurrences and binder names."
 msgstr "`all_names` は項に含まれるすべての名前を返す。自由変数、束縛された出現、束縛子の名前である。"
 
-#: manual/api/syntax.md:131
+#: manual/api/syntax.md:145
 msgid "Use it as the \"used\" set when choosing a fresh name for a term."
 msgstr "項に対して新しい名前を選ぶときの「使用済み」集合として使う。"
 
-#: manual/api/syntax.md:149
+#: manual/api/syntax.md:163
 msgid "`alpha_equal` decides whether two terms are equal up to the names of bound variables."
 msgstr "`alpha_equal` は二つの項が束縛変数の名前を除いて等しいかどうかを判定する。"
 
-#: manual/api/syntax.md:156
+#: manual/api/syntax.md:170
 msgid "Values are compared with `T`'s `==`, free variables by name, and bound variables by the binder they refer to, in one simultaneous traversal of both terms."
 msgstr "値は `T` の `==` で、自由変数は名前で、束縛変数は参照する束縛子で比較され、二つの項を同時に一度走査して判定される。"
 
-#: manual/api/syntax.md:160
+#: manual/api/syntax.md:174
 msgid "`alpha_equal` is the payload equality lifted through binders, so it inherits the properties of `T`'s `==`: each of reflexivity, symmetry and transitivity holds for `alpha_equal` exactly when it holds for that `==`, so `alpha_equal` is an equivalence relation exactly when `==` is one. When `==` is the identity of `T` (as for `Int` or `String`), it is alpha-equivalence. `Double` follows IEEE 754: `NaN` is not equal to itself, so a term with a `NaN` payload is not alpha-equal to itself, while `0.0` and `-0.0` are equal payloads."
 msgstr "`alpha_equal` はペイロードの等価性を束縛子を通して持ち上げたものであり、`T` の `==` の性質を受け継ぐ。反射性・対称性・推移性のそれぞれは、その `==` について成り立つときに限り `alpha_equal` について成り立つ。したがって `alpha_equal` が同値関係であるのは `==` が同値関係であるときに限る。`==` が `T` の恒等関係であるとき（`Int` や `String` など）、これは α同値そのものである。`Double` は IEEE 754 に従う。`NaN` は自分自身と等しくないので、`NaN` ペイロードを含む項は自分自身と α同値にならず、一方 `0.0` と `-0.0` は等しいペイロードである。"
 
-#: manual/api/syntax.md:191
+#: manual/api/syntax.md:205
 msgid "Renaming"
 msgstr "名前の付け替え"
 
-#: manual/api/syntax.md:195
+#: manual/api/syntax.md:209
 msgid "`Term::rename_free` applies a renaming to the free variables of a term, renaming binders where necessary to avoid capture."
 msgstr "`Term::rename_free` は項の自由変数に名前の付け替えを適用し、捕獲を避けるために必要に応じて束縛子の名前を変える。"
 
-#: manual/api/syntax.md:202
+#: manual/api/syntax.md:216
 msgid "Under `Bind(x, body)` the renaming loses its entry for `x`, because the bound `x` is a different variable. If a remaining target of the renaming equals `x`, the binder is renamed to a fresh name first. The result is alpha-equivalent to the textbook capture-avoiding renaming."
 msgstr "`Bind(x, body)` の下では、束縛された `x` は別の変数なので、名前の付け替えから `x` の項目が失われる。付け替えの残りの対象のいずれかが `x` に等しい場合は、まず束縛子を新しい名前に変える。結果は教科書的な捕獲回避の名前の付け替えと α同値である。"
 
-#: manual/api/syntax.md:220
+#: manual/api/syntax.md:234
 msgid "`Term::alpha_rename_bound` renames the occurrences of a variable that are bound by an enclosing binder, refusing a target name that could be captured."
 msgstr "`Term::alpha_rename_bound` は外側の束縛子によって束縛された変数の出現の名前を変え、捕獲されうる対象名は拒否する。"
 
-#: manual/api/syntax.md:227
+#: manual/api/syntax.md:241
 msgid "Call it on the *body* of a binder: `body.alpha_rename_bound(from, to_)` replaces the occurrences of `from` that are free in `body` (and therefore bound by the enclosing `Bind(from, body)`) with `to_`. Inner binders named `from` stop the renaming. The result is `None` when `to_` occurs anywhere in `body`, and `Some(body)` when `from == to_`. On success, `Bind(from, body)` and `Bind(to_, result)` are alpha-equivalent."
 msgstr "束縛子の*本体*に対して呼び出す。`body.alpha_rename_bound(from, to_)` は、`body` の中で自由な（したがって外側の `Bind(from, body)` に束縛された）`from` の出現を `to_` で置き換える。`from` という名前の内側の束縛子があると、そこで名前の付け替えは止まる。`to_` が `body` のどこかに出現する場合、結果は `None` であり、`from == to_` の場合は `Some(body)` である。成功した場合、`Bind(from, body)` と `Bind(to_, result)` は α同値である。"
 
-#: manual/api/syntax.md:250
+#: manual/api/syntax.md:264
 msgid "`BindingView[N]` is the one-layer view of a node that generic algorithms inspect."
 msgstr "`BindingView[N]` は、汎用アルゴリズムが調べるノードの一層分のビューである。"
 
-#: manual/api/syntax.md:262
+#: manual/api/syntax.md:276
 msgid "`Opaque` marks a node with no variables inside, such as a literal. The other cases mirror the constructors of `Term`, with the children left in the downstream type `N`."
 msgstr "`Opaque` はリテラルのように内部に変数を含まないノードを表す。他のケースは `Term` のコンストラクタに対応し、子は下流の型 `N` のまま残される。"
 
-#: manual/api/syntax.md:268
+#: manual/api/syntax.md:282
 msgid "`BindingSyntax` is the open trait that a downstream AST implements to use the generic binding algorithms."
 msgstr "`BindingSyntax` はオープンなトレイトであり、下流の AST はこれを実装することで汎用の束縛アルゴリズムを利用できる。"
 
-#: manual/api/syntax.md:280
+#: manual/api/syntax.md:294
 msgid "`project(node)` tells the algorithms what the node is."
 msgstr "`project(node)` はノードが何であるかをアルゴリズムに伝える。"
 
-#: manual/api/syntax.md:281
+#: manual/api/syntax.md:295
 msgid "`variable`, `apply` and `bind` rebuild nodes of each kind."
 msgstr "`variable`、`apply`、`bind` はそれぞれの種類のノードを再構築する。"
 
-#: manual/api/syntax.md:283
+#: manual/api/syntax.md:297
 msgid "An implementation must make `project` and the three constructors agree: `project(variable(x))` is `Variable(x)`, `project(apply(h, args))` is `Apply(h, args)`, `project(bind(x, b))` is `Bind(x, b)`, and rebuilding a projected `Apply` or `Bind` node gives back an equivalent node. An `Opaque` node must not contain variables. The [adapter design](../design/adapter.md) explains these laws; the [adapter tutorial](../tutorial/adapter.md) implements them for a small AST."
 msgstr "実装は `project` と三つのコンストラクタを整合させなければならない。`project(variable(x))` は `Variable(x)`、`project(apply(h, args))` は `Apply(h, args)`、`project(bind(x, b))` は `Bind(x, b)` であり、射影した `Apply` または `Bind` ノードを再構築すると同等のノードが得られる。`Opaque` ノードは変数を含んではならない。[アダプタの設計](../design/adapter.md)がこれらの法則を説明し、[アダプタのチュートリアル](../tutorial/adapter.md)が小さな AST に対してそれらを実装している。"
 
-#: manual/api/syntax.md:291
+#: manual/api/syntax.md:305
 msgid "Call the trait methods through the trait, for example `@syntax.BindingSyntax::project(node)`."
 msgstr "トレイトのメソッドはトレイト経由で呼び出す。例えば `@syntax.BindingSyntax::project(node)` のようにする。"
 
-#: manual/api/syntax.md:296
+#: manual/api/syntax.md:310
 msgid "`Term[T]` implements `BindingSyntax` with the obvious projection."
 msgstr "`Term[T]` は自明な射影で `BindingSyntax` を実装している。"
 
-#: manual/api/syntax.md:302
+#: manual/api/syntax.md:316
 msgid "`Value` projects to `Opaque` and every other constructor to the case of the same name, so the generic functions below agree with their `Term` versions on `Term` values."
 msgstr "`Value` は `Opaque` に射影され、他のコンストラクタはすべて同名のケースに射影される。そのため、以下の汎用関数は `Term` 値に対して `Term` 版と一致する。"
 
-#: manual/api/syntax.md:319
+#: manual/api/syntax.md:333
 msgid "These functions compute free variables and all names for any `BindingSyntax` type."
 msgstr "以下の関数は任意の `BindingSyntax` 型について自由変数と全名前を計算する。"
 
-#: manual/api/syntax.md:327
+#: manual/api/syntax.md:341
 msgid "On `Term[T]` they return the same sets as `free_variables` and `all_names`."
 msgstr "`Term[T]` 上では、これらは `free_variables` および `all_names` と同じ集合を返す。"
 
-#: manual/api/syntax.md:331
+#: manual/api/syntax.md:345
 msgid "`generic_alpha_rename_bound` is `Term::alpha_rename_bound` for any `BindingSyntax` type."
 msgstr "`generic_alpha_rename_bound` は任意の `BindingSyntax` 型向けの `Term::alpha_rename_bound` である。"
 
-#: manual/api/syntax.md:338
+#: manual/api/syntax.md:352
 msgid "It returns `None` when the target name occurs in the node, and rebuilds the renamed node through `variable`, `apply` and `bind`."
 msgstr "対象名がノードに出現する場合は `None` を返す。名前を付け替えたノードは `variable`、`apply`、`bind` を通じて再構築される。"
 
-#: manual/api/syntax.md:358
+#: manual/api/syntax.md:372
 msgid "`Term::variable(name)` method form"
 msgstr "`Term::variable(name)` メソッド形式"
 
-#: manual/api/syntax.md:359
+#: manual/api/syntax.md:373
 msgid "`Term::apply(head, args)` method form"
 msgstr "`Term::apply(head, args)` メソッド形式"
 
-#: manual/api/syntax.md:360
+#: manual/api/syntax.md:374
 msgid "`Term::bind(name, body)` method form"
 msgstr "`Term::bind(name, body)` メソッド形式"
 
-#: manual/api/syntax.md:362
+#: manual/api/syntax.md:376
 msgid "`Repr(term)` or `@debug.to_string(term)`"
 msgstr "`Repr(term)` または `@debug.to_string(term)`"
 
-#: manual/api/syntax.md:364
+#: manual/api/syntax.md:378
 msgid "These method forms were implicit promotions of trait methods. They are kept hidden and deprecated so that old callers still compile."
 msgstr "これらのメソッド形式はトレイトメソッドの暗黙の昇格であった。古い呼び出し側が引き続きコンパイルできるよう、隠された非推奨のものとして残されている。"
 
@@ -1331,75 +1355,79 @@ msgstr "燃料は単位で測るステップ予算である。項ノードの評
 msgid "The budget bounds the work, not the depth of the host call stack. Evaluation and readback run as a loop that keeps pending work on a stack in the heap, so the call stack does not grow with the fuel spent: a divergent term ends with `FuelExhausted` on every backend, however large the budget. The pending work is bounded by the budget."
 msgstr "予算が制限するのは仕事量であり、ホストの呼び出しスタックの深さではない。評価と読み戻しは、保留中の仕事をヒープ上のスタックに保持するループとして実行されるので、呼び出しスタックは消費した燃料とともに伸びない。発散する項は、予算がどれほど大きくても、すべてのバックエンドで `FuelExhausted` で終わる。保留中の仕事は予算によって抑えられる。"
 
-#: manual/api/utlc/nbe.md:59
+#: manual/api/utlc/nbe.md:49
+msgid "Nor does the host call stack grow with the nesting depth of the input: validation (by `@debruijn.validate`), evaluation and readback handle terms of any depth, such as long application chains or long chains of binders, on every backend. A term of size $n$ needs a few units of fuel per node to be evaluated and read back, so a deep term needs a budget that grows with its size, not a larger stack. The derived `Debug` of `NbeResult` recurses over the term it contains; compare deep results with `==` instead of printing them."
+msgstr "ホストのコールスタックも入力の入れ子の深さに応じて増えない：検証（`@debruijn.validate` による）、評価、読み戻しは、すべてのバックエンドで任意の深さの項、たとえば長い適用の連鎖や長い束縛子の連鎖を扱える。サイズ $n$ の項は、評価と読み戻しにノードごとに数単位の燃料を必要とするので、深い項に必要なのは大きなスタックではなく、そのサイズに応じて増える予算である。`NbeResult` の派生した `Debug` は、含まれる項を再帰的にたどる。深い結果は出力せず、`==` で比較すること。"
+
+#: manual/api/utlc/nbe.md:68
 msgid "Semantic values"
 msgstr "意味値"
 
-#: manual/api/utlc/nbe.md:63
+#: manual/api/utlc/nbe.md:72
 msgid "`Semantic[T]` is an opaque semantic value."
 msgstr "`Semantic[T]` は不透明な意味値である。"
 
-#: manual/api/utlc/nbe.md:69
+#: manual/api/utlc/nbe.md:78
 msgid "A semantic value is a constant, a closure (a binder body with its environment), a delayed argument, or a neutral value (a free variable, a variable at a quote level, or a neutral value applied to an argument). The representation is private; values are produced by `eval` and the `reflect_*` functions and consumed by `quote`."
 msgstr "意味値は、定数、クロージャ（環境付きの束縛子本体）、遅延引数、または中立値（自由変数、quote レベルの変数、あるいは引数に適用された中立値）のいずれかである。表現は非公開であり、値は `eval` と `reflect_*` 関数によって生成され、`quote` によって消費される。"
 
-#: manual/api/utlc/nbe.md:77
+#: manual/api/utlc/nbe.md:86
 msgid "`reflect_free` turns a free name into a neutral semantic value."
 msgstr "`reflect_free` は自由名を中立意味値に変換する。"
 
-#: manual/api/utlc/nbe.md:83
+#: manual/api/utlc/nbe.md:92
 msgid "Quoting it gives `Free(name)`."
 msgstr "これを quote すると `Free(name)` が得られる。"
 
-#: manual/api/utlc/nbe.md:87
+#: manual/api/utlc/nbe.md:96
 msgid "`reflect_level` turns a quote level into a neutral semantic variable."
 msgstr "`reflect_level` は quote レベルを中立意味変数に変換する。"
 
-#: manual/api/utlc/nbe.md:93
+#: manual/api/utlc/nbe.md:102
 msgid "Returns `None` for a negative level. Quoting the variable of level `l` at depth `n > l` gives `Bound(n - l - 1)`."
 msgstr "負のレベルに対しては `None` を返す。レベル `l` の変数を深さ `n > l` で quote すると `Bound(n - l - 1)` が得られる。"
 
-#: manual/api/utlc/nbe.md:114
+#: manual/api/utlc/nbe.md:123
 msgid "Evaluation and readback"
 msgstr "評価と読み戻し"
 
-#: manual/api/utlc/nbe.md:118
+#: manual/api/utlc/nbe.md:127
 msgid "`EvaluationResult[T]` is the outcome of `eval`."
 msgstr "`EvaluationResult[T]` は `eval` の結果である。"
 
-#: manual/api/utlc/nbe.md:130
+#: manual/api/utlc/nbe.md:139
 msgid "`eval` evaluates a closed De Bruijn term to weak head form in the lazy semantic domain."
 msgstr "`eval` は閉じた De Bruijn 項を遅延意味領域で弱頭部形まで評価する。"
 
-#: manual/api/utlc/nbe.md:137
+#: manual/api/utlc/nbe.md:146
 msgid "The term must be well scoped (free names are allowed); otherwise the result is `ScopeFailure` with `consumed=0`. Evaluation is call by name: arguments are delayed and evaluated only when needed, and evaluation stops at a closure or a neutral value without entering binders."
 msgstr "項はスコープが正しくなければならない（自由名は許される）。そうでなければ結果は `consumed=0` の `ScopeFailure` となる。評価は名前呼びである。引数は遅延され、必要になったときにのみ評価される。評価はクロージャまたは中立値で停止し、束縛子の中には入らない。"
 
-#: manual/api/utlc/nbe.md:144
+#: manual/api/utlc/nbe.md:153
 msgid "`QuoteResult[T]` is the outcome of `quote`."
 msgstr "`QuoteResult[T]` は `quote` の結果である。"
 
-#: manual/api/utlc/nbe.md:156
+#: manual/api/utlc/nbe.md:165
 msgid "`quote` reads a semantic value back as a beta-normal De Bruijn term."
 msgstr "`quote` は意味値を beta 正規形の De Bruijn 項として読み戻す。"
 
-#: manual/api/utlc/nbe.md:162
+#: manual/api/utlc/nbe.md:171
 msgid "`quote(value, level, fuel)` reads `value` back under `level` binders. A closure is read back by applying it to a fresh variable of the current level and reading the result under one more binder; neutral applications are read back argument by argument, which forces delayed arguments. Use `level = 0` for values from `eval`. A negative `level`, or a level variable that is not below `level`, gives `ScopeFailure(NegativeIndex)`."
 msgstr "`quote(value, level, fuel)` は `value` を `level` 個の束縛子の下で読み戻す。クロージャは、現在のレベルの新しい変数に適用し、その結果を束縛子 1 つ分深い位置で読み戻すことで読み戻される。中立な適用は引数ごとに読み戻され、その際に遅延引数が強制される。`eval` から得た値には `level = 0` を使う。負の `level`、あるいは `level` 未満でないレベル変数は `ScopeFailure(NegativeIndex)` となる。"
 
-#: manual/api/utlc/nbe.md:186
+#: manual/api/utlc/nbe.md:195
 msgid "`NbeResult[T]` is the outcome of `normalize`."
 msgstr "`NbeResult[T]` は `normalize` の結果である。"
 
-#: manual/api/utlc/nbe.md:199
+#: manual/api/utlc/nbe.md:208
 msgid "`normalize` computes the beta normal form of a well-scoped De Bruijn term within a fuel budget."
 msgstr "`normalize` はスコープの正しい De Bruijn 項の beta 正規形を燃料予算内で計算する。"
 
-#: manual/api/utlc/nbe.md:206
+#: manual/api/utlc/nbe.md:215
 msgid "It validates the term, evaluates it and quotes the result at level 0, with one shared budget. `NormalForm(t, c)`: `t` is the beta normal form, reached with `c` units. `FuelExhausted(c)`: the budget ran out; the term may diverge or may need more fuel. `ScopeFailure`: the input has a dangling or negative index. The fuel test comes first, so an ill-scoped term with fuel `<= 0` gives `FuelExhausted(consumed=0)`, not `ScopeFailure`."
 msgstr "項を検証し、評価し、結果をレベル 0 で quote する。これらは 1 つの予算を共有する。`NormalForm(t, c)`：`t` は beta 正規形であり、`c` 単位で到達した。`FuelExhausted(c)`：予算が尽きた。項は発散するかもしれないし、より多くの燃料が必要なだけかもしれない。`ScopeFailure`：入力にぶら下がった、または負のインデックスがある。燃料の検査が先に行われるので、燃料が `<= 0` のときはスコープの正しくない項でも `ScopeFailure` ではなく `FuelExhausted(consumed=0)` になる。"
 
-#: manual/api/utlc/nbe.md:213
+#: manual/api/utlc/nbe.md:222
 msgid "Applications in the result are unary: a normal form $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`, while `@debruijn.normalize` keeps the n-ary spine `Apply(f, [a, b])` of the input. An empty application `Apply(h, [])` evaluates to the value of `h`, so it disappears from the result; the small-step reducers also read it as `h` but leave the node in place. The two normalizers agree after spines are flattened, where flattening merges nested applications and drops empty ones."
 msgstr "結果の適用は単項である。正規形 $f\\,a\\,b$ は `Apply(Apply(f, [a]), [b])` として返されるが、`@debruijn.normalize` は入力の n 項スパイン `Apply(f, [a, b])` を保つ。空の適用 `Apply(h, [])` は `h` の値に評価されるので結果から消える。小ステップの簡約器もそれを `h` と読むが、ノードはそのまま残す。2 つの正規化器はスパインを平坦化すれば一致する。ここで平坦化とは、入れ子の適用をまとめ、空の適用を取り除くことである。"
 
@@ -1572,15 +1600,15 @@ msgid "A downstream variable type converts to `@core.Name` by an injective map (
 msgstr "下流の変数型は単射（異なる変数を異なる名前へ写す）によって `@core.Name` に変換される。単射性によって名前の等しさが変数の同一性と一致し、下流の変数について新鮮さと捕獲の検査が正しくなる。"
 
 #: manual/design/adapter.md:132
-#: manual/design/core.md:170
-#: manual/design/debruijn.md:242
+#: manual/design/core.md:182
+#: manual/design/debruijn.md:327
 #: manual/design/eval.md:203
 #: manual/design/rewrite.md:184
 #: manual/design/stlc.md:386
 #: manual/design/substitution.md:130
-#: manual/design/syntax.md:286
+#: manual/design/syntax.md:374
 #: manual/design/utlc/lambda.md:205
-#: manual/design/utlc/nbe.md:291
+#: manual/design/utlc/nbe.md:335
 msgid "Correctness and invariants"
 msgstr "正しさと不変条件"
 
@@ -1625,15 +1653,15 @@ msgid "Downstream adapters should add tests of (V1)–(V5) for their own node ki
 msgstr "下流の adapter は自身のノード種別について (V1)–(V5) のテストを追加すべきである。各構築子の結果を射影し、射影した各ノードを再構築し、opaque ノードが自由変数を持たないことを検査する。"
 
 #: manual/design/adapter.md:147
-#: manual/design/core.md:187
-#: manual/design/debruijn.md:263
+#: manual/design/core.md:199
+#: manual/design/debruijn.md:354
 #: manual/design/eval.md:226
 #: manual/design/rewrite.md:212
 #: manual/design/stlc.md:412
-#: manual/design/substitution.md:336
-#: manual/design/syntax.md:309
+#: manual/design/substitution.md:386
+#: manual/design/syntax.md:399
 #: manual/design/utlc/lambda.md:232
-#: manual/design/utlc/nbe.md:355
+#: manual/design/utlc/nbe.md:403
 msgid "Alternatives rejected"
 msgstr "却下した代替案"
 
@@ -1650,15 +1678,15 @@ msgid "**Checking the laws at run time.** The laws are equations over all nodes;
 msgstr "**実行時に法則を検査する。** 法則はすべてのノードにわたる等式であり、強制するのではなくテストする。"
 
 #: manual/design/adapter.md:158
-#: manual/design/core.md:200
-#: manual/design/debruijn.md:275
+#: manual/design/core.md:212
+#: manual/design/debruijn.md:366
 #: manual/design/eval.md:240
 #: manual/design/rewrite.md:224
 #: manual/design/stlc.md:425
-#: manual/design/substitution.md:350
-#: manual/design/syntax.md:323
+#: manual/design/substitution.md:400
+#: manual/design/syntax.md:413
 #: manual/design/utlc/lambda.md:243
-#: manual/design/utlc/nbe.md:374
+#: manual/design/utlc/nbe.md:422
 msgid "Boundaries"
 msgstr "境界"
 
@@ -1814,55 +1842,63 @@ msgstr "リネーミングは単射である必要はない"
 msgid "A renaming that maps two names to one target is useful (it identifies variables) and is allowed. The capture-avoiding operations therefore do not rely on injectivity: they freshen a binder whenever it is a target, see the [syntax design](syntax.md)."
 msgstr "2 つの名前を同じターゲットに写すリネーミングは有用であり（変数を同一視する）、許されている。したがって捕獲回避的な操作は単射性に依存しない。束縛子がターゲットであれば常にそれを新鮮な名前に置き換える。[syntax の設計](syntax.md)を参照。"
 
+#: manual/design/core.md:170
+msgid "Flat values need no work stack"
+msgstr "平坦な値には作業スタックが要らない"
+
 #: manual/design/core.md:172
+msgid "The library promises that its operations use a constant amount of host stack in the nesting depth of their input (issue #13); the traversals of terms keep their pending work on the heap, see the [syntax design](syntax.md). `core` has no nested values to traverse: a `Name` is a string, and `Context`, `Telescope` and `Renaming` are flat arrays. Every operation is a loop over such an array, and `fresh_name` a loop over suffixes, so each runs in constant host stack whatever the input; the derived `Eq`, `Compare`, `Hash` and `Debug` of these types recurse only into names and arrays of names, never into terms."
+msgstr "このライブラリは、操作が使うホストスタックの量が入力の入れ子の深さによらず一定であることを約束する（issue #13）。項の走査は保留中の作業をヒープ上に保持する。[syntax の設計](syntax.md)を参照。`core` には走査すべき入れ子の値がない：`Name` は文字列であり、`Context`、`Telescope`、`Renaming` は平坦な配列である。どの操作もそのような配列に対するループであり、`fresh_name` は接尾辞に対するループなので、入力によらずそれぞれ一定のホストスタックで実行される。これらの型の派生した `Eq`、`Compare`、`Hash`、`Debug` は、名前と名前の配列にしか再帰せず、項には決して再帰しない。"
+
+#: manual/design/core.md:184
 msgid "`fresh_name(h, U) ∉ U`, and `fresh_name(h, U) = h` when `h ∉ U` (freshness lemma)."
 msgstr "`fresh_name(h, U) ∉ U` であり、`h ∉ U` のとき `fresh_name(h, U) = h`（新鮮さの補題）。"
 
-#: manual/design/core.md:173
+#: manual/design/core.md:185
 msgid "`Renaming::set` keeps at most one entry per source, and because the type is abstract no other code can add an entry; `apply` therefore denotes a function."
 msgstr "`Renaming::set` はソースごとに高々 1 つのエントリを保持し、型が抽象型なので他のコードはエントリを追加できない。したがって `apply` は関数を表す。"
 
-#: manual/design/core.md:176
+#: manual/design/core.md:188
 msgid "`r.then(s)` denotes $\\sigma \\circ \\rho$ (composition lemma); `empty` is a two-sided identity for `then` as functions."
 msgstr "`r.then(s)` は $\\sigma \\circ \\rho$ を表す（合成の補題）。関数として、`empty` は `then` の両側単位元である。"
 
-#: manual/design/core.md:178
+#: manual/design/core.md:190
 msgid "`r.without(x).apply(x) == x` and `r.without(x).apply(n) == r.apply(n)` for `n != x`."
 msgstr "`r.without(x).apply(x) == x` であり、`n != x` について `r.without(x).apply(n) == r.apply(n)`。"
 
-#: manual/design/core.md:180
+#: manual/design/core.md:192
 msgid "Every operation returns a new value; no argument is mutated, and no array stored in a value is handed out, so a value cannot change after it is built."
 msgstr "すべての操作は新しい値を返す。引数を変更することはなく、値に格納された配列を外に渡すこともないので、値は作られた後に変わることがない。"
 
-#: manual/design/core.md:184
+#: manual/design/core.md:196
 msgid "These laws are exercised by the tests in `src/core/core_test.mbt` and by every capture-avoidance test of the higher packages."
 msgstr "これらの法則は `src/core/core_test.mbt` のテストと、上位パッケージのすべての捕獲回避テストによって検証される。"
 
-#: manual/design/core.md:189
+#: manual/design/core.md:201
 msgid "**De Bruijn indices everywhere.** Indices remove the need for names in the kernel, and the [debruijn package](debruijn.md) provides them, but downstream ASTs (polynomials, numeric expressions) are written and printed with names. Names stay the shared interface; indices are an internal representation chosen per algorithm."
 msgstr "**どこでも De Bruijn インデックスを使う。** インデックスはカーネルから名前の必要性を取り除き、[debruijn パッケージ](debruijn.md)がそれを提供するが、下流の AST（多項式、数値式）は名前で書かれ表示される。名前が共有インターフェースであり続け、インデックスはアルゴリズムごとに選ぶ内部表現である。"
 
-#: manual/design/core.md:194
+#: manual/design/core.md:206
 msgid "**Locally nameless or nominal types with name abstraction.** These need a richer type system or a library-wide change of representation, while the string-based design lets any downstream AST adopt the library by implementing one trait."
 msgstr "**locally nameless、または名前抽象を持つ nominal 型。** これらはより豊かな型システムか、ライブラリ全体の表現変更を必要とする。一方、文字列に基づく設計では、どの下流 AST も 1 つのトレイトを実装するだけでライブラリを採用できる。"
 
-#: manual/design/core.md:198
+#: manual/design/core.md:210
 msgid "**A global fresh-name counter.** Rejected as hidden state, see above."
 msgstr "**大域的な新鮮名カウンタ。** 隠れた状態であるため却下した。上記を参照。"
 
-#: manual/design/core.md:202
+#: manual/design/core.md:214
 msgid "`Name` has no scope, kind or sort. Distinguishing term variables from type variables, or variables of different downstream sorts, is left to the syntax that contains them."
 msgstr "`Name` はスコープ、カインド、ソートを持たない。項変数と型変数、あるいは異なる下流ソートの変数の区別は、それらを含む構文に任される。"
 
-#: manual/design/core.md:205
+#: manual/design/core.md:217
 msgid "`Context` and `Telescope` do not check well-formedness: they neither reject duplicates nor check what annotations mention."
 msgstr "`Context` と `Telescope` は整形性を検査しない。重複を拒否することも、注釈が何に言及するかを検査することもない。"
 
-#: manual/design/core.md:207
+#: manual/design/core.md:219
 msgid "`Renaming::equal` compares representations, not the denoted functions."
 msgstr "`Renaming::equal` は表す関数ではなく表現を比較する。"
 
-#: manual/design/core.md:208
+#: manual/design/core.md:220
 msgid "`fresh_name` guarantees freshness only with respect to the set it is given. Supplying a complete set of used names is the caller's responsibility."
 msgstr "`fresh_name` が新鮮さを保証するのは与えられた集合に対してだけである。使用済みの名前の完全な集合を与えるのは呼び出し側の責任である。"
 
@@ -1903,7 +1939,7 @@ msgid "A term is *well scoped at depth $n$* when every index under $k$ binders i
 msgstr "$k$ 個の束縛子の下にあるすべてのインデックスが $n + k$ より小さいとき、項は*深さ $n$ でスコープが正しい*という。深さ $0$ でスコープが正しいとき、単にスコープが正しいという。`validate` はこれを判定する。"
 
 #: manual/design/debruijn.md:44
-#: manual/design/syntax.md:217
+#: manual/design/syntax.md:218
 msgid "N. G. de Bruijn, \"Lambda calculus notation with nameless dummies\", Indagationes Mathematicae 34, 1972."
 msgstr "N. G. de Bruijn, \"Lambda calculus notation with nameless dummies\", Indagationes Mathematicae 34, 1972."
 
@@ -2059,65 +2095,113 @@ msgstr "スパインと簡約順序"
 msgid "`Apply(head, args)` is a curried spine: `Apply(Bind(t), [a, ..rest])` is the redex $(\\lambda.\\,t)\\,a$ applied to `rest`, and a step contracts only the first argument. An empty spine `Apply(h, [])` stands for $h$ itself, so empty applications around the `Bind` are looked through when a redex is matched. `reduce_once` searches root, head, arguments, and enters binders: it is the normal-order strategy of the [eval design](eval.md) on nameless terms, so the normalization theorem applies to `normalize`."
 msgstr "`Apply(head, args)` はカリー化されたスパインである：`Apply(Bind(t), [a, ..rest])` は `rest` に適用された簡約基 $(\\lambda.\\,t)\\,a$ であり、1 ステップは最初の引数のみを縮約する。空のスパイン `Apply(h, [])` は $h$ そのものを表すので、簡約基を照合するときは `Bind` を包む空の適用を透過して見る。`reduce_once` は根、ヘッド、引数を探索し、束縛子の中にも入る：これは名前なし項上の [eval の設計](eval.md) の正規順序戦略であり、したがって正規化定理が `normalize` に適用される。"
 
+#: manual/design/debruijn.md:242
+msgid "Explicit stacks instead of host recursion"
+msgstr "ホストの再帰の代わりに明示的なスタックを使う"
+
 #: manual/design/debruijn.md:244
+msgid "**Problem.** Every operation above is defined by structural recursion on the term, and a direct implementation keeps one host stack frame per level of nesting. Terms from users and downstream ASTs can be deep (a long spine $f\\,(f\\,(f \\cdots))$, a long chain of binders), and the js, wasm and wasm-gc stacks overflow at a depth of a few thousand, so the same call returned a result on native and crashed on the other backends."
+msgstr "**問題。** 上のすべての操作は項に対する構造再帰で定義されており、直接実装すると入れ子の 1 段ごとにホストスタックのフレームを 1 つ使う。ユーザや下流の AST から来る項は深くなりうる（長いスパイン $f\\,(f\\,(f \\cdots))$、長い束縛子の連鎖）。js、wasm、wasm-gc のスタックは数千の深さであふれるので、同じ呼び出しが native では結果を返し、他のバックエンドではクラッシュした。"
+
+#: manual/design/debruijn.md:251
+msgid "**Choice.** Each operation runs as a loop over an explicit stack in a heap array, and visits the subterms in exactly the order of its recursive definition, so its results, including the error it reports, are unchanged. The host stack depth is constant; the heap stacks hold at most one entry per node of the term."
+msgstr "**選択。** 各操作はヒープ上の配列にある明示的なスタックに対するループとして動作し、再帰的な定義とまったく同じ順序で部分項を訪れるので、報告するエラーを含め、結果は変わらない。ホストスタックの深さは一定であり、ヒープ上のスタックは項のノードごとに高々 1 つのエントリを保持する。"
+
+#: manual/design/debruijn.md:257
+msgid "*Checks.* `validate` and `==` keep a stack of the subterms (or pairs of subterms) still to visit. Write $\\mathrm{pre}(t)$ for the nodes of $t$ in pre-order, head before arguments and arguments from left to right:"
+msgstr "*検査。* `validate` と `==` は、まだ訪れていない部分項（または部分項の組）のスタックを保持する。$t$ のノードを前順に、頭部を引数より先に、引数を左から右に並べたものを $\\mathrm{pre}(t)$ と書く："
+
+#: manual/design/debruijn.md:266
+msgid "and $\\mathrm{pre}(a) = a$ for a leaf $a$. The loop pops the top entry, checks it if it is a leaf, and otherwise pushes its children, $u_m$ first and the head $t$ last. With the stack $t_1 \\cdots t_r$ (top first) it maintains"
+msgstr "また葉 $a$ に対して $\\mathrm{pre}(a) = a$ とする。ループは先頭のエントリを取り出し、それが葉なら検査し、そうでなければその子を積む。$u_m$ を最初に、頭部 $t$ を最後に積む。スタックが $t_1 \\cdots t_r$（先頭が先）のとき、ループは次を保つ"
+
+#: manual/design/debruijn.md:274
+msgid "since popping $t\\,u_1 \\cdots u_m$ and pushing its children replaces $\\mathrm{pre}(t\\,\\vec u)$ by its tail. So the leaves are checked in pre-order. The recursive `validate` returns the first error of its head, else of its arguments from left to right, which by induction is also the first error in pre-order. Both return the same error. An index is checked against the number of binders above it, which the stack stores with each entry."
+msgstr "$t\\,u_1 \\cdots u_m$ を取り出してその子を積むことは、$\\mathrm{pre}(t\\,\\vec u)$ をその末尾に置き換えることだからである。よって葉は前順に検査される。再帰的な `validate` は、頭部の最初のエラー、なければ引数の左から右への最初のエラーを返し、帰納法によりこれは前順での最初のエラーでもある。両者は同じエラーを返す。添字は、その上にある束縛子の数に対して検査される。この数は各エントリとともにスタックに格納される。"
+
+#: manual/design/debruijn.md:281
+msgid "*Translations.* `shift`, `substitute_bound` (both through one rebuilding traversal that applies a function to each `Bound(i)` and its binder count), `from_named` and `to_named` produce a term. They keep a stack of tasks, $\\mathsf{visit}(t, k)$ and $\\mathsf{build}_@(m)$ / $\\mathsf{build}_\\lambda$, and a stack of results. Visiting a leaf pushes its translation; visiting $t\\,u_1 \\cdots u_m$ pushes $\\mathsf{build}_@(m)$ and above it the visits of $u_m, \\dots, u_1, t$; $\\mathsf{build}_@(m)$ pops the $m + 1$ translations and pushes the application of the first to the others. By induction on $t$, running the tasks pushed for $\\mathsf{visit}(t, k)$ pushes exactly one result, the recursive translation of $t$ under $k$ binders, and leaves the rest of both stacks untouched. Leaves are visited in pre-order as above; errors arise only at leaves, and both versions stop at the first one, so they return the same `Err`. In `substitute_bound` the replacement at an occurrence is shifted by the same loop, run to its end before the traversal continues."
+msgstr "*変換。* `shift`、`substitute_bound`（どちらも、各 `Bound(i)` とその束縛子の数に関数を適用する 1 つの再構築走査を通す）、`from_named`、`to_named` は項を生成する。これらはタスクのスタック（$\\mathsf{visit}(t, k)$ と $\\mathsf{build}_@(m)$ / $\\mathsf{build}_\\lambda$）と、結果のスタックを保持する。葉を訪れるとその変換結果を積む。$t\\,u_1 \\cdots u_m$ を訪れると $\\mathsf{build}_@(m)$ を積み、その上に $u_m, \\dots, u_1, t$ の訪問を積む。$\\mathsf{build}_@(m)$ は $m + 1$ 個の変換結果を取り出し、最初のものを残りに適用したものを積む。$t$ に関する帰納法により、$\\mathsf{visit}(t, k)$ のために積まれたタスクを実行すると、ちょうど 1 つの結果、すなわち $k$ 個の束縛子の下での $t$ の再帰的な変換結果が積まれ、両方のスタックの残りには触れない。葉は上と同じく前順に訪れる。エラーは葉でのみ生じ、どちらの版も最初のエラーで止まるので、同じ `Err` を返す。`substitute_bound` では、出現箇所での置き換え項は同じループでシフトされ、走査が続く前に最後まで実行される。"
+
+#: manual/design/debruijn.md:297
+msgid "`from_named` keeps, for each name, the levels of the enclosing binders of that name, and maps an occurrence under $n$ binders to $n - 1 - \\ell$ for the innermost level $\\ell$, the index of the nearest binder of that name. `to_named` names a binder with the first name of $x, x_1, x_2, \\dots$ that is neither free in the term ($F$) nor the name of an enclosing binder. Let $c_0, c_1, \\dots$ be the names of that sequence not in $F$. By induction on the level, the enclosing binders of a binder at level $n$ are named $c_0, \\dots, c_{n-1}$, so it gets $c_n$: the name depends only on the level and is computed once. Both translations are therefore linear in the size of the term (up to hashing), where a copy of the binder stack at each binder and a rescan of the candidate names made a chain of $n$ binders cost $O(n^2)$."
+msgstr "`from_named` は、各名前について、その名前をもつ外側の束縛子のレベルを保持し、$n$ 個の束縛子の下にある出現を、最内のレベル $\\ell$ すなわち同名の最も近い束縛子の添字として $n - 1 - \\ell$ に写す。`to_named` は、束縛子に、$x, x_1, x_2, \\dots$ のうち、項で自由でなく（$F$）、外側の束縛子の名前でもない最初の名前を付ける。この列のうち $F$ にない名前を $c_0, c_1, \\dots$ とする。レベルに関する帰納法により、レベル $n$ の束縛子の外側の束縛子は $c_0, \\dots, c_{n-1}$ と名付けられているので、それは $c_n$ を得る：名前はレベルだけに依存し、一度だけ計算される。したがってどちらの変換も、項のサイズに対して（ハッシュを除き）線形である。束縛子ごとに束縛子のスタックをコピーし、候補名を再走査すると、$n$ 個の束縛子の連鎖が $O(n^2)$ のコストになっていた。"
+
+#: manual/design/debruijn.md:310
+msgid "*Reduction.* The recursive search of `reduce_once` tries a node, then its head, then its arguments from left to right, and enters binder bodies, and it contracts the first redex it meets: the first redex in pre-order. The loop walks the term in pre-order and keeps the path from the root, each ancestor with the child it descended into; when a leaf ends a branch it returns to the nearest application with an argument left. When it meets a redex it contracts it, then rebuilds the ancestors from the innermost outwards and prepends one frame per ancestor to the reduction path, which is the order in which the recursive calls return. The steps, their paths and their counts in `normalize` are therefore unchanged."
+msgstr "*簡約。* `reduce_once` の再帰的な探索は、ノード、次にその頭部、次に引数を左から右に試し、束縛子の本体にも入り、最初に出会った簡約基、すなわち前順で最初の簡約基を縮約する。ループは項を前順にたどり、根からの経路を、各祖先とそれが降りていった子とともに保持する。葉で枝が終わると、引数が残っている最も近い適用に戻る。簡約基に出会うとそれを縮約し、最内の祖先から外側へ祖先を再構築して、祖先ごとに 1 つのフレームを簡約経路の先頭に加える。これは再帰呼び出しが戻る順序である。したがって `normalize` のステップ、その経路、その個数は変わらない。"
+
+#: manual/design/debruijn.md:321
+msgid "The tests in `src/debruijn/deep_test.mbt` run every operation on terms nested to depth 100 000 (application chains in head and in argument position, binder chains with indices that reach the outermost binder, and mixtures of these, well scoped and ill scoped) on every backend; before the change each of them overflowed the stack on js, wasm and wasm-gc."
+msgstr "`src/debruijn/deep_test.mbt` のテストは、すべてのバックエンドで、入れ子の深さ 100 000 の項（頭部や引数の位置にある適用の連鎖、最外の束縛子に届く添字をもつ束縛子の連鎖、およびそれらの組み合わせで、スコープ整合なものと不整合なもの）に対してすべての操作を実行する。この変更の前は、どれも js、wasm、wasm-gc でスタックがあふれていた。"
+
+#: manual/design/debruijn.md:329
 msgid "`validate(from_named(t)) == Ok(())` for every named $t$."
 msgstr "すべての名前付き項 $t$ について `validate(from_named(t)) == Ok(())`。"
 
-#: manual/design/debruijn.md:245
+#: manual/design/debruijn.md:330
 msgid "Round trips (1)–(3) above; `==` on well-scoped `DbTerm` is alpha-equivalence."
 msgstr "上記の往復変換 (1)–(3)。スコープ整合な `DbTerm` 上の `==` は α同値である。"
 
-#: manual/design/debruijn.md:246
+#: manual/design/debruijn.md:331
 msgid "Lemma 2: on well-scoped input `instantiate` succeeds and preserves scope; `reduce_once` never returns `ScopeFailure`, and every reduct is well scoped. On ill-scoped input `reduce_once` and `normalize` return `ScopeFailure` with the error `validate` reports."
 msgstr "補題 2：スコープ整合な入力に対して `instantiate` は成功しスコープを保つ。`reduce_once` は決して `ScopeFailure` を返さず、すべての簡約結果はスコープ整合である。スコープ不整合な入力に対しては、`reduce_once` と `normalize` は `validate` が報告するエラーとともに `ScopeFailure` を返す。"
 
-#: manual/design/debruijn.md:250
+#: manual/design/debruijn.md:335
 msgid "`reduce_once` satisfies the one-redex contract of [rewrite](rewrite.md), with rule name `\"beta\"`."
 msgstr "`reduce_once` は [rewrite](rewrite.md) の単一簡約基契約を満たし、規則名は `\"beta\"` である。"
 
-#: manual/design/debruijn.md:252
+#: manual/design/debruijn.md:337
 msgid "`shift(t, 0, c) == Ok(t)` for every `t` without negative indices, and shifts with one cutoff compose (Lemma 1)."
 msgstr "負の添字を含まないすべての `t` について `shift(t, 0, c) == Ok(t)` であり、同じカットオフのシフトは合成できる（補題 1）。"
 
-#: manual/design/debruijn.md:254
+#: manual/design/debruijn.md:339
 msgid "`shift` never turns a free index into a bound one: if a free index would fall below its cutoff, it returns `Err(NegativeShift)`, and it rejects a negative cutoff, which would free bound indices, with `Err(NegativeCutoff)`."
 msgstr "`shift` は自由インデックスを束縛されたインデックスに変えることはない：自由インデックスがカットオフを下回る場合は `Err(NegativeShift)` を返し、束縛されたインデックスを自由にしてしまう負のカットオフは `Err(NegativeCutoff)` で拒否する。"
 
-#: manual/design/debruijn.md:258
-msgid "Cost: `shift` and `validate` are linear in the term size. `substitute_bound` costs $O(|t| + m \\cdot |s|)$ for $m$ occurrences of the index, because each inserted copy is shifted. A `reduce_once` step costs one search plus one `instantiate`."
-msgstr "コスト：`shift` と `validate` は項のサイズに対して線形である。添字が $m$ 回出現する場合、挿入される各コピーがシフトされるため、`substitute_bound` のコストは $O(|t| + m \\cdot |s|)$ である。`reduce_once` の 1 ステップのコストは探索 1 回と `instantiate` 1 回である。"
+#: manual/design/debruijn.md:343
+msgid "Cost: `shift`, `validate`, `from_named` and `to_named` are linear in the term size (the translations up to hashing of names). `substitute_bound` costs $O(|t| + m \\cdot |s|)$ for $m$ occurrences of the index, because each inserted copy is shifted. A `reduce_once` step costs one search plus one `instantiate`, plus building the reduction path, which has one frame per ancestor of the redex and is built with `@rewrite.ReductionPath::prepend`."
+msgstr "コスト：`shift`、`validate`、`from_named`、`to_named` は項のサイズに対して線形である（変換は名前のハッシュを除く）。添字が $m$ 回出現する場合、挿入される各コピーがシフトされるため、`substitute_bound` のコストは $O(|t| + m \\cdot |s|)$ である。`reduce_once` の 1 ステップのコストは探索 1 回と `instantiate` 1 回に、簡約経路の構築を加えたものである。簡約経路には簡約基の祖先ごとに 1 つのフレームがあり、`@rewrite.ReductionPath::prepend` で構築される。"
 
-#: manual/design/debruijn.md:265
+#: manual/design/debruijn.md:350
+msgid "Stack: every operation uses a constant depth of host stack, whatever the nesting depth of the term; its pending work is kept in heap arrays with at most one entry per node."
+msgstr "スタック：すべての操作は、項の入れ子の深さによらず一定の深さのホストスタックを使う。保留中の作業はヒープ上の配列に保持され、ノードごとに高々 1 つのエントリである。"
+
+#: manual/design/debruijn.md:356
 msgid "**Levels instead of indices in syntax.** Levels make weakening free but substitution under binders more complex; indices are the standard for syntax, and levels are used where they help (NbE)."
 msgstr "**構文で添字の代わりにレベルを使う。** レベルを使うと弱化はコストなしになるが、束縛子の下での代入が複雑になる。構文には添字が標準であり、レベルは役立つ場面（NbE）で用いる。"
 
-#: manual/design/debruijn.md:268
+#: manual/design/debruijn.md:359
 msgid "**Fully nameless free variables.** Free variables are kept as names so that open terms from users and downstream ASTs need no global variable numbering, and so that `to_named` can restore them exactly."
 msgstr "**完全に名前なしの自由変数。** 自由変数は名前のまま保持される。これにより、ユーザーや下流の AST からの開いた項に大域的な変数番号付けが不要となり、`to_named` がそれらを正確に復元できる。"
 
-#: manual/design/debruijn.md:271
+#: manual/design/debruijn.md:362
 msgid "**Explicit substitutions.** A calculus with suspended substitutions avoids repeated shifting but complicates every consumer; the NbE package provides the efficient path instead."
 msgstr "**明示的代入。** 保留された代入をもつ計算体系は繰り返しのシフトを避けられるが、すべての利用側を複雑にする。代わりに効率的な経路は NbE パッケージが提供する。"
 
-#: manual/design/debruijn.md:277
+#: manual/design/debruijn.md:368
 msgid "Binder names are not preserved: `to_named` chooses `x`, `x_1`, …."
 msgstr "束縛子名は保存されない：`to_named` は `x`、`x_1`、… を選ぶ。"
 
-#: manual/design/debruijn.md:278
+#: manual/design/debruijn.md:369
 msgid "`shift`, `substitute_bound` and `instantiate` operate on open terms and do not detect dangling indices; the reducers and `validate` do."
 msgstr "`shift`、`substitute_bound`、`instantiate` は開いた項を扱い、ぶら下がったインデックスを検出しない。簡約器と `validate` は検出する。"
 
-#: manual/design/debruijn.md:280
+#: manual/design/debruijn.md:371
 msgid "An empty application `Apply(h, [])` is read as `h` when a redex is matched, so it never hides a redex, but `reduce_once` leaves the node in place, whereas [utlc/nbe](utlc/nbe.md) drops it from its normal forms."
 msgstr "空の適用 `Apply(h, [])` は簡約基の照合で `h` と読まれるので、決して簡約基を隠さない。ただし `reduce_once` はそのノードを残し、[utlc/nbe](utlc/nbe.md) は正規形からそれを取り除く。"
 
-#: manual/design/debruijn.md:283
+#: manual/design/debruijn.md:374
 msgid "Only beta is implemented; there is no eta rule for De Bruijn terms."
 msgstr "実装されているのは β のみであり、De Bruijn 項に対する η 規則はない。"
 
-#: manual/design/debruijn.md:284
+#: manual/design/debruijn.md:375
 msgid "Values are opaque; their contents are never shifted."
 msgstr "値は不透明であり、その内容がシフトされることはない。"
+
+#: manual/design/debruijn.md:376
+msgid "The derived `Debug` of `DbTerm` (and of the result types that contain one) recurses over the term, so printing a deeply nested term can overflow the host stack on js, wasm and wasm-gc. Every other operation, `==` included, handles any nesting depth."
+msgstr "`DbTerm`（およびそれを含む結果型）の派生した `Debug` は項を再帰的にたどるので、深く入れ子になった項を出力すると、js、wasm、wasm-gc でホストスタックがあふれることがある。それ以外のすべての操作は、`==` を含め、任意の入れ子の深さを扱える。"
 
 #: manual/design/eval.md:1
 msgid "eval design"
@@ -3072,42 +3156,75 @@ msgid "Cost"
 msgstr "コスト"
 
 #: manual/design/substitution.md:319
-msgid "At each binder, `apply` computes the free variables of the body and of the replacements that are inserted into it, and removes one entry from the substitution. For a term of size $n$ and binder depth $d$ this is $O(n \\cdot d)$ hash-set operations, plus $O(|\\sigma|)$ work and the free variables of the relevant replacements per binder, plus one traversal of the body for each renamed binder. `then` costs one `apply` and one `set` per entry of `self`, so $O(k^2)$ entry copies for $k$ entries besides the applications."
-msgstr "各束縛子で、`apply` は本体と、そこに挿入される置き換え項の自由変数を計算し、代入から 1 つのエントリを取り除く。サイズ $n$、束縛の深さ $d$ の項に対してこれは $O(n \\cdot d)$ 回のハッシュ集合操作であり、さらに束縛子ごとに $O(|\\sigma|)$ の作業と関係する置き換え項の自由変数の計算、名前替えされる束縛子ごとに本体の走査が一回加わる。`then` のコストは `self` のエントリごとに `apply` 一回と `set` 一回であり、$k$ 個のエントリに対して適用とは別に $O(k^2)$ 回のエントリのコピーとなる。"
+msgid "`apply` computes the free variables of every replacement once. At each binder it removes one entry from the substitution and looks for entries whose replacement has the binder free; only if there is one does it compute the free variables of the body (see the capture test below). So a term of size $n$ costs $O(n \\cdot |\\sigma|)$ besides the free variables of the replacements, and each binder that is a candidate for capture adds one traversal of its body, each renamed binder one more. `then` costs one `apply` and one `set` per entry of `self`, so $O(k^2)$ entry copies for $k$ entries besides the applications."
+msgstr "`apply` はすべての置き換え項の自由変数を一度だけ計算する。各束縛子で代入から 1 つのエントリを取り除き、置き換え項にその束縛子が自由に現れるエントリを探す。そのようなエントリがあるときに限り本体の自由変数を計算する（後述の捕獲判定を参照）。したがって、サイズ $n$ の項のコストは、置き換え項の自由変数を除き $O(n \\cdot |\\sigma|)$ であり、捕獲の候補となる束縛子ごとに本体の走査が一回、名前替えされる束縛子ごとにさらに一回加わる。`then` のコストは `self` のエントリごとに `apply` 一回と `set` 一回であり、$k$ 個のエントリに対して適用とは別に $O(k^2)$ 回のエントリのコピーとなる。"
 
-#: manual/design/substitution.md:328
+#: manual/design/substitution.md:329
 msgid "Generic substitution"
 msgstr "ジェネリックな代入"
 
-#: manual/design/substitution.md:330
+#: manual/design/substitution.md:331
 msgid "`GenericSubstitution::apply_once` is the same definition with every constructor replaced by its `BindingSyntax` counterpart. Reading a node through its view gives a named term, so Lemmas 0–3 hold for any implementation that satisfies the view laws of the [adapter design](adapter.md). On `Term[T]` the two algorithms coincide."
 msgstr "`GenericSubstitution::apply_once` は、各構成子を対応する `BindingSyntax` のものに置き換えた同じ定義である。ノードをそのビューを通して読むと名前付きの項が得られるので、補題 0–3 は [adapter の設計](adapter.md) のビュー法則を満たす任意の実装について成り立つ。`Term[T]` 上では二つのアルゴリズムは一致する。"
 
-#: manual/design/substitution.md:338
+#: manual/design/substitution.md:337
+#: manual/design/syntax.md:287
+msgid "Traversal with an explicit work stack"
+msgstr "明示的な作業スタックによる走査"
+
+#: manual/design/substitution.md:339
+msgid "**Problem.** The definition of $t\\sigma$ is a structural recursion, and run as host recursion it overflows the js, wasm and wasm-gc stacks on terms nested a few thousand levels deep."
+msgstr "**問題。** $t\\sigma$ の定義は構造再帰であり、ホストの再帰として実行すると、数千段入れ子になった項で js、wasm、wasm-gc のスタックがあふれる。"
+
+#: manual/design/substitution.md:343
+msgid "**Choice.** `Substitution::apply` and `GenericSubstitution::apply_once` are one private loop, `substitute`, over the view of the generic substitution above. It is an instance of the rebuild scheme of the [syntax design](syntax.md) with the context $c = \\sigma$ and"
+msgstr "**選択。** `Substitution::apply` と `GenericSubstitution::apply_once` は、上のジェネリックな代入のビューに対する 1 つの非公開ループ `substitute` である。これは [syntax の設計](syntax.md)の再構築方式の具体例で、文脈は $c = \\sigma$、"
+
+#: manual/design/substitution.md:356
+msgid "with $\\sigma' = \\sigma \\setminus x$ and $x'$ as in the definition. By the rebuild lemma the loop computes exactly $t\\sigma$, the same term and the same fresh names as the recursion, using a constant amount of host stack; the analyses it calls ($\\mathrm{FV}$, $\\mathrm{names}$ and the checked bound renaming) are stack-safe as well. On `Term[T]`, `Value` and the variables outside the domain are returned as they are instead of being rebuilt, which gives an equal term."
+msgstr "ここで $\\sigma' = \\sigma \\setminus x$ であり、$x'$ は定義のとおりである。再構築補題により、このループは一定量のホストスタックだけを使って、再帰とまったく同じ項、同じ新しい名前をもつ $t\\sigma$ を計算する。呼び出す解析（$\\mathrm{FV}$、$\\mathrm{names}$、検査付きの束縛名替え）もスタック安全である。`Term[T]` では、`Value` と定義域の外の変数は再構築されずそのまま返され、等しい項が得られる。"
+
+#: manual/design/substitution.md:364
+msgid "**The capture test.** The condition $x \\in R_{\\sigma'}(\\mathrm{FV}(t))$ is decided in a cheaper order. Unfolding $R$,"
+msgstr "**捕獲判定。** 条件 $x \\in R_{\\sigma'}(\\mathrm{FV}(t))$ は、より安い順序で判定される。$R$ を展開すると、"
+
+#: manual/design/substitution.md:374
+msgid "where $C = \\{z \\in \\operatorname{dom}\\sigma' \\mid x \\in \\mathrm{FV}(\\sigma'(z))\\}$ is the set of *candidates*. The sets $\\mathrm{FV}(\\sigma(z))$ are computed once per call, and since $\\sigma' \\subseteq \\sigma$ as a set of entries they serve every binder. If $C = \\varnothing$ the condition is false without looking at $t$; otherwise $\\mathrm{FV}(t)$ is computed once. The boolean is the same, so the result is too, but a chain of $n$ binders none of which can capture now costs $O(n)$ instead of $O(n^2)$."
+msgstr "ここで $C = \\{z \\in \\operatorname{dom}\\sigma' \\mid x \\in \\mathrm{FV}(\\sigma'(z))\\}$ は*候補*の集合である。集合 $\\mathrm{FV}(\\sigma(z))$ は呼び出しごとに一度だけ計算され、$\\sigma' \\subseteq \\sigma$（エントリの集合として）なので、すべての束縛子で使える。$C = \\varnothing$ なら、$t$ を見ずに条件は偽である。そうでなければ $\\mathrm{FV}(t)$ を一度だけ計算する。真偽値は同じなので結果も同じだが、捕獲が起こりえない $n$ 個の束縛子の連鎖のコストは、$O(n^2)$ ではなく $O(n)$ になる。"
+
+#: manual/design/substitution.md:382
+msgid "The tests in `src/substitution/stack_safety_test.mbt` run substitution, freshening at the outermost binder, deep replacements, composition and the generic substitution on terms nested 100 000 levels deep, on every backend."
+msgstr "`src/substitution/stack_safety_test.mbt` のテストは、すべてのバックエンドで、100 000 段入れ子になった項に対して、代入、最外の束縛子での新しい名前付け、深い置き換え項、合成、ジェネリックな代入を実行する。"
+
+#: manual/design/substitution.md:388
 msgid "**The Barendregt variable convention.** Assuming that bound names are distinct from all free names would remove the renaming case, but terms come from users and from other algorithms, and the convention is not preserved by reduction. The library renames explicitly instead."
 msgstr "**Barendregt の変数規約。** 束縛名がすべての自由名と異なると仮定すれば名前替えの場合をなくせるが、項は利用者や他のアルゴリズムから来るものであり、この規約は簡約で保存されない。そのためライブラリは明示的に名前替えを行う。"
 
-#: manual/design/substitution.md:342
+#: manual/design/substitution.md:392
 msgid "**Substitution on De Bruijn terms only.** Index-based substitution needs no renaming and is provided by [debruijn](debruijn.md), but the shared interface for downstream ASTs is named, so named substitution must be correct on its own."
 msgstr "**De Bruijn 項のみでの代入。** インデックスによる代入は名前替えを必要とせず [debruijn](debruijn.md) で提供されているが、下流の AST 向けの共有インターフェースは名前付きなので、名前付き代入はそれ自体で正しくなければならない。"
 
-#: manual/design/substitution.md:346
+#: manual/design/substitution.md:396
 msgid "**Iterated substitution.** Repeating until no domain variable occurs can diverge ($x \\mapsto f(x)$) and has no composition law. Callers that want a fixed point iterate explicitly."
 msgstr "**反復代入。** 定義域の変数が現れなくなるまで繰り返すと発散しうるし（$x \\mapsto f(x)$）、合成の法則もない。不動点を必要とする呼び出し側は明示的に反復する。"
 
-#: manual/design/substitution.md:352
+#: manual/design/substitution.md:402
 msgid "No unification, matching or occurs check: substitutions are given, not solved for."
 msgstr "単一化、マッチング、出現検査（occurs check）はない。代入は与えられるものであり、解かれるものではない。"
 
-#: manual/design/substitution.md:354
+#: manual/design/substitution.md:404
 msgid "`GenericSubstitution` has no `then` or `restrict`; compose generic substitutions by applying them in turn."
 msgstr "`GenericSubstitution` には `then` も `restrict` もない。ジェネリックな代入は順に適用することで合成する。"
 
-#: manual/design/substitution.md:356
+#: manual/design/substitution.md:406
 msgid "Results are equal to the textbook definition only up to $=_\\alpha$; use `@syntax.alpha_equal` to compare them."
 msgstr "結果が教科書の定義と等しいのは $=_\\alpha$ を除いてのみである。比較には `@syntax.alpha_equal` を使う。"
 
-#: manual/design/substitution.md:358
+#: manual/design/substitution.md:408
+msgid "Stack safety is in the nesting depth, not in the cost: a chain of $n$ binders every one of which is renamed still costs $O(n^2)$, because each renaming traverses the body below it."
+msgstr "スタック安全性が保証するのは入れ子の深さに対してであり、コストではない：$n$ 個の束縛子の連鎖でそのすべてが名前替えされる場合、各名前替えがその下の本体を走査するので、コストは依然 $O(n^2)$ である。"
+
+#: manual/design/substitution.md:411
 msgid "Values are never entered, so a `Value` payload that contains variables is not substituted into."
 msgstr "値の内部には決して入らないので、変数を含む `Value` ペイロードに対して代入は行われない。"
 
@@ -3256,34 +3373,34 @@ msgstr ""
 "ot\\approx_T \\mathrm{NaN}$。したがって `Term[Double]` 上の `alpha_equal` は対称的かつ推移的であり、`NaN` ペイロードを含まない項でちょうど反射的であり、`Value(0.0)` と `Value(-0.0)` を同一視する。"
 
 #: manual/design/syntax.md:213
-msgid "Each node is visited once. A variable lookup scans the environment, and each binder copies it, both in $O(d)$ for binder depth $d$, so the comparison costs $O(n \\cdot d)$ for terms of size $n$."
-msgstr "各ノードは一度だけ訪問される。変数の検索は環境を走査し、各束縛子は環境をコピーする。どちらも束縛の深さ $d$ に対して $O(d)$ であるので、比較のコストはサイズ $n$ の項に対して $O(n \\cdot d)$ である。"
+msgid "Each node is visited once. The environments are persistent hash maps, so a variable lookup and the extension at a binder are one map operation each, the extension shares the outer environment instead of copying it, and the comparison costs $O(n)$ map operations for terms of size $n$."
+msgstr "各ノードは一度だけ訪れる。環境は永続ハッシュマップなので、変数の参照と束縛子での拡張はそれぞれマップ操作 1 回であり、拡張は外側の環境をコピーせず共有し、サイズ $n$ の項に対する比較のコストは $O(n)$ 回のマップ操作である。"
 
-#: manual/design/syntax.md:219
+#: manual/design/syntax.md:220
 msgid "IEEE Std 754-2019, *IEEE Standard for Floating-Point Arithmetic*, §5.11: every NaN compares unordered with everything, itself included, and $+0 = -0$."
 msgstr "IEEE Std 754-2019, *IEEE Standard for Floating-Point Arithmetic*, §5.11：すべての NaN は自分自身を含むあらゆる値と順序なし（unordered）と比較され、また $+0 = -0$ である。"
 
-#: manual/design/syntax.md:221
+#: manual/design/syntax.md:222
 msgid "Capture-avoiding renaming of free variables"
 msgstr "自由変数の捕獲回避的な名前替え"
 
-#: manual/design/syntax.md:223
+#: manual/design/syntax.md:224
 msgid "**Problem.** Applying a renaming $\\rho$ under a binder can capture: renaming $x \\mapsto y$ in $\\beta y.\\,x$ naively gives $\\beta y.\\,y$."
 msgstr "**問題。** 束縛子の下で名前替え $\\rho$ を適用すると捕獲が起こりうる。$\\beta y.\\,x$ で素朴に $x \\mapsto y$ と名前替えすると $\\beta y.\\,y$ になる。"
 
-#: manual/design/syntax.md:226
+#: manual/design/syntax.md:227
 msgid "**Choice.** `rename_free` implements"
 msgstr "**選択。** `rename_free` は次を実装する。"
 
-#: manual/design/syntax.md:239
+#: manual/design/syntax.md:240
 msgid "with $x' = \\operatorname{fresh}(x,\\ \\mathrm{names}(t) \\cup \\operatorname{supp}(\\rho \\setminus x) \\cup \\{x\\})$."
 msgstr "ここで $x' = \\operatorname{fresh}(x,\\ \\mathrm{names}(t) \\cup \\operatorname{supp}(\\rho \\setminus x) \\cup \\{x\\})$ である。"
 
-#: manual/design/syntax.md:241
+#: manual/design/syntax.md:242
 msgid "**Lemma (free variables of a renaming).** $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$."
 msgstr "**補題（名前替えの自由変数）。** $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$。"
 
-#: manual/design/syntax.md:244
+#: manual/design/syntax.md:245
 msgid ""
 "The only interesting case is the binder without freshening. Let $\\rho' = \\rho \\setminus x$ with $x \\n"
 "otin \\operatorname{tgt}\\rho'$. By induction $\\mathrm{FV}(t\\rho') = \\rho'(\\mathrm{FV}(t))$, so"
@@ -3291,7 +3408,7 @@ msgstr ""
 "興味深いのは新しい名前にしない束縛子の場合だけである。$\\rho' = \\rho \\setminus x$ とし、$x \\n"
 "otin \\operatorname{tgt}\\rho'$ とする。帰納法により $\\mathrm{FV}(t\\rho') = \\rho'(\\mathrm{FV}(t))$ なので、"
 
-#: manual/design/syntax.md:257
+#: manual/design/syntax.md:258
 msgid ""
 "The second step uses $\\rho(n) \\n"
 "e x$ for $n \\n"
@@ -3303,7 +3420,7 @@ msgstr ""
 "e x$ であることを用いる。実際、$n \\in \\operatorname{dom}\\rho'$ かつ $\\rho(n) \\in \\operatorname{tgt}\\rho'$ であって $x$ は除外されるか、または $\\rho(n) = n \\n"
 "e x$ である。新しい名前にする場合も同じ計算が $t\\{x \\mapsto x'\\}$ と $x'$ に適用できる。$x'$ は $\\operatorname{supp}\\rho'$ の外にあり、したがって写す元でも写す先でもないからである。この補題はまさに、どの自由変数も捕獲されなかったことを述べている。"
 
-#: manual/design/syntax.md:264
+#: manual/design/syntax.md:265
 msgid ""
 "The test $x \\n"
 "otin \\operatorname{tgt}(\\rho \\setminus x)$ is conservative: it also renames the binder when the offending entry's source does not occur in $t$. The result is still alpha-equivalent to the minimal one. The lemma shows that no variable is captured; that the result is the intended term up to $=_\\alpha$ follows from the translation lemma of the [substitution design](substitution.md), which covers renamings as well."
@@ -3311,11 +3428,11 @@ msgstr ""
 "判定 $x \\n"
 "otin \\operatorname{tgt}(\\rho \\setminus x)$ は保守的である。問題となるエントリの元が $t$ に現れない場合にも束縛子を名前替えする。それでも結果は最小のものと α同値である。この補題は変数が捕獲されないことを示す。結果が $=_\\alpha$ を除いて意図した項であることは、リネーミングも扱う [substitution の設計](substitution.md)の変換補題から従う。"
 
-#: manual/design/syntax.md:271
+#: manual/design/syntax.md:272
 msgid "Checked bound renaming"
 msgstr "検査付きの束縛名の名前替え"
 
-#: manual/design/syntax.md:273
+#: manual/design/syntax.md:274
 msgid ""
 "`alpha_rename_bound(t, x, y)` computes $t\\{x \\mapsto y\\}$, the body of the alpha step above, and returns `None` unless $y \\n"
 "otin \\mathrm{names}(t)$ (or $x = y$). Under that side condition the alpha axiom gives directly"
@@ -3323,71 +3440,131 @@ msgstr ""
 "`alpha_rename_bound(t, x, y)` は上記の α ステップの本体である $t\\{x \\mapsto y\\}$ を計算し、$y \\n"
 "otin \\mathrm{names}(t)$（または $x = y$）でない限り `None` を返す。この付帯条件のもとで、α公理から直接次が得られる。"
 
-#: manual/design/syntax.md:281
+#: manual/design/syntax.md:282
 msgid "The check is stronger than necessary (an occurrence of $y$ under an inner binder for $y$ would be harmless), but it is cheap and it is all the substitution algorithms need, because they always call it with a name chosen fresh for the body."
 msgstr "この検査は必要以上に強い（内側の $y$ の束縛子の下にある $y$ の出現は無害である）が、安価であり、代入アルゴリズムが必要とするのはこれだけである。代入アルゴリズムは常に本体に対して新しく選んだ名前でこれを呼び出すからである。"
 
-#: manual/design/syntax.md:288
+#: manual/design/syntax.md:289
+msgid "**Problem.** Every definition above is a structural recursion. Run as host recursion, a term nested $n$ levels deep (a chain of `Apply` heads, of `Apply` arguments, or of binders) needs $n$ host frames. The js, wasm and wasm-gc stacks overflow after a few thousand levels, native at $10^5$ levels in the tests, and nothing in the definitions bounds the nesting depth of an input."
+msgstr "**問題。** 上のすべての定義は構造再帰である。ホストの再帰として実行すると、$n$ 段入れ子になった項（`Apply` の頭部の連鎖、`Apply` の引数の連鎖、または束縛子の連鎖）は $n$ 個のホストフレームを必要とする。js、wasm、wasm-gc のスタックは数千段であふれ、native もテストでは $10^5$ 段であふれ、定義には入力の入れ子の深さを制限するものが何もない。"
+
+#: manual/design/syntax.md:295
+msgid "**Choice.** Every operation of the package is a loop over a heap `Array` of pending work. The host stack depth is constant in the nesting depth, and the heap holds $O(n)$ pending items for a term of size $n$. There are two schemes, one for folds and one for rebuilds."
+msgstr "**選択。** パッケージのすべての操作は、保留中の作業のヒープ上の `Array` に対するループである。ホストスタックの深さは入れ子の深さによらず一定であり、サイズ $n$ の項に対してヒープは $O(n)$ 個の保留項目を保持する。方式は 2 つあり、1 つは畳み込み用、もう 1 つは再構築用である。"
+
+#: manual/design/syntax.md:300
+msgid "*Folds.* `free_variables`, `all_names`, `==` and `alpha_equal` have the form"
+msgstr "*畳み込み。* `free_variables`、`all_names`、`==`、`alpha_equal` は次の形をもつ"
+
+#: manual/design/syntax.md:306
+msgid "where $\\operatorname{ch}(t, c)$ lists the children of $t$ with the context the recursive call receives (the bound set $B$, extended to $B \\cup \\{x\\}$ under $\\beta x$; for `alpha_equal`, the environments and the depth), $\\ell$ is the contribution of the node itself, and $\\oplus$ is $\\cup$ for the name sets and $\\wedge$ for the comparisons; for a comparison a node is a pair of subterms, and a mismatch of constructors, names or arities makes $\\ell$ false. Both operations are associative and commutative with a unit ($\\varnothing$, true). The loop keeps an accumulator $A$ and a multiset $W$ of pending pairs, with the invariant"
+msgstr "ここで $\\operatorname{ch}(t, c)$ は $t$ の子を、再帰呼び出しが受け取る文脈とともに列挙する（束縛集合 $B$ は $\\beta x$ の下で $B \\cup \\{x\\}$ に拡張される。`alpha_equal` では環境と深さ）。$\\ell$ はノード自身の寄与であり、$\\oplus$ は名前集合では $\\cup$、比較では $\\wedge$ である。比較ではノードは部分項の組であり、コンストラクタ、名前、アリティの不一致は $\\ell$ を偽にする。どちらの演算も結合的かつ可換で単位元（$\\varnothing$、真）をもつ。ループは累積子 $A$ と保留中の組の多重集合 $W$ を保持し、不変条件は"
+
+#: manual/design/syntax.md:320
+msgid "It holds initially with $A$ the unit and $W = \\{(t_0, c_0)\\}$. Taking $(t, c)$ out of $W$, adding $\\ell(t, c)$ to $A$ and putting $\\operatorname{ch}(t, c)$ into $W$ unfolds one equation of $F$, so the invariant is preserved; every pair is put into $W$ once, so the loop stops, and then $A = F(t_0, c_0)$. For $\\wedge$ the loop returns as soon as $A$ is false, because $\\text{false} \\wedge b = \\text{false}$. The contexts are persistent values (`HashSet`, `HashMap`), so pushing the children of a node shares the context instead of copying it."
+msgstr "これは、$A$ を単位元、$W = \\{(t_0, c_0)\\}$ として最初に成り立つ。$W$ から $(t, c)$ を取り出し、$\\ell(t, c)$ を $A$ に加え、$\\operatorname{ch}(t, c)$ を $W$ に入れることは $F$ の等式を 1 回展開することなので、不変条件は保たれる。すべての組は $W$ に一度だけ入れられるのでループは停止し、そのとき $A = F(t_0, c_0)$ である。$\\wedge$ では、$\\text{false} \\wedge b = \\text{false}$ なので、$A$ が偽になった時点でループは返る。文脈は永続値（`HashSet`、`HashMap`）なので、ノードの子を積むときは文脈をコピーせず共有する。"
+
+#: manual/design/syntax.md:329
+msgid "*Rebuilds.* `map_values`, `rename_free`, `alpha_rename_bound` and the substitutions of the [substitution design](substitution.md) have the form"
+msgstr "*再構築。* `map_values`、`rename_free`、`alpha_rename_bound`、および [substitution の設計](substitution.md)の代入は次の形をもつ"
+
+#: manual/design/syntax.md:339
+msgid "with $R$ given directly on values and variables. A private `rebuild` runs it with a stack of tasks and a stack of results. `Visit(t, c)` of a leaf pushes its result. `Visit` of an application pushes `BuildApply(n)`, then `Visit` of the arguments from last to first, then `Visit` of the head; `Visit` of a binder calls $\\operatorname{binder}$ and pushes `BuildBind(x')` and `Visit(t', c')`. `BuildApply(n)` pops $n + 1$ results and pushes their application, and `BuildBind(x')` wraps the top result in a binder."
+msgstr "ここで $R$ は値と変数に対して直接与えられる。非公開の `rebuild` は、タスクのスタックと結果のスタックでそれを実行する。葉の `Visit(t, c)` はその結果を積む。適用の `Visit` は `BuildApply(n)` を積み、次に引数を最後から最初へ `Visit` し、次に頭部を `Visit` する。束縛子の `Visit` は $\\operatorname{binder}$ を呼び、`BuildBind(x')` と `Visit(t', c')` を積む。`BuildApply(n)` は $n + 1$ 個の結果を取り出してそれらの適用を積み、`BuildBind(x')` は先頭の結果を束縛子で包む。"
+
+#: manual/design/syntax.md:347
+msgid "**Lemma (rebuild).** Started on a result stack $S$, the tasks that a `Visit(t, c)` puts on the task stack leave $S \\cdot R(t, c)$ when they are done, and leave the task stack below them unchanged."
+msgstr "**補題（再構築）。** 結果スタック $S$ から始めて、`Visit(t, c)` がタスクスタックに置くタスクは、完了すると $S \\cdot R(t, c)$ を残し、その下のタスクスタックは変わらない。"
+
+#: manual/design/syntax.md:351
+msgid "*Proof.* By induction on $t$. A leaf pushes $R(t, c)$. For an application, the tasks run in the order `Visit(t)`, `Visit(u_1)`, …, `Visit(u_n)`, `BuildApply(n)`; by induction they leave $S \\cdot R(t, c) \\cdot R(u_1, c) \\cdots R(u_n, c)$ before `BuildApply(n)`, which turns the top $n + 1$ results into $R(t, c)(R(u_1, c), \\dots)$. A binder is the same with one child. $\\square$"
+msgstr "*証明。* $t$ に関する帰納法による。葉は $R(t, c)$ を積む。適用では、タスクは `Visit(t)`、`Visit(u_1)`、…、`Visit(u_n)`、`BuildApply(n)` の順に実行される。帰納法の仮定により、`BuildApply(n)` の前には $S \\cdot R(t, c) \\cdot R(u_1, c) \\cdots R(u_n, c)$ が残り、`BuildApply(n)` は先頭の $n + 1$ 個の結果を $R(t, c)(R(u_1, c), \\dots)$ にする。束縛子は子が 1 つである以外は同じである。$\\square$"
+
+#: manual/design/syntax.md:358
+msgid "Applied to the root, the lemma gives the result stack $[R(t_0, c_0)]$. The callbacks run in the order of the recursive definition: `project`, the `binder` step and `map_values`'s function in pre-order, head first and then the arguments from left to right, and the constructors of `BindingSyntax` in post-order. So the result is the recursive one, even for an impure function passed to `map_values`."
+msgstr "根に適用すると、補題は結果スタック $[R(t_0, c_0)]$ を与える。コールバックは再帰的な定義の順序で実行される：`project`、`binder` のステップ、`map_values` の関数は前順（頭部が先、次に引数を左から右）、`BindingSyntax` のコンストラクタは後順である。したがって、`map_values` に不純な関数を渡した場合でも、結果は再帰版のものと同じである。"
+
+#: manual/design/syntax.md:365
+msgid "**Equality.** A derived `Eq` is itself a structural recursion, so `Term` implements `Eq` by hand as a fold with $\\wedge$: the same constructors, the same names, the same arities, and payloads related by `T`'s `==`. It has no shortcut for physically equal subterms, because the derived `==` has none: a term with a `NaN` payload is not `==` to itself in either."
+msgstr "**等価性。** 派生した `Eq` はそれ自体が構造再帰なので、`Term` は `Eq` を、$\\wedge$ による畳み込みとして手で実装する：コンストラクタが同じ、名前が同じ、アリティが同じで、ペイロードが `T` の `==` で関係づけられる。物理的に等しい部分項の近道はない。派生した `==` にもないからである：`NaN` のペイロードをもつ項は、どちらでも自分自身と `==` にならない。"
+
+#: manual/design/syntax.md:371
+msgid "The tests in `src/syntax/stack_safety_wbtest.mbt` run every operation on the three chains and a mixture of them, 100 000 levels deep, on every backend."
+msgstr "`src/syntax/stack_safety_wbtest.mbt` のテストは、すべてのバックエンドで、3 種類の連鎖とそれらの混合に対して、100 000 段の深さですべての操作を実行する。"
+
+#: manual/design/syntax.md:376
 msgid "$\\mathrm{FV}(t) \\subseteq \\mathrm{names}(t)$; `map_values` preserves both."
 msgstr "$\\mathrm{FV}(t) \\subseteq \\mathrm{names}(t)$ であり、`map_values` は両者を保存する。"
 
-#: manual/design/syntax.md:289
+#: manual/design/syntax.md:377
 msgid "`alpha_equal` decides the lifting of `T`'s `==` to nameless terms, and coincides with $=_\\alpha$ when that `==` is the identity (theorem above). It is reflexive, symmetric and transitive exactly when `==` is (corollary above). Reflexivity for `Int` payloads is checked by a QuickCheck property in `src/syntax/syntax_wbtest.mbt`, and a test there records that a `NaN` payload is not alpha-equal to itself."
 msgstr "`alpha_equal` は `T` の `==` を名前なしの項へ持ち上げたものを判定し、その `==` が恒等関係であるときに $=_\\alpha$ と一致する（上の定理）。それが反射的・対称的・推移的であるのは `==` がそうであるときに限る（上の系）。`Int` ペイロードについての反射性は `src/syntax/syntax_wbtest.mbt` の QuickCheck 性質で検査され、同じファイルのテストは `NaN` ペイロードが自分自身と α同値にならないことを記録している。"
 
-#: manual/design/syntax.md:295
+#: manual/design/syntax.md:383
 msgid "`rename_free` satisfies $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$ and is invariant under $=_\\alpha$: alpha-equivalent inputs give alpha-equivalent outputs."
 msgstr "`rename_free` は $\\mathrm{FV}(t\\rho) = \\rho(\\mathrm{FV}(t))$ を満たし、$=_\\alpha$ のもとで不変である。α同値な入力は α同値な出力を与える。"
 
-#: manual/design/syntax.md:298
+#: manual/design/syntax.md:386
 msgid "`alpha_rename_bound(t, x, y) = Some(t')` implies $\\beta x.\\,t =_\\alpha \\beta y.\\,t'$."
 msgstr "`alpha_rename_bound(t, x, y) = Some(t')` ならば $\\beta x.\\,t =_\\alpha \\beta y.\\,t'$ である。"
 
-#: manual/design/syntax.md:300
+#: manual/design/syntax.md:388
 msgid "On `Term[T]` every `generic_*` function equals its specialised counterpart."
 msgstr "`Term[T]` 上では、各 `generic_*` 関数はその特殊化版と等しい。"
 
-#: manual/design/syntax.md:302
-msgid "Cost: `free_variables` and `all_names` make $O(n)$ hash-set operations for a term of size $n$; each union costs up to the size of the sets involved. `alpha_rename_bound` adds one traversal to `all_names`. `rename_free` removes one entry and computes the targets of the renaming at every binder, so it costs $O(n \\cdot |\\rho|)$ when no binder is renamed; each freshened binder adds `all_names` and one renaming traversal of its body."
-msgstr "コスト：`free_variables` と `all_names` はサイズ $n$ の項に対して $O(n)$ 回のハッシュ集合操作を行い、各和集合のコストは関係する集合の大きさまでである。`alpha_rename_bound` は `all_names` に走査を 1 回加える。`rename_free` は各束縛子でエントリを 1 つ取り除き、リネーミングの像を計算するので、束縛子が名前替えされない場合のコストは $O(n \\cdot |\\rho|)$ である。新しい名前にされる束縛子ごとに、`all_names` とその本体の名前替えの走査が 1 回加わる。"
+#: manual/design/syntax.md:389
+msgid "Every operation, `==` included, uses a constant amount of host stack in the nesting depth of its input (traversal with an explicit work stack, above)."
+msgstr "すべての操作は、`==` を含め、入力の入れ子の深さに対して一定量のホストスタックしか使わない（上の、明示的な作業スタックによる走査）。"
 
-#: manual/design/syntax.md:311
+#: manual/design/syntax.md:392
+msgid "Cost: `free_variables` and `all_names` make $O(n)$ hash-set insertions for a term of size $n$. `alpha_rename_bound` adds one traversal to `all_names`. `rename_free` removes one entry and computes the targets of the renaming at every binder, so it costs $O(n \\cdot |\\rho|)$ when no binder is renamed; each freshened binder adds `all_names` and one renaming traversal of its body."
+msgstr "コスト：`free_variables` と `all_names` はサイズ $n$ の項に対して $O(n)$ 回のハッシュ集合への挿入を行う。`alpha_rename_bound` は `all_names` に走査を 1 回加える。`rename_free` は各束縛子でエントリを 1 つ取り除き、リネーミングの像を計算するので、束縛子が名前替えされない場合のコストは $O(n \\cdot |\\rho|)$ である。新しい名前にされる束縛子ごとに、`all_names` とその本体の名前替えの走査が 1 回加わる。"
+
+#: manual/design/syntax.md:401
 msgid "**Variables inside values.** Letting `T` contain names would require a traversal trait on `T` as well. Such ASTs implement `BindingSyntax` directly, which covers the same need with one trait."
 msgstr "**値の内部の変数。** `T` に名前を含めることを許すと、`T` にも走査用のトレイトが必要になる。そのような AST は `BindingSyntax` を直接実装すればよく、一つのトレイトで同じ要求を満たせる。"
 
-#: manual/design/syntax.md:314
+#: manual/design/syntax.md:404
 msgid "**Multi-variable binders.** A binder for several names at once is expressed as nested `Bind` nodes. This keeps the view small and the proofs per binder."
 msgstr "**多変数の束縛子。** 複数の名前を一度に束縛する束縛子は、入れ子の `Bind` ノードとして表現する。これによりビューは小さく保たれ、証明も束縛子ごとに行える。"
 
-#: manual/design/syntax.md:316
+#: manual/design/syntax.md:406
 msgid "**Unchecked bound renaming.** A version without the `None` case would make a capture silent. The checked form makes the precondition visible in the type."
 msgstr "**検査なしの束縛名の名前替え。** `None` の場合をなくした版では捕獲が黙って起こる。検査付きの形にすると事前条件が型に現れる。"
 
-#: manual/design/syntax.md:319
+#: manual/design/syntax.md:409
 msgid "**Alpha-equivalence by conversion.** Converting both terms to De Bruijn form and comparing would allocate two new terms; the lockstep algorithm is the same comparison without the allocation."
 msgstr "**変換による α同値。** 両方の項を De Bruijn 形式に変換して比較すると新しい項を二つ割り当てることになる。歩調を合わせるアルゴリズムは割り当てなしで同じ比較を行う。"
 
-#: manual/design/syntax.md:325
+#: manual/design/syntax.md:415
 msgid "`Value` payloads are never inspected. A payload that contains variables is outside the contract."
 msgstr "`Value` ペイロードは決して調べられない。変数を含むペイロードは契約の範囲外である。"
 
-#: manual/design/syntax.md:327
+#: manual/design/syntax.md:417
 msgid "`==` on terms is structural, not alpha-equivalence."
 msgstr "項に対する `==` は構造的な等価性であり、α同値ではない。"
 
-#: manual/design/syntax.md:328
+#: manual/design/syntax.md:418
+msgid "`Debug` on terms (`@debug.to_string`, `Repr`, the messages of `assert_eq` and `inspect`) is derived and recursive, so formatting a term nested tens of thousands of levels deep can still overflow the host stack."
+msgstr "項に対する `Debug`（`@debug.to_string`、`Repr`、`assert_eq` と `inspect` のメッセージ）は派生で再帰的なので、数万段入れ子になった項を整形すると、依然としてホストスタックがあふれることがある。"
+
+#: manual/design/syntax.md:421
+msgid "The generic algorithms are stack-safe when the `BindingSyntax` methods of the downstream type are: `project` and the three constructors should look at one layer of a node and not recurse into it."
+msgstr "ジェネリックなアルゴリズムは、下流の型の `BindingSyntax` メソッドがスタック安全であるときにスタック安全である：`project` と 3 つのコンストラクタは、ノードの 1 層だけを見て、その中へ再帰してはならない。"
+
+#: manual/design/syntax.md:424
 msgid "`alpha_equal` compares payloads with `T`'s `==` and adds no reflexivity of its own: with a non-reflexive `==` (such as `Double` and `NaN`) a term can fail to be alpha-equal to itself."
 msgstr "`alpha_equal` はペイロードを `T` の `==` で比較し、独自の反射性を付け加えない。反射的でない `==`（`Double` と `NaN` など）では、項が自分自身と α同値にならないことがある。"
 
-#: manual/design/syntax.md:331
+#: manual/design/syntax.md:427
 msgid "No sorts, scopes or types: every name is a term variable of the same kind."
 msgstr "ソート、スコープ、型はない。すべての名前は同じ種類の項変数である。"
 
-#: manual/design/syntax.md:332
+#: manual/design/syntax.md:428
 msgid "The package does not check that a `BindingSyntax` implementation obeys its laws; [adapter](adapter.md) describes how to test them."
 msgstr "このパッケージは `BindingSyntax` の実装がその法則に従っているかを検査しない。その検査方法は [adapter](adapter.md) で説明されている。"
 
-#: manual/design/syntax.md:334
+#: manual/design/syntax.md:430
 msgid "Substitution lives in [substitution](substitution.md), traversal and rewriting in [rewrite](rewrite.md)."
 msgstr "代入は [substitution](substitution.md) に、走査と書き換えは [rewrite](rewrite.md) にある。"
 
@@ -3708,122 +3885,138 @@ msgid "These are the readback equations above, with the head of a neutral read b
 msgstr "これらは上の読み戻しの方程式であり、以前と同じく中立値の頭部をその引数より先に読み戻す。$\\mathsf{rb}$ ステップ内の強制と評価は評価機械を最後まで実行して読み戻しのループに戻るので、ホストスタックに載るのは高々この 2 つのループであり、$Q$ も $K$ と同様に消費した単位数で抑えられる。"
 
 #: manual/design/utlc/nbe.md:260
+msgid "*Deep input terms.* The same machines make the host stack independent of the nesting depth of the input. The rule for $\\mathsf{ev}(t\\,\\vec u, \\rho)$ pushes a frame and continues with the head, so a long chain of applications in head position grows $K$, not the host stack; arguments are delayed, and a chain nested in argument position is evaluated one level per $\\mathsf{fo}$ step, when readback forces the argument. A binder is a closure, and readback opens it with one $\\mathsf{bind}$ frame. Every frame is paid for by a unit, so the bound $|K| \\le f_0 + 1$ above covers deep input as well. Before evaluating, `eval` and `normalize` validate the input with `@debruijn.validate`, which keeps its pending subterms on a heap stack (see the [debruijn design](../debruijn.md)). On every backend, the depth of the input therefore costs fuel and heap, not host stack."
+msgstr "*深い入力項。* 同じ機械により、ホストスタックは入力の入れ子の深さに依存しなくなる。$\\mathsf{ev}(t\\,\\vec u, \\rho)$ の規則はフレームを積んで頭部を続けて評価するので、頭部位置の長い適用の連鎖が伸ばすのはホストスタックではなく $K$ である。引数は遅延され、引数位置に入れ子になった連鎖は、読み戻しがその引数を強制するときに、$\\mathsf{fo}$ のステップごとに 1 段ずつ評価される。束縛子はクロージャであり、読み戻しは 1 つの $\\mathsf{bind}$ フレームでそれを開く。すべてのフレームは 1 単位で支払われるので、上の限界 $|K| \\le f_0 + 1$ は深い入力も覆う。評価の前に、`eval` と `normalize` は `@debruijn.validate` で入力を検証する。これは保留中の部分項をヒープ上のスタックに保持する（[debruijn の設計](../debruijn.md)を参照）。したがって、すべてのバックエンドで、入力の深さが消費するのはホストスタックではなく燃料とヒープである。"
+
+#: manual/design/utlc/nbe.md:273
+msgid "*Shared environments.* Opening a binder extends an environment: $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$ evaluates $t$ in $e \\cdot \\rho$, and readback of $\\mathsf{clo}(t, \\rho)$ under $n$ binders evaluates $t$ in $\\mathsf{lvl}(n) \\cdot \\rho$. Copying $\\rho$ for each extension makes a term with $n$ nested binders cost"
+msgstr "*共有される環境。* 束縛子を開くと環境が拡張される：$\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$ は $t$ を $e \\cdot \\rho$ で評価し、$n$ 個の束縛子の下での $\\mathsf{clo}(t, \\rho)$ の読み戻しは $t$ を $\\mathsf{lvl}(n) \\cdot \\rho$ で評価する。拡張のたびに $\\rho$ をコピーすると、$n$ 個の入れ子の束縛子をもつ項のコストは"
+
+#: manual/design/utlc/nbe.md:283
+msgid "element copies, tens of seconds for $n = 100\\,000$. Environments are therefore persistent lists stored in shared arrays: an environment is a pair $(a, \\ell)$ of an array and a length, with $\\rho_i = a[\\ell - 1 - i]$, outermost entry first. No environment ever changes $a[0..\\ell)$, so"
+msgstr "回の要素コピーとなり、$n = 100\\,000$ では数十秒かかる。そこで環境は、共有される配列に格納された永続リストとする：環境は配列と長さの組 $(a, \\ell)$ であり、$\\rho_i = a[\\ell - 1 - i]$ で、最も外側のエントリが先頭である。どの環境も $a[0..\\ell)$ を変更しないので、"
+
+#: manual/design/utlc/nbe.md:297
+msgid "leaves every other environment that shares $a$ unchanged: they read only their own prefixes, which the push does not touch. A chain of binders extends each environment once, at the end of its array, so it costs $O(n)$; lookup stays $O(1)$; an environment extended twice, as when one closure is applied to two arguments, copies as before. Values, the order of the steps and the fuel spent are the same as with copied environments."
+msgstr "は、$a$ を共有する他のすべての環境を変えない：それらは自分の接頭辞だけを読み、push はそこに触れない。束縛子の連鎖は、配列の末尾で各環境を一度だけ拡張するので、コストは $O(n)$ である。参照は $O(1)$ のままである。2 回拡張される環境、たとえば 1 つのクロージャが 2 つの引数に適用される場合は、従来どおりコピーする。値、ステップの順序、消費される燃料は、環境をコピーした場合と同じである。"
+
+#: manual/design/utlc/nbe.md:304
 msgid "M. Felleisen and D. P. Friedman, \"Control operators, the SECD-machine, and the λ-calculus\", 1986, for the CEK machine; M. S. Ager, D. Biernacki, O. Danvy and J. Midtgaard, \"A functional correspondence between evaluators and abstract machines\", PPDP 2003, for deriving it from an evaluator by CPS transformation and defunctionalization."
 msgstr "CEK 機械については M. Felleisen and D. P. Friedman, \"Control operators, the SECD-machine, and the λ-calculus\", 1986 を、CPS 変換と脱関数化によって評価器からそれを導くことについては M. S. Ager, D. Biernacki, O. Danvy and J. Midtgaard, \"A functional correspondence between evaluators and abstract machines\", PPDP 2003 を参照。"
 
-#: manual/design/utlc/nbe.md:262
+#: manual/design/utlc/nbe.md:306
 msgid "Laziness without sharing"
 msgstr "共有なしの遅延評価"
 
-#: manual/design/utlc/nbe.md:264
+#: manual/design/utlc/nbe.md:308
 msgid "**Problem.** Strict evaluation (call by value) diverges on $(\\lambda.\\,7)\\,\\Omega$, although the term has the normal form $7$."
 msgstr "**問題。** 正格評価（値呼び）は $(\\lambda.\\,7)\\,\\Omega$ で発散するが、この項は正規形 $7$ を持つ。"
 
-#: manual/design/utlc/nbe.md:267
+#: manual/design/utlc/nbe.md:311
 msgid "**Choice.** Arguments are delayed. Together with readback, which evaluates the head of every neutral first and its arguments afterwards, and enters closures only after their head is known, this realizes normal-order (leftmost-outermost) reduction, the normalizing strategy of the [eval design](../eval.md). Call by need would share delayed results; it is not used because it needs mutable thunks, and the budget keeps the cost of recomputation bounded and visible."
 msgstr "**選択。** 引数は遅延される。各中立項の先頭を先に評価してから引数を評価し、先頭が判明してから初めてクロージャに入る読み戻しと合わせて、これは正規順序（最左最外）簡約、すなわち [eval の設計](../eval.md)の正規化戦略を実現する。必要呼びなら遅延された結果を共有するが、可変なサンクを必要とするため採用しておらず、予算によって再計算のコストは有界かつ可視に保たれる。"
 
-#: manual/design/utlc/nbe.md:275
+#: manual/design/utlc/nbe.md:319
 msgid "Opaque semantic values"
 msgstr "不透明な意味値"
 
-#: manual/design/utlc/nbe.md:277
+#: manual/design/utlc/nbe.md:321
 msgid "`Semantic[T]` is a struct around a private enum. Callers can create neutral values (`reflect_free`, `reflect_level`), evaluate, and quote, but cannot build closures with ill-scoped environments. This keeps the invariant that every closure environment matches the scope of its body, which is why `eval` validates its input once and can then trust every index lookup."
 msgstr "`Semantic[T]` は非公開の列挙型を包む構造体である。呼び出し側は中立値の作成（`reflect_free`、`reflect_level`）、評価、quote はできるが、スコープの正しくない環境を持つクロージャは構築できない。これにより、すべてのクロージャの環境がその本体のスコープと一致するという不変条件が保たれる。`eval` が入力を一度だけ検証し、その後はすべてのインデックス参照を信頼できるのはこのためである。"
 
-#: manual/design/utlc/nbe.md:283
+#: manual/design/utlc/nbe.md:327
 msgid "Unary applications in normal forms"
 msgstr "正規形における単項適用"
 
-#: manual/design/utlc/nbe.md:285
+#: manual/design/utlc/nbe.md:329
 msgid "Readback produces $R_n(\\mathsf{app}(d, e)) = R_n(d)\\,R_n(e)$ as a unary `Apply`, so the spine $f\\,a\\,b$ is returned as `Apply(Apply(f, [a]), [b])`. The small-step reducer keeps the n-ary `Apply(f, [a, b])` of its input. Both denote the same curried application; comparisons between the two normalizers must flatten spines first."
 msgstr "読み戻しは $R_n(\\mathsf{app}(d, e)) = R_n(d)\\,R_n(e)$ を単項の `Apply` として生成するので、スパイン $f\\,a\\,b$ は `Apply(Apply(f, [a]), [b])` として返される。スモールステップ簡約器は入力の n 項 `Apply(f, [a, b])` を保つ。どちらも同じカリー化された適用を表すので、2 つの正規化器を比較する際はまずスパインを平坦化しなければならない。"
 
-#: manual/design/utlc/nbe.md:293
+#: manual/design/utlc/nbe.md:337
 msgid "**Theorem (soundness).** If `normalize(t, fuel)` returns `NormalForm(u, _)`, then $u$ is beta-normal and $t =_\\beta u$ (up to spine flattening)."
 msgstr "**定理（健全性）。** `normalize(t, fuel)` が `NormalForm(u, _)` を返すならば、$u$ は β 正規であり、$t =_\\beta u$ である（スパインの平坦化を除いて）。"
 
-#: manual/design/utlc/nbe.md:296
+#: manual/design/utlc/nbe.md:340
 msgid "*Sketch.* Define the *denotation* $\\lfloor d \\rfloor_n$ of a value under $n$ binders as the term it stands for: $\\lfloor \\mathsf{clo}(t, \\rho) \\rfloor_n = \\lambda.\\,t[\\rho]$, $\\lfloor \\mathsf{delay}(t, \\rho) \\rfloor_n = t[\\rho]$, $\\lfloor \\mathsf{lvl}(\\ell) \\rfloor_n = n - 1 - \\ell$, and so on, where $t[\\rho]$ substitutes the denotations of $\\rho$ for the free indices of $t$. By induction on evaluation, $t[\\rho] \\to_\\beta^{*} \\lfloor \\llbracket t \\rrbracket\\rho \\rfloor_n$: the only non-trivial case is $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$, which is the beta step $(\\lambda.\\,t[\\rho])\\,\\lfloor e \\rfloor \\to_\\beta t[\\lfloor e \\rfloor \\cdot \\rho]$ (substitution lemma of the [debruijn attachment](../../../attachments/design_debruijn_index-lemmas.typ)). Readback inserts only beta steps under binders, so $t \\to_\\beta^{*} u$. For normality: $R$ produces $\\lambda$ only from closures, and applications only from $\\mathsf{app}(d, e)$, whose head $d$ is a neutral or a constant, never a closure (application of a closure is evaluated, not stored). Hence the output follows the grammar"
 msgstr "*証明概要。* $n$ 個の束縛子の下での値の*表示* $\\lfloor d \\rfloor_n$ を、それが表す項として定義する：$\\lfloor \\mathsf{clo}(t, \\rho) \\rfloor_n = \\lambda.\\,t[\\rho]$、$\\lfloor \\mathsf{delay}(t, \\rho) \\rfloor_n = t[\\rho]$、$\\lfloor \\mathsf{lvl}(\\ell) \\rfloor_n = n - 1 - \\ell$ などであり、ここで $t[\\rho]$ は $t$ の自由なインデックスに $\\rho$ の表示を代入する。評価に関する帰納法により $t[\\rho] \\to_\\beta^{*} \\lfloor \\llbracket t \\rrbracket\\rho \\rfloor_n$ が成り立つ：自明でない唯一のケースは $\\mathrm{app}(\\mathsf{clo}(t, \\rho), e)$ であり、これは β ステップ $(\\lambda.\\,t[\\rho])\\,\\lfloor e \\rfloor \\to_\\beta t[\\lfloor e \\rfloor \\cdot \\rho]$ である（[debruijn の付録](../../../attachments/design_debruijn_index-lemmas.typ)の代入補題）。読み戻しは束縛子の下に β ステップを挿入するだけなので、$t \\to_\\beta^{*} u$ となる。正規性について：$R$ は $\\lambda$ をクロージャからのみ生成し、適用を $\\mathsf{app}(d, e)$ からのみ生成するが、その先頭 $d$ は中立項か定数であり、決してクロージャではない（クロージャの適用は格納されずに評価される）。よって出力は次の文法に従う"
 
-#: manual/design/utlc/nbe.md:315
+#: manual/design/utlc/nbe.md:359
 msgid "which contains no redex $(\\lambda.\\,t)\\,u$. $\\square$"
 msgstr "これは簡約基 $(\\lambda.\\,t)\\,u$ を含まない。$\\square$"
 
-#: manual/design/utlc/nbe.md:317
+#: manual/design/utlc/nbe.md:361
 msgid "**Completeness (sketch).** If $t$ has a beta normal form, `normalize` returns it for sufficient fuel. Evaluation computes the weak head normal form by call by name, and readback recursively normalizes the body of a closure and the arguments of a neutral after its head: this is the leftmost-outermost strategy decomposed into head and arguments. By the normalization theorem (Barendregt 13.2.2) this strategy terminates on every term with a normal form, and by confluence the normal form is unique.[^nbe]"
 msgstr "**完全性（証明概要）。** $t$ が β 正規形を持つならば、十分な燃料があれば `normalize` はそれを返す。評価は名前呼びで弱頭部正規形を計算し、読み戻しはクロージャの本体と、中立項の先頭の後の引数を再帰的に正規化する：これは先頭と引数に分解された最左最外戦略である。正規化定理（Barendregt 13.2.2）によりこの戦略は正規形を持つすべての項で停止し、合流性により正規形は一意である。[^nbe]"
 
-#: manual/design/utlc/nbe.md:325
+#: manual/design/utlc/nbe.md:369
 msgid "For untyped NbE see K. Aehlig and F. Joachimski, \"Operational aspects of untyped normalisation by evaluation\", Mathematical Structures in Computer Science 14, 2004; for strong reduction by evaluation, B. Grégoire and X. Leroy, \"A compiled implementation of strong reduction\", ICFP 2002."
 msgstr "型なし NbE については K. Aehlig and F. Joachimski, \"Operational aspects of untyped normalisation by evaluation\", Mathematical Structures in Computer Science 14, 2004 を、評価による強簡約については B. Grégoire and X. Leroy, \"A compiled implementation of strong reduction\", ICFP 2002 を参照。"
 
-#: manual/design/utlc/nbe.md:327
-msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices. Further tests run $\\Omega$, a divergent term whose head grows, and two terms with infinite normal forms with budgets of thirty million units on every backend, and pin the exact cost of Church numeral arithmetic together with its reproducibility at `consumed` and `consumed - 1`."
-msgstr "**スモールステップ簡約との一致。** 健全性と合流性により、同じスコープ整合な項に対して `@nbe.normalize` と `@debruijn.normalize` がともに正規形を返すときは常に、2 つの正規形はスパインの平坦化（入れ子の適用をまとめ、空の適用を取り除くこと）の後に等しい。どちらも `Apply(h, [])` を $h$ と読む：評価はそのノードを消去し、スモールステップの簡約器は簡約基の照合でそれを透過して見る（[eval の設計](../eval.md)を参照）。`src/utlc/nbe/nbe_test.mbt` のテストはこれに加え、$(\\lambda.\\,7)\\,\\Omega$ での遅延性、$\\Omega$ での燃料切れ、quote がレベルをインデックスに戻すことを検査する。さらに、$\\Omega$、頭部が伸び続ける発散項、無限の正規形をもつ 2 つの項を、すべてのバックエンドで 3000 万単位の予算で実行するテストと、チャーチ数の算術の正確なコストおよび `consumed` と `consumed - 1` での再現性を固定するテストがある。"
+#: manual/design/utlc/nbe.md:371
+msgid "**Agreement with small-step reduction.** By soundness and confluence, whenever both `@nbe.normalize` and `@debruijn.normalize` return a normal form for the same well-scoped term, the two normal forms are equal after spine flattening, which merges nested applications and drops empty ones. Both read `Apply(h, [])` as $h$: evaluation erases the node, and the small-step reducer looks through it when it matches a redex (see the [eval design](../eval.md)). The tests in `src/utlc/nbe/nbe_test.mbt` check this, laziness on $(\\lambda.\\,7)\\,\\Omega$, fuel exhaustion on $\\Omega$, and that quote turns levels back into indices. Further tests run $\\Omega$, a divergent term whose head grows, and two terms with infinite normal forms with budgets of thirty million units on every backend, and pin the exact cost of Church numeral arithmetic together with its reproducibility at `consumed` and `consumed - 1`. The tests in `src/utlc/nbe/deep_test.mbt` evaluate, read back and normalize terms nested to depth 100 000, normal and with redexes, on every backend."
+msgstr "**スモールステップ簡約との一致。** 健全性と合流性により、同じスコープ整合な項に対して `@nbe.normalize` と `@debruijn.normalize` がともに正規形を返すときは常に、2 つの正規形はスパインの平坦化（入れ子の適用をまとめ、空の適用を取り除くこと）の後に等しい。どちらも `Apply(h, [])` を $h$ と読む：評価はそのノードを消去し、スモールステップの簡約器は簡約基の照合でそれを透過して見る（[eval の設計](../eval.md)を参照）。`src/utlc/nbe/nbe_test.mbt` のテストはこれに加え、$(\\lambda.\\,7)\\,\\Omega$ での遅延性、$\\Omega$ での燃料切れ、quote がレベルをインデックスに戻すことを検査する。さらに、$\\Omega$、頭部が伸び続ける発散項、無限の正規形をもつ 2 つの項を、すべてのバックエンドで 3000 万単位の予算で実行するテストと、チャーチ数の算術の正確なコストおよび `consumed` と `consumed - 1` での再現性を固定するテストがある。`src/utlc/nbe/deep_test.mbt` のテストは、すべてのバックエンドで、入れ子の深さ 100 000 の項（正規のものと簡約基を含むもの）を評価し、読み戻し、正規化する。"
 
-#: manual/design/utlc/nbe.md:342
+#: manual/design/utlc/nbe.md:388
 msgid "Other invariants:"
 msgstr "その他の不変条件："
 
-#: manual/design/utlc/nbe.md:344
+#: manual/design/utlc/nbe.md:390
 msgid "With positive fuel, `eval` and `normalize` reject ill-scoped input with `ScopeFailure` and `consumed=0` before doing any work; with fuel `<= 0` they return `FuelExhausted(consumed=0)` without looking at the term."
 msgstr "燃料が正のとき、`eval` と `normalize` は、何の処理も行う前に、スコープの正しくない入力を `ScopeFailure` と `consumed=0` で拒否する。燃料が `<= 0` のときは、項を見ずに `FuelExhausted(consumed=0)` を返す。"
 
-#: manual/design/utlc/nbe.md:347
+#: manual/design/utlc/nbe.md:393
 msgid "`quote(value, n, _)` returns `ScopeFailure` only when $n < 0$ or a level variable is not below $n$. Values produced by `eval` contain no level variables, so quoting them at any level $n \\ge 0$ never fails this way."
 msgstr "`quote(value, n, _)` が `ScopeFailure` を返すのは $n < 0$ の場合か、レベル変数が $n$ 未満でない場合のみである。`eval` が生成する値はレベル変数を含まないので、任意のレベル $n \\ge 0$ で quote してもこの理由で失敗することはない。"
 
-#: manual/design/utlc/nbe.md:350
+#: manual/design/utlc/nbe.md:396
 msgid "Fuel: `consumed` never exceeds the fuel given; the determinism property above holds."
 msgstr "燃料：`consumed` は与えられた燃料を超えることがなく、上記の決定性が成り立つ。"
 
-#: manual/design/utlc/nbe.md:352
-msgid "Stack: evaluation and readback use a constant depth of host stack; their frame stacks live in the heap and are bounded by the budget."
-msgstr "スタック：評価と読み戻しはホストスタックを一定の深さしか使わない。それらのフレームのスタックはヒープ上にあり、予算で抑えられる。"
+#: manual/design/utlc/nbe.md:398
+msgid "Stack: validation, evaluation and readback use a constant depth of host stack, whatever the budget and the nesting depth of the input; their frame stacks live in the heap and are bounded by the budget (validation's by the size of the input)."
+msgstr "スタック：検証、評価、読み戻しは、予算と入力の入れ子の深さによらず、一定の深さのホストスタックを使う。それらのフレームのスタックはヒープ上にあり、予算で抑えられる（検証のものは入力のサイズで抑えられる）。"
 
-#: manual/design/utlc/nbe.md:357
+#: manual/design/utlc/nbe.md:405
 msgid "**Typed or eta-long readback.** Untyped readback cannot know where to eta-expand; eta-long normal forms are provided for typed terms by [stlc](../stlc.md)."
 msgstr "**型付きまたは η 長形式の読み戻し。** 型なしの読み戻しはどこで η展開すべきかを知りえない。型付き項に対する η 長形式の正規形は [stlc](../stlc.md) が提供する。"
 
-#: manual/design/utlc/nbe.md:360
+#: manual/design/utlc/nbe.md:408
 msgid "**Host-language closures (HOAS).** Representing $\\mathsf{clo}$ as a MoonBit function would be faster but makes fuel accounting and inspection of values impossible, and the values could not be quoted without a fresh-variable trick on the host side. A first-order closure keeps everything observable."
 msgstr "**ホスト言語のクロージャ（HOAS）。** $\\mathsf{clo}$ を MoonBit の関数として表せば高速になるが、燃料の計上や値の検査が不可能になり、ホスト側で新しい変数を使う工夫なしには値を quote することもできない。一階のクロージャならすべてを観察可能に保てる。"
 
-#: manual/design/utlc/nbe.md:364
+#: manual/design/utlc/nbe.md:412
 msgid "**Named environments.** Indexing the environment by De Bruijn index makes lookup positional and needs no fresh names during evaluation."
 msgstr "**名前付き環境。** 環境を De Bruijn インデックスで添字付けすることで参照は位置によるものとなり、評価中に新しい名前を必要としない。"
 
-#: manual/design/utlc/nbe.md:366
+#: manual/design/utlc/nbe.md:414
 msgid "**Direct recursion with a larger stack.** The js and wasm hosts fix the stack size, and any fixed stack is exhausted by some budget, so the outcome would depend on the backend."
 msgstr "**スタックを大きくした直接再帰。** js と wasm のホストはスタックの大きさを固定しており、どんな固定サイズのスタックもある予算で使い尽くされるので、結果がバックエンドに依存してしまう。"
 
-#: manual/design/utlc/nbe.md:369
+#: manual/design/utlc/nbe.md:417
 msgid "**Trampolining through host closures.** Returning a closure for the rest of the computation also bounds the stack, but allocates a host function per step and hides the pending work. First-order frames keep the machine observable, for the same reason as first-order semantic closures."
 msgstr "**ホストのクロージャによるトランポリン。** 残りの計算を表すクロージャを返す方法でもスタックは抑えられるが、ステップごとにホストの関数を確保し、保留中の仕事を隠してしまう。一階のフレームなら、一階の意味論的クロージャと同じ理由で、機械を観察可能に保てる。"
 
-#: manual/design/utlc/nbe.md:376
+#: manual/design/utlc/nbe.md:424
 msgid "Beta only: no eta, no reduction of constants."
 msgstr "β のみ：η も定数の簡約もない。"
 
-#: manual/design/utlc/nbe.md:377
+#: manual/design/utlc/nbe.md:425
 msgid "Not total: `FuelExhausted` is the expected outcome for divergent terms and does not prove divergence."
 msgstr "全域的ではない：`FuelExhausted` は発散する項に対して予期される結果であるが、発散を証明するものではない。"
 
-#: manual/design/utlc/nbe.md:379
+#: manual/design/utlc/nbe.md:427
 msgid "No sharing of delayed arguments."
 msgstr "遅延された引数は共有されない。"
 
-#: manual/design/utlc/nbe.md:380
-msgid "Only evaluation and readback have a bounded host stack. `eval` and `normalize` first validate their input with `@debruijn.validate`, which recurses over the term, so the stack depth they need still grows with the nesting depth of the input term."
-msgstr "ホストスタックが有界なのは評価と読み戻しだけである。`eval` と `normalize` はまず `@debruijn.validate` で入力を検証し、これは項を再帰的にたどるので、それらに必要なスタックの深さは依然として入力項の入れ子の深さとともに増える。"
+#: manual/design/utlc/nbe.md:428
+msgid "The derived `Debug` of `NbeResult` recurses over the term it contains, so printing a deeply nested normal form can overflow the host stack on js, wasm and wasm-gc; `==` handles any depth."
+msgstr "`NbeResult` の派生した `Debug` は含まれる項を再帰的にたどるので、深く入れ子になった正規形を出力すると、js、wasm、wasm-gc でホストスタックがあふれることがある。`==` は任意の深さを扱える。"
 
-#: manual/design/utlc/nbe.md:384
+#: manual/design/utlc/nbe.md:431
 msgid "Normal forms use unary applications."
 msgstr "正規形は単項適用を用いる。"
 
-#: manual/design/utlc/nbe.md:385
+#: manual/design/utlc/nbe.md:432
 msgid "Input must be De Bruijn syntax; convert named terms with `@debruijn.from_named` and results back with `@debruijn.to_named`."
 msgstr "入力は De Bruijn 構文でなければならない。名前付き項は `@debruijn.from_named` で変換し、結果は `@debruijn.to_named` で戻すこと。"
 
@@ -5692,6 +5885,18 @@ msgstr "[utlc/nbe の設計](../../design/utlc/nbe.md)：意味領域と健全�
 #: manual/tutorial/utlc/nbe.md:203
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc チュートリアル](../stlc.md)：型付きの η 長形式 NbE。"
+
+#~ msgid "`DbTerm::equal` compares two terms structurally."
+#~ msgstr "`DbTerm::equal` は 2 つの項を構造的に比較する。"
+
+#~ msgid "It is the promoted `Eq` implementation. `λx.x` and `λy.y` are not `equal`."
+#~ msgstr "これは昇格された `Eq` の実装である。`λx.x` と `λy.y` は `equal` ではない。"
+
+#~ msgid "Each node is visited once. A variable lookup scans the environment, and each binder copies it, both in $O(d)$ for binder depth $d$, so the comparison costs $O(n \\cdot d)$ for terms of size $n$."
+#~ msgstr "各ノードは一度だけ訪問される。変数の検索は環境を走査し、各束縛子は環境をコピーする。どちらも束縛の深さ $d$ に対して $O(d)$ であるので、比較のコストはサイズ $n$ の項に対して $O(n \\cdot d)$ である。"
+
+#~ msgid "Only evaluation and readback have a bounded host stack. `eval` and `normalize` first validate their input with `@debruijn.validate`, which recurses over the term, so the stack depth they need still grows with the nesting depth of the input term."
+#~ msgstr "ホストスタックが有界なのは評価と読み戻しだけである。`eval` と `normalize` はまず `@debruijn.validate` で入力を検証し、これは項を再帰的にたどるので、それらに必要なスタックの深さは依然として入力項の入れ子の深さとともに増える。"
 
 #~ msgid "The `core` package defines the vocabulary that every other package of `type_theory` shares: variable names, fresh-name generation, ordered scopes, telescopes and finite renamings. All values are immutable: every operation that \"changes\" a value returns a new one and leaves its argument untouched. The mathematics behind these definitions is in the [core design](../design/core.md)."
 #~ msgstr "`core` パッケージは、`type_theory` の他のすべてのパッケージが共有する語彙を定義する：変数名、新しい名前の生成、順序付きスコープ、テレスコープ、有限リネーミングである。すべての値は不変であり、値を「変更する」操作はすべて新しい値を返し、引数には手を触れない。これらの定義の背後にある数学は [core の設計](../design/core.md)にある。"

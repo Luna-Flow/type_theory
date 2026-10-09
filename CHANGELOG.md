@@ -122,6 +122,16 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
 - Documentation: `@syntax.Term` and `@debruijn.DbTerm` values are shared, not
   copied, by substitutions, traces and the reducers; the API pages now say
   that the argument array of `Apply` must be treated as immutable.
+- Stack safety (#13, first part): `syntax`, `core`, `substitution`, `debruijn`
+  and `utlc/nbe` no longer recurse on the host stack along the nesting depth
+  of the input, so terms nested 100,000 deep work on js, wasm and wasm-gc as
+  they do on native. Traversals keep their pending work on a heap array;
+  results, error order, reduction paths and fuel accounting are unchanged.
+  `Term` and `DbTerm` use a hand-written structural `Eq` instead of the
+  derived one. `from_named`, `to_named` and the NbE environments also lost
+  quadratic costs on long binder chains. Derived `Debug` of deep terms still
+  recurses, and `rewrite`, `eval`, `utlc/lambda` and `stlc` are not converted
+  yet.
 
 ### Documentation
 
