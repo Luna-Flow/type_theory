@@ -167,6 +167,18 @@ variables) and is allowed. The capture-avoiding operations therefore do not
 rely on injectivity: they freshen a binder whenever it is a target, see the
 [syntax design](syntax.md).
 
+### Flat values need no work stack
+
+The library promises that its operations use a constant amount of host
+stack in the nesting depth of their input (issue #13); the traversals of
+terms keep their pending work on the heap, see the
+[syntax design](syntax.md). `core` has no nested values to traverse: a
+`Name` is a string, and `Context`, `Telescope` and `Renaming` are flat
+arrays. Every operation is a loop over such an array, and `fresh_name` a loop
+over suffixes, so each runs in constant host stack whatever the input; the
+derived `Eq`, `Compare`, `Hash` and `Debug` of these types recurse only into
+names and arrays of names, never into terms.
+
 ## Correctness and invariants
 
 - `fresh_name(h, U) ∉ U`, and `fresh_name(h, U) = h` when `h ∉ U` (freshness lemma).
