@@ -885,3 +885,32 @@ test "checking mode still rejects ill-typed lambda redexes" {
     @stlc.check(sig, ctx, uses_x, @stlc.Ty::Arrow(a, @stlc.Ty::Unit)) == Ok(()),
   )
 }
+
+///|
+test "checking mode needs every argument given to a lambda head to be inferable" {
+  // typable terms outside the accepted fragment, as stated in the design doc
+  let a = base("A")
+  let sig = @stlc.Signature::empty()
+  let ctx = @stlc.TypeContext::empty()
+  let aa = @stlc.Ty::Arrow(a, a)
+  // (λf. f ()) (λy. y) : Unit
+  let first = app(
+    lam("f", app(tm_var("f"), unit_term())),
+    lam("y", tm_var("y")),
+  )
+  // (λx. λy. y) () (λz. z) : A -> A, where λz. z is given to the head λy. y
+  let second = spine(lam("x", lam("y", tm_var("y"))), [
+    unit_term(),
+    lam("z", tm_var("z")),
+  ])
+  for case in [(first, @stlc.Ty::Unit), (second, aa)] {
+    let (term, ty) = case
+    assert_true(
+      @stlc.check(sig, ctx, term, ty) == Err(@stlc.TypeError::CannotInferLambda),
+    )
+    assert_true(
+      @stlc.normalize_eta_long(sig, ctx, term, ty) ==
+      Err(@stlc.TypeError::CannotInferLambda),
+    )
+  }
+}
