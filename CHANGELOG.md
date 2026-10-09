@@ -56,6 +56,12 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
 
 ### Fixed
 
+- **#32:** public STLC `check`, `infer` and typed eta-long normalization now
+  use one bidirectional typed-plan machine. The duplicate checker is removed,
+  so future rule changes cannot diverge between checking and normalization.
+  Public typing builds and discards a private plan, adding temporary storage
+  proportional to typing visits. Public signatures are unchanged.
+
 - **#27:** `normalize_eta_long` now builds a private typed execution plan during
   checking. Evaluation and closure application reuse it instead of inferring
   nested redex arguments again. The regression suite normalizes 100,000 nested

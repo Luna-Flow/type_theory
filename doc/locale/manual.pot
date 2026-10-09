@@ -257,8 +257,8 @@ msgstr ""
 
 #: manual/api/core.md:366
 #: manual/api/core.md:368
-#: manual/api/stlc.md:357
 #: manual/api/stlc.md:359
+#: manual/api/stlc.md:361
 #: manual/api/syntax.md:367
 #: manual/api/syntax.md:369
 #: manual/index.md:103
@@ -266,7 +266,7 @@ msgid "Deprecated"
 msgstr ""
 
 #: manual/api/core.md:368
-#: manual/api/stlc.md:359
+#: manual/api/stlc.md:361
 #: manual/api/syntax.md:369
 msgid "Replacement"
 msgstr ""
@@ -939,18 +939,18 @@ msgid "On a type error it returns `Err` without reducing. Otherwise it returns `
 msgstr ""
 
 #: manual/api/stlc.md:317
-msgid "`normalize_eta_long` checks a term against a type and returns its beta-normal, eta-long form, computed by typed normalization by evaluation. The checking pass builds a private typed execution plan, so evaluation and closure application reuse established types without rechecking or inferring source subterms. Plan construction preserves the first error reported by `check`; the public term representation is unchanged."
+msgid "`normalize_eta_long` checks a term against a type and returns its beta-normal, eta-long form, computed by typed normalization by evaluation. The checking pass builds a private typed execution plan, so evaluation and closure application reuse established types without rechecking or inferring source subterms. Plan construction preserves the first error reported by `check`; the public term representation is unchanged. Public `check` and `infer` use the same plan-building machine and discard the resulting plan, adding temporary plan storage proportional to successful typing visits."
 msgstr ""
 
-#: manual/api/stlc.md:328
+#: manual/api/stlc.md:330
 msgid "In the result, every subterm of arrow type is a lambda, and every application has a variable or a constant at its head. Variables of the context and constants of the signature are kept as they are and eta-expanded according to their types. No step limit is needed: well-typed terms always normalize. New binder names are `x`, `x_1`, … chosen to avoid every name of the term and the context."
 msgstr ""
 
-#: manual/api/stlc.md:364
+#: manual/api/stlc.md:366
 msgid "The hidden method forms `not_equal` and `to_repr` on the types of this package are deprecated; use `!=` and `Repr(x)`."
 msgstr ""
 
-#: manual/api/stlc.md:367
+#: manual/api/stlc.md:369
 msgid "The field `entries` of `Signature` and of `TypeContext` is no longer public; use `lookup`, `length` and `to_array` instead."
 msgstr ""
 
@@ -1620,7 +1620,7 @@ msgstr ""
 #: manual/design/debruijn.md:327
 #: manual/design/eval.md:236
 #: manual/design/rewrite.md:259
-#: manual/design/stlc.md:520
+#: manual/design/stlc.md:522
 #: manual/design/substitution.md:130
 #: manual/design/syntax.md:374
 #: manual/design/utlc/lambda.md:237
@@ -1673,7 +1673,7 @@ msgstr ""
 #: manual/design/debruijn.md:354
 #: manual/design/eval.md:262
 #: manual/design/rewrite.md:293
-#: manual/design/stlc.md:549
+#: manual/design/stlc.md:551
 #: manual/design/substitution.md:386
 #: manual/design/syntax.md:399
 #: manual/design/utlc/lambda.md:267
@@ -1698,7 +1698,7 @@ msgstr ""
 #: manual/design/debruijn.md:366
 #: manual/design/eval.md:276
 #: manual/design/rewrite.md:305
-#: manual/design/stlc.md:562
+#: manual/design/stlc.md:564
 #: manual/design/substitution.md:400
 #: manual/design/syntax.md:413
 #: manual/design/utlc/lambda.md:278
@@ -2902,118 +2902,122 @@ msgid "**Problem.** Written as host functions, the checker (`infer`, `check`, th
 msgstr ""
 
 #: manual/design/stlc.md:396
-msgid "**Choice.** Each of the three algorithms runs as one loop over an explicit continuation, like the untyped evaluator of [utlc/nbe](utlc/nbe.md): a control says what to compute next, and a stack of frames in the heap holds the rest of the callers. A call in tail position replaces the control; a call whose result is still needed first pushes a frame for the rest of its caller. For the checker, the controls and frames are"
+msgid "**Choice.** Each of the three algorithms runs as one loop over an explicit continuation, like the untyped evaluator of [utlc/nbe](utlc/nbe.md): a control says what to compute next, and a stack of frames in the heap holds the rest of the callers. A call in tail position replaces the control; a call whose result is still needed first pushes a frame for the rest of its caller. The single bidirectional machine is `build_typed_plan`, with `PlanControl` and `PlanFrame` in the code. `infer` starts it in inference mode and returns the plan's type; `check` starts it in checking mode and discards the plan; `normalize_eta_long` starts it in checking mode and evaluates the plan. Their typing rules and first-error order cannot diverge through separate implementations (#32)."
 msgstr ""
 
-#: manual/design/stlc.md:410
-msgid "(`CheckControl` and `CheckFrame` in the code). $\\textsc{Lam}$ and the flattening of a spine are tail calls. $\\textsc{Sub}$ pushes $\\mathsf{cmp}(\\tau)$ and infers; $\\textsc{App}$ pushes $\\mathsf{head}(\\Gamma, \\vec a)$ and infers $h$, and the inferred type $\\tau_1 \\to \\cdots$ meeting $\\mathsf{head}$ checks $a_1$ against $\\tau_1$ under $\\mathsf{arg}(\\Gamma, \\vec a, 1, \\tau_2 \\to \\cdots)$, and so on; $\\textsc{Redex}$ and $\\textsc{Redex}^{\\Leftarrow}$ rename the parameter apart, push $\\mathsf{redex}(\\Gamma, x', b\\{x \\mapsto x'\\}, \\vec a, m)$ and infer $a_1$; the type $\\sigma$ meeting that frame flattens $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ and continues with $\\mathsf{inf}^{*}$ or $\\mathsf{chk}^{*}$ under $\\Gamma, x'{:}\\sigma$. Typed evaluation runs a private typed plan rather than reconstructing types from source terms. Its controls evaluate a plan, apply a semantic value, or return a value; its frames wait for a function, an operand, or a strict-let argument. Applying a closure and entering a strict-let body are tail calls. Readback retains controls for $\\downarrow^\\tau$, for $\\mathrm{quote}$ and for returning a term, and frames for a binder, an argument still to read back, and a function waiting for its argument."
+#: manual/design/stlc.md:408
+msgid "The machine flattens each application spine, infers a non-lambda head, checks its operands in order and compares the result with the expected type when checking. A lambda body is checked against the codomain of its expected arrow. A redex parameter is renamed apart before its first argument is inferred; only after inference succeeds does `redex_finish` flatten the body and join the trailing arguments. The remaining spine continues in its original mode. Assembly frames record checked lambdas, applications and strict lets without introducing new failures. All pending work lives in heap arrays."
 msgstr ""
 
-#: manual/design/stlc.md:429
+#: manual/design/stlc.md:417
+msgid "Typed evaluation runs the private plan. Its controls evaluate a plan, apply a semantic value, or return a value; its frames wait for a function, an operand, or a strict-let argument. Applying a closure and entering a strict-let body are tail calls. Readback retains controls for $\\downarrow^\\tau$, for $\\mathrm{quote}$ and for returning a term, and frames for a binder, an argument still to read back, and a function waiting for its argument."
+msgstr ""
+
+#: manual/design/stlc.md:424
 msgid "*Same results, same errors.* Read a frame as the function that the rest of its caller applies to the returned value, and a state as the stack applied to the value of its control. Every transition is one equation of the recursive definition, so it preserves that reading, and a run ends with the value the recursive functions return. The machines make the calls of the definition in its order, and no rule of the definition catches an error: every `Err` propagates unchanged to the top. The result of the recursive functions is therefore the first error met in that order, and the machines stop at the same one; which `TypeError` is reported does not change."
 msgstr ""
 
-#: manual/design/stlc.md:439
+#: manual/design/stlc.md:434
 msgid "*Equality of types.* `Ty` has a hand-written `Eq` that compares a heap array of pending pairs, and skips a pair of physically equal types, which is sound because the equality is reflexive."
 msgstr ""
 
-#: manual/design/stlc.md:443
+#: manual/design/stlc.md:438
 msgid "*Linear time.* Two hidden quadratic costs would dominate at depth $100\\,000$, so they are removed without changing results. Contexts and environments built from one another share an append-only array and read only their own prefix, so entering $n$ binders costs $O(n)$ instead of $O(n^2)$. Readback chooses binder names with $\\operatorname{fresh}(x, U)$, the first of the candidates $c_0 = x$, $c_1 = x\\_1$, $c_2 = x\\_2$, … not in $U$, and eta-expanding at a type nested $n$ levels deep would retry the $n$ names chosen before. It carries, with $U$, a position $p$ such that every $c_q$ with $q < p$ is in $U$, and starts the search there. If $c_{p'}$ is chosen, every $c_q$ with $q \\le p'$ is in $U \\cup \\{c_{p'}\\}$, so $p' + 1$ is a valid position for the extended set; readback only ever adds names to $U$, so the position stays valid along the path, and the name found is the one $\\operatorname{fresh}$ returns."
 msgstr ""
 
-#: manual/design/stlc.md:457
+#: manual/design/stlc.md:452
 msgid "Checking once for evaluation (issue #27)"
 msgstr ""
 
-#: manual/design/stlc.md:459
+#: manual/design/stlc.md:454
 msgid "The former evaluator reconstructed the type of each redex head by inferring its first argument again. For nested identity redexes in argument position, that revisited suffixes of sizes $n, n-1, \\ldots, 1$, even after the initial check succeeded. Removing repeated argument checks in PR #30 left this second source of quadratic traversal."
 msgstr ""
 
-#: manual/design/stlc.md:465
+#: manual/design/stlc.md:460
 msgid "`build_typed_plan` now performs the bidirectional checking rules while recording a private `TypedPlan`. Values and variables record their inferred type; lambdas record their expected arrow and checked body; each application records its domain and checked operand. The redex rule records a strict let: first evaluate the inferred argument, bind the renamed parameter, then run the plan for the body joined with the trailing arguments. The public syntax, `check` and `infer` APIs are unchanged. Evaluation and closure application execute these plans and never call `check` or `infer`."
 msgstr ""
 
-#: manual/design/stlc.md:474
-msgid "**Error correspondence.** Erase the plan returned by each control to its type (for inference) or successful check (for checking). `PlanHead`, `PlanArgument` and `PlanCompare` perform the same head inference, argument check and type comparison as their checker counterparts. `PlanRedexFirst` renames before inferring the first argument, calls `redex_finish` only after it succeeds, and continues the remaining spine in the original inference/checking mode. `PlanBindBody` and `PlanRedexRest` only assemble successful plans; neither can fail. Induction over machine transitions therefore gives the same acceptance and first `TypeError` as `check`. The public checker remains an independent implementation used for comparison."
+#: manual/design/stlc.md:469
+msgid "**Error correspondence.** Erase the plan returned by each control to its type (for inference) or successful check (for checking). `PlanHead`, `PlanArgument` and `PlanCompare` perform the same head inference, argument check and type comparison prescribed by the bidirectional rules. `PlanRedexFirst` renames before inferring the first argument, calls `redex_finish` only after it succeeds, and continues the remaining spine in the original inference/checking mode. `PlanBindBody` and `PlanRedexRest` only assemble successful plans; neither can fail. Induction over machine transitions therefore gives the same acceptance and first `TypeError` as the original checker. Public `check` and `normalize_eta_long` now start this same machine in the same checking mode (#32), so their typing acceptance and first error have one implementation. The frozen baseline remains available for compatibility comparisons."
 msgstr ""
 
-#: manual/design/stlc.md:485
+#: manual/design/stlc.md:482
 msgid "**Semantic correspondence.** A planned application evaluates its function, then its operand, then applies the value. A planned redex implements $(\\lambda x.b)\\,a_1\\,a_2\\cdots a_n$ by evaluating $a_1$ and continuing $b\\,a_2\\cdots a_n$ under its value. The existing capture-avoidance step renames $x$ away from the free variables of every trailing argument; adding that binding therefore leaves their meanings unchanged (environment weakening). Induction on the successful typing derivation relates the plan to the source term in the same STLC semantic domain. Readback is unchanged. Environment entries retain both the internal lookup name and its source name: internal capture-avoidance names must not occupy additional output binder candidates. Source names are already in the initial avoidance set. These are structural arguments, not machine-checked proofs."
 msgstr ""
 
-#: manual/design/stlc.md:498
-msgid "**Cost and limits.** Each successful typing visit creates a constant number of plan nodes; $p$ such visits add $O(p)$ plan storage and $O(d)$ pending frames at traversal depth $d$. The retained plan can live as long as a closure. Evaluation traverses plans without the repeated type-inference suffixes. For the nested identity-redex regression with fixed signature and empty initial context, checking, plan construction and evaluation take $O(n)$ work and $O(n)$ heap storage. This is not a linear-time bound for arbitrary STLC normalization: reduction can duplicate work and normal forms can grow; context lookup, branch-prefix copies, type equality, spine copying and name analysis retain their existing costs. In particular, capture avoidance may scan trailing arguments at multiple redexes, and name collection for closure readback is unchanged."
+#: manual/design/stlc.md:495
+msgid "**Cost and limits.** Each successful typing visit creates a constant number of plan nodes; $p$ such visits add $O(p)$ plan storage and $O(d)$ pending frames at traversal depth $d$. Public `infer` and `check` also build a plan and discard it, adding $O(p)$ temporary plan storage compared with the former checker. This allocation is the explicit tradeoff for one rule implementation (#32); no allocation-free checking mode is provided. The retained plan can live as long as a closure. Evaluation traverses plans without the repeated type-inference suffixes. For the nested identity-redex regression with fixed signature and empty initial context, checking, plan construction and evaluation take $O(n)$ work and $O(n)$ heap storage. This is not a linear-time bound for arbitrary STLC normalization: reduction can duplicate work and normal forms can grow; context lookup, branch-prefix copies, type equality, spine copying and name analysis retain their existing costs. In particular, capture avoidance may scan trailing arguments at multiple redexes, and name collection for closure readback is unchanged."
 msgstr ""
 
-#: manual/design/stlc.md:511
-msgid "**Evidence.** `src/stlc/issue27_test.mbt` covers 100,000 nested identity redexes, 100,000 neutral argument positions, first-error ordering and a capture case with exact binder-name comparison. `python3 tools/verify_stlc_plan.py --target all` compares 43,120 bounded term/type combinations per backend with the frozen PR #30 implementation at `db53d775e9248e8712a240adc8327be72675c80f`, including exact output names and error values. It requires that Git object locally and removes its temporary oracle afterward. The corpus is finite; it supports compatibility but does not establish a universal theorem."
+#: manual/design/stlc.md:512
+msgid "**Evidence.** `src/stlc/issue27_test.mbt` covers 100,000 nested identity redexes, 100,000 neutral argument positions, first-error ordering and a capture case with exact binder-name comparison. `python3 tools/verify_stlc_plan.py --target all` compares 43,120 bounded term/type combinations per backend with the frozen PR #30 implementation at `db53d775e9248e8712a240adc8327be72675c80f`, including exact output names and error values. It also compares public `check` on those combinations and `infer` on all 8,624 generated terms. It requires that Git object locally and removes its temporary oracle afterward. The corpus is finite; it supports compatibility but does not establish a universal theorem."
 msgstr ""
 
-#: manual/design/stlc.md:522
+#: manual/design/stlc.md:524
 msgid "`check` and `infer` terminate; on success, the term is declaratively typable at the reported type (soundness theorem). The regression tests include redexes whose parameter occurs free in a trailing argument."
 msgstr ""
 
-#: manual/design/stlc.md:525
+#: manual/design/stlc.md:527
 msgid "`check` accepts every well-typed beta-normal term, and every well-typed term in which each argument given to a lambda head is inferable, including redexes that return a lambda."
 msgstr ""
 
-#: manual/design/stlc.md:528
+#: manual/design/stlc.md:530
 msgid "`normalize_eta_long` returns `Ok` exactly for terms that `check` accepts; its result is in $\\mathit{Nf}^\\tau$, is $\\beta\\eta$-equal to the input, and is the same (up to $=_\\alpha$) for $\\beta\\eta$-equal inputs."
 msgstr ""
 
-#: manual/design/stlc.md:532
+#: manual/design/stlc.md:534
 msgid "`normalize_checked` returns `Err` before any reduction for ill-typed input."
 msgstr ""
 
-#: manual/design/stlc.md:533
+#: manual/design/stlc.md:535
 msgid "`NormalizationError` signals a violated internal invariant and is not produced for checked input."
 msgstr ""
 
-#: manual/design/stlc.md:535
+#: manual/design/stlc.md:537
 msgid "`check`, `infer`, `normalize_checked`, `normalize_eta_long` and `==` on types use a constant host stack depth; terms and types nested 100 000 levels deep are handled on every backend (`src/stlc/deep_test.mbt`)."
 msgstr ""
 
-#: manual/design/stlc.md:539
+#: manual/design/stlc.md:541
 msgid "The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing, eta expansion of open variables and of constants (including nested arrow types and higher-order arguments), agreement of the two normalizers on small terms, and agreement of `check` and `normalize_eta_long` on redexes with curried heads, mixed flat and nested spines, and bodies that consume the outer arguments. They also cover redexes checked against an arrow ($\\textsc{Redex}^{\\Leftarrow}$): redexes that return a lambda, alone and as arguments, in curried and flat spines, nested ones, the renaming shape above in checking mode, and ill-typed variants that are still rejected."
 msgstr ""
 
-#: manual/design/stlc.md:551
+#: manual/design/stlc.md:553
 msgid "**Church-style annotated lambdas.** Annotations would make inference complete but change the shared `Term` syntax; the bidirectional checker keeps terms unannotated."
 msgstr ""
 
-#: manual/design/stlc.md:554
+#: manual/design/stlc.md:556
 msgid "**Hindley–Milner inference.** Unification would infer types of unannotated lambdas, but polymorphism and type variables are beyond this calculus."
 msgstr ""
 
-#: manual/design/stlc.md:556
+#: manual/design/stlc.md:558
 msgid "**Fuel for typed NbE.** Unnecessary by strong normalization; the untyped [utlc/nbe](utlc/nbe.md) keeps fuel because it needs it."
 msgstr ""
 
-#: manual/design/stlc.md:558
+#: manual/design/stlc.md:560
 msgid "**Eta for the unit type.** Implementable by reifying every neutral of type $\\mathsf{Unit}$ as $()$; not done, so that neutrals stay observable. The decided equality is $\\beta\\eta$ for arrows only."
 msgstr ""
 
-#: manual/design/stlc.md:564
+#: manual/design/stlc.md:566
 msgid "Types are $b$, $\\mathsf{Unit}$ and arrows: no products, sums, polymorphism or dependent types."
 msgstr ""
 
-#: manual/design/stlc.md:566
+#: manual/design/stlc.md:568
 msgid "No unit eta; normal forms are eta-long for arrow types only."
 msgstr ""
 
-#: manual/design/stlc.md:567
+#: manual/design/stlc.md:569
 msgid "Constants are opaque: there are no delta rules."
 msgstr ""
 
-#: manual/design/stlc.md:568
+#: manual/design/stlc.md:570
 msgid "`normalize_checked` is bounded by a step limit because it reuses the untyped reducer."
 msgstr ""
 
-#: manual/design/stlc.md:570
+#: manual/design/stlc.md:572
 msgid "`normalize_eta_long` executes a plan produced by one checking pass, with no type inference during evaluation (#27). It does not promise linear time for arbitrary terms: reduction, context lookup, capture avoidance, spine copying and readback can still require more work than the input size."
 msgstr ""
 
-#: manual/design/stlc.md:574
+#: manual/design/stlc.md:576
 msgid "`Debug` of a deep term, type or error recurses and can overflow the stack."
 msgstr ""
 

@@ -24,6 +24,9 @@ Last audited: 2026-10-09
 - `Debug`/`Repr` of deeply nested terms, types and errors is recursive and can
   overflow the host stack; the #13 contract covers the algorithms, not derived
   formatting (#28).
+- Public `check`, `infer` and `normalize_eta_long` share one typed-plan machine
+  (#32). Public typing builds and discards a plan, adding temporary storage
+  proportional to typing visits.
 - `normalize_eta_long` builds a private typed plan during checking and executes
   it without repeating inference (#27). This removes the nested argument
   suffix traversals, but is not a linear-time guarantee for arbitrary STLC

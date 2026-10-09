@@ -319,7 +319,9 @@ beta-normal, eta-long form, computed by typed normalization by evaluation.
 The checking pass builds a private typed execution plan, so evaluation and
 closure application reuse established types without rechecking or inferring
 source subterms. Plan construction preserves the first error reported by
-`check`; the public term representation is unchanged.
+`check`; the public term representation is unchanged. Public `check` and
+`infer` use the same plan-building machine and discard the resulting plan,
+adding temporary plan storage proportional to successful typing visits.
 
 ```mbti
 pub fn normalize_eta_long(Signature, TypeContext, @syntax.Term[Atom], Ty) -> Result[@syntax.Term[Atom], TypeError]

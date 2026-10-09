@@ -120,253 +120,30 @@ fn redex_finish(
   })
 }
 
-// Bounded-stack type checking (issue #13).
-//
-// Bidirectional checking is specified by mutually recursive functions:
-//
-// - `infer(Γ, t)` and `check(Γ, t, A)` on a term;
-// - `infer_spine(Γ, h, ā)` and `check_spine(Γ, h, ā, A)` on a flattened
-//   application, where a lambda head takes one step of the redex rule:
-//   infer the first argument, then continue with the rest of the spine under
-//   the parameter;
-// - `infer_apply(Γ, A, ā)`, which checks the arguments of a non-lambda head
-//   of type `A` one after the other against the domains of `A`.
-//
-// Implemented as host recursion, a term nested `d` levels deep (binders,
-// argument positions or redexes) needs `d` host frames, and the js and wasm
-// stacks overflow at a depth of a few thousand.
-//
-// The functions are run instead as one loop over an explicit continuation, as
-// the NbE evaluator of `utlc/nbe` does:
-//
-// - `CheckControl` is the next thing to do: one of the functions above, or a
-//   result (`Inferred` or `Checked`) handed to the innermost frame.
-// - `CheckFrame` is the rest of a caller that still has to run when a call
-//   returns. The frames live in a heap `Array`.
-//
-// A call in tail position replaces the control and pushes nothing; a call
-// whose result is still needed pushes the frame for the rest of the caller
-// first. Every step happens in the order of the recursive definition, and no
-// error is ever caught and replaced, so the first error met is the one the
-// recursive functions returned: results, including which `TypeError` is
-// reported, are unchanged.
-
 ///|
-/// The next step of the type checking machine.
-priv enum CheckControl {
-  /// `infer(ctx, term)`.
-  Infer(TypeContext, Term)
-  /// `check(ctx, term, expected)`.
-  Check(TypeContext, Term, Ty)
-  /// `infer_spine(ctx, head, arguments)`; `head` is not an `Apply`.
-  InferSpine(TypeContext, Term, Array[Term])
-  /// `check_spine(ctx, head, arguments, expected)`; `head` is not an `Apply`.
-  CheckSpine(TypeContext, Term, Array[Term], Ty)
-  /// An inference returned this type.
-  Inferred(Ty)
-  /// A check succeeded.
-  Checked
-}
-
-///|
-/// A pending step of the type checking machine, waiting for a result.
-priv enum CheckFrame {
-  /// Waiting for the type of a non-lambda spine head: check `arguments`
-  /// against its domains (`infer_apply`).
-  ApplyHeadType(TypeContext, Array[Term])
-  /// Waiting for the check of argument `index` of a spine; `codomain` is the
-  /// type of the application up to and including that argument.
-  ArgumentChecked(TypeContext, Array[Term], Int, Ty)
-  /// Waiting for an inferred type to compare with `expected`.
-  CompareWith(Ty)
-  /// Waiting for the type of the first argument of the redex
-  /// `(λparameter. body) arguments`, whose parameter has been renamed apart;
-  /// then the rest of the spine is inferred, or checked against the type.
-  RedexArgument(TypeContext, @core.Name, Term, Array[Term], Ty?)
-}
-
-///|
-/// `infer_apply` from argument `index` on, where the application up to that
-/// argument has type `current`: the next control, after pushing the frame
-/// for the arguments after it.
-fn apply_arguments(
-  frames : Array[CheckFrame],
-  ctx : TypeContext,
-  arguments : Array[Term],
-  index : Int,
-  current : Ty,
-) -> Result[CheckControl, TypeError] {
-  if index == arguments.length() {
-    return Ok(Inferred(current))
-  }
-  match current {
-    Ty::Arrow(domain, codomain) => {
-      frames.push(ArgumentChecked(ctx, arguments, index, codomain))
-      Ok(Check(ctx, arguments[index], domain))
-    }
-    _ => Err(TypeError::ExpectedFunction(current))
-  }
-}
-
-///|
-/// Runs the type checking machine from `start`. Returns `Some(ty)` when the
-/// outermost call is an inference and `None` when it is a check. The host
-/// stack depth is constant; pending work is kept in a heap array of frames.
-fn run_typing(sig : Signature, start : CheckControl) -> Result[Ty?, TypeError] {
-  let frames : Array[CheckFrame] = []
-  for control = start {
-    match control {
-      Infer(ctx, term) =>
-        match term {
-          @syntax.Value(Atom::UnitLit) => continue Inferred(Ty::Unit)
-          @syntax.Value(Atom::Const(name)) =>
-            match sig.lookup(name) {
-              Some(ty) => continue Inferred(ty)
-              None => break Err(TypeError::UnknownConstant(name))
-            }
-          @syntax.Variable(name) =>
-            match ctx.lookup(name) {
-              Some(ty) => continue Inferred(ty)
-              None => break Err(TypeError::UnboundVariable(name))
-            }
-          @syntax.Apply(_, _) =>
-            match application_spine(term) {
-              Ok((head, arguments)) => continue InferSpine(ctx, head, arguments)
-              Err(error) => break Err(error)
-            }
-          @syntax.Bind(_, _) => break Err(TypeError::CannotInferLambda)
-        }
-      Check(ctx, term, expected) =>
-        match (term, expected) {
-          (@syntax.Bind(name, body), Ty::Arrow(domain, codomain)) =>
-            continue Check(ctx.extend_with(name, domain), body, codomain)
-          (@syntax.Apply(_, _), _) =>
-            match application_spine(term) {
-              Ok((head, arguments)) =>
-                continue CheckSpine(ctx, head, arguments, expected)
-              Err(error) => break Err(error)
-            }
-          (_, _) => {
-            frames.push(CompareWith(expected))
-            continue Infer(ctx, term)
-          }
-        }
-      InferSpine(ctx, head, arguments) => {
-        if arguments.length() == 0 {
-          continue Infer(ctx, head)
-        }
-        match head {
-          @syntax.Bind(parameter, body) =>
-            match redex_prepare(ctx, parameter, body, arguments) {
-              Ok((parameter, body)) => {
-                frames.push(
-                  RedexArgument(ctx, parameter, body, arguments, None),
-                )
-                continue Infer(ctx, arguments[0])
-              }
-              Err(error) => break Err(error)
-            }
-          _ => {
-            frames.push(ApplyHeadType(ctx, arguments))
-            continue Infer(ctx, head)
-          }
-        }
-      }
-      CheckSpine(ctx, head, arguments, expected) => {
-        if arguments.length() == 0 {
-          continue Check(ctx, head, expected)
-        }
-        match head {
-          @syntax.Bind(parameter, body) =>
-            match redex_prepare(ctx, parameter, body, arguments) {
-              Ok((parameter, body)) => {
-                frames.push(
-                  RedexArgument(ctx, parameter, body, arguments, Some(expected)),
-                )
-                continue Infer(ctx, arguments[0])
-              }
-              Err(error) => break Err(error)
-            }
-          _ => {
-            frames.push(CompareWith(expected))
-            continue InferSpine(ctx, head, arguments)
-          }
-        }
-      }
-      Inferred(ty) =>
-        match frames.pop() {
-          None => break Ok(Some(ty))
-          Some(ApplyHeadType(ctx, arguments)) =>
-            match apply_arguments(frames, ctx, arguments, 0, ty) {
-              Ok(next) => continue next
-              Err(error) => break Err(error)
-            }
-          Some(CompareWith(expected)) =>
-            if ty == expected {
-              continue Checked
-            } else {
-              break Err(TypeError::TypeMismatch(expected~, actual=ty))
-            }
-          Some(RedexArgument(ctx, parameter, body, arguments, mode)) =>
-            match redex_finish(ctx, parameter, body, arguments, ty) {
-              Ok(step) =>
-                match mode {
-                  None =>
-                    continue InferSpine(step.ctx, step.head, step.arguments)
-                  Some(expected) =>
-                    continue CheckSpine(
-                        step.ctx,
-                        step.head,
-                        step.arguments,
-                        expected,
-                      )
-                }
-              Err(error) => break Err(error)
-            }
-          Some(ArgumentChecked(_, _, _, _)) =>
-            abort("an argument check cannot return a type")
-        }
-      Checked =>
-        match frames.pop() {
-          None => break Ok(None)
-          Some(ArgumentChecked(ctx, arguments, index, codomain)) =>
-            match apply_arguments(frames, ctx, arguments, index + 1, codomain) {
-              Ok(next) => continue next
-              Err(error) => break Err(error)
-            }
-          Some(_) => abort("only an argument check waits for a check")
-        }
-    }
-  }
-}
-
-///|
-/// Infers the type of `term`. The host stack depth does not grow with the
-/// nesting depth of `term`.
+/// Public typing is a view of the single typed-plan elaborator. The private
+/// machine lives in `typed_plan.mbt`; these wrappers discard the plan after
+/// preserving its inferred type or successful check.
 pub fn infer(
   sig : Signature,
   ctx : TypeContext,
   term : Term,
 ) -> Result[Ty, TypeError] {
-  match run_typing(sig, Infer(ctx, term)) {
-    Ok(Some(ty)) => Ok(ty)
-    Ok(None) => abort("an inference must return a type")
+  match build_typed_plan(sig, InferPlan(ctx, term)) {
+    Ok(plan) => Ok(plan.ty())
     Err(error) => Err(error)
   }
 }
 
 ///|
-/// Checks `term` against `expected`. The host stack depth does not grow with
-/// the nesting depth of `term` or `expected`.
 pub fn check(
   sig : Signature,
   ctx : TypeContext,
   term : Term,
   expected : Ty,
 ) -> Result[Unit, TypeError] {
-  match run_typing(sig, Check(ctx, term, expected)) {
-    Ok(None) => Ok(())
-    Ok(Some(_)) => abort("a check must not return a type")
+  match build_typed_plan(sig, CheckPlan(ctx, term, expected)) {
+    Ok(_) => Ok(())
     Err(error) => Err(error)
   }
 }

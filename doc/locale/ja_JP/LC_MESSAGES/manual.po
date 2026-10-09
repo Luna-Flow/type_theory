@@ -257,8 +257,8 @@ msgstr "これは昇格された `Eq` 実装である。新しいコードでは
 
 #: manual/api/core.md:366
 #: manual/api/core.md:368
-#: manual/api/stlc.md:357
 #: manual/api/stlc.md:359
+#: manual/api/stlc.md:361
 #: manual/api/syntax.md:367
 #: manual/api/syntax.md:369
 #: manual/index.md:103
@@ -266,7 +266,7 @@ msgid "Deprecated"
 msgstr "非推奨"
 
 #: manual/api/core.md:368
-#: manual/api/stlc.md:359
+#: manual/api/stlc.md:361
 #: manual/api/syntax.md:369
 msgid "Replacement"
 msgstr "代替"
@@ -945,18 +945,18 @@ msgid "On a type error it returns `Err` without reducing. Otherwise it returns `
 msgstr "型エラーの場合は簡約せずに `Err` を返す。そうでなければ `Ok(@lambda.normalize(term, max_steps))` を返す。これはステップ上限付きの正規順序 βη 簡約である。その正規形は β 正規かつ η *短*形式である（単項適用について。[`@lambda.eta_rule`](utlc/lambda.md) を参照）。よく型付けされた項はすべて強正規化可能なので、`max_steps` を十分大きくすれば必ず `NormalForm` が得られる。"
 
 #: manual/api/stlc.md:317
-msgid "`normalize_eta_long` checks a term against a type and returns its beta-normal, eta-long form, computed by typed normalization by evaluation. The checking pass builds a private typed execution plan, so evaluation and closure application reuse established types without rechecking or inferring source subterms. Plan construction preserves the first error reported by `check`; the public term representation is unchanged."
-msgstr "`normalize_eta_long` は項を型に対して検査し、型付きの評価による正規化で beta 正規形かつ eta 長形を返す。検査で非公開の型付き実行計画を構築するため、評価とクロージャ適用は確定済みの型を再利用し、元の部分項を再検査・再推論しない。計画構築は `check` が報告する最初のエラーを保つ。公開の項表現は変わらない。"
+msgid "`normalize_eta_long` checks a term against a type and returns its beta-normal, eta-long form, computed by typed normalization by evaluation. The checking pass builds a private typed execution plan, so evaluation and closure application reuse established types without rechecking or inferring source subterms. Plan construction preserves the first error reported by `check`; the public term representation is unchanged. Public `check` and `infer` use the same plan-building machine and discard the resulting plan, adding temporary plan storage proportional to successful typing visits."
+msgstr "`normalize_eta_long` は項を型に対して検査し、型付きの評価による正規化で beta 正規形かつ eta 長形を返す。検査で非公開の型付き実行計画を構築するため、評価とクロージャ適用は確定済みの型を再利用し、元の部分項を再検査・再推論しない。計画構築は `check` が報告する最初のエラーを保つ。公開の項表現は変わらない。公開 `check` と `infer` は同じ計画構築機械を使って結果の計画を破棄するため、成功した型付け訪問数に比例する一時的な計画領域が加わる。"
 
-#: manual/api/stlc.md:328
+#: manual/api/stlc.md:330
 msgid "In the result, every subterm of arrow type is a lambda, and every application has a variable or a constant at its head. Variables of the context and constants of the signature are kept as they are and eta-expanded according to their types. No step limit is needed: well-typed terms always normalize. New binder names are `x`, `x_1`, … chosen to avoid every name of the term and the context."
 msgstr "結果において、矢印型の部分項はすべてラムダであり、すべての適用は頭部に変数または定数を持つ。文脈の変数とシグネチャの定数はそのまま保たれ、それぞれの型に従って η 展開される。ステップ上限は不要である。型の付く項は常に正規化されるからである。新しい束縛子の名前は `x`、`x_1`、… であり、項と文脈のすべての名前を避けるように選ばれる。"
 
-#: manual/api/stlc.md:364
+#: manual/api/stlc.md:366
 msgid "The hidden method forms `not_equal` and `to_repr` on the types of this package are deprecated; use `!=` and `Repr(x)`."
 msgstr "このパッケージの型にある隠されたメソッド形式 `not_equal` と `to_repr` は非推奨である。`!=` と `Repr(x)` を使うこと。"
 
-#: manual/api/stlc.md:367
+#: manual/api/stlc.md:369
 msgid "The field `entries` of `Signature` and of `TypeContext` is no longer public; use `lookup`, `length` and `to_array` instead."
 msgstr "`Signature` と `TypeContext` のフィールド `entries` は公開されなくなった。代わりに `lookup`、`length`、`to_array` を使う。"
 
@@ -1628,7 +1628,7 @@ msgstr "下流の変数型は単射（異なる変数を異なる名前へ写す
 #: manual/design/debruijn.md:327
 #: manual/design/eval.md:236
 #: manual/design/rewrite.md:259
-#: manual/design/stlc.md:520
+#: manual/design/stlc.md:522
 #: manual/design/substitution.md:130
 #: manual/design/syntax.md:374
 #: manual/design/utlc/lambda.md:237
@@ -1681,7 +1681,7 @@ msgstr "下流の adapter は自身のノード種別について (V1)–(V5) �
 #: manual/design/debruijn.md:354
 #: manual/design/eval.md:262
 #: manual/design/rewrite.md:293
-#: manual/design/stlc.md:549
+#: manual/design/stlc.md:551
 #: manual/design/substitution.md:386
 #: manual/design/syntax.md:399
 #: manual/design/utlc/lambda.md:267
@@ -1706,7 +1706,7 @@ msgstr "**実行時に法則を検査する。** 法則はすべてのノード�
 #: manual/design/debruijn.md:366
 #: manual/design/eval.md:276
 #: manual/design/rewrite.md:305
-#: manual/design/stlc.md:562
+#: manual/design/stlc.md:564
 #: manual/design/substitution.md:400
 #: manual/design/syntax.md:413
 #: manual/design/utlc/lambda.md:278
@@ -2926,118 +2926,122 @@ msgid "**Problem.** Written as host functions, the checker (`infer`, `check`, th
 msgstr "**問題。** ホスト関数として書くと、型検査器（`infer`、`check`、それらのスパイン版、および $\\textsc{App}$ の引数を処理するループ）、型付き評価、読み戻し、導出された型の等価性は、項、型、または正規形の各階層で再帰する。js、wasm、wasm-gc のスタックは数千階層であふれるため、深い束縛子や引数位置、長いカリー化スパイン、入れ子の簡約基、定義域に入れ子の型でパッケージがクラッシュしていた（issue #13）。"
 
 #: manual/design/stlc.md:396
-msgid "**Choice.** Each of the three algorithms runs as one loop over an explicit continuation, like the untyped evaluator of [utlc/nbe](utlc/nbe.md): a control says what to compute next, and a stack of frames in the heap holds the rest of the callers. A call in tail position replaces the control; a call whose result is still needed first pushes a frame for the rest of its caller. For the checker, the controls and frames are"
-msgstr "**選択。** 3 つのアルゴリズムはそれぞれ、[utlc/nbe](utlc/nbe.md) の型なし評価器と同様、明示的な継続を使う 1 つのループとして実行する。制御が次に計算する内容を示し、ヒープ上のフレームスタックが呼び出し元の残りの処理を保持する。末尾位置の呼び出しは制御を置き換え、結果が後で必要な呼び出しでは、呼び出し元の残りの処理を表すフレームを先にプッシュする。型検査器の制御とフレームは次のとおりである。"
+msgid "**Choice.** Each of the three algorithms runs as one loop over an explicit continuation, like the untyped evaluator of [utlc/nbe](utlc/nbe.md): a control says what to compute next, and a stack of frames in the heap holds the rest of the callers. A call in tail position replaces the control; a call whose result is still needed first pushes a frame for the rest of its caller. The single bidirectional machine is `build_typed_plan`, with `PlanControl` and `PlanFrame` in the code. `infer` starts it in inference mode and returns the plan's type; `check` starts it in checking mode and discards the plan; `normalize_eta_long` starts it in checking mode and evaluates the plan. Their typing rules and first-error order cannot diverge through separate implementations (#32)."
+msgstr "**選択。** 三つのアルゴリズムはそれぞれ、[utlc/nbe](utlc/nbe.md) の型なし評価器と同様に、明示的な継続に対する一つのループとして動く。制御は次の計算を指定し、ヒープのフレームスタックは呼び出し元の残りを保持する。末尾呼び出しは制御を置き換え、結果が必要な呼び出しは先に残りの処理のフレームを積む。唯一の双方向型付け機械は `build_typed_plan` で、コードでは `PlanControl` と `PlanFrame` を使う。`infer` は推論モードで起動して計画の型を返し、`check` は検査モードで起動して計画を破棄し、`normalize_eta_long` は検査モードで起動して計画を評価する。独立した実装による型規則と最初のエラー順序の乖離は起きない（#32）。"
 
-#: manual/design/stlc.md:410
-msgid "(`CheckControl` and `CheckFrame` in the code). $\\textsc{Lam}$ and the flattening of a spine are tail calls. $\\textsc{Sub}$ pushes $\\mathsf{cmp}(\\tau)$ and infers; $\\textsc{App}$ pushes $\\mathsf{head}(\\Gamma, \\vec a)$ and infers $h$, and the inferred type $\\tau_1 \\to \\cdots$ meeting $\\mathsf{head}$ checks $a_1$ against $\\tau_1$ under $\\mathsf{arg}(\\Gamma, \\vec a, 1, \\tau_2 \\to \\cdots)$, and so on; $\\textsc{Redex}$ and $\\textsc{Redex}^{\\Leftarrow}$ rename the parameter apart, push $\\mathsf{redex}(\\Gamma, x', b\\{x \\mapsto x'\\}, \\vec a, m)$ and infer $a_1$; the type $\\sigma$ meeting that frame flattens $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ and continues with $\\mathsf{inf}^{*}$ or $\\mathsf{chk}^{*}$ under $\\Gamma, x'{:}\\sigma$. Typed evaluation runs a private typed plan rather than reconstructing types from source terms. Its controls evaluate a plan, apply a semantic value, or return a value; its frames wait for a function, an operand, or a strict-let argument. Applying a closure and entering a strict-let body are tail calls. Readback retains controls for $\\downarrow^\\tau$, for $\\mathrm{quote}$ and for returning a term, and frames for a binder, an argument still to read back, and a function waiting for its argument."
-msgstr "（コード中の `CheckControl` と `CheckFrame`）。$\\textsc{Lam}$ とスパインの平坦化は末尾呼び出しである。$\\textsc{Sub}$ は $\\mathsf{cmp}(\\tau)$ をプッシュして推論する。$\\textsc{App}$ は $\\mathsf{head}(\\Gamma, \\vec a)$ をプッシュして $h$ を推論し、得られた型 $\\tau_1 \\to \\cdots$ が $\\mathsf{head}$ に合うとき、$\\mathsf{arg}(\\Gamma, \\vec a, 1, \\tau_2 \\to \\cdots)$ の下で $a_1$ を $\\tau_1$ に対して検査し、以降も同様に進める。$\\textsc{Redex}$ と $\\textsc{Redex}^{\\Leftarrow}$ はパラメータを別名にし、$\\mathsf{redex}(\\Gamma, x', b\\{x \\mapsto x'\\}, \\vec a, m)$ をプッシュして $a_1$ を推論する。そのフレームに合う型 $\\sigma$ を得たら、$b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ を平坦化し、$\\Gamma, x'{:}\\sigma$ の下で $\\mathsf{inf}^{*}$ または $\\mathsf{chk}^{*}$ を続ける。型付き評価は元の項から型を再構築せず、非公開の型付き計画を実行する。制御は計画を評価する、意味値を適用する、値を返す操作を表し、フレームは関数、引数、厳格な let の引数を待つ。クロージャ適用と厳格な let の本体への移行は末尾呼び出しである。読み戻しには $\\downarrow^\\tau$、$\\mathrm{quote}$、項を返す制御と、束縛子、読み戻し待ちの引数、引数を待つ関数のフレームが残る。"
+#: manual/design/stlc.md:408
+msgid "The machine flattens each application spine, infers a non-lambda head, checks its operands in order and compares the result with the expected type when checking. A lambda body is checked against the codomain of its expected arrow. A redex parameter is renamed apart before its first argument is inferred; only after inference succeeds does `redex_finish` flatten the body and join the trailing arguments. The remaining spine continues in its original mode. Assembly frames record checked lambdas, applications and strict lets without introducing new failures. All pending work lives in heap arrays."
+msgstr "機械は各適用スパインを平坦化し、lambda 以外の頭部を推論し、引数を順に検査し、検査モードでは結果を期待型と比較する。lambda の本体は期待する矢印の終域に対して検査する。redex のパラメータは最初の引数の推論前に別名にし、推論成功後だけ `redex_finish` が本体を平坦化して後続引数を結合する。残りのスパインは元のモードで処理する。組み立てフレームは検査済みの lambda、適用、厳格な let を記録し、新たな失敗を導入しない。保留中の仕事はすべてヒープ配列に保持する。"
 
-#: manual/design/stlc.md:429
+#: manual/design/stlc.md:417
+msgid "Typed evaluation runs the private plan. Its controls evaluate a plan, apply a semantic value, or return a value; its frames wait for a function, an operand, or a strict-let argument. Applying a closure and entering a strict-let body are tail calls. Readback retains controls for $\\downarrow^\\tau$, for $\\mathrm{quote}$ and for returning a term, and frames for a binder, an argument still to read back, and a function waiting for its argument."
+msgstr "型付き評価は非公開の計画を実行する。制御は計画の評価、意味値の適用、値の返却を表し、フレームは関数、引数、厳格な let の引数を待つ。クロージャ適用と厳格な let の本体への移行は末尾呼び出しである。読み戻しには $\\downarrow^\\tau$、$\\mathrm{quote}$、項を返す制御と、束縛子、読み戻し待ちの引数、引数を待つ関数のフレームが残る。"
+
+#: manual/design/stlc.md:424
 msgid "*Same results, same errors.* Read a frame as the function that the rest of its caller applies to the returned value, and a state as the stack applied to the value of its control. Every transition is one equation of the recursive definition, so it preserves that reading, and a run ends with the value the recursive functions return. The machines make the calls of the definition in its order, and no rule of the definition catches an error: every `Err` propagates unchanged to the top. The result of the recursive functions is therefore the first error met in that order, and the machines stop at the same one; which `TypeError` is reported does not change."
 msgstr "*同じ結果、同じエラー。* フレームは、呼び出し元の残りの処理が返された値に適用する関数とみなす。状態は、その制御の値にスタックを適用したものとみなす。各遷移は再帰定義の 1 つの等式に対応し、その解釈を保つため、実行は再帰関数が返す値で終わる。機械は定義と同じ順序で呼び出しを行い、定義のどの規則もエラーを捕捉しない。すべての `Err` は変更されずに最上位まで伝播する。したがって再帰関数の結果はその順序で最初に現れるエラーであり、機械も同じエラーで停止する。報告される `TypeError` は変わらない。"
 
-#: manual/design/stlc.md:439
+#: manual/design/stlc.md:434
 msgid "*Equality of types.* `Ty` has a hand-written `Eq` that compares a heap array of pending pairs, and skips a pair of physically equal types, which is sound because the equality is reflexive."
 msgstr "*型の等価性。* `Ty` には手書きの `Eq` があり、保留中の型ペアをヒープ配列で比較する。物理的に同一な型のペアは、等価性が反射的であるため健全にスキップする。"
 
-#: manual/design/stlc.md:443
+#: manual/design/stlc.md:438
 msgid "*Linear time.* Two hidden quadratic costs would dominate at depth $100\\,000$, so they are removed without changing results. Contexts and environments built from one another share an append-only array and read only their own prefix, so entering $n$ binders costs $O(n)$ instead of $O(n^2)$. Readback chooses binder names with $\\operatorname{fresh}(x, U)$, the first of the candidates $c_0 = x$, $c_1 = x\\_1$, $c_2 = x\\_2$, … not in $U$, and eta-expanding at a type nested $n$ levels deep would retry the $n$ names chosen before. It carries, with $U$, a position $p$ such that every $c_q$ with $q < p$ is in $U$, and starts the search there. If $c_{p'}$ is chosen, every $c_q$ with $q \\le p'$ is in $U \\cup \\{c_{p'}\\}$, so $p' + 1$ is a valid position for the extended set; readback only ever adds names to $U$, so the position stays valid along the path, and the name found is the one $\\operatorname{fresh}$ returns."
 msgstr "*線形時間。* 深さ $100\\,000$ では 2 つの隠れた二次コストが支配的になるため、結果を変えずにこれらを取り除く。互いに構築される文脈と環境は追加専用配列を共有し、それぞれ自身の接頭部だけを読むので、$n$ 個の束縛子に入るコストは $O(n^2)$ ではなく $O(n)$ である。読み戻しは $\\operatorname{fresh}(x, U)$ を使って束縛子名を選ぶ。これは候補 $c_0 = x$、$c_1 = x\\_1$、$c_2 = x\\_2$、… のうち $U$ にない最初の名前である。深さ $n$ の型で η 展開すると、それ以前に選んだ $n$ 個の名前を再試行することになる。そこで $U$ とともに、$q < p$ ならすべての $c_q$ が $U$ に含まれるという位置 $p$ を保持し、そこから探索を始める。$c_{p'}$ を選んだ場合、$q \\le p'$ なるすべての $c_q$ は $U \\cup \\{c_{p'}\\}$ に含まれるため、拡張後の集合で $p' + 1$ は有効な位置である。読み戻しでは $U$ に名前を追加するだけなので、この位置は経路上で有効なままであり、見つかる名前は $\\operatorname{fresh}$ が返すものと同じである。"
 
-#: manual/design/stlc.md:457
+#: manual/design/stlc.md:452
 msgid "Checking once for evaluation (issue #27)"
 msgstr "評価のための検査を一度だけ行う（issue #27）"
 
-#: manual/design/stlc.md:459
+#: manual/design/stlc.md:454
 msgid "The former evaluator reconstructed the type of each redex head by inferring its first argument again. For nested identity redexes in argument position, that revisited suffixes of sizes $n, n-1, \\ldots, 1$, even after the initial check succeeded. Removing repeated argument checks in PR #30 left this second source of quadratic traversal."
 msgstr "以前の評価器は、各 redex の最初の引数を再推論して頭部の型を再構築していた。引数位置に入れ子になった恒等 redex では、最初の検査が成功した後も、大きさ $n, n-1, \\ldots, 1$ の接尾部分を繰り返し訪問していた。PR #30 は引数の再検査を除いたが、この二次走査の原因は残っていた。"
 
-#: manual/design/stlc.md:465
+#: manual/design/stlc.md:460
 msgid "`build_typed_plan` now performs the bidirectional checking rules while recording a private `TypedPlan`. Values and variables record their inferred type; lambdas record their expected arrow and checked body; each application records its domain and checked operand. The redex rule records a strict let: first evaluate the inferred argument, bind the renamed parameter, then run the plan for the body joined with the trailing arguments. The public syntax, `check` and `infer` APIs are unchanged. Evaluation and closure application execute these plans and never call `check` or `infer`."
 msgstr "`build_typed_plan` は双方向検査規則を実行しながら、非公開の `TypedPlan` を記録する。値と変数は推論された型を、lambda は期待する矢印型と検査済みの本体を、各適用は定義域と検査済みの引数を記録する。redex 規則は厳格な let を記録する。まず推論済みの引数を評価し、改名したパラメータを束縛して、本体と後続引数を結合した計画を実行する。公開構文と `check`・`infer` API は変わらない。評価とクロージャ適用は計画を実行し、`check` や `infer` を呼ばない。"
 
-#: manual/design/stlc.md:474
-msgid "**Error correspondence.** Erase the plan returned by each control to its type (for inference) or successful check (for checking). `PlanHead`, `PlanArgument` and `PlanCompare` perform the same head inference, argument check and type comparison as their checker counterparts. `PlanRedexFirst` renames before inferring the first argument, calls `redex_finish` only after it succeeds, and continues the remaining spine in the original inference/checking mode. `PlanBindBody` and `PlanRedexRest` only assemble successful plans; neither can fail. Induction over machine transitions therefore gives the same acceptance and first `TypeError` as `check`. The public checker remains an independent implementation used for comparison."
-msgstr "**エラーの対応。** 各制御が返す計画を、その型（推論時）または検査成功（検査時）に消去する。`PlanHead`、`PlanArgument`、`PlanCompare` は検査器の対応するフレームと同じ頭部推論、引数検査、型比較を行う。`PlanRedexFirst` は最初の引数の推論前に改名し、成功した後だけ `redex_finish` を呼び、元の推論・検査モードで残りのスパインを処理する。`PlanBindBody` と `PlanRedexRest` は成功した計画を組み立てるだけで、失敗しない。機械の遷移に関する帰納法により、`check` と同じ受理条件および最初の `TypeError` が得られる。公開検査器は比較に使う独立した実装として残る。"
+#: manual/design/stlc.md:469
+msgid "**Error correspondence.** Erase the plan returned by each control to its type (for inference) or successful check (for checking). `PlanHead`, `PlanArgument` and `PlanCompare` perform the same head inference, argument check and type comparison prescribed by the bidirectional rules. `PlanRedexFirst` renames before inferring the first argument, calls `redex_finish` only after it succeeds, and continues the remaining spine in the original inference/checking mode. `PlanBindBody` and `PlanRedexRest` only assemble successful plans; neither can fail. Induction over machine transitions therefore gives the same acceptance and first `TypeError` as the original checker. Public `check` and `normalize_eta_long` now start this same machine in the same checking mode (#32), so their typing acceptance and first error have one implementation. The frozen baseline remains available for compatibility comparisons."
+msgstr "**エラーの対応。** 各制御が返す計画を、その型（推論時）または検査成功（検査時）に消去する。`PlanHead`、`PlanArgument`、`PlanCompare` は双方向規則が定める頭部推論、引数検査、型比較を行う。`PlanRedexFirst` は最初の引数の推論前に改名し、成功した後だけ `redex_finish` を呼び、元の推論・検査モードで残りのスパインを処理する。`PlanBindBody` と `PlanRedexRest` は成功した計画を組み立てるだけで、失敗しない。機械の遷移に関する帰納法により、元の検査器と同じ受理条件および最初の `TypeError` が得られる。公開 `check` と `normalize_eta_long` は同じ機械を同じ検査モードで起動する（#32）ため、型の受理条件と最初のエラーは一つの実装に従う。固定した基準実装は互換性比較に使える。"
 
-#: manual/design/stlc.md:485
+#: manual/design/stlc.md:482
 msgid "**Semantic correspondence.** A planned application evaluates its function, then its operand, then applies the value. A planned redex implements $(\\lambda x.b)\\,a_1\\,a_2\\cdots a_n$ by evaluating $a_1$ and continuing $b\\,a_2\\cdots a_n$ under its value. The existing capture-avoidance step renames $x$ away from the free variables of every trailing argument; adding that binding therefore leaves their meanings unchanged (environment weakening). Induction on the successful typing derivation relates the plan to the source term in the same STLC semantic domain. Readback is unchanged. Environment entries retain both the internal lookup name and its source name: internal capture-avoidance names must not occupy additional output binder candidates. Source names are already in the initial avoidance set. These are structural arguments, not machine-checked proofs."
 msgstr "**意味の対応。** 計画の適用は関数、引数の順に評価し、得た値を適用する。計画の redex は $a_1$ を評価し、その値を束縛した環境で $b\\,a_2\\cdots a_n$ を続けることで $(\\lambda x.b)\\,a_1\\,a_2\\cdots a_n$ を実装する。既存の捕獲回避手順は $x$ を各後続引数の自由変数と異なる名前にするため、その束縛を加えても引数の意味は変わらない（環境の弱化）。成功した型導出に関する帰納法により、計画と元の項を同じ STLC 意味領域で対応付ける。読み戻しは変わらない。環境要素は内部検索名と元の名前の両方を保持する。内部の捕獲回避名が、出力の束縛子候補を余分に占有してはならない。元の名前は初期回避集合に含まれる。これは構造的な議論であり、機械検証済みの証明ではない。"
 
-#: manual/design/stlc.md:498
-msgid "**Cost and limits.** Each successful typing visit creates a constant number of plan nodes; $p$ such visits add $O(p)$ plan storage and $O(d)$ pending frames at traversal depth $d$. The retained plan can live as long as a closure. Evaluation traverses plans without the repeated type-inference suffixes. For the nested identity-redex regression with fixed signature and empty initial context, checking, plan construction and evaluation take $O(n)$ work and $O(n)$ heap storage. This is not a linear-time bound for arbitrary STLC normalization: reduction can duplicate work and normal forms can grow; context lookup, branch-prefix copies, type equality, spine copying and name analysis retain their existing costs. In particular, capture avoidance may scan trailing arguments at multiple redexes, and name collection for closure readback is unchanged."
-msgstr "**コストと限界。** 成功した各型付け訪問は定数個の計画ノードを作る。$p$ 回の訪問に対して計画の追加領域は $O(p)$、走査深度 $d$ に対して保留フレームは $O(d)$ である。保持した計画はクロージャと同じ期間生存し得る。評価は計画を走査し、接尾部分の型推論を繰り返さない。固定されたシグネチャと空の初期コンテキストによる入れ子の恒等 redex 回帰では、検査・計画構築・評価の仕事量とヒープ領域は $O(n)$ である。これは任意の STLC 正規化の線形時間上限ではない。簡約は仕事を複製し、正規形は増大し得る。コンテキスト検索、分岐の接頭部分コピー、型の等価比較、スパインコピー、名前解析の既存コストは残る。特に捕獲回避は複数の redex で後続引数を走査し得る。クロージャの読み戻しでの名前収集も変わらない。"
+#: manual/design/stlc.md:495
+msgid "**Cost and limits.** Each successful typing visit creates a constant number of plan nodes; $p$ such visits add $O(p)$ plan storage and $O(d)$ pending frames at traversal depth $d$. Public `infer` and `check` also build a plan and discard it, adding $O(p)$ temporary plan storage compared with the former checker. This allocation is the explicit tradeoff for one rule implementation (#32); no allocation-free checking mode is provided. The retained plan can live as long as a closure. Evaluation traverses plans without the repeated type-inference suffixes. For the nested identity-redex regression with fixed signature and empty initial context, checking, plan construction and evaluation take $O(n)$ work and $O(n)$ heap storage. This is not a linear-time bound for arbitrary STLC normalization: reduction can duplicate work and normal forms can grow; context lookup, branch-prefix copies, type equality, spine copying and name analysis retain their existing costs. In particular, capture avoidance may scan trailing arguments at multiple redexes, and name collection for closure readback is unchanged."
+msgstr "**コストと限界。** 成功した各型付け訪問は定数個の計画ノードを作る。$p$ 回の訪問に対して計画の追加領域は $O(p)$、走査深度 $d$ に対して保留フレームは $O(d)$ である。公開 `infer` と `check` も計画を構築して破棄するため、以前の検査器と比べて $O(p)$ の一時的な計画領域が加わる。この割り当ては規則実装を統一する明示的なトレードオフである（#32）。計画を割り当てない検査モードは提供しない。保持した計画はクロージャと同じ期間生存し得る。評価は計画を走査し、接尾部分の型推論を繰り返さない。固定されたシグネチャと空の初期コンテキストによる入れ子の恒等 redex 回帰では、検査・計画構築・評価の仕事量とヒープ領域は $O(n)$ である。これは任意の STLC 正規化の線形時間上限ではない。簡約は仕事を複製し、正規形は増大し得る。コンテキスト検索、分岐の接頭部分コピー、型の等価比較、スパインコピー、名前解析の既存コストは残る。特に捕獲回避は複数の redex で後続引数を走査し得る。クロージャの読み戻しでの名前収集も変わらない。"
 
-#: manual/design/stlc.md:511
-msgid "**Evidence.** `src/stlc/issue27_test.mbt` covers 100,000 nested identity redexes, 100,000 neutral argument positions, first-error ordering and a capture case with exact binder-name comparison. `python3 tools/verify_stlc_plan.py --target all` compares 43,120 bounded term/type combinations per backend with the frozen PR #30 implementation at `db53d775e9248e8712a240adc8327be72675c80f`, including exact output names and error values. It requires that Git object locally and removes its temporary oracle afterward. The corpus is finite; it supports compatibility but does not establish a universal theorem."
-msgstr "**検証結果。** `src/stlc/issue27_test.mbt` は 100,000 段の恒等 redex、100,000 段の中立的な引数位置、最初のエラーの順序、および束縛子名を厳密に比較する捕獲ケースを扱う。`python3 tools/verify_stlc_plan.py --target all` は各バックエンドで 43,120 個の有界な項・型の組を、コミット `db53d775e9248e8712a240adc8327be72675c80f` に固定した PR #30 の実装と比較する。出力名とエラー値も厳密に比較する。その Git オブジェクトがローカルに必要であり、一時的な比較実装は実行後に削除する。コーパスは有限で、互換性を裏付けるが普遍的な定理を確立するものではない。"
+#: manual/design/stlc.md:512
+msgid "**Evidence.** `src/stlc/issue27_test.mbt` covers 100,000 nested identity redexes, 100,000 neutral argument positions, first-error ordering and a capture case with exact binder-name comparison. `python3 tools/verify_stlc_plan.py --target all` compares 43,120 bounded term/type combinations per backend with the frozen PR #30 implementation at `db53d775e9248e8712a240adc8327be72675c80f`, including exact output names and error values. It also compares public `check` on those combinations and `infer` on all 8,624 generated terms. It requires that Git object locally and removes its temporary oracle afterward. The corpus is finite; it supports compatibility but does not establish a universal theorem."
+msgstr "**検証結果。** `src/stlc/issue27_test.mbt` は 100,000 段の恒等 redex、100,000 段の中立的な引数位置、最初のエラーの順序、および束縛子名を厳密に比較する捕獲ケースを扱う。`python3 tools/verify_stlc_plan.py --target all` は各バックエンドで 43,120 個の有界な項・型の組を、コミット `db53d775e9248e8712a240adc8327be72675c80f` に固定した PR #30 の実装と比較する。出力名とエラー値も厳密に比較する。これらの組に対する公開 `check` と、生成した全 8,624 項に対する `infer` も比較する。その Git オブジェクトがローカルに必要であり、一時的な比較実装は実行後に削除する。コーパスは有限で、互換性を裏付けるが普遍的な定理を確立するものではない。"
 
-#: manual/design/stlc.md:522
+#: manual/design/stlc.md:524
 msgid "`check` and `infer` terminate; on success, the term is declaratively typable at the reported type (soundness theorem). The regression tests include redexes whose parameter occurs free in a trailing argument."
 msgstr "`check` と `infer` は停止する。成功した場合、その項は報告された型で宣言的に型付け可能である（健全性定理）。回帰テストには、パラメータが後続の引数に自由に現れる簡約基が含まれる。"
 
-#: manual/design/stlc.md:525
+#: manual/design/stlc.md:527
 msgid "`check` accepts every well-typed beta-normal term, and every well-typed term in which each argument given to a lambda head is inferable, including redexes that return a lambda."
 msgstr "`check` は、型の付くすべての β 正規な項と、ラムダの先頭に渡される各引数が推論可能である型の付くすべての項（ラムダを返す簡約基を含む）を受理する。"
 
-#: manual/design/stlc.md:528
+#: manual/design/stlc.md:530
 msgid "`normalize_eta_long` returns `Ok` exactly for terms that `check` accepts; its result is in $\\mathit{Nf}^\\tau$, is $\\beta\\eta$-equal to the input, and is the same (up to $=_\\alpha$) for $\\beta\\eta$-equal inputs."
 msgstr "`normalize_eta_long` はちょうど `check` が受理する項に対して `Ok` を返す。その結果は $\\mathit{Nf}^\\tau$ に属し、入力と $\\beta\\eta$ 等しく、$\\beta\\eta$ 等しい入力に対しては（$=_\\alpha$ を除いて）同じである。"
 
-#: manual/design/stlc.md:532
+#: manual/design/stlc.md:534
 msgid "`normalize_checked` returns `Err` before any reduction for ill-typed input."
 msgstr "型の誤った入力に対して、`normalize_checked` は簡約を行う前に `Err` を返す。"
 
-#: manual/design/stlc.md:533
+#: manual/design/stlc.md:535
 msgid "`NormalizationError` signals a violated internal invariant and is not produced for checked input."
 msgstr "`NormalizationError` は内部不変条件の違反を示し、検査済みの入力に対しては生じない。"
 
-#: manual/design/stlc.md:535
+#: manual/design/stlc.md:537
 msgid "`check`, `infer`, `normalize_checked`, `normalize_eta_long` and `==` on types use a constant host stack depth; terms and types nested 100 000 levels deep are handled on every backend (`src/stlc/deep_test.mbt`)."
 msgstr "`check`、`infer`、`normalize_checked`、`normalize_eta_long`、および型に対する `==` が使うホストスタックの深さは一定である。どのバックエンドでも 100 000 階層入れ子になった項と型を扱う（`src/stlc/deep_test.mbt`）。"
 
-#: manual/design/stlc.md:539
+#: manual/design/stlc.md:541
 msgid "The tests in `src/stlc/stlc_test.mbt` cover typing and rejection, shadowing, eta expansion of open variables and of constants (including nested arrow types and higher-order arguments), agreement of the two normalizers on small terms, and agreement of `check` and `normalize_eta_long` on redexes with curried heads, mixed flat and nested spines, and bodies that consume the outer arguments. They also cover redexes checked against an arrow ($\\textsc{Redex}^{\\Leftarrow}$): redexes that return a lambda, alone and as arguments, in curried and flat spines, nested ones, the renaming shape above in checking mode, and ill-typed variants that are still rejected."
 msgstr "`src/stlc/stlc_test.mbt` のテストは、型付けと拒否、シャドーイング、開いた変数および定数の η展開（入れ子の矢印型や高階の引数を含む）、小さな項における二つの正規化器の一致、そしてカリー化された先頭、平坦なスパインと入れ子のスパインの混在、外側の引数を消費する本体を持つ簡約基における `check` と `normalize_eta_long` の一致を扱う。さらに、矢印型に対して検査される簡約基（$\\textsc{Redex}^{\\Leftarrow}$）も扱う。ラムダを返す簡約基（単独の場合と引数の場合）、カリー化されたスパインと平坦なスパイン、入れ子の簡約基、検査モードにおける上の名前替えの形、そして依然として拒否される型の誤った変種である。"
 
-#: manual/design/stlc.md:551
+#: manual/design/stlc.md:553
 msgid "**Church-style annotated lambdas.** Annotations would make inference complete but change the shared `Term` syntax; the bidirectional checker keeps terms unannotated."
 msgstr "**Church 流の注釈付きラムダ。** 注釈があれば型推論は完全になるが、共有の `Term` 構文を変えてしまう。双方向型検査器は項を注釈なしのまま保つ。"
 
-#: manual/design/stlc.md:554
+#: manual/design/stlc.md:556
 msgid "**Hindley–Milner inference.** Unification would infer types of unannotated lambdas, but polymorphism and type variables are beyond this calculus."
 msgstr "**Hindley–Milner 型推論。** 単一化により注釈なしラムダの型を推論できるが、多相性と型変数はこの計算の範囲外である。"
 
-#: manual/design/stlc.md:556
+#: manual/design/stlc.md:558
 msgid "**Fuel for typed NbE.** Unnecessary by strong normalization; the untyped [utlc/nbe](utlc/nbe.md) keeps fuel because it needs it."
 msgstr "**型付き NbE の燃料。** 強正規化性により不要である。型なしの [utlc/nbe](utlc/nbe.md) が燃料を保持するのは、それが必要だからである。"
 
-#: manual/design/stlc.md:558
+#: manual/design/stlc.md:560
 msgid "**Eta for the unit type.** Implementable by reifying every neutral of type $\\mathsf{Unit}$ as $()$; not done, so that neutrals stay observable. The decided equality is $\\beta\\eta$ for arrows only."
 msgstr "**unit 型の η。** $\\mathsf{Unit}$ 型のすべての中立項を $()$ として具象化すれば実装できるが、中立項を観測可能に保つため行っていない。決定される等価性は矢印型に対する $\\beta\\eta$ のみである。"
 
-#: manual/design/stlc.md:564
+#: manual/design/stlc.md:566
 msgid "Types are $b$, $\\mathsf{Unit}$ and arrows: no products, sums, polymorphism or dependent types."
 msgstr "型は $b$、$\\mathsf{Unit}$、矢印型のみである。直積、直和、多相性、依存型はない。"
 
-#: manual/design/stlc.md:566
+#: manual/design/stlc.md:568
 msgid "No unit eta; normal forms are eta-long for arrow types only."
 msgstr "unit 型の η はない。正規形が η 長であるのは矢印型についてのみである。"
 
-#: manual/design/stlc.md:567
+#: manual/design/stlc.md:569
 msgid "Constants are opaque: there are no delta rules."
 msgstr "定数は不透明である。δ 規則はない。"
 
-#: manual/design/stlc.md:568
+#: manual/design/stlc.md:570
 msgid "`normalize_checked` is bounded by a step limit because it reuses the untyped reducer."
 msgstr "`normalize_checked` は型なし簡約器を再利用するため、ステップ数の上限に縛られる。"
 
-#: manual/design/stlc.md:570
+#: manual/design/stlc.md:572
 msgid "`normalize_eta_long` executes a plan produced by one checking pass, with no type inference during evaluation (#27). It does not promise linear time for arbitrary terms: reduction, context lookup, capture avoidance, spine copying and readback can still require more work than the input size."
 msgstr "`normalize_eta_long` は一度の検査で作られた計画を実行し、評価中に型推論を行わない（#27）。任意の項に対する線形時間は保証しない。簡約、コンテキスト検索、捕獲回避、スパインコピー、読み戻しは入力サイズを超える仕事を要し得る。"
 
-#: manual/design/stlc.md:574
+#: manual/design/stlc.md:576
 msgid "`Debug` of a deep term, type or error recurses and can overflow the stack."
 msgstr "深い項、型、またはエラーに対する `Debug` は再帰し、スタックを使い切ることがある。"
 
@@ -6063,6 +6067,9 @@ msgstr "[utlc/nbe の設計](../../design/utlc/nbe.md)：意味領域と健全�
 #: manual/tutorial/utlc/nbe.md:203
 msgid "[stlc tutorial](../stlc.md) for typed, eta-long NbE."
 msgstr "[stlc チュートリアル](../stlc.md)：型付きの η 長形式 NbE。"
+
+#~ msgid "(`CheckControl` and `CheckFrame` in the code). $\\textsc{Lam}$ and the flattening of a spine are tail calls. $\\textsc{Sub}$ pushes $\\mathsf{cmp}(\\tau)$ and infers; $\\textsc{App}$ pushes $\\mathsf{head}(\\Gamma, \\vec a)$ and infers $h$, and the inferred type $\\tau_1 \\to \\cdots$ meeting $\\mathsf{head}$ checks $a_1$ against $\\tau_1$ under $\\mathsf{arg}(\\Gamma, \\vec a, 1, \\tau_2 \\to \\cdots)$, and so on; $\\textsc{Redex}$ and $\\textsc{Redex}^{\\Leftarrow}$ rename the parameter apart, push $\\mathsf{redex}(\\Gamma, x', b\\{x \\mapsto x'\\}, \\vec a, m)$ and infer $a_1$; the type $\\sigma$ meeting that frame flattens $b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ and continues with $\\mathsf{inf}^{*}$ or $\\mathsf{chk}^{*}$ under $\\Gamma, x'{:}\\sigma$. Typed evaluation runs a private typed plan rather than reconstructing types from source terms. Its controls evaluate a plan, apply a semantic value, or return a value; its frames wait for a function, an operand, or a strict-let argument. Applying a closure and entering a strict-let body are tail calls. Readback retains controls for $\\downarrow^\\tau$, for $\\mathrm{quote}$ and for returning a term, and frames for a binder, an argument still to read back, and a function waiting for its argument."
+#~ msgstr "（コード中の `CheckControl` と `CheckFrame`）。$\\textsc{Lam}$ とスパインの平坦化は末尾呼び出しである。$\\textsc{Sub}$ は $\\mathsf{cmp}(\\tau)$ をプッシュして推論する。$\\textsc{App}$ は $\\mathsf{head}(\\Gamma, \\vec a)$ をプッシュして $h$ を推論し、得られた型 $\\tau_1 \\to \\cdots$ が $\\mathsf{head}$ に合うとき、$\\mathsf{arg}(\\Gamma, \\vec a, 1, \\tau_2 \\to \\cdots)$ の下で $a_1$ を $\\tau_1$ に対して検査し、以降も同様に進める。$\\textsc{Redex}$ と $\\textsc{Redex}^{\\Leftarrow}$ はパラメータを別名にし、$\\mathsf{redex}(\\Gamma, x', b\\{x \\mapsto x'\\}, \\vec a, m)$ をプッシュして $a_1$ を推論する。そのフレームに合う型 $\\sigma$ を得たら、$b\\{x \\mapsto x'\\}\\,a_2 \\cdots a_n$ を平坦化し、$\\Gamma, x'{:}\\sigma$ の下で $\\mathsf{inf}^{*}$ または $\\mathsf{chk}^{*}$ を続ける。型付き評価は元の項から型を再構築せず、非公開の型付き計画を実行する。制御は計画を評価する、意味値を適用する、値を返す操作を表し、フレームは関数、引数、厳格な let の引数を待つ。クロージャ適用と厳格な let の本体への移行は末尾呼び出しである。読み戻しには $\\downarrow^\\tau$、$\\mathrm{quote}$、項を返す制御と、束縛子、読み戻し待ちの引数、引数を待つ関数のフレームが残る。"
 
 #~ msgid "`normalize_eta_long` checks a term against a type and returns its beta-normal, eta-long form, computed by typed normalization by evaluation."
 #~ msgstr "`normalize_eta_long` は項を型に対して検査し、その β 正規・η 長形式を返す。これは型付きの評価による正規化で計算される。"
