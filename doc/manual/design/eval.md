@@ -192,6 +192,39 @@ strategy's step function to `@rewrite.normalize` and `@rewrite.trace`. As a
 result, every strategy has a trace, and the step-count contract is the same
 for all of them.
 
+### Searches with a bounded host stack
+
+**Problem.** Like the traversals of [rewrite](rewrite.md), the weak head and
+applicative searches were structural recursion, so a redex nested a few
+thousand levels deep overflowed the js, wasm and wasm-gc stacks (issue #13).
+
+**Choice.** Both run as loops over the stack of ancestors described in "A
+bounded host stack" of the [rewrite design](rewrite.md): a heap array of parent
+nodes with the edge taken from each, root first, rebuilt from the innermost
+outwards when a step is found. `NormalOrder` and `FullNormal` use
+`@rewrite.top_down_once` itself.
+
+- *Weak head.* The search tries $r$ at the root and, while it fails at an
+  application, descends into the head. The ancestors are all
+  `ApplyHead` entries; the loop tries the same nodes in the same order and
+  rebuilds $h'\,\vec u_k \cdots \vec u_1$ around the result $h'$, which is
+  what the recursion returned.
+- *Applicative order.* The search is the post-order search of
+  [rewrite](rewrite.md), with one change where an
+  argument has been searched without a step: leaving argument $i$ of
+  $s = h\,a_0 \cdots a_{n-1}$ with $i < n - 1$ first tries the prefix
+  $h\,a_0 \cdots a_i$ and, if the prefix is a redex, the whole $s$, exactly
+  as the recursive loop over the arguments does after each argument. The
+  recursion keeps one local variable across that loop, `root_failed`
+  (the early attempt at $s$ failed, so $s$ is not tried again after the last
+  argument). The ancestor entry for argument $i$ carries it,
+  $(s, \mathsf{A}_i, \mathit{failed})$, and passes it on to the entry for
+  argument $i + 1$, so every attempt, at a node or at a prefix, happens in
+  the order and with the outcome of the recursive definition.
+
+Steps, paths and traces are therefore unchanged; the host stack depth is
+constant, and the heap holds one entry per level of the current position.
+
 ### `FullNormal` as a separate name
 
 `FullNormal` maps to the same traversal as `NormalOrder` today. The
@@ -216,6 +249,9 @@ changing the meaning of `NormalOrder`.
   least the length of the normal-order reduction (normalization theorem).
 - If two strategies both return `NormalForm` for a confluent rule, the terms
   are alpha-equivalent (Church–Rosser).
+- Every strategy uses a constant host stack depth; a redex nested 100 000
+  levels deep is found and rewritten on every backend
+  (`src/eval/deep_test.mbt`).
 
 The library's tests check named and De Bruijn beta steps against each other
 and every strategy on random terms against their curried forms

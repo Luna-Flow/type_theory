@@ -9,6 +9,13 @@ domain simplification) is supplied by the caller.
 
 The strategies are defined precisely in the [eval design](../design/eval.md).
 
+Every function of the package is stack-safe in the nesting depth of the
+term: each strategy keeps the ancestors of the position it searches in a heap
+array and uses a constant amount of host stack, so it finds and rewrites a
+redex nested 100 000 levels deep on every backend. The rule must itself be
+stack-safe on the subterms it is given. As in [rewrite](rewrite.md), `Debug`
+of a deep term or result is not stack-safe.
+
 ## Importing
 
 Add the package, and the packages whose types appear in its signatures, to
