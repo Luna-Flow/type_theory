@@ -17,6 +17,8 @@ so that every normalizer can be explained step by step.
 - **Arbitrary rules.** A rule is any MoonBit function, so termination and
   confluence cannot be decided; repetition must be bounded.
 - **Immutable terms.** Steps build new terms and never update in place.
+  Unchanged subterms are shared between `before` and `after`, so callers
+  must not change the argument array of an `Apply` node either.
 
 ## Mathematical background
 
@@ -194,6 +196,9 @@ simplifiers use and because it makes the normal-form lemma available.
   every traversal of this package and of [eval](eval.md) does, then also
   `steps[0].before = initial` and `steps[i].after = steps[i+1].before`.
   `trace` records what the step function returns and does not check this.
+- `ReductionPath` and `ReductionTrace` are abstract and their accessors
+  return copies of the stored arrays, so a path or a trace cannot change
+  after it is built and the laws above, once true of it, stay true.
 
 **What is not checked.** The package does not decide termination or
 confluence of a rule. When the rule is confluent, every terminating strategy

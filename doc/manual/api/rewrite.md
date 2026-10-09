@@ -135,26 +135,27 @@ pub fn ReductionFrame::equal(Self, Self) -> Bool
 `ReductionPath` is the sequence of frames from the root to a position.
 
 ```mbti
-pub struct ReductionPath {
-  frames : Array[ReductionFrame]
-} derive(Eq, @debug.Debug)
+type ReductionPath derive(Eq, @debug.Debug)
 ```
 
-The empty path is the root.
+The empty path is the root. The type is abstract: a path is built only with
+`root` and `prepend` and cannot be changed afterwards.
 
-### `ReductionPath::root`, `ReductionPath::prepend`, `ReductionPath::to_array`
+### `ReductionPath::root`, `ReductionPath::prepend`, `ReductionPath::length`, `ReductionPath::to_array`
 
 These functions build and read paths.
 
 ```mbti
 pub fn ReductionPath::root() -> Self
 pub fn ReductionPath::prepend(Self, ReductionFrame) -> Self
+pub fn ReductionPath::length(Self) -> Int
 pub fn ReductionPath::to_array(Self) -> Array[ReductionFrame]
 ```
 
 `prepend(frame)` adds a frame at the root end, which is how a traversal
-lifts the path of a step in a child to the parent. `to_array` returns the
-frames root first.
+lifts the path of a step in a child to the parent. `length` is the number of
+frames, 0 for the root. `to_array` returns the frames root first, as a fresh
+array: changing it does not change the path.
 
 ### `ReductionPath::equal`
 
@@ -170,7 +171,8 @@ test "paths are built from the redex up" {
     .prepend(@rewrite.ApplyArgument(1))
     .prepend(@rewrite.BinderBody)
   assert_eq(path.to_array(), [@rewrite.BinderBody, @rewrite.ApplyArgument(1)])
-  assert_eq(@rewrite.ReductionPath::root().to_array(), [])
+  assert_eq(path.length(), 2)
+  assert_eq(@rewrite.ReductionPath::root().length(), 0)
 }
 ```
 
@@ -296,19 +298,18 @@ classifies `term`. The step function decides the strategy; see
 step and the final result.
 
 ```mbti
-pub struct ReductionTrace[T] {
-  initial : @syntax.Term[T]
-  steps : Array[StepResult[T]]
-  result : NormalizationResult[T]
-} derive(Eq, @debug.Debug)
+type ReductionTrace[T] derive(Eq, @debug.Debug)
 pub fn[T] ReductionTrace::initial(Self[T]) -> @syntax.Term[T]
 pub fn[T] ReductionTrace::steps(Self[T]) -> Array[StepResult[T]]
 pub fn[T] ReductionTrace::result(Self[T]) -> NormalizationResult[T]
 pub fn[T : Eq] ReductionTrace::equal(Self[T], Self[T]) -> Bool
 ```
 
-`initial()`, `steps()` and `result()` read the three fields; `steps()`
-returns a copy, and `equal` is the promoted `Eq` implementation. Every
+The type is abstract: only `trace` builds a trace, and `initial()`,
+`steps()` and `result()` read its three parts. `steps()` returns a fresh
+array, so changing it does not change the trace; the terms inside are
+shared, not copied, and must be treated as immutable (see
+[`Term`](syntax.md)). `equal` is the promoted `Eq` implementation. Every
 element of `steps` is a `Reduced` value, and `steps().length()` equals the
 `steps` count of `result`. When the step function keeps the contract of
 `StepResult` (it reports its own input as `before`, as every traversal of
@@ -411,3 +412,10 @@ test "generic rewriting on Term" {
 ```
 
 For a downstream AST see the [adapter tutorial](../tutorial/adapter.md).
+
+## Removed fields
+
+The fields `ReductionPath::frames` and `ReductionTrace::initial`, `steps` and
+`result` are no longer public. Use `ReductionPath::length` and
+`ReductionPath::to_array`, and the methods `ReductionTrace::initial`,
+`ReductionTrace::steps` and `ReductionTrace::result`.

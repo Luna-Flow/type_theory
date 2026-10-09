@@ -5,7 +5,9 @@
 The `substitution` package replaces free variables by terms without capturing
 variables. `Substitution[T]` works on `@syntax.Term[T]`;
 `GenericSubstitution[N]` works on any AST that implements
-`@syntax.BindingSyntax`. Both are finite, simultaneous and immutable.
+`@syntax.BindingSyntax`. Both are finite, simultaneous and immutable: they
+are abstract types, every operation returns a new value, and every method
+that returns an array returns a fresh copy.
 
 The definition of capture-avoiding substitution and the proofs of its laws
 are in the [substitution design](../design/substitution.md).
@@ -33,14 +35,21 @@ for example `@core.Name`.
 `Substitution[T]` is a finite map from names to replacement terms.
 
 ```mbti
-pub struct Substitution[T] {
-  entries : Array[(@core.Name, @syntax.Term[T])]
-}
+type Substitution[T]
 ```
 
 It denotes the map $\sigma$ with $\sigma(x) = s$ for an entry $(x, s)$ and
-$\sigma(x) = x$ (the variable itself) for every other name. The entries are
-read-only outside the package; at most one entry exists per name.
+$\sigma(x) = x$ (the variable itself) for every other name. The type is
+abstract: the entries cannot be reached from outside the package, so the
+functions below are the only way to build a substitution, and each name has
+at most one entry.
+
+Replacement terms are stored and returned as they are, not copied: `get`,
+`to_array` and `apply` return terms that share structure with the terms
+passed to `singleton` and `set`. `Term` is a plain enum whose `Apply`
+arguments are an `Array`, so treat terms as immutable values; changing the
+argument array of a term in place would also change every substitution that
+holds it.
 
 ### `Substitution::empty`, `Substitution::singleton`, `Substitution::set`
 
@@ -60,6 +69,35 @@ pub fn[T] Substitution::set(Self[T], @core.Name, @syntax.Term[T]) -> Self[T]
 
 ```mbti
 pub fn[T] Substitution::get(Self[T], @core.Name) -> @syntax.Term[T]?
+```
+
+### `Substitution::length`, `Substitution::to_array`
+
+These methods read the entries of a substitution.
+
+```mbti
+pub fn[T] Substitution::length(Self[T]) -> Int
+pub fn[T] Substitution::to_array(Self[T]) -> Array[(@core.Name, @syntax.Term[T])]
+```
+
+`length` is the number of names in the domain. `to_array` returns the entries
+`(x, s)` as a fresh array, in the order the names were first added; changing
+the array does not change the substitution.
+
+```moonbit
+test "substitution entries are read through a copy" {
+  let x = @core.Name::new("x")
+  let y = @core.Name::new("y")
+  let s : @substitution.Substitution[Int] = @substitution.Substitution::singleton(
+    x,
+    Value(1),
+  ).set(y, Value(2))
+  let entries = s.to_array()
+  assert_eq(entries, [(x, Value(1)), (y, Value(2))])
+  entries.push((x, Value(3)))
+  assert_eq(s.length(), 2)
+  assert_eq(s.get(x), Some(@syntax.Value(1)))
+}
 ```
 
 ### `Substitution::without`, `Substitution::restrict`
@@ -180,12 +218,13 @@ test "a renaming as a substitution" {
 AST `N`.
 
 ```mbti
-pub struct GenericSubstitution[N] {
-  entries : Array[(@core.Name, N)]
-}
+type GenericSubstitution[N]
 ```
 
-### `GenericSubstitution::empty`, `GenericSubstitution::singleton`, `GenericSubstitution::set`, `GenericSubstitution::get`, `GenericSubstitution::without`
+Like `Substitution`, the type is abstract and has at most one entry per name.
+Replacement nodes are stored and returned without copying.
+
+### `GenericSubstitution::empty`, `GenericSubstitution::singleton`, `GenericSubstitution::set`, `GenericSubstitution::get`, `GenericSubstitution::without`, `GenericSubstitution::length`, `GenericSubstitution::to_array`
 
 These functions build and query generic substitutions; they behave exactly
 like their `Substitution` counterparts.
@@ -196,6 +235,8 @@ pub fn[N] GenericSubstitution::singleton(@core.Name, N) -> Self[N]
 pub fn[N] GenericSubstitution::set(Self[N], @core.Name, N) -> Self[N]
 pub fn[N] GenericSubstitution::get(Self[N], @core.Name) -> N?
 pub fn[N] GenericSubstitution::without(Self[N], @core.Name) -> Self[N]
+pub fn[N] GenericSubstitution::length(Self[N]) -> Int
+pub fn[N] GenericSubstitution::to_array(Self[N]) -> Array[(@core.Name, N)]
 ```
 
 ### `GenericSubstitution::apply_once`
@@ -226,3 +267,8 @@ test "generic substitution on Term" {
 
 On `Term[T]`, `apply_once` agrees with `Substitution::apply`. For a
 downstream AST see the [adapter tutorial](../tutorial/adapter.md).
+
+## Removed fields
+
+The field `entries` of `Substitution` and of `GenericSubstitution` is no
+longer public. Read a substitution with `get`, `length` and `to_array`.

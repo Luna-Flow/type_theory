@@ -6,6 +6,9 @@ The `core` package defines the vocabulary that every other package of
 `type_theory` shares: variable names, fresh-name generation, ordered scopes,
 telescopes and finite renamings. All values are immutable: every operation
 that "changes" a value returns a new one and leaves its argument untouched.
+`Context`, `Telescope` and `Renaming` are abstract types, so their storage
+cannot be reached from outside the package, and every method that returns an
+array returns a fresh copy.
 The mathematics behind these definitions is in the [core design](../design/core.md).
 
 ## Importing
@@ -127,14 +130,13 @@ test "fresh_name keeps the hint or adds a suffix" {
 `Context` is an ordered list of names in scope, innermost last.
 
 ```mbti
-pub struct Context {
-  names : Array[Name]
-} derive(Eq, @debug.Debug)
+type Context derive(Eq, @debug.Debug)
 ```
 
 A context may contain the same name more than once; a later entry shadows an
 earlier one. Two contexts are equal when they list the same names in the same
-order.
+order. The type is abstract: read a context with `length`, `contains` and
+`to_array`.
 
 ### `Context::empty`, `Context::from_array`
 
@@ -172,8 +174,9 @@ pub fn Context::to_array(Self) -> Array[Name]
 pub fn Context::equal(Self, Self) -> Bool
 ```
 
-`contains` is a linear search. `to_array` returns a copy, outermost name
-first. `equal` is the promoted `Eq` implementation.
+`contains` is a linear search. `to_array` returns a fresh array, outermost
+name first; changing it does not change the context. `equal` is the promoted
+`Eq` implementation.
 
 ```moonbit
 test "contexts grow at the inner end" {
@@ -193,14 +196,13 @@ test "contexts grow at the inner end" {
 in dependency order.
 
 ```mbti
-pub struct Telescope[T] {
-  entries : Array[(Name, T)]
-}
+type Telescope[T]
 ```
 
 In a telescope $x_1 : A_1, \dots, x_n : A_n$ the annotation $A_i$ may refer to
 $x_1, \dots, x_{i-1}$. `Telescope` records the order; it does not check what
-the annotations mention.
+the annotations mention. The type is abstract: read a telescope with `length`
+and `to_array`.
 
 ### `Telescope::empty`, `Telescope::extend_with`, `Telescope::length`, `Telescope::to_array`
 
@@ -215,7 +217,8 @@ pub fn[T] Telescope::to_array(Self[T]) -> Array[(Name, T)]
 ```
 
 `extend_with` appends one binder and returns a new telescope; `to_array`
-returns a copy of the entries, first binder first.
+returns a fresh array of the entries, first binder first, and changing it does
+not change the telescope.
 
 ```moonbit
 test "telescopes keep binder order" {
@@ -237,16 +240,16 @@ test "telescopes keep binder order" {
 left unchanged.
 
 ```mbti
-pub struct Renaming {
-  entries : Array[(Name, Name)]
-} derive(Eq, @debug.Debug)
+type Renaming derive(Eq, @debug.Debug)
 ```
 
 A renaming $\rho$ denotes the total function
 $\rho(n) = m$ if $(n, m)$ is an entry and $\rho(n) = n$ otherwise. It is
 applied simultaneously: the image of a name is never renamed again. A renaming
-need not be injective. Equality (`Renaming::equal`) compares the entry lists,
-so two renamings that denote the same function can still be different values.
+need not be injective. The type is abstract, so the only way to build a
+renaming is through the functions below, and each name has at most one entry.
+Equality (`Renaming::equal`) compares the entry lists, so two renamings that
+denote the same function can still be different values.
 
 ### `Renaming::empty`, `Renaming::singleton`, `Renaming::set`
 
@@ -267,6 +270,35 @@ pub fn Renaming::set(Self, Name, Name) -> Self
 
 ```mbti
 pub fn Renaming::apply(Self, Name) -> Name
+```
+
+### `Renaming::length`, `Renaming::to_array`
+
+These methods read the entries of a renaming.
+
+```mbti
+pub fn Renaming::length(Self) -> Int
+pub fn Renaming::to_array(Self) -> Array[(Name, Name)]
+```
+
+`length` is the number of names in the domain. `to_array` returns the entries
+`(from, to_)` as a fresh array, in the order the names were first added;
+changing the array does not change the renaming. An entry may map a name to
+itself, so `length` can count names that `apply` leaves unchanged.
+
+```moonbit
+test "renaming entries are read through a copy" {
+  let x = @core.Name::new("x")
+  let y = @core.Name::new("y")
+  let z = @core.Name::new("z")
+  let r = @core.Renaming::singleton(x, y).set(y, z).set(x, z)
+  assert_eq(r.length(), 2)
+  let entries = r.to_array()
+  assert_eq(entries, [(x, z), (y, z)])
+  entries.push((z, x))
+  assert_eq(r.length(), 2)
+  assert_eq(r.apply(z), z)
+}
 ```
 
 ### `Renaming::without`
@@ -335,6 +367,10 @@ It is the promoted `Eq` implementation; use `==` in new code.
 | --- | --- |
 | `Context::extend` | `Context::extend_with` |
 | `Telescope::extend` | `Telescope::extend_with` |
+
+The fields `Context::names`, `Telescope::entries` and `Renaming::entries`
+are no longer public; use `to_array`, `length`, `contains` and
+`apply` instead.
 
 `extend` became a reserved word in MoonBit 0.10, so the methods were renamed.
 The old names remain as deprecated aliases. The method forms `not_equal`,

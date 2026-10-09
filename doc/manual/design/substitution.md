@@ -129,6 +129,13 @@ substitution, which is cheaper (one traversal) and has the laws below.
 
 ## Correctness and invariants
 
+`Substitution` and `GenericSubstitution` are abstract types: only the
+functions of the package build them, each of those keeps at most one entry
+per name, and `to_array` returns a copy of the entries. So every value
+denotes a map $\sigma$ and keeps denoting the same map. The
+replacement terms are shared, not copied; the laws assume, as the whole
+library does, that terms are not changed in place.
+
 The laws below are proved through the nameless reading of terms. The direct
 argument by induction on named terms is the classical one, but its binder
 case has to compare results whose fresh names differ, and that comparison is

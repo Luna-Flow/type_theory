@@ -55,6 +55,9 @@ A term is *well scoped* when every `Bound(i)` lies under more than `i`
 binders. Because binders carry no names, `==` (`DbTerm::equal`) on
 well-scoped terms is alpha-equivalence.
 
+As with `@syntax.Term`, terms are shared, not copied: treat the argument
+array of `Apply` as immutable and build a new node instead of changing it.
+
 ### `DbTerm::equal`
 
 `DbTerm::equal` compares two terms structurally.

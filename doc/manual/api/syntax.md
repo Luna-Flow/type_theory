@@ -56,6 +56,13 @@ pub(all) enum Term[T] {
 literally. Use `alpha_equal` to compare terms up to renaming of bound
 variables.
 
+Terms are values that the library shares instead of copying: an operation may
+return its argument, a subterm of it, or a term stored in a substitution or a
+reduction trace. The argument list of `Apply` is an ordinary `Array`, so the
+compiler does not stop you from changing it in place, but doing so changes
+every term and every library value that shares it. Treat terms as immutable:
+build a new `Apply` node instead of changing the array of an existing one.
+
 ```moonbit
 test "build the term λx. f x 1" {
   let x = @core.Name::new("x")

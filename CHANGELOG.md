@@ -20,6 +20,24 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
 - `debruijn`: `ScopeError` has a new case `NegativeCutoff(cutoff~ : Int)`,
   returned by `shift` for a negative cutoff. Downstream exhaustive matches on
   `ScopeError` need a new arm (#10).
+- **BREAKING:** the types that hold an array are now abstract, so their
+  fields are no longer accessible outside their package (#14):
+  - `core`: `Context` (`names`), `Telescope` (`entries`), `Renaming`
+    (`entries`). Use `Context::to_array`, `length`, `contains`;
+    `Telescope::to_array`, `length`; and the new `Renaming::to_array`,
+    `Renaming::length`.
+  - `substitution`: `Substitution` and `GenericSubstitution` (`entries`). Use
+    `get` and the new `to_array` and `length` on both types.
+  - `stlc`: `Signature` and `TypeContext` (`entries`). Use `lookup`,
+    `to_array` and the new `length` on both types.
+  - `rewrite`: `ReductionPath` (`frames`) and `ReductionTrace` (`initial`,
+    `steps`, `result`). Use `ReductionPath::to_array` and the new
+    `ReductionPath::length`, and `ReductionTrace::initial`, `steps`,
+    `result`.
+
+  Every `to_array` (and `ReductionTrace::steps`) returns a fresh array.
+  Struct literals and field access on these types no longer compile outside
+  their package.
 
 ### Deprecated
 
@@ -93,6 +111,14 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   budget of a few million units instead of returning `FuelExhausted`. Both
   now run as loops over an explicit stack of frames in the heap, bounded by
   the budget; results and `consumed` are unchanged (#12).
+- `core`, `substitution`, `stlc`, `rewrite`: values documented as immutable
+  could be changed through their public array fields, for example
+  `s.entries.push((x, t))` gave a substitution two entries for `x`, so `s`
+  and `s.then(empty)` disagreed, and `ctx.names.push(x)` grew a `Context` in
+  place. The fields are now hidden (see Changed) (#14).
+- Documentation: `@syntax.Term` and `@debruijn.DbTerm` values are shared, not
+  copied, by substitutions, traces and the reducers; the API pages now say
+  that the argument array of `Apply` must be treated as immutable.
 
 ### Documentation
 

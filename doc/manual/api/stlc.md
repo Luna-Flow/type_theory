@@ -77,39 +77,41 @@ exactly type equality. `Atom::equal` likewise compares constants by name.
 
 ## Signatures and contexts
 
-### `Signature`, `Signature::empty`, `Signature::extend_with`, `Signature::lookup`, `Signature::to_array`, `Signature::equal`
+### `Signature`, `Signature::empty`, `Signature::extend_with`, `Signature::lookup`, `Signature::length`, `Signature::to_array`, `Signature::equal`
 
 `Signature` assigns types to constants.
 
 ```mbti
-pub struct Signature {
-  entries : Array[(@core.Name, Ty)]
-} derive(Eq, @debug.Debug)
+type Signature derive(Eq, @debug.Debug)
 pub fn Signature::empty() -> Self
 #alias(extend, deprecated)
 pub fn Signature::extend_with(Self, @core.Name, Ty) -> Self
 pub fn Signature::lookup(Self, @core.Name) -> Ty?
+pub fn Signature::length(Self) -> Int
 pub fn Signature::to_array(Self) -> Array[(@core.Name, Ty)]
 pub fn Signature::equal(Self, Self) -> Bool
 ```
 
-`empty()` has no constants. `extend_with(c, ty)` returns a new signature
-with `c : ty` added; a later entry for the same name shadows an earlier one,
-and `lookup` returns the latest, or `None`. `to_array` returns a copy of the
-entries in insertion order, and `equal` compares the entry lists.
+The type is abstract: a signature is built only with `empty` and
+`extend_with` and cannot be changed afterwards. `empty()` has no constants.
+`extend_with(c, ty)` returns a new signature with `c : ty` added; a later
+entry for the same name shadows an earlier one, and `lookup` returns the
+latest, or `None`. `length` counts the entries, shadowed ones included.
+`to_array` returns a fresh array of the entries in insertion order, so
+changing it does not change the signature, and `equal` compares the entry
+lists.
 
-### `TypeContext`, `TypeContext::empty`, `TypeContext::extend_with`, `TypeContext::lookup`, `TypeContext::to_array`, `TypeContext::equal`
+### `TypeContext`, `TypeContext::empty`, `TypeContext::extend_with`, `TypeContext::lookup`, `TypeContext::length`, `TypeContext::to_array`, `TypeContext::equal`
 
 `TypeContext` assigns types to free variables.
 
 ```mbti
-pub struct TypeContext {
-  entries : Array[(@core.Name, Ty)]
-} derive(Eq, @debug.Debug)
+type TypeContext derive(Eq, @debug.Debug)
 pub fn TypeContext::empty() -> Self
 #alias(extend, deprecated)
 pub fn TypeContext::extend_with(Self, @core.Name, Ty) -> Self
 pub fn TypeContext::lookup(Self, @core.Name) -> Ty?
+pub fn TypeContext::length(Self) -> Int
 pub fn TypeContext::to_array(Self) -> Array[(@core.Name, Ty)]
 pub fn TypeContext::equal(Self, Self) -> Bool
 ```
@@ -127,7 +129,11 @@ test "signatures and contexts" {
   let ctx = @stlc.TypeContext::empty().extend_with(x, a).extend_with(x, @stlc.Ty::Unit)
   assert_eq(sig.lookup(c), Some(@stlc.Ty::Arrow(a, a)))
   assert_eq(ctx.lookup(x), Some(@stlc.Ty::Unit))
-  assert_eq(ctx.to_array().length(), 2)
+  assert_eq(ctx.length(), 2)
+  let entries = ctx.to_array()
+  entries.push((x, a))
+  assert_eq(ctx.length(), 2)
+  assert_eq(ctx.lookup(x), Some(@stlc.Ty::Unit))
 }
 ```
 
@@ -336,3 +342,6 @@ test "beta-normal eta-long form" {
 
 The hidden method forms `not_equal` and `to_repr` on the types of this package
 are deprecated; use `!=` and `Repr(x)`.
+
+The field `entries` of `Signature` and of `TypeContext` is no longer public;
+use `lookup`, `length` and `to_array` instead.
