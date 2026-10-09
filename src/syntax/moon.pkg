@@ -1,5 +1,6 @@
 import {
   "Luna-Flow/type_theory/core",
+  "moonbitlang/core/immut/hashmap",
   "moonbitlang/core/immut/hashset",
 }
 
