@@ -47,12 +47,14 @@ pub(all) enum ReductionFrame {
 } derive(Eq, @debug.Debug)
 pub fn ReductionFrame::equal(Self, Self) -> Bool
 
-type ReductionPath derive(Eq, @debug.Debug)
+type ReductionPath
 pub fn ReductionPath::equal(Self, Self) -> Bool
 pub fn ReductionPath::length(Self) -> Int
 pub fn ReductionPath::prepend(Self, ReductionFrame) -> Self
 pub fn ReductionPath::root() -> Self
 pub fn ReductionPath::to_array(Self) -> Array[ReductionFrame]
+pub impl Eq for ReductionPath
+pub impl @debug.Debug for ReductionPath
 
 type ReductionTrace[T] derive(Eq, @debug.Debug)
 pub fn[T : Eq] ReductionTrace::equal(Self[T], Self[T]) -> Bool

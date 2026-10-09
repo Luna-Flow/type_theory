@@ -13,78 +13,18 @@ pub(all) enum GenericNormalizationResult[N] {
 } derive(Eq, Debug)
 
 ///|
-fn[N] lift_generic_step(
-  before : N,
-  result : GenericStepResult[N],
-  frame : ReductionFrame,
-  rebuild : (N) -> N,
-) -> GenericStepResult[N] {
-  match result {
-    NoStep => NoStep
-    Reduced(after=child_after, rule~, path~, ..) =>
-      Reduced(
-        before~,
-        after=rebuild(child_after),
-        rule~,
-        path=path.prepend(frame),
-      )
-  }
-}
-
-///|
 /// Rewrites at most one downstream AST node in pre-order.
 pub fn[N : @syntax.BindingSyntax] generic_top_down_once(
   node : N,
   rule_name : RuleName,
   rule : (N) -> N?,
 ) -> GenericStepResult[N] {
-  match rule(node) {
-    Some(after) =>
-      Reduced(before=node, after~, rule=rule_name, path=ReductionPath::root())
-    None =>
-      match @syntax.BindingSyntax::project(node) {
-        @syntax.BindingView::Opaque | @syntax.BindingView::Variable(_) => NoStep
-        @syntax.BindingView::Bind(name, body) =>
-          lift_generic_step(
-            node,
-            generic_top_down_once(body, rule_name, rule),
-            BinderBody,
-            fn(next) { @syntax.BindingSyntax::bind(name, next) },
-          )
-        @syntax.BindingView::Apply(head, arguments) => {
-          let head_step = generic_top_down_once(head, rule_name, rule)
-          match head_step {
-            Reduced(_) =>
-              lift_generic_step(node, head_step, ApplyHead, fn(next) {
-                @syntax.BindingSyntax::apply(next, arguments)
-              })
-            NoStep => {
-              for i in 0..<arguments.length() {
-                let argument_step = generic_top_down_once(
-                  arguments[i],
-                  rule_name,
-                  rule,
-                )
-                match argument_step {
-                  Reduced(_) =>
-                    return lift_generic_step(
-                      node,
-                      argument_step,
-                      ApplyArgument(i),
-                      fn(next) {
-                        let next_arguments = arguments.copy()
-                        next_arguments[i] = next
-                        @syntax.BindingSyntax::apply(head, next_arguments)
-                      },
-                    )
-                  NoStep => continue
-                }
-              }
-              NoStep
-            }
-          }
-        }
-      }
+  match search_top_down(node, rule) {
+    None => NoStep
+    Some(found) => {
+      let (after, path) = found.rebuild()
+      Reduced(before=node, after~, rule=rule_name, path~)
+    }
   }
 }
 
