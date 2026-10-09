@@ -54,6 +54,13 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
   rejected, so a free index could be captured by an enclosing binder:
   `shift(Bind(Bound(1)), -1, 0)` returned `Ok(Bind(Bound(0)))`, the identity.
   `instantiate` and the reducers never produced such a shift (#9).
+- `stlc`: `normalize_eta_long` rejected with `CannotInferLambda` some terms
+  that `check` accepts: a redex with a curried head such as
+  `((λx. λy. y) ()) x`, and a redex whose body is itself a redex consuming the
+  outer arguments, such as `(λx. (λy. λz. z) x) () v`. The typed evaluator
+  now flattens the application spine before typing its head and follows redex
+  bodies the same way `infer` does, so it accepts exactly the terms `check`
+  accepts (#7).
 
 ### Documentation
 
