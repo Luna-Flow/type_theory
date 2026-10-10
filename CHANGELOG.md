@@ -4,6 +4,8 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
 
 ## Unreleased
 
+## 0.3.0 - 2026-10-10
+
 ### Changed
 
 - Migrated to MoonBit 0.10 (`moonc` 0.10 or newer is required).

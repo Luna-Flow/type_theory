@@ -16,7 +16,7 @@ nameless input, and converts results back to names for display.
 ## Quick start
 
 ```bash
-moon add Luna-Flow/type_theory@0.2.0
+moon add Luna-Flow/type_theory@0.3.0
 ```
 
 ```moonbit nocheck
