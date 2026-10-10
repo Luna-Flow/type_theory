@@ -14,7 +14,7 @@ and deals with terms that never stop reducing.
 ## Quick start
 
 ```bash
-moon add Luna-Flow/type_theory@0.2.0
+moon add Luna-Flow/type_theory@0.3.0
 ```
 
 ```moonbit nocheck

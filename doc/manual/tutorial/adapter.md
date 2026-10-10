@@ -16,7 +16,7 @@ converting to `Term[T]`. Finally you test the adapter laws.
 ## Quick start
 
 ```bash
-moon add Luna-Flow/type_theory@0.2.0
+moon add Luna-Flow/type_theory@0.3.0
 ```
 
 ```moonbit nocheck

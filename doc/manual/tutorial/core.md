@@ -18,7 +18,7 @@ the end you can give your own syntax a name type that the rest of
 Add the module and import the package:
 
 ```bash
-moon add Luna-Flow/type_theory@0.2.0
+moon add Luna-Flow/type_theory@0.3.0
 ```
 
 ```moonbit nocheck

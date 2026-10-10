@@ -10,7 +10,7 @@ evaluation.
 ## Install
 
 ```bash
-moon add Luna-Flow/type_theory@0.2.0
+moon add Luna-Flow/type_theory@0.3.0
 ```
 
 Requires MoonBit `moonc` 0.10 or newer. All targets are supported (`wasm-gc`,

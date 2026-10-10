@@ -17,7 +17,7 @@ substitutions and evaluating partially. The examples encode arithmetic as
 ## Quick start
 
 ```bash
-moon add Luna-Flow/type_theory@0.2.0
+moon add Luna-Flow/type_theory@0.3.0
 ```
 
 ```moonbit nocheck
