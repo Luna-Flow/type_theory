@@ -17,7 +17,7 @@ works for any AST implementing `BindingSyntax`.
 ## Quick start
 
 ```bash
-moon add Luna-Flow/type_theory@0.3.0
+moon add Luna-Flow/type_theory@0.4.0
 ```
 
 ```moonbit nocheck

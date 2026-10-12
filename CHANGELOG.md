@@ -4,8 +4,11 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
 
 ## Unreleased
 
+## 0.4.0 - 2026-10-13
+
 ### Changed
 
+- **Breaking:** the deprecated `extend` aliases are removed (see below).
 - Builds with the latest MoonBit toolchain (moon 0.1.20261012, moonc 0.10.15):
   `extend` is now a reserved word, so the deprecated `extend` aliases of
   `Context::extend_with`, `Telescope::extend_with`, `TypeContext::extend_with`
