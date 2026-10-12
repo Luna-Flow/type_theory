@@ -2,7 +2,7 @@
 test "named round trip preserves alpha equivalence" {
   let x = @core.Name::new("x")
   let y = @core.Name::new("y")
-  let named : @syntax.Term[Int] = @syntax.Bind(
+  let named : @syntax.Term[Int32] = @syntax.Bind(
     x,
     @syntax.Apply(@syntax.Variable(x), [@syntax.Variable(y)]),
   )
@@ -26,14 +26,14 @@ test "well scoped debruijn round trip is exact" {
 
 ///|
 test "scope validation rejects dangling indices" {
-  let term : @debruijn.DbTerm[Int] = Bind(Bound(1))
+  let term : @debruijn.DbTerm[Int32] = Bind(Bound(1))
   assert_true(@debruijn.validate(term) == Err(UnboundIndex(index=1, depth=1)))
 }
 
 ///|
 test "binder instantiation uses standard shifting" {
-  let body : @debruijn.DbTerm[Int] = Bind(Apply(Bound(1), [Bound(0)]))
-  let argument : @debruijn.DbTerm[Int] = Free(@core.Name::new("y"))
+  let body : @debruijn.DbTerm[Int32] = Bind(Apply(Bound(1), [Bound(0)]))
+  let argument : @debruijn.DbTerm[Int32] = Free(@core.Name::new("y"))
   assert_true(
     @debruijn.instantiate(body, argument) ==
     Ok(Bind(Apply(Free(@core.Name::new("y")), [Bound(0)]))),
@@ -42,8 +42,8 @@ test "binder instantiation uses standard shifting" {
 
 ///|
 test "single step records the beta redex path" {
-  let redex : @debruijn.DbTerm[Int] = Apply(Bind(Bound(0)), [Value(7)])
-  let term : @debruijn.DbTerm[Int] = Bind(
+  let redex : @debruijn.DbTerm[Int32] = Apply(Bind(Bound(0)), [Value(7)])
+  let term : @debruijn.DbTerm[Int32] = Bind(
     Apply(Free(@core.Name::new("f")), [redex]),
   )
   match @debruijn.reduce_once(term) {
@@ -60,7 +60,7 @@ test "single step records the beta redex path" {
 test "empty applications are read as their head" {
   // issue #2
   let a = @core.Name::new("a")
-  let hidden : @debruijn.DbTerm[Int] = Apply(Apply(Bind(Bound(0)), []), [
+  let hidden : @debruijn.DbTerm[Int32] = Apply(Apply(Bind(Bound(0)), []), [
     Free(a),
   ])
   match @debruijn.reduce_once(hidden) {
@@ -70,7 +70,7 @@ test "empty applications are read as their head" {
     }
     _ => assert_false(true)
   }
-  let spine : @debruijn.DbTerm[Int] = Apply(
+  let spine : @debruijn.DbTerm[Int32] = Apply(
     Apply(Apply(Bind(Bind(Bound(1))), []), []),
     [Value(1), Value(2)],
   )
@@ -78,14 +78,14 @@ test "empty applications are read as their head" {
     @debruijn.normalize(spine, 10) == NormalForm(term=Value(1), steps=2),
   )
   // an empty application of a binder alone is not a redex
-  let lone : @debruijn.DbTerm[Int] = Apply(Bind(Bound(0)), [])
+  let lone : @debruijn.DbTerm[Int32] = Apply(Bind(Bound(0)), [])
   assert_true(@debruijn.reduce_once(lone) == NoStep)
 }
 
 ///|
 test "reducers report ill-scoped input" {
   // issue #3
-  let negative : @debruijn.DbTerm[Int] = Bind(Bound(-1))
+  let negative : @debruijn.DbTerm[Int32] = Bind(Bound(-1))
   assert_true(
     @debruijn.reduce_once(negative) == ScopeFailure(NegativeIndex(index=-1)),
   )
@@ -93,7 +93,7 @@ test "reducers report ill-scoped input" {
     @debruijn.normalize(negative, 10) ==
     ScopeFailure(term=negative, error=NegativeIndex(index=-1), steps=0),
   )
-  let dangling : @debruijn.DbTerm[Int] = Apply(Bind(Bound(5)), [Value(1)])
+  let dangling : @debruijn.DbTerm[Int32] = Apply(Bind(Bound(5)), [Value(1)])
   assert_true(
     @debruijn.reduce_once(dangling) ==
     ScopeFailure(UnboundIndex(index=5, depth=1)),
@@ -103,7 +103,7 @@ test "reducers report ill-scoped input" {
     ScopeFailure(term=dangling, error=UnboundIndex(index=5, depth=1), steps=0),
   )
   // a bad index away from every redex is reported too
-  let elsewhere : @debruijn.DbTerm[Int] = Apply(Free(@core.Name::new("f")), [
+  let elsewhere : @debruijn.DbTerm[Int32] = Apply(Free(@core.Name::new("f")), [
     Apply(Bind(Bound(0)), [Value(1)]),
     Bound(0),
   ])
@@ -118,7 +118,7 @@ test "reducers report ill-scoped input" {
     ScopeFailure(term=elsewhere, error=UnboundIndex(index=0, depth=0), steps=0),
   )
   // a well-scoped term with redexes under binders still reduces
-  let under : @debruijn.DbTerm[Int] = Bind(
+  let under : @debruijn.DbTerm[Int32] = Bind(
     Apply(Bind(Apply(Bound(1), [Bound(0)])), [Value(2)]),
   )
   assert_true(
@@ -132,43 +132,47 @@ test "downward shift rejects capture by an enclosing binder" {
   // issue #9
   let f = @core.Name::new("f")
   // λ. (free 0): the free variable must not become the parameter
-  let under_binder : @debruijn.DbTerm[Int] = Bind(Bound(1))
+  let under_binder : @debruijn.DbTerm[Int32] = Bind(Bound(1))
   assert_true(
     @debruijn.shift(under_binder, -1, 0) ==
     Err(NegativeShift(index=1, delta=-1, cutoff=1)),
   )
   // a free index at the cutoff must not drop below it
-  let at_cutoff : @debruijn.DbTerm[Int] = Bound(1)
+  let at_cutoff : @debruijn.DbTerm[Int32] = Bound(1)
   assert_true(
     @debruijn.shift(at_cutoff, -1, 1) ==
     Err(NegativeShift(index=1, delta=-1, cutoff=1)),
   )
   // deeper binders and a larger delta
-  let deep : @debruijn.DbTerm[Int] = Bind(Bind(Bound(3)))
+  let deep : @debruijn.DbTerm[Int32] = Bind(Bind(Bound(3)))
   assert_true(
     @debruijn.shift(deep, -2, 0) ==
     Err(NegativeShift(index=3, delta=-2, cutoff=2)),
   )
-  let deep_cutoff : @debruijn.DbTerm[Int] = Bind(Bound(3))
+  let deep_cutoff : @debruijn.DbTerm[Int32] = Bind(Bound(3))
   assert_true(
     @debruijn.shift(deep_cutoff, -2, 2) ==
     Err(NegativeShift(index=3, delta=-2, cutoff=3)),
   )
   // the capture is found inside an application spine
-  let spine : @debruijn.DbTerm[Int] = Apply(Free(f), [Bound(2), Bind(Bound(1))])
+  let spine : @debruijn.DbTerm[Int32] = Apply(Free(f), [
+    Bound(2),
+    Bind(Bound(1)),
+  ])
   assert_true(
     @debruijn.shift(spine, -1, 0) ==
     Err(NegativeShift(index=1, delta=-1, cutoff=1)),
   )
-  let head : @debruijn.DbTerm[Int] = Apply(Bind(Apply(Bound(0), [Bound(1)])), [
-    Value(1),
-  ])
+  let head : @debruijn.DbTerm[Int32] = Apply(
+    Bind(Apply(Bound(0), [Bound(1)])),
+    [Value(1)],
+  )
   assert_true(
     @debruijn.shift(head, -1, 0) ==
     Err(NegativeShift(index=1, delta=-1, cutoff=1)),
   )
   // a shift below zero is still rejected
-  let top : @debruijn.DbTerm[Int] = Bound(0)
+  let top : @debruijn.DbTerm[Int32] = Bound(0)
   assert_true(
     @debruijn.shift(top, -1, 0) ==
     Err(NegativeShift(index=0, delta=-1, cutoff=0)),
@@ -179,15 +183,15 @@ test "downward shift rejects capture by an enclosing binder" {
 test "downward shift keeps free indices at or above the cutoff" {
   // issue #9: i + d == c is the boundary that must succeed
   let f = @core.Name::new("f")
-  let under_binder : @debruijn.DbTerm[Int] = Bind(Bound(2))
+  let under_binder : @debruijn.DbTerm[Int32] = Bind(Bound(2))
   assert_true(@debruijn.shift(under_binder, -1, 0) == Ok(Bind(Bound(1))))
-  let at_cutoff : @debruijn.DbTerm[Int] = Bound(2)
+  let at_cutoff : @debruijn.DbTerm[Int32] = Bound(2)
   assert_true(@debruijn.shift(at_cutoff, -1, 1) == Ok(Bound(1)))
-  let deep : @debruijn.DbTerm[Int] = Bind(Bind(Apply(Bound(4), [Bound(1)])))
+  let deep : @debruijn.DbTerm[Int32] = Bind(Bind(Apply(Bound(4), [Bound(1)])))
   assert_true(
     @debruijn.shift(deep, -2, 0) == Ok(Bind(Bind(Apply(Bound(2), [Bound(1)])))),
   )
-  let spine : @debruijn.DbTerm[Int] = Apply(Free(f), [
+  let spine : @debruijn.DbTerm[Int32] = Apply(Free(f), [
     Bound(1),
     Bind(Apply(Bound(0), [Bound(2)])),
   ])
@@ -196,19 +200,19 @@ test "downward shift keeps free indices at or above the cutoff" {
     Ok(Apply(Free(f), [Bound(0), Bind(Apply(Bound(0), [Bound(1)]))])),
   )
   // indices bound inside the term are untouched by any delta
-  let closed : @debruijn.DbTerm[Int] = Bind(Bind(Apply(Bound(1), [Bound(0)])))
+  let closed : @debruijn.DbTerm[Int32] = Bind(Bind(Apply(Bound(1), [Bound(0)])))
   assert_true(@debruijn.shift(closed, -5, 0) == Ok(closed))
 }
 
 ///|
 test "upward shift is unchanged" {
-  let open_term : @debruijn.DbTerm[Int] = Bind(Apply(Bound(0), [Bound(1)]))
+  let open_term : @debruijn.DbTerm[Int32] = Bind(Apply(Bound(0), [Bound(1)]))
   assert_true(
     @debruijn.shift(open_term, 2, 0) == Ok(Bind(Apply(Bound(0), [Bound(3)]))),
   )
-  let below : @debruijn.DbTerm[Int] = Apply(Bound(0), [Bound(1)])
+  let below : @debruijn.DbTerm[Int32] = Apply(Bound(0), [Bound(1)])
   assert_true(@debruijn.shift(below, 1, 1) == Ok(Apply(Bound(0), [Bound(2)])))
-  let deep : @debruijn.DbTerm[Int] = Bind(Bind(Bound(2)))
+  let deep : @debruijn.DbTerm[Int32] = Bind(Bind(Bound(2)))
   assert_true(@debruijn.shift(deep, 3, 0) == Ok(Bind(Bind(Bound(5)))))
   assert_true(@debruijn.shift(deep, 0, 0) == Ok(deep))
 }
@@ -218,7 +222,7 @@ test "shift rejects a negative cutoff" {
   // issue #10: a negative cutoff is rejected up front, whatever the term
   let x = @core.Name::new("x")
   // λ. 0 must not become λ. 1
-  let identity : @debruijn.DbTerm[Int] = Bind(Bound(0))
+  let identity : @debruijn.DbTerm[Int32] = Bind(Bound(0))
   assert_true(
     @debruijn.shift(identity, 1, -1) == Err(NegativeCutoff(cutoff=-1)),
   )
@@ -229,19 +233,19 @@ test "shift rejects a negative cutoff" {
     @debruijn.shift(identity, -1, -1) == Err(NegativeCutoff(cutoff=-1)),
   )
   // closed and open terms alike
-  let closed : @debruijn.DbTerm[Int] = Bind(Bind(Apply(Bound(1), [Bound(0)])))
+  let closed : @debruijn.DbTerm[Int32] = Bind(Bind(Apply(Bound(1), [Bound(0)])))
   assert_true(@debruijn.shift(closed, 2, -3) == Err(NegativeCutoff(cutoff=-3)))
-  let open_term : @debruijn.DbTerm[Int] = Apply(Bound(0), [Bound(1)])
+  let open_term : @debruijn.DbTerm[Int32] = Apply(Bound(0), [Bound(1)])
   assert_true(
     @debruijn.shift(open_term, 1, -1) == Err(NegativeCutoff(cutoff=-1)),
   )
   // terms without any index
-  let value : @debruijn.DbTerm[Int] = Value(7)
+  let value : @debruijn.DbTerm[Int32] = Value(7)
   assert_true(@debruijn.shift(value, 0, -1) == Err(NegativeCutoff(cutoff=-1)))
-  let free : @debruijn.DbTerm[Int] = Apply(Free(x), [Value(1)])
+  let free : @debruijn.DbTerm[Int32] = Apply(Free(x), [Value(1)])
   assert_true(@debruijn.shift(free, -1, -2) == Err(NegativeCutoff(cutoff=-2)))
   // the cutoff is checked before the indices of the term
-  let negative : @debruijn.DbTerm[Int] = Bound(-1)
+  let negative : @debruijn.DbTerm[Int32] = Bound(-1)
   assert_true(
     @debruijn.shift(negative, 1, -1) == Err(NegativeCutoff(cutoff=-1)),
   )

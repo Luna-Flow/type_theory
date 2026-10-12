@@ -1,9 +1,10 @@
 ///|
 test "nbe agrees with small step on normalizing terms" {
-  let term : @debruijn.DbTerm[Int] = Apply(Bind(Apply(Bound(0), [Value(1)])), [
-    Bind(Bound(0)),
-  ])
-  let expected : @debruijn.DbTerm[Int] = Value(1)
+  let term : @debruijn.DbTerm[Int32] = Apply(
+    Bind(Apply(Bound(0), [Value(1)])),
+    [Bind(Bound(0))],
+  )
+  let expected : @debruijn.DbTerm[Int32] = Value(1)
   assert_true(
     @debruijn.normalize(term, 20) ==
     @debruijn.NormalForm(term=expected, steps=2),
@@ -16,11 +17,13 @@ test "nbe agrees with small step on normalizing terms" {
 
 ///|
 test "lazy nbe does not force an unused divergent argument" {
-  let omega_function : @debruijn.DbTerm[Int] = Bind(Apply(Bound(0), [Bound(0)]))
-  let omega : @debruijn.DbTerm[Int] = @debruijn.Apply(omega_function, [
+  let omega_function : @debruijn.DbTerm[Int32] = Bind(
+    Apply(Bound(0), [Bound(0)]),
+  )
+  let omega : @debruijn.DbTerm[Int32] = @debruijn.Apply(omega_function, [
     omega_function,
   ])
-  let term : @debruijn.DbTerm[Int] = Apply(Bind(Value(7)), [omega])
+  let term : @debruijn.DbTerm[Int32] = Apply(Bind(Value(7)), [omega])
   match @nbe.normalize(term, 100) {
     NormalForm(term=normal, ..) => assert_true(normal == Value(7))
     _ => assert_false(true)
@@ -29,8 +32,10 @@ test "lazy nbe does not force an unused divergent argument" {
 
 ///|
 test "omega exhausts fuel instead of hanging" {
-  let omega_function : @debruijn.DbTerm[Int] = Bind(Apply(Bound(0), [Bound(0)]))
-  let omega : @debruijn.DbTerm[Int] = @debruijn.Apply(omega_function, [
+  let omega_function : @debruijn.DbTerm[Int32] = Bind(
+    Apply(Bound(0), [Bound(0)]),
+  )
+  let omega : @debruijn.DbTerm[Int32] = @debruijn.Apply(omega_function, [
     omega_function,
   ])
   assert_true(@nbe.normalize(omega, 40) is FuelExhausted(_))
@@ -54,7 +59,7 @@ test "public eval reflect and quote expose the semantic pipeline" {
       assert_true(term == @debruijn.Free(free))
     _ => assert_false(true)
   }
-  let identity : @debruijn.DbTerm[Int] = Bind(Bound(0))
+  let identity : @debruijn.DbTerm[Int32] = Bind(Bound(0))
   match @nbe.eval(identity, 20) {
     Evaluated(value~, ..) =>
       match @nbe.quote(value, 0, 20) {
@@ -69,7 +74,9 @@ test "public eval reflect and quote expose the semantic pipeline" {
 test "nbe and small step agree on empty applications" {
   // (λ. 0) a with the head wrapped in an empty application (issue #2)
   let a = @core.Name::new("a")
-  let term : @debruijn.DbTerm[Int] = Apply(Apply(Bind(Bound(0)), []), [Free(a)])
+  let term : @debruijn.DbTerm[Int32] = Apply(Apply(Bind(Bound(0)), []), [
+    Free(a),
+  ])
   assert_true(
     @debruijn.normalize(term, 10) == @debruijn.NormalForm(term=Free(a), steps=1),
   )
@@ -82,8 +89,10 @@ test "nbe and small step agree on empty applications" {
 ///|
 test "omega exhausts a large budget without growing the stack" {
   // (λ. 0 0) (λ. 0 0) with a budget of thirty million units (issue #12)
-  let omega_function : @debruijn.DbTerm[Int] = Bind(Apply(Bound(0), [Bound(0)]))
-  let omega : @debruijn.DbTerm[Int] = @debruijn.Apply(omega_function, [
+  let omega_function : @debruijn.DbTerm[Int32] = Bind(
+    Apply(Bound(0), [Bound(0)]),
+  )
+  let omega : @debruijn.DbTerm[Int32] = @debruijn.Apply(omega_function, [
     omega_function,
   ])
   assert_true(
@@ -94,8 +103,8 @@ test "omega exhausts a large budget without growing the stack" {
 ///|
 test "a growing divergent application exhausts a large budget" {
   // (λ. 0 0 0) (λ. 0 0 0) reduces to ((w w) w) w ...: the head grows
-  let w : @debruijn.DbTerm[Int] = Bind(Apply(Bound(0), [Bound(0), Bound(0)]))
-  let term : @debruijn.DbTerm[Int] = Apply(w, [w])
+  let w : @debruijn.DbTerm[Int32] = Bind(Apply(Bound(0), [Bound(0), Bound(0)]))
+  let term : @debruijn.DbTerm[Int32] = Apply(w, [w])
   assert_true(
     @nbe.normalize(term, 30_000_000) == FuelExhausted(consumed=30_000_000),
   )
@@ -105,16 +114,16 @@ test "a growing divergent application exhausts a large budget" {
 test "readback of an unbounded normal form exhausts a large budget" {
   // (λ. f (0 0)) (λ. f (0 0)) has the infinite normal form f (f (f ...))
   let f = @core.Name::new("f")
-  let w : @debruijn.DbTerm[Int] = Bind(
+  let w : @debruijn.DbTerm[Int32] = Bind(
     Apply(Free(f), [Apply(Bound(0), [Bound(0)])]),
   )
-  let spine : @debruijn.DbTerm[Int] = Apply(w, [w])
+  let spine : @debruijn.DbTerm[Int32] = Apply(w, [w])
   assert_true(
     @nbe.normalize(spine, 30_000_000) == FuelExhausted(consumed=30_000_000),
   )
   // (λ. λ. 1 1) (λ. λ. 1 1) has the infinite normal form λ. λ. λ. ...
-  let v : @debruijn.DbTerm[Int] = Bind(Bind(Apply(Bound(1), [Bound(1)])))
-  let binders : @debruijn.DbTerm[Int] = Apply(v, [v])
+  let v : @debruijn.DbTerm[Int32] = Bind(Bind(Apply(Bound(1), [Bound(1)])))
+  let binders : @debruijn.DbTerm[Int32] = Apply(v, [v])
   assert_true(
     @nbe.normalize(binders, 30_000_000) == FuelExhausted(consumed=30_000_000),
   )
@@ -125,10 +134,10 @@ test "fuel accounting is exact and reproducible" {
   // Church numerals: 2 2 = 4, 2 2 2 = 16, and 2 2 f a = f (f (f (f a)))
   let f = @core.Name::new("f")
   let a = @core.Name::new("a")
-  let two : @debruijn.DbTerm[Int] = Bind(
+  let two : @debruijn.DbTerm[Int32] = Bind(
     Bind(Apply(Bound(1), [Apply(Bound(1), [Bound(0)])])),
   )
-  let cases : Array[(@debruijn.DbTerm[Int], Int)] = [
+  let cases : Array[(@debruijn.DbTerm[Int32], Int32)] = [
     (Apply(two, [two]), 82),
     (Apply(two, [two, two]), 473),
     (Apply(two, [two, Free(f), Free(a)]), 85),
@@ -149,7 +158,7 @@ test "fuel accounting is exact and reproducible" {
   }
   match @nbe.normalize(Apply(two, [two, Free(f), Free(a)]), 100) {
     NormalForm(term~, ..) => {
-      let mut expected : @debruijn.DbTerm[Int] = Free(a)
+      let mut expected : @debruijn.DbTerm[Int32] = Free(a)
       for _ in 0..<4 {
         expected = Apply(Free(f), [expected])
       }

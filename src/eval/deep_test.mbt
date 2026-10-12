@@ -4,11 +4,11 @@
 // `Debug`, which are recursive.
 
 ///|
-const DEPTH : Int = 100_000
+const DEPTH : Int32 = 100_000
 
 ///|
 /// `Value(1)` is the only redex: it becomes `Value(2)`.
-fn bump(term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
+fn bump(term : @syntax.Term[Int32]) -> @syntax.Term[Int32]? {
   match term {
     Value(1) => Some(Value(2))
     _ => None
@@ -18,7 +18,7 @@ fn bump(term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
 ///|
 /// `Apply(head, [argument])` nested `depth` times in head position around
 /// `leaf`.
-fn head_chain(depth : Int, leaf : @syntax.Term[Int]) -> @syntax.Term[Int] {
+fn head_chain(depth : Int32, leaf : @syntax.Term[Int32]) -> @syntax.Term[Int32] {
   let mut term = leaf
   for _ in 0..<depth {
     term = Apply(term, [Value(0)])
@@ -28,7 +28,10 @@ fn head_chain(depth : Int, leaf : @syntax.Term[Int]) -> @syntax.Term[Int] {
 
 ///|
 /// `Apply(Value(0), [Value(0), next])` nested `depth` times around `leaf`.
-fn argument_chain(depth : Int, leaf : @syntax.Term[Int]) -> @syntax.Term[Int] {
+fn argument_chain(
+  depth : Int32,
+  leaf : @syntax.Term[Int32],
+) -> @syntax.Term[Int32] {
   let mut term = leaf
   for _ in 0..<depth {
     term = Apply(Value(0), [Value(0), term])
@@ -38,7 +41,10 @@ fn argument_chain(depth : Int, leaf : @syntax.Term[Int]) -> @syntax.Term[Int] {
 
 ///|
 /// `Bind(x, next)` nested `depth` times around `leaf`.
-fn binder_chain(depth : Int, leaf : @syntax.Term[Int]) -> @syntax.Term[Int] {
+fn binder_chain(
+  depth : Int32,
+  leaf : @syntax.Term[Int32],
+) -> @syntax.Term[Int32] {
   let x = @core.Name::new("x")
   let mut term = leaf
   for _ in 0..<depth {
@@ -50,7 +56,10 @@ fn binder_chain(depth : Int, leaf : @syntax.Term[Int]) -> @syntax.Term[Int] {
 ///|
 /// The leaf of `head_chain(depth, _)`, `argument_chain(depth, _)` or
 /// `binder_chain(depth, _)`, found with a loop.
-fn chain_leaf(depth : Int, term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
+fn chain_leaf(
+  depth : Int32,
+  term : @syntax.Term[Int32],
+) -> @syntax.Term[Int32]? {
   let mut current = term
   for _ in 0..<depth {
     current = match current {
@@ -68,7 +77,7 @@ fn chain_leaf(depth : Int, term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
 fn is_uniform_path(
   path : @rewrite.ReductionPath,
   frame : @rewrite.ReductionFrame,
-  depth : Int,
+  depth : Int32,
 ) -> Bool {
   let frames = path.to_array()
   frames.length() == depth && frames.iter().all(fn(each) { each == frame })
@@ -141,13 +150,13 @@ test "deep terms: applicative order tries a deep application early" {
   // each level is tried right after its first argument, before the deeper
   // second argument, and the outermost level is rewritten
   let rule = @rewrite.RuleName::unsafe_new("first_five")
-  let first_five = fn(term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
+  let first_five = fn(term : @syntax.Term[Int32]) -> @syntax.Term[Int32]? {
     match term {
       Apply(Value(0), [Value(5), ..]) => Some(Value(9))
       _ => None
     }
   }
-  let mut term : @syntax.Term[Int] = Value(1)
+  let mut term : @syntax.Term[Int32] = Value(1)
   for _ in 0..<DEPTH {
     term = Apply(Value(0), [Value(5), term])
   }
@@ -157,7 +166,7 @@ test "deep terms: applicative order tries a deep application early" {
   }
   // with a rule that matches every prefix but no whole application, each
   // level is tried once early and the search goes on to the bottom
-  let prefix_only = fn(term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
+  let prefix_only = fn(term : @syntax.Term[Int32]) -> @syntax.Term[Int32]? {
     match term {
       Apply(Value(0), [Value(5)]) => Some(Value(9))
       Value(1) => Some(Value(2))
@@ -174,7 +183,7 @@ test "deep terms: applicative order tries a deep application early" {
 ///|
 test "deep terms: evaluate and trace repeat deep steps" {
   let rule = @rewrite.RuleName::unsafe_new("count")
-  let count = fn(term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
+  let count = fn(term : @syntax.Term[Int32]) -> @syntax.Term[Int32]? {
     match term {
       Value(1) => Some(Value(2))
       Value(2) => Some(Value(3))

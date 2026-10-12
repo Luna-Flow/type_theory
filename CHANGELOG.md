@@ -4,6 +4,18 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
 
 ## Unreleased
 
+### Changed
+
+- Builds with the latest MoonBit toolchain (moon 0.1.20261012, moonc 0.10.15):
+  `extend` is now a reserved word, so the deprecated `extend` aliases of
+  `Context::extend_with`, `Telescope::extend_with`, `TypeContext::extend_with`
+  and `Signature::extend_with` are removed (use the `extend_with` methods), and
+  the sources follow the formatter of that toolchain.
+- Known blocker: the published `moonbitlang/quickcheck@0.14.0` (used by one
+  test) still ships `moon.mod.json`, which the latest toolchain rejects for
+  dependencies; this package resolves again once upstream publishes a fixed
+  version.
+
 ## 0.3.0 - 2026-10-10
 
 ### Changed

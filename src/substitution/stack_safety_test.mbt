@@ -7,7 +7,7 @@
 // a deep term is not stack-safe).
 
 ///|
-const DEEP_DEPTH : Int = 100_000
+const DEEP_DEPTH : Int32 = 100_000
 
 ///|
 /// The nesting shapes exercised by the deep tests.
@@ -38,7 +38,7 @@ fn[N : @syntax.BindingSyntax] deep_node(
   shape : DeepShape,
   x : N,
   z : @core.Name,
-  value : (Int) -> N,
+  value : (Int32) -> N,
 ) -> N {
   let mut node = x
   for i in 0..<DEEP_DEPTH {
@@ -64,16 +64,16 @@ fn[N : @syntax.BindingSyntax] deep_node(
 ///|
 fn deep_term(
   shape : DeepShape,
-  x : @syntax.Term[Int],
+  x : @syntax.Term[Int32],
   z : @core.Name,
-) -> @syntax.Term[Int] {
+) -> @syntax.Term[Int32] {
   deep_node(shape, x, z, fn(i) { @syntax.Term::Value(i) })
 }
 
 ///|
 /// Minimal downstream AST for the generic substitution.
 priv enum DeepMock {
-  Leaf(Int)
+  Leaf(Int32)
   Name(@core.Name)
   Node(DeepMock, Array[DeepMock])
   Scope(@core.Name, DeepMock)
@@ -143,7 +143,7 @@ test "deep terms: substitution" {
   let x = @core.Name::new("x")
   let y = @core.Name::new("y")
   let z = @core.Name::new("z")
-  let replacement : @syntax.Term[Int] = Apply(Variable(y), [Value(-1)])
+  let replacement : @syntax.Term[Int32] = Apply(Variable(y), [Value(-1)])
   let substitution = @substitution.Substitution::singleton(x, replacement)
   for shape in deep_shapes {
     let term = deep_term(shape, Variable(x), z)
@@ -157,18 +157,18 @@ test "deep terms: substitution freshens a capturing binder" {
   let y = @core.Name::new("y")
   let y1 = @core.Name::new("y_1")
   let z = @core.Name::new("z")
-  let substitution : @substitution.Substitution[Int] = @substitution.Substitution::singleton(
+  let substitution : @substitution.Substitution[Int32] = @substitution.Substitution::singleton(
     x,
     Variable(y),
   )
   // the outermost binder captures `y`: it is freshened and the whole deep
   // body is alpha-renamed before the substitution continues
   for shape in deep_shapes {
-    let term : @syntax.Term[Int] = Bind(
+    let term : @syntax.Term[Int32] = Bind(
       y,
       Apply(Variable(y), [deep_term(shape, Variable(x), z)]),
     )
-    let expected : @syntax.Term[Int] = Bind(
+    let expected : @syntax.Term[Int32] = Bind(
       y1,
       Apply(Variable(y1), [deep_term(shape, Variable(y), z)]),
     )
@@ -182,14 +182,14 @@ test "deep terms: deep replacements" {
   let w = @core.Name::new("w")
   let z = @core.Name::new("z")
   let z1 = @core.Name::new("z_1")
-  let term : @syntax.Term[Int] = Bind(z, Apply(Variable(x), [Variable(z)]))
+  let term : @syntax.Term[Int32] = Bind(z, Apply(Variable(x), [Variable(z)]))
   for shape in deep_shapes {
     // the replacement mentions `z` free, so the binder is freshened
-    let replacement : @syntax.Term[Int] = Apply(Variable(z), [
+    let replacement : @syntax.Term[Int32] = Apply(Variable(z), [
       deep_term(shape, Variable(w), z),
     ])
     let substitution = @substitution.Substitution::singleton(x, replacement)
-    let expected : @syntax.Term[Int] = Bind(
+    let expected : @syntax.Term[Int32] = Bind(
       z1,
       Apply(replacement, [Variable(z1)]),
     )

@@ -58,7 +58,7 @@ pub fn[T] Substitution::get(
 
 ///|
 /// Returns the number of variables in the substitution domain.
-pub fn[T] Substitution::length(self : Substitution[T]) -> Int {
+pub fn[T] Substitution::length(self : Substitution[T]) -> Int32 {
   self.entries.length()
 }
 

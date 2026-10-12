@@ -11,7 +11,7 @@ priv enum SemanticInner[T] {
   Closure(@debruijn.DbTerm[T], Environment[T])
   Delayed(@debruijn.DbTerm[T], Environment[T])
   NeutralFree(@core.Name)
-  NeutralLevel(Int)
+  NeutralLevel(Int32)
   NeutralApply(Semantic[T], Semantic[T])
 }
 
@@ -27,7 +27,7 @@ priv enum SemanticInner[T] {
 /// cost quadratic time.
 priv struct Environment[T] {
   values : Array[Semantic[T]]
-  length : Int
+  length : Int32
 }
 
 ///|
@@ -37,7 +37,7 @@ fn[T] Environment::empty() -> Environment[T] {
 
 ///|
 /// The value of index `index`, which must be below `self.length`.
-fn[T] Environment::lookup(self : Environment[T], index : Int) -> Semantic[T] {
+fn[T] Environment::lookup(self : Environment[T], index : Int32) -> Semantic[T] {
   self.values[self.length - 1 - index]
 }
 
@@ -59,36 +59,36 @@ fn[T] Environment::cons(
 ///|
 /// Public bounded semantic evaluation result.
 pub(all) enum EvaluationResult[T] {
-  Evaluated(value~ : Semantic[T], consumed~ : Int)
-  FuelExhausted(consumed~ : Int)
-  ScopeFailure(error~ : @debruijn.ScopeError, consumed~ : Int)
+  Evaluated(value~ : Semantic[T], consumed~ : Int32)
+  FuelExhausted(consumed~ : Int32)
+  ScopeFailure(error~ : @debruijn.ScopeError, consumed~ : Int32)
 }
 
 ///|
 /// Public bounded quote/readback result.
 pub(all) enum QuoteResult[T] {
-  Quoted(term~ : @debruijn.DbTerm[T], consumed~ : Int)
-  FuelExhausted(consumed~ : Int)
-  ScopeFailure(error~ : @debruijn.ScopeError, consumed~ : Int)
+  Quoted(term~ : @debruijn.DbTerm[T], consumed~ : Int32)
+  FuelExhausted(consumed~ : Int32)
+  ScopeFailure(error~ : @debruijn.ScopeError, consumed~ : Int32)
 }
 
 ///|
 /// Observable result of bounded untyped NbE.
 pub(all) enum NbeResult[T] {
-  NormalForm(term~ : @debruijn.DbTerm[T], consumed~ : Int)
-  FuelExhausted(consumed~ : Int)
-  ScopeFailure(error~ : @debruijn.ScopeError, consumed~ : Int)
+  NormalForm(term~ : @debruijn.DbTerm[T], consumed~ : Int32)
+  FuelExhausted(consumed~ : Int32)
+  ScopeFailure(error~ : @debruijn.ScopeError, consumed~ : Int32)
 } derive(Eq, Debug)
 
 ///|
 priv enum Run[T] {
-  Done(Semantic[T], Int)
-  Exhausted(Int)
-  ScopeFailed(@debruijn.ScopeError, Int)
+  Done(Semantic[T], Int32)
+  Exhausted(Int32)
+  ScopeFailed(@debruijn.ScopeError, Int32)
 }
 
 ///|
-fn consumed(initial : Int, remaining : Int) -> Int {
+fn consumed(initial : Int32, remaining : Int32) -> Int32 {
   initial - remaining
 }
 
@@ -141,7 +141,7 @@ priv enum EvalControl[T] {
 priv enum EvalFrame[T] {
   /// Apply the returned value to `delay(arguments[next], environment)`, then
   /// the result to the remaining arguments of the spine.
-  ApplyArguments(Array[@debruijn.DbTerm[T]], Int, Environment[T])
+  ApplyArguments(Array[@debruijn.DbTerm[T]], Int32, Environment[T])
   /// The returned value is a forced function: apply it to this argument.
   ApplyTo(Semantic[T])
 }
@@ -149,7 +149,7 @@ priv enum EvalFrame[T] {
 ///|
 /// Runs the evaluation machine from `start` with `fuel` units. The host stack
 /// depth is constant; pending work is kept in a heap array of frames.
-fn[T] run_evaluation(start : EvalControl[T], fuel : Int) -> Run[T] {
+fn[T] run_evaluation(start : EvalControl[T], fuel : Int32) -> Run[T] {
   let frames : Array[EvalFrame[T]] = []
   for control = start, fuel = fuel {
     match control {
@@ -230,22 +230,22 @@ fn[T] run_evaluation(start : EvalControl[T], fuel : Int) -> Run[T] {
 fn[T] eval_semantic(
   term : @debruijn.DbTerm[T],
   environment : Environment[T],
-  fuel : Int,
+  fuel : Int32,
 ) -> Run[T] {
   run_evaluation(Evaluate(term, environment), fuel)
 }
 
 ///|
 /// Forces `value` to weak head form.
-fn[T] force(value : Semantic[T], fuel : Int) -> Run[T] {
+fn[T] force(value : Semantic[T], fuel : Int32) -> Run[T] {
   run_evaluation(Force(value), fuel)
 }
 
 ///|
 priv enum QuoteRun[T] {
-  Quoted(@debruijn.DbTerm[T], Int)
-  QuoteExhausted(Int)
-  QuoteScopeFailed(@debruijn.ScopeError, Int)
+  Quoted(@debruijn.DbTerm[T], Int32)
+  QuoteExhausted(Int32)
+  QuoteScopeFailed(@debruijn.ScopeError, Int32)
 }
 
 ///|
@@ -256,7 +256,7 @@ pub fn[T] reflect_free(name : @core.Name) -> Semantic[T] {
 
 ///|
 /// Reflects a quote level. Negative levels are rejected.
-pub fn[T] reflect_level(level : Int) -> Semantic[T]? {
+pub fn[T] reflect_level(level : Int32) -> Semantic[T]? {
   if level < 0 {
     None
   } else {
@@ -266,7 +266,7 @@ pub fn[T] reflect_level(level : Int) -> Semantic[T]? {
 
 ///|
 /// Evaluates a closed De Bruijn term into the lazy semantic domain.
-pub fn[T] eval(term : @debruijn.DbTerm[T], fuel : Int) -> EvaluationResult[T] {
+pub fn[T] eval(term : @debruijn.DbTerm[T], fuel : Int32) -> EvaluationResult[T] {
   if fuel <= 0 {
     return EvaluationResult::FuelExhausted(consumed=0)
   }
@@ -289,7 +289,11 @@ pub fn[T] eval(term : @debruijn.DbTerm[T], fuel : Int) -> EvaluationResult[T] {
 
 ///|
 /// Quotes a semantic value to beta-normal De Bruijn syntax.
-pub fn[T] quote(value : Semantic[T], level : Int, fuel : Int) -> QuoteResult[T] {
+pub fn[T] quote(
+  value : Semantic[T],
+  level : Int32,
+  fuel : Int32,
+) -> QuoteResult[T] {
   if level < 0 {
     return QuoteResult::ScopeFailure(
       error=@debruijn.NegativeIndex(index=level),
@@ -313,7 +317,7 @@ pub fn[T] quote(value : Semantic[T], level : Int, fuel : Int) -> QuoteResult[T] 
 /// The next step of the readback machine.
 priv enum QuoteControl[T] {
   /// Read a value back under the given number of binders.
-  ReadBack(Semantic[T], Int)
+  ReadBack(Semantic[T], Int32)
   /// Pass a read-back term to the innermost frame.
   Emit(@debruijn.DbTerm[T])
 }
@@ -325,7 +329,7 @@ priv enum QuoteFrame[T] {
   WrapBind
   /// The term is the head of a neutral application: read back this argument
   /// at this level next.
-  QuoteArgument(Semantic[T], Int)
+  QuoteArgument(Semantic[T], Int32)
   /// The term is the argument of a neutral application with this head.
   WrapApply(@debruijn.DbTerm[T])
 }
@@ -336,8 +340,8 @@ priv enum QuoteFrame[T] {
 /// with the fuel spent (for example the normal form `f (f (f ...))`).
 fn[T] quote_semantic(
   value : Semantic[T],
-  level : Int,
-  fuel : Int,
+  level : Int32,
+  fuel : Int32,
 ) -> QuoteRun[T] {
   let frames : Array[QuoteFrame[T]] = []
   for control = ReadBack(value, level), fuel = fuel {
@@ -404,7 +408,7 @@ fn[T] quote_semantic(
 
 ///|
 /// Bounded beta normalization by evaluation for untyped De Bruijn terms.
-pub fn[T] normalize(term : @debruijn.DbTerm[T], fuel : Int) -> NbeResult[T] {
+pub fn[T] normalize(term : @debruijn.DbTerm[T], fuel : Int32) -> NbeResult[T] {
   if fuel <= 0 {
     return FuelExhausted(consumed=0)
   }

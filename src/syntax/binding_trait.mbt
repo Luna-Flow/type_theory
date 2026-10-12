@@ -101,7 +101,7 @@ priv enum RebuildTask[N, C] {
   Visit(N, C)
   /// Pop the rebuilt head and `arity` rebuilt arguments (pushed in this
   /// order) and push their application.
-  BuildApply(Int)
+  BuildApply(Int32)
   /// Pop the rebuilt body and push it under a binder of this name.
   BuildBind(@core.Name)
 }

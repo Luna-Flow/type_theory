@@ -58,7 +58,7 @@ pub fn[N] GenericSubstitution::get(
 
 ///|
 /// Returns the number of variables in the substitution domain.
-pub fn[N] GenericSubstitution::length(self : GenericSubstitution[N]) -> Int {
+pub fn[N] GenericSubstitution::length(self : GenericSubstitution[N]) -> Int32 {
   self.entries.length()
 }
 

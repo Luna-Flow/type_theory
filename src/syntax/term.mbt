@@ -54,7 +54,7 @@ pub impl[T : Eq] Eq for Term[T] with fn equal(self, other) {
 /// A pending step of `map_values`; see `rebuild` for the scheme.
 priv enum MapTask[T] {
   Visit(Term[T])
-  BuildApply(Int)
+  BuildApply(Int32)
   BuildBind(@core.Name)
 }
 

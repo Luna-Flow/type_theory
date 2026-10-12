@@ -33,7 +33,7 @@ priv enum Ancestor[N] {
   /// The head of the application `parent = Apply(head, arguments)`.
   HeadOf(N, N, Array[N])
   /// Argument `index` of the application `parent = Apply(head, arguments)`.
-  ArgumentOf(N, N, Array[N], Int)
+  ArgumentOf(N, N, Array[N], Int32)
 }
 
 ///|

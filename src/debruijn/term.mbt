@@ -9,7 +9,7 @@
 pub(all) enum DbTerm[T] {
   Value(T)
   Free(@core.Name)
-  Bound(Int)
+  Bound(Int32)
   Apply(DbTerm[T], Array[DbTerm[T]])
   Bind(DbTerm[T])
 } derive(Debug)
@@ -17,10 +17,10 @@ pub(all) enum DbTerm[T] {
 ///|
 /// Scope and index failures in De Bruijn operations.
 pub(all) enum ScopeError {
-  UnboundIndex(index~ : Int, depth~ : Int)
-  NegativeIndex(index~ : Int)
-  NegativeShift(index~ : Int, delta~ : Int, cutoff~ : Int)
-  NegativeCutoff(cutoff~ : Int)
+  UnboundIndex(index~ : Int32, depth~ : Int32)
+  NegativeIndex(index~ : Int32)
+  NegativeShift(index~ : Int32, delta~ : Int32, cutoff~ : Int32)
+  NegativeCutoff(cutoff~ : Int32)
 } derive(Eq, Debug)
 
 // Bounded-stack traversals (issue #13).
@@ -75,10 +75,10 @@ pub impl[T : Eq] Eq for DbTerm[T] with fn equal(self, other) {
 /// A pending step of a translation of terms of type `S`.
 priv enum Task[S, B] {
   /// Translate this subterm, which lies under this many binders.
-  Visit(S, Int)
+  Visit(S, Int32)
   /// Take the translations of a head and this many arguments and rebuild an
   /// application.
-  BuildApply(Int)
+  BuildApply(Int32)
   /// Take the translation of a body and rebuild a binder with this data.
   BuildBind(B)
 }
@@ -91,7 +91,7 @@ fn[S, B] push_application(
   tasks : Array[Task[S, B]],
   head : S,
   arguments : Array[S],
-  depth : Int,
+  depth : Int32,
 ) -> Unit {
   tasks.push(BuildApply(arguments.length()))
   for i = arguments.length() - 1; i >= 0; i = i - 1 {
@@ -102,7 +102,7 @@ fn[S, B] push_application(
 
 ///|
 /// Takes the translations of a head and `count` arguments.
-fn[R] pop_application(results : Array[R], count : Int) -> (R, Array[R]) {
+fn[R] pop_application(results : Array[R], count : Int32) -> (R, Array[R]) {
   let arguments = results.drain(results.length() - count, results.length())
   (pop_result(results), arguments)
 }
@@ -120,7 +120,7 @@ fn[R] pop_result(results : Array[R]) -> R {
 pub fn[T] from_named(term : @syntax.Term[T]) -> DbTerm[T] {
   // for each name, the levels of the enclosing binders of that name,
   // innermost last
-  let scopes : Map[@core.Name, Array[Int]] = Map([])
+  let scopes : Map[@core.Name, Array[Int32]] = Map([])
   let mut depth = 0
   let tasks : Array[Task[@syntax.Term[T], @core.Name]] = [Visit(term, 0)]
   let results : Array[DbTerm[T]] = []
@@ -239,7 +239,7 @@ pub fn[T] to_named(term : DbTerm[T]) -> Result[@syntax.Term[T], ScopeError] {
 ///|
 /// Validates that every bound index refers to an enclosing binder.
 pub fn[T] validate(term : DbTerm[T]) -> Result[Unit, ScopeError] {
-  let pending : Array[(DbTerm[T], Int)] = [(term, 0)]
+  let pending : Array[(DbTerm[T], Int32)] = [(term, 0)]
   while pending.pop() is Some((current, depth)) {
     match current {
       Value(_) | Free(_) => ()
@@ -267,7 +267,7 @@ pub fn[T] validate(term : DbTerm[T]) -> Result[Unit, ScopeError] {
 /// the traversal of `shift` and `substitute_bound`.
 fn[T] map_indices(
   term : DbTerm[T],
-  leaf : (Int, Int) -> Result[DbTerm[T], ScopeError],
+  leaf : (Int32, Int32) -> Result[DbTerm[T], ScopeError],
 ) -> Result[DbTerm[T], ScopeError] {
   let tasks : Array[Task[DbTerm[T], Unit]] = [Visit(term, 0)]
   let results : Array[DbTerm[T]] = []
@@ -302,8 +302,8 @@ fn[T] map_indices(
 /// Fails with `NegativeShift` if a shifted index would fall below the cutoff.
 pub fn[T] shift(
   term : DbTerm[T],
-  delta : Int,
-  cutoff : Int,
+  delta : Int32,
+  cutoff : Int32,
 ) -> Result[DbTerm[T], ScopeError] {
   // A negative cutoff would treat indices bound inside the term as free.
   if cutoff < 0 {
@@ -332,7 +332,7 @@ pub fn[T] shift(
 /// Replaces the bound index relative to the current term root.
 pub fn[T] substitute_bound(
   term : DbTerm[T],
-  index : Int,
+  index : Int32,
   replacement : DbTerm[T],
 ) -> Result[DbTerm[T], ScopeError] {
   if index < 0 {

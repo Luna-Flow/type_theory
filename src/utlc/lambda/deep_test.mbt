@@ -3,12 +3,15 @@
 // results with loops instead of `==` or `Debug`, which are recursive.
 
 ///|
-const DEPTH : Int = 100_000
+const DEPTH : Int32 = 100_000
 
 ///|
 /// `Bind(x, next)` nested `depth` times around `leaf`, for distinct binder
 /// names `x0`, `x1`, ...
-fn deep_binders(depth : Int, leaf : @syntax.Term[Int]) -> @syntax.Term[Int] {
+fn deep_binders(
+  depth : Int32,
+  leaf : @syntax.Term[Int32],
+) -> @syntax.Term[Int32] {
   let mut term = leaf
   for level = depth - 1; level >= 0; level = level - 1 {
     term = Bind(@core.Name::new("x" + level.to_string()), term)
@@ -18,7 +21,10 @@ fn deep_binders(depth : Int, leaf : @syntax.Term[Int]) -> @syntax.Term[Int] {
 
 ///|
 /// The body under `depth` binders, found with a loop.
-fn under_binders(depth : Int, term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
+fn under_binders(
+  depth : Int32,
+  term : @syntax.Term[Int32],
+) -> @syntax.Term[Int32]? {
   let mut current = term
   for _ in 0..<depth {
     match current {
@@ -33,7 +39,7 @@ fn under_binders(depth : Int, term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
 test "deep terms: beta reads through deep empty applications" {
   // `Apply(Apply(...Apply(λx. x, [])..., []), [a])` is a redex
   let x = @core.Name::new("x")
-  let mut head : @syntax.Term[Int] = Bind(x, Variable(x))
+  let mut head : @syntax.Term[Int32] = Bind(x, Variable(x))
   for _ in 0..<DEPTH {
     head = Apply(head, [])
   }
@@ -50,17 +56,17 @@ test "deep terms: eta checks a deep function for the bound variable" {
   let x = @core.Name::new("x")
   let f = @core.Name::new("f")
   let y = @core.Name::new("y")
-  let mut function : @syntax.Term[Int] = Variable(y)
+  let mut function : @syntax.Term[Int32] = Variable(y)
   for _ in 0..<DEPTH {
     function = Apply(Variable(f), [function])
   }
-  let eta_redex : @syntax.Term[Int] = Bind(x, Apply(function, [Variable(x)]))
+  let eta_redex : @syntax.Term[Int32] = Bind(x, Apply(function, [Variable(x)]))
   match @lambda.eta_rule(eta_redex) {
     Some(reduced) => assert_true(physical_equal(reduced, function))
     None => fail("the eta redex was not reduced")
   }
   // the bound variable occurring at the bottom of `F` blocks the step
-  let mut capturing : @syntax.Term[Int] = Variable(x)
+  let mut capturing : @syntax.Term[Int32] = Variable(x)
   for _ in 0..<DEPTH {
     capturing = Apply(Variable(f), [capturing])
   }
@@ -68,7 +74,7 @@ test "deep terms: eta checks a deep function for the bound variable" {
     @lambda.eta_rule(Bind(x, Apply(capturing, [Variable(x)]))) is None,
   )
   // so does it under deep empty applications around the body
-  let mut body : @syntax.Term[Int] = Apply(capturing, [Variable(x)])
+  let mut body : @syntax.Term[Int32] = Apply(capturing, [Variable(x)])
   for _ in 0..<DEPTH {
     body = Apply(body, [])
   }
@@ -86,7 +92,7 @@ test "deep terms: normalize contracts a redex under deep binders" {
   // `λx0. ... λx(DEPTH-1). c`
   let y = @core.Name::new("y")
   let c = @core.Name::new("c")
-  let redex : @syntax.Term[Int] = Apply(Bind(y, Variable(y)), [Variable(c)])
+  let redex : @syntax.Term[Int32] = Apply(Bind(y, Variable(y)), [Variable(c)])
   match @lambda.normalize(deep_binders(DEPTH, redex), 10) {
     NormalForm(term~, steps=1) =>
       assert_true(
@@ -102,7 +108,7 @@ test "deep terms: normalize contracts a redex deep in argument position" {
   let f = @core.Name::new("f")
   let y = @core.Name::new("y")
   let c = @core.Name::new("c")
-  let mut term : @syntax.Term[Int] = Apply(Bind(y, Variable(y)), [Variable(c)])
+  let mut term : @syntax.Term[Int32] = Apply(Bind(y, Variable(y)), [Variable(c)])
   for _ in 0..<DEPTH {
     term = Apply(Variable(f), [term])
   }

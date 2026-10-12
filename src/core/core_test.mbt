@@ -47,7 +47,7 @@ test "context from_array does not alias its argument" {
 ///|
 test "telescope to_array returns a copy" {
   let x = @core.Name::new("x")
-  let telescope : @core.Telescope[Int] = @core.Telescope::empty().extend_with(
+  let telescope : @core.Telescope[Int32] = @core.Telescope::empty().extend_with(
     x, 1,
   )
   let entries = telescope.to_array()

@@ -8,8 +8,8 @@ pub(all) enum GenericStepResult[N] {
 ///|
 /// Bounded generic rewrite result.
 pub(all) enum GenericNormalizationResult[N] {
-  NormalForm(term~ : N, steps~ : Int)
-  StepLimitReached(term~ : N, steps~ : Int)
+  NormalForm(term~ : N, steps~ : Int32)
+  StepLimitReached(term~ : N, steps~ : Int32)
 } derive(Eq, Debug)
 
 ///|
@@ -34,7 +34,7 @@ pub fn[N : @syntax.BindingSyntax] generic_normalize(
   node : N,
   rule_name : RuleName,
   rule : (N) -> N?,
-  max_steps : Int,
+  max_steps : Int32,
 ) -> GenericNormalizationResult[N] {
   let mut current = node
   let mut steps = 0

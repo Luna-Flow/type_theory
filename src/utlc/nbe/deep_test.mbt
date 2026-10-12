@@ -4,17 +4,17 @@
 // stacks.
 
 ///|
-const DEPTH : Int = 100_000
+const DEPTH : Int32 = 100_000
 
 ///|
 /// Enough fuel for the terms below, which need a few units per node.
-const FUEL : Int = 100 * DEPTH
+const FUEL : Int32 = 100 * DEPTH
 
 ///|
 fn argument_chain(
-  depth : Int,
-  leaf : @debruijn.DbTerm[Int],
-) -> @debruijn.DbTerm[Int] {
+  depth : Int32,
+  leaf : @debruijn.DbTerm[Int32],
+) -> @debruijn.DbTerm[Int32] {
   let f = @core.Name::new("f")
   let mut term = leaf
   for _ in 0..<depth {
@@ -25,9 +25,9 @@ fn argument_chain(
 
 ///|
 fn head_chain(
-  depth : Int,
-  leaf : @debruijn.DbTerm[Int],
-) -> @debruijn.DbTerm[Int] {
+  depth : Int32,
+  leaf : @debruijn.DbTerm[Int32],
+) -> @debruijn.DbTerm[Int32] {
   let mut term = leaf
   for i in 0..<depth {
     term = Apply(term, [Value(i)])
@@ -37,9 +37,9 @@ fn head_chain(
 
 ///|
 fn bind_chain(
-  depth : Int,
-  body : @debruijn.DbTerm[Int],
-) -> @debruijn.DbTerm[Int] {
+  depth : Int32,
+  body : @debruijn.DbTerm[Int32],
+) -> @debruijn.DbTerm[Int32] {
   let mut term = body
   for _ in 0..<depth {
     term = Bind(term)
@@ -48,7 +48,7 @@ fn bind_chain(
 }
 
 ///|
-fn normal_form(term : @debruijn.DbTerm[Int]) -> @debruijn.DbTerm[Int]? {
+fn normal_form(term : @debruijn.DbTerm[Int32]) -> @debruijn.DbTerm[Int32]? {
   match @nbe.normalize(term, FUEL) {
     NormalForm(term~, ..) => Some(term)
     _ => None
@@ -97,11 +97,11 @@ test "eval and quote deep terms" {
 ///|
 test "nbe of deep terms with redexes" {
   let f = @core.Name::new("f")
-  let identity : @debruijn.DbTerm[Int] = Bind(Bound(0))
+  let identity : @debruijn.DbTerm[Int32] = Bind(Bound(0))
   // (λ. 0) ((λ. 0) (... ((λ. 0) 7)))
   assert_true(normal_form(argument_chain_of(identity, DEPTH)) == Some(Value(7)))
   // f ((λ. 0) (f ((λ. 0) (... 7))))
-  let mut alternating : @debruijn.DbTerm[Int] = Value(7)
+  let mut alternating : @debruijn.DbTerm[Int32] = Value(7)
   for _ in 0..<DEPTH {
     alternating = Apply(Free(f), [Apply(identity, [alternating])])
   }
@@ -121,10 +121,10 @@ test "nbe of deep terms with redexes" {
 ///|
 /// `(λ. 0) ((λ. 0) (... ((λ. 0) 7)))` with `depth` applications of `function`.
 fn argument_chain_of(
-  function : @debruijn.DbTerm[Int],
-  depth : Int,
-) -> @debruijn.DbTerm[Int] {
-  let mut term : @debruijn.DbTerm[Int] = Value(7)
+  function : @debruijn.DbTerm[Int32],
+  depth : Int32,
+) -> @debruijn.DbTerm[Int32] {
+  let mut term : @debruijn.DbTerm[Int32] = Value(7)
   for _ in 0..<depth {
     term = Apply(function, [term])
   }

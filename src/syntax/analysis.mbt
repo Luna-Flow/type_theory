@@ -36,9 +36,9 @@ pub fn[T] all_names(term : Term[T]) -> @hashset.HashSet[@core.Name] {
 priv struct AlphaTask[T] {
   left : Term[T]
   right : Term[T]
-  left_env : @hashmap.HashMap[@core.Name, Int]
-  right_env : @hashmap.HashMap[@core.Name, Int]
-  depth : Int
+  left_env : @hashmap.HashMap[@core.Name, Int32]
+  right_env : @hashmap.HashMap[@core.Name, Int32]
+  depth : Int32
 }
 
 ///|

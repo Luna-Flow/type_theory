@@ -4,11 +4,11 @@
 // `Debug`, which are recursive.
 
 ///|
-const DEPTH : Int = 100_000
+const DEPTH : Int32 = 100_000
 
 ///|
 /// `Value(1)` is the only redex: it becomes `Value(2)`.
-fn bump(term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
+fn bump(term : @syntax.Term[Int32]) -> @syntax.Term[Int32]? {
   match term {
     Value(1) => Some(Value(2))
     _ => None
@@ -27,7 +27,7 @@ priv enum Shape {
 
 ///|
 /// The frame that enters level `level` of a term of the given shape.
-fn frame_at(shape : Shape, level : Int) -> @rewrite.ReductionFrame {
+fn frame_at(shape : Shape, level : Int32) -> @rewrite.ReductionFrame {
   match shape {
     Heads => ApplyHead
     Arguments => ApplyArgument(1)
@@ -46,9 +46,9 @@ fn frame_at(shape : Shape, level : Int) -> @rewrite.ReductionFrame {
 /// `frame_at(shape, level)`. The other children are `Value(0)`.
 fn nest(
   shape : Shape,
-  depth : Int,
-  leaf : @syntax.Term[Int],
-) -> @syntax.Term[Int] {
+  depth : Int32,
+  leaf : @syntax.Term[Int32],
+) -> @syntax.Term[Int32] {
   let x = @core.Name::new("x")
   let mut term = leaf
   for level = depth - 1; level >= 0; level = level - 1 {
@@ -66,9 +66,9 @@ fn nest(
 /// returns the leaf, or `None` if the term does not have that shape.
 fn leaf_of(
   shape : Shape,
-  depth : Int,
-  term : @syntax.Term[Int],
-) -> @syntax.Term[Int]? {
+  depth : Int32,
+  term : @syntax.Term[Int32],
+) -> @syntax.Term[Int32]? {
   let mut current = term
   for level in 0..<depth {
     current = match (frame_at(shape, level), current) {
@@ -85,7 +85,7 @@ fn leaf_of(
 /// Whether `path` is the path of `nest(shape, depth, _)` to its leaf.
 fn is_leaf_path(
   shape : Shape,
-  depth : Int,
+  depth : Int32,
   path : @rewrite.ReductionPath,
 ) -> Bool {
   let frames = path.to_array()
@@ -143,7 +143,7 @@ test "deep terms: a search without a redex ends with NoStep" {
 test "deep terms: post-order rewrites the innermost application first" {
   // every application is a redex; bottom-up picks the deepest one
   let rule = @rewrite.RuleName::unsafe_new("collapse")
-  let collapse = fn(term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
+  let collapse = fn(term : @syntax.Term[Int32]) -> @syntax.Term[Int32]? {
     match term {
       Apply(_, _) => Some(Value(7))
       _ => None
@@ -167,7 +167,7 @@ test "deep terms: post-order rewrites the innermost application first" {
 test "deep terms: normalize and trace repeat deep steps" {
   // `Value(1)` -> `Value(2)` -> `Value(3)` at the bottom of each shape
   let rule = @rewrite.RuleName::unsafe_new("count")
-  let count = fn(term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
+  let count = fn(term : @syntax.Term[Int32]) -> @syntax.Term[Int32]? {
     match term {
       Value(1) => Some(Value(2))
       Value(2) => Some(Value(3))
