@@ -2,10 +2,6 @@ name = "Luna-Flow/type_theory"
 
 version = "0.3.0"
 
-import {
-  "moonbitlang/quickcheck@0.14.0",
-}
-
 readme = "README.md"
 
 repository = "https://github.com/Luna-Flow/type_theory"
