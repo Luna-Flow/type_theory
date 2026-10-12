@@ -119,7 +119,7 @@ pub fn[T] beta_eta_rule(term : @syntax.Term[T]) -> @syntax.Term[T]? {
 /// Normalizes a lambda term using the shared evaluator.
 pub fn[T] normalize(
   term : @syntax.Term[T],
-  max_steps : Int,
+  max_steps : Int32,
 ) -> @rewrite.NormalizationResult[T] {
   @eval.evaluate(
     term,

@@ -15,7 +15,7 @@ struct TypeContext {
   /// context.
   entries : Array[(@core.Name, Ty)]
   /// The number of entries of this context, counting shadowed ones.
-  length : Int
+  length : Int32
 }
 
 ///|
@@ -46,7 +46,6 @@ pub fn TypeContext::empty() -> TypeContext {
 /// Returns the context with `name : ty` added as its last entry. Takes
 /// amortized constant time when `self` is the longest context extended so far
 /// from the same empty context, as it is when a checker enters nested binders.
-#alias(extend, deprecated="Use `TypeContext::extend_with` instead")
 pub fn TypeContext::extend_with(
   self : TypeContext,
   name : @core.Name,
@@ -73,7 +72,7 @@ pub fn TypeContext::lookup(self : TypeContext, name : @core.Name) -> Ty? {
 
 ///|
 /// Returns the number of entries, counting shadowed ones.
-pub fn TypeContext::length(self : TypeContext) -> Int {
+pub fn TypeContext::length(self : TypeContext) -> Int32 {
   self.length
 }
 

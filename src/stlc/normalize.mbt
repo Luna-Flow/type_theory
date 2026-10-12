@@ -4,7 +4,7 @@ pub fn normalize_checked(
   ctx : TypeContext,
   term : Term,
   ty : Ty,
-  max_steps : Int,
+  max_steps : Int32,
 ) -> Result[@rewrite.NormalizationResult[Atom], TypeError] {
   match check(sig, ctx, term, ty) {
     Ok(_) => Ok(@utlc_lambda.normalize(term, max_steps))

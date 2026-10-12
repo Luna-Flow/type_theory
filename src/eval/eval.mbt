@@ -32,7 +32,7 @@ priv enum Ancestor[T] {
     @syntax.Term[T],
     @syntax.Term[T],
     Array[@syntax.Term[T]],
-    Int,
+    Int32,
     Bool
   )
 }
@@ -210,7 +210,7 @@ pub fn[T] evaluate(
   rule_name : @rewrite.RuleName,
   rule : (@syntax.Term[T]) -> @syntax.Term[T]?,
   strategy : Strategy,
-  max_steps : Int,
+  max_steps : Int32,
 ) -> @rewrite.NormalizationResult[T] {
   @rewrite.normalize(
     term,
@@ -226,7 +226,7 @@ pub fn[T] trace(
   rule_name : @rewrite.RuleName,
   rule : (@syntax.Term[T]) -> @syntax.Term[T]?,
   strategy : Strategy,
-  max_steps : Int,
+  max_steps : Int32,
 ) -> @rewrite.ReductionTrace[T] {
   @rewrite.trace(
     term,

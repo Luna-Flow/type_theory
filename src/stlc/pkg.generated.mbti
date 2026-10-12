@@ -30,7 +30,6 @@ pub fn Atom::equal(Self, Self) -> Bool
 type Signature derive(Eq, @debug.Debug)
 pub fn Signature::empty() -> Self
 pub fn Signature::equal(Self, Self) -> Bool
-#alias(extend, deprecated)
 pub fn Signature::extend_with(Self, @core.Name, Ty) -> Self
 pub fn Signature::length(Self) -> Int
 pub fn Signature::lookup(Self, @core.Name) -> Ty?
@@ -47,7 +46,6 @@ pub impl Eq for Ty
 type TypeContext
 pub fn TypeContext::empty() -> Self
 pub fn TypeContext::equal(Self, Self) -> Bool
-#alias(extend, deprecated)
 pub fn TypeContext::extend_with(Self, @core.Name, Ty) -> Self
 pub fn TypeContext::length(Self) -> Int
 pub fn TypeContext::lookup(Self, @core.Name) -> Ty?

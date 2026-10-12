@@ -7,7 +7,7 @@
 // a deep term is not stack-safe).
 
 ///|
-const DEEP_DEPTH : Int = 100_000
+const DEEP_DEPTH : Int32 = 100_000
 
 ///|
 /// The nesting shapes exercised by the deep tests.
@@ -36,10 +36,10 @@ let deep_shapes : Array[DeepShape] = [
 /// named `z`; `value(i)` is an opaque leaf.
 fn[N : BindingSyntax] deep_node(
   shape : DeepShape,
-  depth : Int,
+  depth : Int32,
   x : N,
   z : @core.Name,
-  value : (Int) -> N,
+  value : (Int32) -> N,
 ) -> N {
   let mut node = x
   for i in 0..<depth {
@@ -62,17 +62,17 @@ fn[N : BindingSyntax] deep_node(
 /// `deep_node` over `Term[Int]`.
 fn deep_term(
   shape : DeepShape,
-  x : Term[Int],
+  x : Term[Int32],
   z : @core.Name,
-  offset? : Int = 0,
-) -> Term[Int] {
+  offset~ : Int32 = 0,
+) -> Term[Int32] {
   deep_node(shape, DEEP_DEPTH, x, z, fn(i) { Term::Value(i + offset) })
 }
 
 ///|
 /// Minimal downstream AST for the generic algorithms.
 priv enum DeepMock {
-  Leaf(Int)
+  Leaf(Int32)
   Name(@core.Name)
   Node(DeepMock, Array[DeepMock])
   Scope(@core.Name, DeepMock)

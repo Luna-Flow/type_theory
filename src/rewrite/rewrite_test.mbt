@@ -9,7 +9,7 @@ test "rule names report validation failures as data" {
 
 ///|
 test "structured step records rule and root path" {
-  let decrement = fn(term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
+  let decrement = fn(term : @syntax.Term[Int32]) -> @syntax.Term[Int32]? {
     match term {
       Value(value) if value > 0 => Some(Value(value - 1))
       _ => None
@@ -29,7 +29,7 @@ test "structured step records rule and root path" {
 
 ///|
 test "normalizer and trace are built from single steps" {
-  let decrement = fn(term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
+  let decrement = fn(term : @syntax.Term[Int32]) -> @syntax.Term[Int32]? {
     match term {
       Value(value) if value > 0 => Some(Value(value - 1))
       _ => None
@@ -67,7 +67,7 @@ test "reduction path to_array returns a copy" {
 
 ///|
 test "reduction trace steps returns a copy" {
-  let decrement = fn(term : @syntax.Term[Int]) -> @syntax.Term[Int]? {
+  let decrement = fn(term : @syntax.Term[Int32]) -> @syntax.Term[Int32]? {
     match term {
       Value(value) if value > 0 => Some(Value(value - 1))
       _ => None

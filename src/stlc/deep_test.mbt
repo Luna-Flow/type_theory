@@ -4,11 +4,11 @@
 // `Debug`, which are recursive. `==` on `Ty` is written with a loop.
 
 ///|
-const DEPTH : Int = 100_000
+const DEPTH : Int32 = 100_000
 
 ///|
 /// `domain -> domain -> ... -> result` with `arrows` arrows.
-fn deep_arrow(arrows : Int, domain : @stlc.Ty, result : @stlc.Ty) -> @stlc.Ty {
+fn deep_arrow(arrows : Int32, domain : @stlc.Ty, result : @stlc.Ty) -> @stlc.Ty {
   let mut ty = result
   for _ in 0..<arrows {
     ty = Arrow(domain, ty)
@@ -18,13 +18,13 @@ fn deep_arrow(arrows : Int, domain : @stlc.Ty, result : @stlc.Ty) -> @stlc.Ty {
 
 ///|
 /// The name of binder number `level`.
-fn binder(level : Int) -> String {
+fn binder(level : Int32) -> String {
   "x" + level.to_string()
 }
 
 ///|
 /// `λx0. λx1. ... λx(depth-1). body`.
-fn deep_lambda(depth : Int, body : @stlc.Term) -> @stlc.Term {
+fn deep_lambda(depth : Int32, body : @stlc.Term) -> @stlc.Term {
   let mut term = body
   for level = depth - 1; level >= 0; level = level - 1 {
     term = lam(binder(level), term)
@@ -265,7 +265,11 @@ test "deep terms: checked normalization under deep binders" {
 ///|
 /// `(...((domain -> result) -> result) ...) -> result` with `arrows` arrows,
 /// nested in the domains.
-fn deep_domain(arrows : Int, domain : @stlc.Ty, result : @stlc.Ty) -> @stlc.Ty {
+fn deep_domain(
+  arrows : Int32,
+  domain : @stlc.Ty,
+  result : @stlc.Ty,
+) -> @stlc.Ty {
   let mut ty = domain
   for _ in 0..<arrows {
     ty = Arrow(ty, result)

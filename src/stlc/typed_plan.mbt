@@ -32,7 +32,7 @@ priv enum PlanControl {
 ///|
 priv enum PlanFrame {
   PlanHead(TypeContext, Array[Term])
-  PlanArgument(TypeContext, Array[Term], Int, TypedPlan, Ty, Ty)
+  PlanArgument(TypeContext, Array[Term], Int32, TypedPlan, Ty, Ty)
   PlanCompare(Ty)
   PlanRedexFirst(TypeContext, @core.Name, @core.Name, Term, Array[Term], Ty?)
   PlanRedexRest(@core.Name, @core.Name, TypedPlan)
@@ -44,7 +44,7 @@ fn plan_arguments(
   frames : Array[PlanFrame],
   ctx : TypeContext,
   arguments : Array[Term],
-  index : Int,
+  index : Int32,
   function : TypedPlan,
 ) -> Result[PlanControl, TypeError] {
   if index == arguments.length() {

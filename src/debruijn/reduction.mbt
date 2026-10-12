@@ -14,9 +14,9 @@ pub(all) enum DbStepResult[T] {
 ///|
 /// Result of bounded De Bruijn reduction.
 pub(all) enum DbNormalizationResult[T] {
-  NormalForm(term~ : DbTerm[T], steps~ : Int)
-  StepLimitReached(term~ : DbTerm[T], steps~ : Int)
-  ScopeFailure(term~ : DbTerm[T], error~ : ScopeError, steps~ : Int)
+  NormalForm(term~ : DbTerm[T], steps~ : Int32)
+  StepLimitReached(term~ : DbTerm[T], steps~ : Int32)
+  ScopeFailure(term~ : DbTerm[T], error~ : ScopeError, steps~ : Int32)
 } derive(Eq, Debug)
 
 ///|
@@ -71,7 +71,7 @@ fn[T] reduce_valid(term : DbTerm[T]) -> DbStepResult[T] {
   // the ancestors of `current`, outermost first, with the child taken:
   // -1 for the head of an application, `i` for its argument `i`, 0 for the
   // body of a binder
-  let ancestors : Array[(DbTerm[T], Int)] = []
+  let ancestors : Array[(DbTerm[T], Int32)] = []
   let mut current = term
   while true {
     if redex_body(current) is Some(body) && current is Apply(_, arguments) {
@@ -111,7 +111,7 @@ fn[T] reduce_valid(term : DbTerm[T]) -> DbStepResult[T] {
 /// found below `ancestors` in `term`, and rebuilds the term around the reduct.
 fn[T] contract(
   term : DbTerm[T],
-  ancestors : Array[(DbTerm[T], Int)],
+  ancestors : Array[(DbTerm[T], Int32)],
   body : DbTerm[T],
   arguments : Array[DbTerm[T]],
 ) -> DbStepResult[T] {
@@ -161,7 +161,7 @@ fn[T] contract(
 /// themselves need no further validation.
 pub fn[T] normalize(
   term : DbTerm[T],
-  max_steps : Int,
+  max_steps : Int32,
 ) -> DbNormalizationResult[T] {
   match validate(term) {
     Err(error) => return ScopeFailure(term~, error~, steps=0)

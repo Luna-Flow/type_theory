@@ -2,7 +2,7 @@
 test "beta reduction substitutes generic values without capture" {
   let x = @core.Name::new("x")
   let y = @core.Name::new("y")
-  let function : @syntax.Term[Int] = @lambda.abstraction(
+  let function : @syntax.Term[Int32] = @lambda.abstraction(
     x,
     @lambda.abstraction(
       y,
@@ -10,7 +10,7 @@ test "beta reduction substitutes generic values without capture" {
     ),
   )
   let term = @lambda.application(function, @syntax.Variable(y))
-  let expected : @syntax.Term[Int] = @lambda.abstraction(
+  let expected : @syntax.Term[Int32] = @lambda.abstraction(
     @core.Name::new("y_1"),
     @lambda.application(
       @syntax.Variable(y),
@@ -43,7 +43,7 @@ test "beta reduction preserves wrapped domain values" {
 test "named and debruijn beta reduction agree modulo alpha" {
   let x = @core.Name::new("x")
   let y = @core.Name::new("y")
-  let named : @syntax.Term[Int] = @lambda.application(
+  let named : @syntax.Term[Int32] = @lambda.application(
     @lambda.abstraction(
       x,
       @lambda.abstraction(
@@ -74,10 +74,11 @@ test "empty applications are read as their head" {
   let x = @core.Name::new("x")
   let a = @core.Name::new("a")
   let f = @core.Name::new("f")
-  let identity : @syntax.Term[Int] = @syntax.Bind(x, @syntax.Variable(x))
-  let hidden : @syntax.Term[Int] = @syntax.Apply(@syntax.Apply(identity, []), [
-    @syntax.Variable(a),
-  ])
+  let identity : @syntax.Term[Int32] = @syntax.Bind(x, @syntax.Variable(x))
+  let hidden : @syntax.Term[Int32] = @syntax.Apply(
+    @syntax.Apply(identity, []),
+    [@syntax.Variable(a)],
+  )
   assert_true(@lambda.beta_rule(hidden) == Some(@syntax.Variable(a)))
   assert_true(
     @lambda.normalize(hidden, 10) ==
@@ -95,7 +96,7 @@ test "empty applications are read as their head" {
     is Reduced(after=Variable(_), ..),
   )
   // λx. (f (x)) with the argument and the body wrapped in empty applications
-  let wrapped : @syntax.Term[Int] = @syntax.Bind(
+  let wrapped : @syntax.Term[Int32] = @syntax.Bind(
     x,
     @syntax.Apply(
       @syntax.Apply(@syntax.Variable(f), [
@@ -109,7 +110,7 @@ test "empty applications are read as their head" {
 
 ///|
 /// Erases every empty application `Apply(h, [])` to `h`.
-fn erase_empty_applications(term : @syntax.Term[Int]) -> @syntax.Term[Int] {
+fn erase_empty_applications(term : @syntax.Term[Int32]) -> @syntax.Term[Int32] {
   match term {
     Apply(head, []) => erase_empty_applications(head)
     Apply(head, arguments) =>
@@ -127,7 +128,7 @@ test "beta then eta agrees with normalize modulo empty applications" {
   // issue #16: λz. (λy. y) (z ())
   let z = @core.Name::new("z")
   let y = @core.Name::new("y")
-  let term : @syntax.Term[Int] = Bind(
+  let term : @syntax.Term[Int32] = Bind(
     z,
     Apply(Bind(y, Variable(y)), [Apply(Variable(z), [])]),
   )
@@ -164,7 +165,7 @@ test "beta then eta agrees with normalize modulo empty applications" {
 /// Rewrites every n-ary application `Apply(f, [a1, ..., an])` with `n > 0`
 /// into the nested unary spine `Apply(...Apply(f, [a1])..., [an])`. Empty
 /// applications are kept as they are.
-fn curry(term : @syntax.Term[Int]) -> @syntax.Term[Int] {
+fn curry(term : @syntax.Term[Int32]) -> @syntax.Term[Int32] {
   match term {
     Value(_) | Variable(_) => term
     Bind(name, body) => Bind(name, curry(body))
@@ -182,13 +183,13 @@ test "applicative order picks the same redex for n-ary and curried spines" {
   let x = @core.Name::new("x")
   let y = @core.Name::new("y")
   let v = @core.Name::new("v")
-  let k : @syntax.Term[Int] = Bind(x, Bind(y, Variable(y)))
-  let inner : @syntax.Term[Int] = Apply(Bind(y, Variable(y)), [Variable(v)])
-  let nary : @syntax.Term[Int] = Apply(k, [Value(0), inner])
-  let nested : @syntax.Term[Int] = Apply(Apply(k, [Value(0)]), [inner])
+  let k : @syntax.Term[Int32] = Bind(x, Bind(y, Variable(y)))
+  let inner : @syntax.Term[Int32] = Apply(Bind(y, Variable(y)), [Variable(v)])
+  let nary : @syntax.Term[Int32] = Apply(k, [Value(0), inner])
+  let nested : @syntax.Term[Int32] = Apply(Apply(k, [Value(0)]), [inner])
   let beta = @rewrite.RuleName::unsafe_new("beta")
   // (λx. λy. y) 0 is contracted first in both encodings
-  let expected : @syntax.Term[Int] = Apply(Bind(y, Variable(y)), [inner])
+  let expected : @syntax.Term[Int32] = Apply(Bind(y, Variable(y)), [inner])
   match @eval.reduce_once(nary, beta, @lambda.beta_rule, ApplicativeOrder) {
     Reduced(before~, after~, path~, ..) => {
       assert_true(before == nary)
@@ -219,7 +220,7 @@ priv struct Lcg {
 }
 
 ///|
-fn Lcg::below(self : Lcg, bound : Int) -> Int {
+fn Lcg::below(self : Lcg, bound : Int32) -> Int32 {
   self.state = self.state * 6364136223846793005UL + 1442695040888963407UL
   ((self.state >> 33) % bound.to_uint64()).to_int()
 }
@@ -232,14 +233,14 @@ fn random_name(rng : Lcg) -> @core.Name {
 ///|
 /// A random term with few names (to force renaming), many redexes and n-ary
 /// spines of length 0 to 3.
-fn random_term(rng : Lcg, depth : Int) -> @syntax.Term[Int] {
+fn random_term(rng : Lcg, depth : Int32) -> @syntax.Term[Int32] {
   let choice = if depth <= 0 { rng.below(3) } else { rng.below(7) }
   match choice {
     0 => Value(rng.below(3))
     1 | 2 => Variable(random_name(rng))
     3 | 4 => Bind(random_name(rng), random_term(rng, depth - 1))
     _ => {
-      let head : @syntax.Term[Int] = if rng.below(2) == 0 {
+      let head : @syntax.Term[Int32] = if rng.below(2) == 0 {
         Bind(random_name(rng), random_term(rng, depth - 1))
       } else {
         random_term(rng, depth - 1)
@@ -255,9 +256,9 @@ fn random_term(rng : Lcg, depth : Int) -> @syntax.Term[Int] {
 /// Runs `strategy` for up to `max_steps` steps on `term` and on its curried
 /// form in lockstep, and reports whether every step corresponds.
 fn same_steps_when_curried(
-  term : @syntax.Term[Int],
+  term : @syntax.Term[Int32],
   strategy : @eval.Strategy,
-  max_steps : Int,
+  max_steps : Int32,
 ) -> Bool {
   let beta = @rewrite.RuleName::unsafe_new("beta")
   let mut nary = term

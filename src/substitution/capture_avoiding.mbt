@@ -39,7 +39,7 @@ priv enum SubstituteTask[N] {
   Visit(N, Array[Pending[N]])
   /// Pop the substituted head and `arity` substituted arguments (pushed in
   /// this order) and push their application.
-  BuildApply(Int)
+  BuildApply(Int32)
   /// Pop the substituted body and push it under a binder of this name.
   BuildBind(@core.Name)
 }

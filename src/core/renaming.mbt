@@ -39,7 +39,7 @@ pub fn Renaming::set(self : Renaming, from : Name, to_ : Name) -> Renaming {
 
 ///|
 /// Returns the number of mapped source names.
-pub fn Renaming::length(self : Renaming) -> Int {
+pub fn Renaming::length(self : Renaming) -> Int32 {
   self.entries.length()
 }
 

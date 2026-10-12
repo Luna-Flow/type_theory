@@ -37,7 +37,7 @@ pub fn RuleName::value(self : RuleName) -> String {
 pub(all) enum ReductionFrame {
   BinderBody
   ApplyHead
-  ApplyArgument(Int)
+  ApplyArgument(Int32)
 } derive(Eq, Debug)
 
 ///|
@@ -59,7 +59,7 @@ struct ReductionPath {
   /// entries belong to this path.
   reversed : Array[ReductionFrame]
   /// The number of frames of this path.
-  length : Int
+  length : Int32
 }
 
 ///|
@@ -105,7 +105,7 @@ pub fn ReductionPath::prepend(
 
 ///|
 /// Returns the number of frames. The root path has length zero.
-pub fn ReductionPath::length(self : ReductionPath) -> Int {
+pub fn ReductionPath::length(self : ReductionPath) -> Int32 {
   self.length
 }
 
@@ -131,8 +131,8 @@ pub(all) enum StepResult[T] {
 ///|
 /// The result of bounded repeated reduction.
 pub(all) enum NormalizationResult[T] {
-  NormalForm(term~ : @syntax.Term[T], steps~ : Int)
-  StepLimitReached(term~ : @syntax.Term[T], steps~ : Int)
+  NormalForm(term~ : @syntax.Term[T], steps~ : Int32)
+  StepLimitReached(term~ : @syntax.Term[T], steps~ : Int32)
 } derive(Eq, Debug)
 
 ///|
@@ -204,7 +204,7 @@ pub fn[T] bottom_up_once(
 pub fn[T] normalize(
   term : @syntax.Term[T],
   step : (@syntax.Term[T]) -> StepResult[T],
-  max_steps : Int,
+  max_steps : Int32,
 ) -> NormalizationResult[T] {
   let mut current = term
   let mut count = 0
@@ -230,7 +230,7 @@ pub fn[T] normalize(
 pub fn[T] trace(
   term : @syntax.Term[T],
   step : (@syntax.Term[T]) -> StepResult[T],
-  max_steps : Int,
+  max_steps : Int32,
 ) -> ReductionTrace[T] {
   let initial = term
   let steps : Array[StepResult[T]] = []

@@ -32,7 +32,7 @@ priv struct Environment {
   // Lookup key, semantic value, source name to avoid during readback.
   // Internal capture-avoidance names must not perturb fresh output names.
   entries : Array[(@core.Name, Value, @core.Name)]
-  length : Int
+  length : Int32
 }
 
 ///|
@@ -40,7 +40,7 @@ fn Environment::extend_with(
   self : Environment,
   name : @core.Name,
   value : Value,
-  source_name? : @core.Name = name,
+  source_name~ : @core.Name = name,
 ) -> Environment {
   let entries = if self.entries.length() == self.length {
     self.entries
@@ -182,7 +182,7 @@ fn reflect(ty : Ty, neutral : Neutral) -> Value {
 /// before `p + 1` is in the new set, and `union` only adds names.
 priv struct Used {
   names : @hashset.HashSet[@core.Name]
-  skip : Int
+  skip : Int32
 }
 
 ///|

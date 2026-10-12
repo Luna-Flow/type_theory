@@ -19,7 +19,6 @@ pub fn Context::from_array(names : Array[Name]) -> Context {
 }
 
 ///|
-#alias(extend, deprecated="Use `Context::extend_with` instead")
 pub fn Context::extend_with(self : Context, name : Name) -> Context {
   let names = self.names.copy()
   names.push(name)
@@ -32,7 +31,7 @@ pub fn Context::contains(self : Context, name : Name) -> Bool {
 }
 
 ///|
-pub fn Context::length(self : Context) -> Int {
+pub fn Context::length(self : Context) -> Int32 {
   self.names.length()
 }
 
@@ -58,7 +57,6 @@ pub fn[T] Telescope::empty() -> Telescope[T] {
 }
 
 ///|
-#alias(extend, deprecated="Use `Telescope::extend_with` instead")
 pub fn[T] Telescope::extend_with(
   self : Telescope[T],
   name : Name,
@@ -70,7 +68,7 @@ pub fn[T] Telescope::extend_with(
 }
 
 ///|
-pub fn[T] Telescope::length(self : Telescope[T]) -> Int {
+pub fn[T] Telescope::length(self : Telescope[T]) -> Int32 {
   self.entries.length()
 }
 

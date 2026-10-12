@@ -3,14 +3,14 @@
 // recursion they overflowed the js, wasm and wasm-gc stacks.
 
 ///|
-const DEPTH : Int = 100_000
+const DEPTH : Int32 = 100_000
 
 ///|
 /// `f (f (... (f 0)))`: nested in argument position.
 fn argument_chain(
-  depth : Int,
-  leaf : @debruijn.DbTerm[Int],
-) -> @debruijn.DbTerm[Int] {
+  depth : Int32,
+  leaf : @debruijn.DbTerm[Int32],
+) -> @debruijn.DbTerm[Int32] {
   let f = @core.Name::new("f")
   let mut term = leaf
   for _ in 0..<depth {
@@ -22,9 +22,9 @@ fn argument_chain(
 ///|
 /// `((leaf 0) 1) ... (depth - 1)`: nested in head position.
 fn head_chain(
-  depth : Int,
-  leaf : @debruijn.DbTerm[Int],
-) -> @debruijn.DbTerm[Int] {
+  depth : Int32,
+  leaf : @debruijn.DbTerm[Int32],
+) -> @debruijn.DbTerm[Int32] {
   let mut term = leaf
   for i in 0..<depth {
     term = Apply(term, [Value(i)])
@@ -35,9 +35,9 @@ fn head_chain(
 ///|
 /// `λ. λ. ... λ. body` with `depth` binders.
 fn bind_chain(
-  depth : Int,
-  body : @debruijn.DbTerm[Int],
-) -> @debruijn.DbTerm[Int] {
+  depth : Int32,
+  body : @debruijn.DbTerm[Int32],
+) -> @debruijn.DbTerm[Int32] {
   let mut term = body
   for _ in 0..<depth {
     term = Bind(term)
@@ -52,9 +52,9 @@ fn bind_chain(
 /// is `DEPTH`, and level `i` is under at least `reach(depth, i)` binders
 /// added by the levels outside it.
 fn mixture_with(
-  depth : Int,
-  leaf : @debruijn.DbTerm[Int],
-) -> @debruijn.DbTerm[Int] {
+  depth : Int32,
+  leaf : @debruijn.DbTerm[Int32],
+) -> @debruijn.DbTerm[Int32] {
   let f = @core.Name::new("f")
   let mut term = leaf
   for i in 0..<depth {
@@ -62,7 +62,7 @@ fn mixture_with(
     term = match i % 3 {
       // nested in argument position, under no new binder
       0 => {
-        let head : @debruijn.DbTerm[Int] = if outside > 0 {
+        let head : @debruijn.DbTerm[Int32] = if outside > 0 {
           Bound(i * 7 % outside)
         } else {
           Value(i)
@@ -84,22 +84,22 @@ fn mixture_with(
 ///|
 /// A lower bound for the number of binders that the levels after level `i`
 /// of `mixture_with(depth, _)` add: at least two of three levels add one.
-fn reach(depth : Int, i : Int) -> Int {
+fn reach(depth : Int32, i : Int32) -> Int32 {
   2 * (depth - 1 - i) / 3
 }
 
 ///|
 /// The depth of the deepest redex. `@rewrite.ReductionPath::prepend` copies
 /// the path, so a path of length `n` costs O(n^2) to build.
-const PATH_DEPTH : Int = 5_000
+const PATH_DEPTH : Int32 = 5_000
 
 ///|
-const MIXTURE_BINDERS : Int = 99_999
+const MIXTURE_BINDERS : Int32 = 99_999
 
 ///|
 /// A well-scoped, beta-normal mixture whose innermost leaf refers to the
 /// outermost binder.
-fn mixture(depth : Int) -> @debruijn.DbTerm[Int] {
+fn mixture(depth : Int32) -> @debruijn.DbTerm[Int32] {
   mixture_with(depth, Bound(MIXTURE_BINDERS - 1))
 }
 
@@ -152,7 +152,7 @@ test "from_named and to_named on deep terms" {
   let f = @core.Name::new("f")
   let x = @core.Name::new("x")
   // nested in argument position
-  let mut named : @syntax.Term[Int] = Variable(x)
+  let mut named : @syntax.Term[Int32] = Variable(x)
   for _ in 0..<DEPTH {
     named = Apply(Variable(f), [named])
   }
@@ -178,7 +178,7 @@ test "from_named and to_named on deep terms" {
     named = Bind(x, Apply(Variable(x), [named]))
   }
   let shadowed = @debruijn.from_named(named)
-  let mut expected_shadowed : @debruijn.DbTerm[Int] = Bound(0)
+  let mut expected_shadowed : @debruijn.DbTerm[Int32] = Bound(0)
   for _ in 0..<DEPTH {
     expected_shadowed = Bind(Apply(Bound(0), [expected_shadowed]))
   }
@@ -293,9 +293,9 @@ test "substitute and instantiate in deep terms" {
 ///|
 test "one step on deep terms" {
   let f = @core.Name::new("f")
-  let identity : @debruijn.DbTerm[Int] = Bind(Bound(0))
+  let identity : @debruijn.DbTerm[Int32] = Bind(Bound(0))
   // the search goes through a deep normal subterm before the redex
-  let term : @debruijn.DbTerm[Int] = Apply(Free(f), [
+  let term : @debruijn.DbTerm[Int32] = Apply(Free(f), [
     mixture(DEPTH),
     Apply(identity, [Value(1)]),
   ])
@@ -308,7 +308,7 @@ test "one step on deep terms" {
     _ => fail("expected a step")
   }
   // a redex at the root with a deep body and a deep argument
-  let redex : @debruijn.DbTerm[Int] = Apply(
+  let redex : @debruijn.DbTerm[Int32] = Apply(
     Bind(bind_chain(DEPTH, Apply(Bound(DEPTH), [Bound(0)]))),
     [argument_chain(DEPTH, Value(0))],
   )
@@ -337,7 +337,7 @@ test "one step on deep terms" {
 test "one step at the bottom of a deep term" {
   // the redex lies under PATH_DEPTH application heads and binders; the
   // reduction path has one frame per level
-  let identity : @debruijn.DbTerm[Int] = Bind(Bound(0))
+  let identity : @debruijn.DbTerm[Int32] = Bind(Bound(0))
   let deep_redex = bind_chain(
     PATH_DEPTH,
     head_chain(PATH_DEPTH, Apply(identity, [Value(-1)])),
@@ -356,9 +356,9 @@ test "one step at the bottom of a deep term" {
 ///|
 test "normalize deep terms" {
   let f = @core.Name::new("f")
-  let identity : @debruijn.DbTerm[Int] = Bind(Bound(0))
+  let identity : @debruijn.DbTerm[Int32] = Bind(Bound(0))
   // one step to a deep normal form
-  let term : @debruijn.DbTerm[Int] = Apply(
+  let term : @debruijn.DbTerm[Int32] = Apply(
     Bind(bind_chain(DEPTH, Apply(Bound(DEPTH), [Bound(0)]))),
     [Free(f)],
   )
@@ -372,7 +372,7 @@ test "normalize deep terms" {
     NormalForm(term=mixture(DEPTH), steps=0),
   )
   // a few redexes beside a deep normal subterm
-  let spine : @debruijn.DbTerm[Int] = Apply(Free(f), [
+  let spine : @debruijn.DbTerm[Int32] = Apply(Free(f), [
     argument_chain(DEPTH, Value(0)),
     Apply(identity, [Apply(identity, [Value(1)])]),
   ])
@@ -393,7 +393,7 @@ test "normalize deep terms" {
       steps=1,
     ),
   )
-  let bad : @debruijn.DbTerm[Int] = Apply(identity, [
+  let bad : @debruijn.DbTerm[Int32] = Apply(identity, [
     mixture_with(DEPTH, Bound(2 * DEPTH)),
   ])
   assert_true(

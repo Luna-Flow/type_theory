@@ -13,7 +13,6 @@ pub fn Signature::empty() -> Signature {
 }
 
 ///|
-#alias(extend, deprecated="Use `Signature::extend_with` instead")
 pub fn Signature::extend_with(
   self : Signature,
   name : @core.Name,
@@ -36,7 +35,7 @@ pub fn Signature::lookup(self : Signature, name : @core.Name) -> Ty? {
 
 ///|
 /// Returns the number of entries, counting shadowed ones.
-pub fn Signature::length(self : Signature) -> Int {
+pub fn Signature::length(self : Signature) -> Int32 {
   self.entries.length()
 }
 
