@@ -9,22 +9,22 @@ import {
 // Values
 pub fn[T] bottom_up_once(@syntax.Term[T], RuleName, (@syntax.Term[T]) -> @syntax.Term[T]?) -> StepResult[T]
 
-pub fn[N : @syntax.BindingSyntax] generic_normalize(N, RuleName, (N) -> N?, Int) -> GenericNormalizationResult[N]
+pub fn[N : @syntax.BindingSyntax] generic_normalize(N, RuleName, (N) -> N?, Int32) -> GenericNormalizationResult[N]
 
 pub fn[N : @syntax.BindingSyntax] generic_top_down_once(N, RuleName, (N) -> N?) -> GenericStepResult[N]
 
-pub fn[T] normalize(@syntax.Term[T], (@syntax.Term[T]) -> StepResult[T], Int) -> NormalizationResult[T]
+pub fn[T] normalize(@syntax.Term[T], (@syntax.Term[T]) -> StepResult[T], Int32) -> NormalizationResult[T]
 
 pub fn[T] top_down_once(@syntax.Term[T], RuleName, (@syntax.Term[T]) -> @syntax.Term[T]?) -> StepResult[T]
 
-pub fn[T] trace(@syntax.Term[T], (@syntax.Term[T]) -> StepResult[T], Int) -> ReductionTrace[T]
+pub fn[T] trace(@syntax.Term[T], (@syntax.Term[T]) -> StepResult[T], Int32) -> ReductionTrace[T]
 
 // Errors
 
 // Types and methods
 pub(all) enum GenericNormalizationResult[N] {
-  NormalForm(term~ : N, steps~ : Int)
-  StepLimitReached(term~ : N, steps~ : Int)
+  NormalForm(term~ : N, steps~ : Int32)
+  StepLimitReached(term~ : N, steps~ : Int32)
 } derive(Eq, @debug.Debug)
 pub fn[N : Eq] GenericNormalizationResult::equal(Self[N], Self[N]) -> Bool
 
@@ -35,21 +35,21 @@ pub(all) enum GenericStepResult[N] {
 pub fn[N : Eq] GenericStepResult::equal(Self[N], Self[N]) -> Bool
 
 pub(all) enum NormalizationResult[T] {
-  NormalForm(term~ : @syntax.Term[T], steps~ : Int)
-  StepLimitReached(term~ : @syntax.Term[T], steps~ : Int)
+  NormalForm(term~ : @syntax.Term[T], steps~ : Int32)
+  StepLimitReached(term~ : @syntax.Term[T], steps~ : Int32)
 } derive(Eq, @debug.Debug)
 pub fn[T : Eq] NormalizationResult::equal(Self[T], Self[T]) -> Bool
 
 pub(all) enum ReductionFrame {
   BinderBody
   ApplyHead
-  ApplyArgument(Int)
+  ApplyArgument(Int32)
 } derive(Eq, @debug.Debug)
 pub fn ReductionFrame::equal(Self, Self) -> Bool
 
 type ReductionPath
 pub fn ReductionPath::equal(Self, Self) -> Bool
-pub fn ReductionPath::length(Self) -> Int
+pub fn ReductionPath::length(Self) -> Int32
 pub fn ReductionPath::prepend(Self, ReductionFrame) -> Self
 pub fn ReductionPath::root() -> Self
 pub fn ReductionPath::to_array(Self) -> Array[ReductionFrame]
@@ -65,9 +65,9 @@ pub fn[T] ReductionTrace::steps(Self[T]) -> Array[StepResult[T]]
 pub struct RuleName {
   value : String
 } derive(Compare, Eq, Hash, @debug.Debug)
-pub fn RuleName::compare(Self, Self) -> Int
+pub fn RuleName::compare(Self, Self) -> Int32
 pub fn RuleName::equal(Self, Self) -> Bool
-pub fn RuleName::hash(Self) -> Int
+pub fn RuleName::hash(Self) -> Int32
 pub fn RuleName::new(String) -> Result[Self, RuleNameError]
 pub fn RuleName::unsafe_new(String) -> Self
 pub fn RuleName::value(Self) -> String

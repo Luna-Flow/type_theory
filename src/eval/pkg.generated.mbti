@@ -8,11 +8,11 @@ import {
 }
 
 // Values
-pub fn[T] evaluate(@syntax.Term[T], @rewrite.RuleName, (@syntax.Term[T]) -> @syntax.Term[T]?, Strategy, Int) -> @rewrite.NormalizationResult[T]
+pub fn[T] evaluate(@syntax.Term[T], @rewrite.RuleName, (@syntax.Term[T]) -> @syntax.Term[T]?, Strategy, Int32) -> @rewrite.NormalizationResult[T]
 
 pub fn[T] reduce_once(@syntax.Term[T], @rewrite.RuleName, (@syntax.Term[T]) -> @syntax.Term[T]?, Strategy) -> @rewrite.StepResult[T]
 
-pub fn[T] trace(@syntax.Term[T], @rewrite.RuleName, (@syntax.Term[T]) -> @syntax.Term[T]?, Strategy, Int) -> @rewrite.ReductionTrace[T]
+pub fn[T] trace(@syntax.Term[T], @rewrite.RuleName, (@syntax.Term[T]) -> @syntax.Term[T]?, Strategy, Int32) -> @rewrite.ReductionTrace[T]
 
 // Errors
 
