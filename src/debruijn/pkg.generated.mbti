@@ -13,13 +13,13 @@ pub fn[T] from_named(@syntax.Term[T]) -> DbTerm[T]
 
 pub fn[T] instantiate(DbTerm[T], DbTerm[T]) -> Result[DbTerm[T], ScopeError]
 
-pub fn[T] normalize(DbTerm[T], Int) -> DbNormalizationResult[T]
+pub fn[T] normalize(DbTerm[T], Int32) -> DbNormalizationResult[T]
 
 pub fn[T] reduce_once(DbTerm[T]) -> DbStepResult[T]
 
-pub fn[T] shift(DbTerm[T], Int, Int) -> Result[DbTerm[T], ScopeError]
+pub fn[T] shift(DbTerm[T], Int32, Int32) -> Result[DbTerm[T], ScopeError]
 
-pub fn[T] substitute_bound(DbTerm[T], Int, DbTerm[T]) -> Result[DbTerm[T], ScopeError]
+pub fn[T] substitute_bound(DbTerm[T], Int32, DbTerm[T]) -> Result[DbTerm[T], ScopeError]
 
 pub fn[T] to_named(DbTerm[T]) -> Result[@syntax.Term[T], ScopeError]
 
@@ -29,9 +29,9 @@ pub fn[T] validate(DbTerm[T]) -> Result[Unit, ScopeError]
 
 // Types and methods
 pub(all) enum DbNormalizationResult[T] {
-  NormalForm(term~ : DbTerm[T], steps~ : Int)
-  StepLimitReached(term~ : DbTerm[T], steps~ : Int)
-  ScopeFailure(term~ : DbTerm[T], error~ : ScopeError, steps~ : Int)
+  NormalForm(term~ : DbTerm[T], steps~ : Int32)
+  StepLimitReached(term~ : DbTerm[T], steps~ : Int32)
+  ScopeFailure(term~ : DbTerm[T], error~ : ScopeError, steps~ : Int32)
 } derive(Eq, @debug.Debug)
 pub fn[T : Eq] DbNormalizationResult::equal(Self[T], Self[T]) -> Bool
 
@@ -45,7 +45,7 @@ pub fn[T : Eq] DbStepResult::equal(Self[T], Self[T]) -> Bool
 pub(all) enum DbTerm[T] {
   Value(T)
   Free(@core.Name)
-  Bound(Int)
+  Bound(Int32)
   Apply(DbTerm[T], Array[DbTerm[T]])
   Bind(DbTerm[T])
 } derive(@debug.Debug)
@@ -53,10 +53,10 @@ pub fn[T : Eq] DbTerm::equal(Self[T], Self[T]) -> Bool
 pub impl[T : Eq] Eq for DbTerm[T]
 
 pub(all) enum ScopeError {
-  UnboundIndex(index~ : Int, depth~ : Int)
-  NegativeIndex(index~ : Int)
-  NegativeShift(index~ : Int, delta~ : Int, cutoff~ : Int)
-  NegativeCutoff(cutoff~ : Int)
+  UnboundIndex(index~ : Int32, depth~ : Int32)
+  NegativeIndex(index~ : Int32)
+  NegativeShift(index~ : Int32, delta~ : Int32, cutoff~ : Int32)
+  NegativeCutoff(cutoff~ : Int32)
 } derive(Eq, @debug.Debug)
 pub fn ScopeError::equal(Self, Self) -> Bool
 

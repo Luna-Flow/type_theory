@@ -18,7 +18,7 @@ pub fn[T] beta_rule(@syntax.Term[T]) -> @syntax.Term[T]?
 
 pub fn[T] eta_rule(@syntax.Term[T]) -> @syntax.Term[T]?
 
-pub fn[T] normalize(@syntax.Term[T], Int) -> @rewrite.NormalizationResult[T]
+pub fn[T] normalize(@syntax.Term[T], Int32) -> @rewrite.NormalizationResult[T]
 
 // Errors
 

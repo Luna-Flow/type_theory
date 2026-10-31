@@ -14,7 +14,7 @@ pub fn check(Signature, TypeContext, @syntax.Term[Atom], Ty) -> Result[Unit, Typ
 
 pub fn infer(Signature, TypeContext, @syntax.Term[Atom]) -> Result[Ty, TypeError]
 
-pub fn normalize_checked(Signature, TypeContext, @syntax.Term[Atom], Ty, Int) -> Result[@rewrite.NormalizationResult[Atom], TypeError]
+pub fn normalize_checked(Signature, TypeContext, @syntax.Term[Atom], Ty, Int32) -> Result[@rewrite.NormalizationResult[Atom], TypeError]
 
 pub fn normalize_eta_long(Signature, TypeContext, @syntax.Term[Atom], Ty) -> Result[@syntax.Term[Atom], TypeError]
 
@@ -31,7 +31,7 @@ type Signature derive(Eq, @debug.Debug)
 pub fn Signature::empty() -> Self
 pub fn Signature::equal(Self, Self) -> Bool
 pub fn Signature::extend_with(Self, @core.Name, Ty) -> Self
-pub fn Signature::length(Self) -> Int
+pub fn Signature::length(Self) -> Int32
 pub fn Signature::lookup(Self, @core.Name) -> Ty?
 pub fn Signature::to_array(Self) -> Array[(@core.Name, Ty)]
 
@@ -47,7 +47,7 @@ type TypeContext
 pub fn TypeContext::empty() -> Self
 pub fn TypeContext::equal(Self, Self) -> Bool
 pub fn TypeContext::extend_with(Self, @core.Name, Ty) -> Self
-pub fn TypeContext::length(Self) -> Int
+pub fn TypeContext::length(Self) -> Int32
 pub fn TypeContext::lookup(Self, @core.Name) -> Ty?
 pub fn TypeContext::to_array(Self) -> Array[(@core.Name, Ty)]
 pub impl Eq for TypeContext
