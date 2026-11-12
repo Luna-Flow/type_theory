@@ -4,9 +4,10 @@
 /// The type is abstract: its storage is not accessible outside the package,
 /// so a `Context` cannot be changed after it is built. Use `length`,
 /// `contains`, and `to_array` to read it.
+#derive(Eq, Debug)
 struct Context {
   names : Array[Name]
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn Context::empty() -> Context {

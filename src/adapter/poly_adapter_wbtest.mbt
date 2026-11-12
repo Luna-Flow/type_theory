@@ -1,11 +1,12 @@
 ///|
 /// Minimal polynomial-shaped AST used to verify downstream trait integration.
+#derive(Eq, Debug)
 priv enum PolyExpr {
   Scalar(Int32)
   Variable(@core.Name)
   Add(PolyExpr, Array[PolyExpr])
   Scope(@core.Name, PolyExpr)
-} derive(Eq, Debug)
+}
 
 ///|
 impl @syntax.BindingSyntax for PolyExpr with fn project(self) {

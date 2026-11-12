@@ -6,22 +6,24 @@
 ///
 /// Equality (`==`) is structural and works on terms of any nesting depth;
 /// the derived `Debug` recurses over the term.
+#derive(Debug)
 pub(all) enum DbTerm[T] {
   Value(T)
   Free(@core.Name)
   Bound(Int32)
   Apply(DbTerm[T], Array[DbTerm[T]])
   Bind(DbTerm[T])
-} derive(Debug)
+}
 
 ///|
 /// Scope and index failures in De Bruijn operations.
+#derive(Eq, Debug)
 pub(all) enum ScopeError {
   UnboundIndex(index~ : Int32, depth~ : Int32)
   NegativeIndex(index~ : Int32)
   NegativeShift(index~ : Int32, delta~ : Int32, cutoff~ : Int32)
   NegativeCutoff(cutoff~ : Int32)
-} derive(Eq, Debug)
+}
 
 // Bounded-stack traversals (issue #13).
 //

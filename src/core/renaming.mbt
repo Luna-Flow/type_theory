@@ -4,9 +4,10 @@
 /// The type is abstract: its entries are not accessible outside the package,
 /// so each source name has at most one image. Use `apply`, `length`, and
 /// `to_array` to read it.
+#derive(Eq, Debug)
 struct Renaming {
   entries : Array[(Name, Name)]
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn Renaming::empty() -> Renaming {

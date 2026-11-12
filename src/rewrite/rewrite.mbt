@@ -1,14 +1,16 @@
 ///|
 /// Stable identifier for a reduction rule.
+#derive(Eq, Compare, Hash, Debug)
 pub struct RuleName {
   value : String
-} derive(Eq, Compare, Hash, Debug)
+}
 
 ///|
 /// Failures produced while validating a reduction rule name.
+#derive(Eq, Debug)
 pub(all) enum RuleNameError {
   Empty
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn RuleName::new(value : String) -> Result[RuleName, RuleNameError] {
@@ -34,11 +36,12 @@ pub fn RuleName::value(self : RuleName) -> String {
 
 ///|
 /// One edge in a path from the root to a redex.
+#derive(Eq, Debug)
 pub(all) enum ReductionFrame {
   BinderBody
   ApplyHead
   ApplyArgument(Int32)
-} derive(Eq, Debug)
+}
 
 ///|
 /// Root-to-redex path. The empty path identifies the root.
@@ -118,6 +121,7 @@ pub fn ReductionPath::to_array(self : ReductionPath) -> Array[ReductionFrame] {
 
 ///|
 /// The result of exactly one reduction attempt.
+#derive(Eq, Debug)
 pub(all) enum StepResult[T] {
   NoStep
   Reduced(
@@ -126,25 +130,27 @@ pub(all) enum StepResult[T] {
     rule~ : RuleName,
     path~ : ReductionPath
   )
-} derive(Eq, Debug)
+}
 
 ///|
 /// The result of bounded repeated reduction.
+#derive(Eq, Debug)
 pub(all) enum NormalizationResult[T] {
   NormalForm(term~ : @syntax.Term[T], steps~ : Int32)
   StepLimitReached(term~ : @syntax.Term[T], steps~ : Int32)
-} derive(Eq, Debug)
+}
 
 ///|
 /// A complete bounded operational trace.
 ///
 /// The type is abstract: its fields are not accessible outside the package.
 /// Use `initial`, `steps`, and `result` to read it.
+#derive(Eq, Debug)
 struct ReductionTrace[T] {
   initial : @syntax.Term[T]
   steps : Array[StepResult[T]]
   result : NormalizationResult[T]
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn[T] ReductionTrace::initial(self : ReductionTrace[T]) -> @syntax.Term[T] {

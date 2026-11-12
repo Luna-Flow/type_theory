@@ -3,9 +3,10 @@
 ///
 /// The type is abstract: its entries are not accessible outside the package.
 /// Use `lookup`, `length`, and `to_array` to read it.
+#derive(Eq, Debug)
 struct Signature {
   entries : Array[(@core.Name, Ty)]
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn Signature::empty() -> Signature {

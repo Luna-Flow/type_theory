@@ -21,13 +21,15 @@ pub fn normalize_eta_long(Signature, TypeContext, @syntax.Term[Atom], Ty) -> Res
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) enum Atom {
   UnitLit
   Const(@core.Name)
-} derive(Eq, @debug.Debug)
+}
 pub fn Atom::equal(Self, Self) -> Bool
 
-type Signature derive(Eq, @debug.Debug)
+#derive(Eq, @debug.Debug)
+type Signature
 pub fn Signature::empty() -> Self
 pub fn Signature::equal(Self, Self) -> Bool
 pub fn Signature::extend_with(Self, @core.Name, Ty) -> Self
@@ -35,11 +37,12 @@ pub fn Signature::length(Self) -> Int32
 pub fn Signature::lookup(Self, @core.Name) -> Ty?
 pub fn Signature::to_array(Self) -> Array[(@core.Name, Ty)]
 
+#derive(@debug.Debug)
 pub(all) enum Ty {
   Base(@core.Name)
   Unit
   Arrow(Ty, Ty)
-} derive(@debug.Debug)
+}
 pub fn Ty::equal(Self, Self) -> Bool
 pub impl Eq for Ty
 
@@ -53,6 +56,7 @@ pub fn TypeContext::to_array(Self) -> Array[(@core.Name, Ty)]
 pub impl Eq for TypeContext
 pub impl @debug.Debug for TypeContext
 
+#derive(Eq, @debug.Debug)
 pub(all) enum TypeError {
   UnboundVariable(@core.Name)
   UnknownConstant(@core.Name)
@@ -62,7 +66,7 @@ pub(all) enum TypeError {
   EmptyApplication
   ScopeError(@debruijn.ScopeError)
   NormalizationError(message~ : String)
-} derive(Eq, @debug.Debug)
+}
 pub fn TypeError::equal(Self, Self) -> Bool
 
 // Type aliases

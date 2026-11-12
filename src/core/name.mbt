@@ -1,8 +1,9 @@
 ///|
 /// A variable name. Equality identifies variables in named syntax.
+#derive(Eq, Compare, Hash, Debug)
 pub struct Name {
   text : String
-} derive(Eq, Compare, Hash, Debug)
+}
 
 ///|
 pub fn Name::new(text : String) -> Name {

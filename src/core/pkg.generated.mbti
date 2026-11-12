@@ -12,7 +12,8 @@ pub fn fresh_name(Name, @hashset.HashSet[Name]) -> Name
 // Errors
 
 // Types and methods
-type Context derive(Eq, @debug.Debug)
+#derive(Eq, @debug.Debug)
+type Context
 pub fn Context::contains(Self, Name) -> Bool
 pub fn Context::empty() -> Self
 pub fn Context::equal(Self, Self) -> Bool
@@ -21,16 +22,18 @@ pub fn Context::from_array(Array[Name]) -> Self
 pub fn Context::length(Self) -> Int32
 pub fn Context::to_array(Self) -> Array[Name]
 
+#derive(Compare, Eq, Hash, @debug.Debug)
 pub struct Name {
   text : String
-} derive(Compare, Eq, Hash, @debug.Debug)
+}
 pub fn Name::compare(Self, Self) -> Int32
 pub fn Name::equal(Self, Self) -> Bool
 pub fn Name::hash(Self) -> Int32
 pub fn Name::new(String) -> Self
 pub fn Name::text(Self) -> String
 
-type Renaming derive(Eq, @debug.Debug)
+#derive(Eq, @debug.Debug)
+type Renaming
 pub fn Renaming::apply(Self, Name) -> Name
 pub fn Renaming::empty() -> Self
 pub fn Renaming::equal(Self, Self) -> Bool

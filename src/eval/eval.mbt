@@ -1,11 +1,12 @@
 ///|
 /// Standard operational traversal choices.
+#derive(Eq, Debug)
 pub(all) enum Strategy {
   NormalOrder
   ApplicativeOrder
   WeakHead
   FullNormal
-} derive(Eq, Debug)
+}
 
 // Bounded-stack traversals (issue #13).
 //

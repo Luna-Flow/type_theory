@@ -1,9 +1,10 @@
 ///|
+#derive(Debug)
 pub(all) enum Ty {
   Base(@core.Name)
   Unit
   Arrow(Ty, Ty)
-} derive(Debug)
+}
 
 ///|
 /// Structural equality of types.
