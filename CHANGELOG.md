@@ -4,6 +4,8 @@ All notable changes to `Luna-Flow/type_theory` are recorded here.
 
 ## Unreleased
 
+## 0.4.1 - 2026-11-12
+
 ### Changed
 
 - Require MoonBit `moonc` 0.10.20 or later, verified with `moon 0.1.20261104` and `moonc v0.10.20`: `derive(...)` clauses are now `#derive(...)` attributes, which older 0.10 compilers ignore. No public API changed.
