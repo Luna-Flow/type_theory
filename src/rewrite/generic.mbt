@@ -1,16 +1,18 @@
 ///|
 /// Structured single-step result for a downstream binding-aware AST.
+#derive(Eq, Debug)
 pub(all) enum GenericStepResult[N] {
   NoStep
   Reduced(before~ : N, after~ : N, rule~ : RuleName, path~ : ReductionPath)
-} derive(Eq, Debug)
+}
 
 ///|
 /// Bounded generic rewrite result.
+#derive(Eq, Debug)
 pub(all) enum GenericNormalizationResult[N] {
   NormalForm(term~ : N, steps~ : Int32)
   StepLimitReached(term~ : N, steps~ : Int32)
-} derive(Eq, Debug)
+}
 
 ///|
 /// Rewrites at most one downstream AST node in pre-order.

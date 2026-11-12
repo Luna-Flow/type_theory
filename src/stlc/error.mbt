@@ -1,4 +1,5 @@
 ///|
+#derive(Eq, Debug)
 pub(all) enum TypeError {
   UnboundVariable(@core.Name)
   UnknownConstant(@core.Name)
@@ -8,4 +9,4 @@ pub(all) enum TypeError {
   EmptyApplication
   ScopeError(@debruijn.ScopeError)
   NormalizationError(message~ : String)
-} derive(Eq, Debug)
+}

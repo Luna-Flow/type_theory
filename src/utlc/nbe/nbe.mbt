@@ -74,11 +74,12 @@ pub(all) enum QuoteResult[T] {
 
 ///|
 /// Observable result of bounded untyped NbE.
+#derive(Eq, Debug)
 pub(all) enum NbeResult[T] {
   NormalForm(term~ : @debruijn.DbTerm[T], consumed~ : Int32)
   FuelExhausted(consumed~ : Int32)
   ScopeFailure(error~ : @debruijn.ScopeError, consumed~ : Int32)
-} derive(Eq, Debug)
+}
 
 ///|
 priv enum Run[T] {

@@ -17,12 +17,13 @@ pub fn[T] trace(@syntax.Term[T], @rewrite.RuleName, (@syntax.Term[T]) -> @syntax
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) enum Strategy {
   NormalOrder
   ApplicativeOrder
   WeakHead
   FullNormal
-} derive(Eq, @debug.Debug)
+}
 pub fn Strategy::equal(Self, Self) -> Bool
 
 // Type aliases

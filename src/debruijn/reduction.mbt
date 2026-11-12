@@ -1,5 +1,6 @@
 ///|
 /// One operational reduction attempt over De Bruijn syntax.
+#derive(Eq, Debug)
 pub(all) enum DbStepResult[T] {
   NoStep
   Reduced(
@@ -9,15 +10,16 @@ pub(all) enum DbStepResult[T] {
     path~ : @rewrite.ReductionPath
   )
   ScopeFailure(ScopeError)
-} derive(Eq, Debug)
+}
 
 ///|
 /// Result of bounded De Bruijn reduction.
+#derive(Eq, Debug)
 pub(all) enum DbNormalizationResult[T] {
   NormalForm(term~ : DbTerm[T], steps~ : Int32)
   StepLimitReached(term~ : DbTerm[T], steps~ : Int32)
   ScopeFailure(term~ : DbTerm[T], error~ : ScopeError, steps~ : Int32)
-} derive(Eq, Debug)
+}
 
 ///|
 /// Removes empty applications `Apply(h, [])` around a term; an application

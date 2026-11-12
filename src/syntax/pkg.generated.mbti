@@ -30,12 +30,13 @@ pub(all) enum BindingView[N] {
   Bind(@core.Name, N)
 }
 
+#derive(@debug.Debug)
 pub(all) enum Term[T] {
   Value(T)
   Variable(@core.Name)
   Apply(Term[T], Array[Term[T]])
   Bind(@core.Name, Term[T])
-} derive(@debug.Debug)
+}
 pub fn[T] Term::alpha_rename_bound(Self[T], @core.Name, @core.Name) -> Self[T]?
 pub fn[T : Eq] Term::equal(Self[T], Self[T]) -> Bool
 pub fn[T, U] Term::map_values(Self[T], (T) -> U) -> Self[U]
