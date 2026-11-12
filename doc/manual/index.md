@@ -43,7 +43,7 @@ import {
 }
 ```
 
-The code needs the MoonBit toolchain 0.10 or later (`moonc` ≥ 0.10) and
+The code needs the MoonBit toolchain 0.10.20 or later (`moonc` ≥ 0.10.20) and
 builds on all targets (`wasm-gc`, `wasm`, `js`, `native`). The library has no
 Luna Flow dependencies; `moonbitlang/quickcheck` is used by its tests only.
 

@@ -4235,8 +4235,8 @@ msgid "Then import the packages you need in your `moon.pkg`, for example:"
 msgstr "次に、必要なパッケージを `moon.pkg` でインポートする。例："
 
 #: manual/index.md:46
-msgid "The code needs the MoonBit toolchain 0.10 or later (`moonc` ≥ 0.10) and builds on all targets (`wasm-gc`, `wasm`, `js`, `native`). The library has no Luna Flow dependencies; `moonbitlang/quickcheck` is used by its tests only."
-msgstr "コードには MoonBit ツールチェーン 0.10 以降（`moonc` ≥ 0.10）が必要であり、すべてのターゲット（`wasm-gc`、`wasm`、`js`、`native`）でビルドできる。このライブラリは Luna Flow の他のパッケージに依存しない。`moonbitlang/quickcheck` はテストでのみ使われる。"
+msgid "The code needs the MoonBit toolchain 0.10.20 or later (`moonc` ≥ 0.10.20) and builds on all targets (`wasm-gc`, `wasm`, `js`, `native`). The library has no Luna Flow dependencies; `moonbitlang/quickcheck` is used by its tests only."
+msgstr "コードには MoonBit ツールチェーン 0.10.20 以降（`moonc` ≥ 0.10.20）が必要であり、すべてのターゲット（`wasm-gc`、`wasm`、`js`、`native`）でビルドできる。このライブラリは Luna Flow の他のパッケージに依存しない。`moonbitlang/quickcheck` はテストでのみ使われる。"
 
 #: manual/index.md:50
 msgid "Pages"
