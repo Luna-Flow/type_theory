@@ -30,7 +30,7 @@ explains how the layers fit together and how the normalizers relate.
 ## Install
 
 ```bash
-moon add Luna-Flow/type_theory@0.4.0
+moon add Luna-Flow/type_theory@0.4.1
 ```
 
 Then import the packages you need in your `moon.pkg`, for example:
